@@ -2,19 +2,11 @@
 #include <ChRt.h>
 #include <Servo.h>
 
-#define FIFO_SIZE 16
 
 #define SERVO_PIN 5
 #define LED_PIN 13
 
 Servo myservo;
-
-// SEMAPHORES are used to solve MUTEX-ish
-// Count of data records in fifo.
-SEMAPHORE_DECL(fifoData, 0);
-
-// Count of free buffers in fifo.
-SEMAPHORE_DECL(fifoSpace, FIFO_SIZE);
 
 // Give our threads 32 bytes
 static THD_WORKING_AREA(waThread1, 32);
