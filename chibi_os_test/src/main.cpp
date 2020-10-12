@@ -37,10 +37,14 @@ static THD_FUNCTION(lightThread, arg){
   (void)arg;
 
   while(true){
-    digitalWrite(LED_BUILTIN, HIGH);   // turn the LED on (HIGH is the voltage level)
-    delay(1000);                       // wait for a second
-    digitalWrite(LED_BUILTIN, LOW);    // turn the LED off by making the voltage LOW
-    delay(1000);
+    digitalWrite(LED_BUILTIN, HIGH); //turn on built in LED by powering pin 13
+    chThdSleep(10); //put thread to sleep while not doing anything
+    digitalWrite(LED_BUILTIN, LOW); //turn off built in LED by powering off pin 13
+    chThdSleep(300);
+    digitalWrite(LED_BUILTIN, HIGH);
+    chThdSleep(10);
+    digitalWrite(LED_BUILTIN, LOW);
+    chThdSleep(1000);
   }
 }
 
