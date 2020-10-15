@@ -3,7 +3,7 @@
 #include <Servo.h>
 
 
-#define SERVO_PIN 5
+#define SERVO_PIN 2
 #define LED_PIN 13
 #define POT_PIN A0
 
@@ -37,6 +37,9 @@ static THD_FUNCTION(potThread, arg){
 
   while(true){
     potData.potVal = map(analogRead(POT_PIN), 0, 1023, 0 , 180); //read value of potentiometer and remap to 0-180 scale
+    
+    Serial.println(potData.potVal);
+
     potData.timestamp = chVTGetSystemTime(); //add timestamp in ticks to message
     chMsgSend(servoThreadPointer, (msg_t)&potData); //sends potData to servoThread and thread goes to sleep until reply
   }
@@ -95,6 +98,9 @@ void setup(){
   myservo.attach(SERVO_PIN);
   pinMode(LED_BUILTIN, OUTPUT);
   pinMode(POT_PIN, INPUT);
+
+//open serial port
+  Serial.begin(9600);
   
   //start ChibiOS
   chBegin(chSetup);
