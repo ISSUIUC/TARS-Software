@@ -1,6 +1,6 @@
 #include <SD.h>
 #include <ChRt.h>
-#include <Servo.h>
+#include <PWMServo.h>
 
 #define BALL_VALVE_1_PIN 5
 #define BALL_VALVE_2_PIN 7
@@ -12,13 +12,19 @@
 
 //------------------------------------------------------------------------------
 //Create servo objects for main ball value actuation.
-Servo ballValve1;
-Servo ballValve2;
+PWMServo ballValve1;
+PWMServo ballValve2;
 
 //------------------------------------------------------------------------------
 //create 32byte working area for ball valve input thread
 static THD_WORKING_AREA(waBallValveInput, 32);
 thread_t *ballValveInputPointer;
+
+//create 32byte working area for ball valve control thread
+static THD_WORKING_AREA(waBallValveServos, 32);
+thread_t *ballValveServosPointer;
+
+//------------------------------------------------------------------------------
 
 static THD_FUNCTION(ballValveInput, arg){
   int servoTarget;
@@ -31,9 +37,6 @@ static THD_FUNCTION(ballValveInput, arg){
 }
 
 //------------------------------------------------------------------------------
-//create 32byte working area for ball valve control thread
-static THD_WORKING_AREA(waBallValveServos, 32);
-thread_t *ballValveServosPointer;
 
 static THD_FUNCTION(ballValveServos, arg){
   int* servoTarget; //create an empty int pointer for servoTarget
