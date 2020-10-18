@@ -1,4 +1,4 @@
-This code was taken from the hybrid repo. We will be working on it here in preparation for the static pressure test.
+The data logging code was taken from the hybrid repo. We will be working on it here in preparation for the static pressure test.
 
 ### Note!
 
