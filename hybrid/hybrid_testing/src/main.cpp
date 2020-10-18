@@ -1,11 +1,54 @@
 #include <SD.h>
 #include <ChRt.h>
+#include <Servo.h>
 
 // Data logger based on a FIFO to decouple SD write latency from data
 // acquisition timing.
 //
 // The FIFO uses two semaphores to synchronize between tasks.
 
+//------------------------------------------------------------------------------
+//Create servo objects for main ball value actuation.
+Servo ballValve1;
+Servo ballValve2;
+
+//------------------------------------------------------------------------------
+//create 32byte working area for ball valve input thread
+static THD_WORKING_AREA(waBallValveInput, 32);
+thread_t *ballValveInputPointer;
+
+static THD_FUNCTION(ballValveInput, arg){
+  int servoTarget;
+
+  while(true){
+    servoTarget = 180;//TODO: Implement input for servo target here
+
+    chMsgSend(ballValveServosPointer, (msg_t)&servoTarget);
+  }
+}
+
+//------------------------------------------------------------------------------
+//create 32byte working area for ball valve control thread
+static THD_WORKING_AREA(waBallValveServos, 32);
+thread_t *ballValveServosPointer;
+
+static THD_FUNCTION(ballValveServos, arg){
+  int* servoTarget; //create an empty int pointer for servoTarget
+
+  while(true){
+    chMsgWait(); //wait until synchronous message is recieved
+    servoTarget = (int*)chMsgGet(ballValveInputPointer);
+    
+    //set two ball valve actuation servos to the int servoTarget points to.
+    ballValve1.write(*servoTarget);
+    ballValve2.write(*servoTarget);
+
+    chMsgRelease(ballValveInputPointer, (msg_t)&servoTarget);
+  }
+}
+
+
+//------------------------------------------------------------------------------
 // Interval between points in units of 1024 usec on AVR, usec on ARM.
 const systime_t intervalTicks = TIME_US2I(1000);
 //const systime_t intervalTicks = 1;
@@ -116,6 +159,10 @@ void mainThread() {
 
   // start producer thread
   chThdCreateStatic(waThread1, sizeof(waThread1), NORMALPRIO + 1, Thread1, NULL);
+
+  //start ball valve control threads TODO: Figure out if these will run with their current priorities
+  ballValveInputPointer = chThdCreateStatic(waBallValveInput, sizeof(waBallValveInput), NORMALPRIO, ballValveInput, NULL);
+  ballValveServosPointer = chThdCreateStatic(waBallValveServos, sizeof(waBallValveServos), NORMALPRIO, ballValveServos, NULL);
 
   pinMode(LED_BUILTIN, OUTPUT);
 
