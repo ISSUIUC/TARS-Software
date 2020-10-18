@@ -2,6 +2,9 @@
 #include <ChRt.h>
 #include <Servo.h>
 
+#define BALL_VALVE_1_PIN 5
+#define BALL_VALVE_2_PIN 7
+
 // Data logger based on a FIFO to decouple SD write latency from data
 // acquisition timing.
 //
@@ -127,6 +130,14 @@ void mainThread();
 
 //------------------------------------------------------------------------------
 void setup() {
+
+  //attach ball valve actuation servos to pins
+  ballValve1.attach(BALL_VALVE_1_PIN);
+  ballValve2.attach(BALL_VALVE_2_PIN);
+  
+  //move ball valve servos to their initial state
+  ballValve1.write(180);
+  ballValve2.write(180);
 
   analogReadResolution(13);
   Serial.begin(9600);
