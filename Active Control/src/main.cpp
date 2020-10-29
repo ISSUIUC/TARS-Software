@@ -3,17 +3,22 @@
 #include <ChRt.h>
 #include <Servo.h>
 #include <SPI.h>
+#include <SD.h>
+
 
 #define SERVO1_PIN 5
 #define SERVO2_PIN 6
-#define SERVO3_PIN 7
-#define SERVO4_PIN 8
-#define TERMINATE 9900000000000
+#define SERVO3_PIN 8
+#define SERVO4_PIN 9
+#define TERMINATE 9900000000
 
 Servo servo1;
 Servo servo2;
 Servo servo3;
 Servo servo4;
+File logFile;
+
+const int chip = BUILTIN_SDCARD;
 
 int initialAngle = 0;
 int currentAngle;
@@ -23,13 +28,17 @@ int altitude;
 static THD_WORKING_AREA(waThread, 32);
 //May have to change the size
 static THD_WORKING_AREA(waThread2, 32);
+//Workign area thread for logger
+static THD_WORKING_AREA(waThread3, 32);
 
+
+//Thread to get data from sensors
 static THD_FUNCTION(dataThread, arg) {
     (void)arg;
     // start the SPI library:
     SPI.begin();
     /*
-    //Need IMU, Pitot, and GPS data from Beaglebone...
+    Need IMU, Pitot, and GPS data from Beaglebone...
     
     Datasheet for IMU: https://www.mouser.com/datasheet/2/389/lsm9ds1-1849526.pdf
     Datasheet for Pressure Sensor: https://www.te.com/commerce/DocumentDelivery/DDEController?Action=srchrtrv&DocNm=MS5611-01BA03&DocType=Data+Sheet&DocLang=English
@@ -41,6 +50,53 @@ static THD_FUNCTION(dataThread, arg) {
     */
    
 }
+//Thread to log information to BeagleBone. This will be done after data is read.
+//https://www.pjrc.com/store/sd_adaptor.html
+static THD_FUNCTION(loggerThread, arg) {
+    (void)arg;
+    Serial.begin(9600);
+    while (!Serial) {
+        //Wait to connect to serial
+    }
+    Serial.print("Initializing SD card...");
+    if (!SD.begin(chip)) {
+        Serial.println("initialization failed!");
+        return;
+    }
+    Serial.println("initialization done.");
+    
+    // open the file. 
+    logFile = SD.open("AC_Logger.txt", FILE_WRITE);
+    
+    // if the file opened okay, write to it:
+    if (logFile) {
+        Serial.print("Writing to AC_Logger.txt...");
+        logFile.println("Log test: (Can you read this");
+        // close the file:
+        logFile.close();
+        Serial.println("done.");
+    } else {
+        // if the file didn't open, print an error:
+        Serial.println("error opening AC_Logger.txt");
+    }
+    
+    // re-open the file for reading:
+    logFile = SD.open("AC_Logger.txt");
+    if (logFile) {
+        Serial.println("AC_Logger.txt:");
+        
+        // read from the file until there's nothing else in it:
+        while (logFile.available()) {
+            Serial.write(logFile.read());
+        }
+        // close the file:
+        logFile.close();
+    } else {
+        // if the file didn't open, print an error:
+        Serial.println("error opening AC_Logger.txt");
+    }
+}
+
 
 static THD_FUNCTION(servoThread, arg) {
     (void)arg;
@@ -89,6 +145,8 @@ void chSetup() {
     //Start servoThread
     chThdCreateStatic(waThread, sizeof(waThread), NORMALPRIO, servoThread, NULL);
     chThdCreateStatic(waThread2, sizeof(waThread2), NORMALPRIO, dataThread,NULL);
+    chThdCreateStatic(waThread3, sizeof(waThread3), NORMALPRIO, loggerThread,NULL);
+
     while(true) {
         //Spawning Thread. We just need to keep it running in order to no lose servoThread
         chThdSleep(100);
