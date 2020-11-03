@@ -64,6 +64,7 @@ static THD_FUNCTION(dataThread, arg) {
    
 }
 //Thread to log information to BeagleBone. This will be done after data is read.
+//https://www.arduino.cc/en/Tutorial/LibraryExamples/ReadWrite
 static THD_FUNCTION(loggerThread, arg) {
     (void)arg;
     Serial.begin(115200);
