@@ -1,0 +1,20 @@
+
+# Created by https://www.toptal.com/developers/gitignore/api/platformio,vscode
+# Edit at https://www.toptal.com/developers/gitignore?templates=platformio,vscode
+
+### PlatformIO ###
+.pioenvs
+.piolibdeps
+.clang_complete
+.gcc-flags.json
+.pio
+
+### vscode ###
+.vscode/*
+.vscode/settings.json
+.vscode/tasks.json
+.vscode/launch.json
+.vscode/extensions.json
+*.code-workspace
+
+# End of https://www.toptal.com/developers/gitignore/api/platformio,vscode
