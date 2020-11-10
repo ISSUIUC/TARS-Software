@@ -5,7 +5,7 @@
 #define BALL_VALVE_1_PIN 2
 #define BALL_VALVE_2_PIN 3
 
-#define HYRBID_PT_1_PIN 20
+#define HYBRID_PT_1_PIN 20
 #define HYBRID_PT_2_PIN 21
 #define HYBRID_PT_3_PIN 22
 
@@ -13,6 +13,7 @@
 struct ballValve_Message{
   bool isOpen;
   //more data can be added as needed
+  //Anshuk: Add a timestamp using current millis() measurement
 };
 
 //data struct for hybridPT_THD to send pressure transducer data to FSM
@@ -21,11 +22,15 @@ struct pressureData{
   int PT2;
   int PT3;
   //more data can be added as needed
+  //Anshuk: Add a timestamp using current millis() measurement
 };
 
 //create servo objects for the ball valve servos
 Servo ballValve1;
 Servo ballValve2;
+
+//Anshuk: Where will the FSM go?
+//Anshuk: Add provisions for reading other sensor data, and thread for relaying to BeagleBone
 
 //----------------------------------------------------------------
 //create thread working areas
@@ -47,6 +52,7 @@ static THD_FUNCTION(ballValve_THD, arg){
     chMsgWait(); //sleep until message is recieved
     incomingMessage = (ballValve_Message*)chMsgGet(/*TODO: Insert pointer to FSM thread here*/);
 
+    //Anshuk: Once FSM is developed, make conditionals below more 
     if(incomingMessage->isOpen == false){
       ballValve1.write(180);
       ballValve2.write(180);
@@ -65,7 +71,7 @@ static THD_FUNCTION(hybridPT_THD, arg){
   pressureData outgoingMessage;
   
   while(true){
-    outgoingMessage.PT1 = analogRead(HYRBID_PT_1_PIN);
+    outgoingMessage.PT1 = analogRead(HYBRID_PT_1_PIN);
     outgoingMessage.PT2 = analogRead(HYBRID_PT_2_PIN);
     outgoingMessage.PT3 = analogRead(HYBRID_PT_3_PIN);
 
