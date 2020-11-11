@@ -9,6 +9,11 @@
 #define HYBRID_PT_2_PIN 21
 #define HYBRID_PT_3_PIN 22
 
+#define DEBUG_LED_1 6
+#define DEBUG_LED_2 7
+#define DEBUG_LED_3 8
+#define DEBUG_LED_4 9
+
 //data struct for FSM to send to ballValve_THD
 struct ballValve_Message{
   bool isOpen;
@@ -54,12 +59,14 @@ static THD_FUNCTION(ballValve_THD, arg){
 
     //Anshuk: Once FSM is developed, make conditionals below more 
     if(incomingMessage->isOpen == false){
-      ballValve1.write(180); //TODO: Add some output to confirm it's working during testing. USE THE TEENSY DEBUG LEDs
+      ballValve1.write(180);
       ballValve2.write(180);
+      digitalWrite(DEBUG_LED_1, HIGH);
     }
     else if(incomingMessage->isOpen == true){
       ballValve1.write(0);
       ballValve2.write(0);
+      digitalWrite(DEBUG_LED_1, LOW);
     }
 
     chMsgRelease(/*TODO: Insert pointer to FSM thread here*/, (msg_t)&incomingMessage); //releases FSM thread and returns incoming message
@@ -99,6 +106,9 @@ void chSetup(){
 void setup() {
   ballValve1.attach(BALL_VALVE_1_PIN);
   ballValve2.attach(BALL_VALVE_2_PIN);
+
+  pinMode(DEBUG_LED_1, OUTPUT);
+  digitalWrite(DEBUG_LED_1, HIGH);
 
   //start chibios
   chBegin(chSetup);
