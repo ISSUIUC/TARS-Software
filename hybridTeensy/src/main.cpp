@@ -12,8 +12,8 @@
 //data struct for FSM to send to ballValve_THD
 struct ballValve_Message{
   bool isOpen;
+  int timeStamp; //timeStamp is set when open or close command is sent.
   //more data can be added as needed
-  //Anshuk: Add a timestamp using current millis() measurement
 };
 
 //data struct for hybridPT_THD to send pressure transducer data to FSM
@@ -21,8 +21,8 @@ struct pressureData{
   int PT1;
   int PT2;
   int PT3;
+  int timeStamp; //timeStamp is set when pressure data is read.
   //more data can be added as needed
-  //Anshuk: Add a timestamp using current millis() measurement
 };
 
 //create servo objects for the ball valve servos
@@ -54,7 +54,7 @@ static THD_FUNCTION(ballValve_THD, arg){
 
     //Anshuk: Once FSM is developed, make conditionals below more 
     if(incomingMessage->isOpen == false){
-      ballValve1.write(180);
+      ballValve1.write(180); //TODO: Add some output to confirm it's working during testing. USE THE TEENSY DEBUG LEDs
       ballValve2.write(180);
     }
     else if(incomingMessage->isOpen == true){
@@ -74,6 +74,8 @@ static THD_FUNCTION(hybridPT_THD, arg){
     outgoingMessage.PT1 = analogRead(HYBRID_PT_1_PIN);
     outgoingMessage.PT2 = analogRead(HYBRID_PT_2_PIN);
     outgoingMessage.PT3 = analogRead(HYBRID_PT_3_PIN);
+
+    outgoingMessage.timeStamp = chVTGetSystemTime();
 
     chMsgSend(/*TODO: Insert pointer to FSM thread here*/, (msg_t)&outgoingMessage);
   }
