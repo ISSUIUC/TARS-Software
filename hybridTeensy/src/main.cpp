@@ -96,7 +96,7 @@ void chSetup(){
   ballValve_Pointer = chThdCreateStatic(ballValve_WA, sizeof(ballValve_WA), NORMALPRIO, ballValve_THD, NULL);
 
   //start hybrid pressure transducer data aquisition thread
-  hybridPT_Pointer = chThdCreateStatic(ballValve_WA, sizeof(ballValve_WA), NORMALPRIO, hybridPT_THD, NULL);
+  hybridPT_Pointer = chThdCreateStatic(hybridPT_WA, sizeof(hybridPT_WA), NORMALPRIO, hybridPT_THD, NULL);
 
   while(true);
 }
