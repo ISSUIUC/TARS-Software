@@ -1,7 +1,4 @@
 #include <Arduino.h>
-#include <ChRt.h>
-#include <Servo.h>
-#include <SPI.h>
 
 float altitude; //current altitude from altimiter
 float az; //Acceleration in the z direction
@@ -52,7 +49,8 @@ void loop() {
     roll_rate = *( (float*) rr_byte_array );
     velocity = *( (float*) velocity_byte_array);
     
-    //debug purposes
-    //Serial.write(dataBuffer, 16);
-    //Serial.println(String(az) + " " + String(roll_rate) + " " + String(alt) + " " + String(vel));
+    //For Debugging
+    //-----
+    //Serial.write(dataBuffer, 24);
+    //Serial.println(String(altitude) + " " + String(az)+ " " + String(lattitude) + " " + String(longitude) + " " + String(roll_rate)+ " " + String(velocity));
   }

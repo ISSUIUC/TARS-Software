@@ -1,8 +1,7 @@
 #include <Arduino.h>
 #include <ChRt.h>
-#include <Servo.h>
+#include <PWMServo.h>
 #include <SPI.h>
-
 
 #define SERVO1_PIN 3
 #define SERVO2_PIN 5
@@ -10,10 +9,10 @@
 #define SERVO4_PIN 9
 const unsigned int TERMINATE = 99000000;
 
-Servo servo1;
-Servo servo2;
-Servo servo3;
-Servo servo4;
+PWMServo servo1;
+PWMServo servo2;
+PWMServo servo3;
+PWMServo servo4;
 
 
 int currentAngle; //Current angle of the servos. 
