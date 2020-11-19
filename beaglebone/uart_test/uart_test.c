@@ -8,6 +8,9 @@
  * config-pin P9_24 uart
  * config-pin P9_26 uart
  *
+ * Example code and useful explanations from:
+ * https://blog.mbedded.ninja/programming/operating-systems/linux/linux-serial-ports-using-c-cpp/
+ *
  * compile with:
  * gcc -o uart_test uart_test.c
  *
