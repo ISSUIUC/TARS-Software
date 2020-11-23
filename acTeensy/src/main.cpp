@@ -62,7 +62,7 @@ static THD_FUNCTION(dataThread, arg) {
 static THD_FUNCTION(loggerThread, arg) {
     (void)arg;
     //Fastest Baud Rate Possible (Teensy should be able to handle it but can the BBB?)
-    Serial.begin(4608000);
+    Serial.begin(9600); //Maximum is 4608000. We will have to test to see how much higher we can go before packets are lost.
     //Sending data in alphabetical order. First 4 bytes is altitude,  second 4 bytes is az, etc.
     float sensorData[6] = {altitude, az, lattitude, longitude, roll_rate, velocity};
     //Creates a byte array of length 24
