@@ -1,7 +1,7 @@
 /*
 This is the preliminary code for aquiring the sensor data through the UART protocol.
 Six floats are sent as one-24 byte (unsigned char) array with a specified order
-(altitude, az, lattitude, longitude, roll_rate, and finally velocity). The raw data is split into 4 byte arrays
+(altitude, az, latitude, longitude, roll_rate, and finally velocity). The raw data is split into 4 byte arrays
 for each float value since a float is made up of 4 bytes. They are finally converted back to floats.
 -Matt
 
@@ -19,7 +19,7 @@ PS shoutout to Ayberk for the help with all the linux commands involved.
 
 float altitude; //current altitude from altimiter
 float az; //Acceleration in the z direction
-float lattitude; //current lattitude from gps
+float latitude; //current latitude from gps
 float longitude; //current longitude from gps
 float roll_rate; //angular velocity in the z direction
 float velocity; //current velocity of the rocket
@@ -76,7 +76,7 @@ int main() {
   
   //Write 24 bytes to serial port-
   //This is the order in which data is sent from the teensy!
-  //float sensorData[6] = {altitude, az, lattitude, longitude, roll_rate, velocity};
+  //float sensorData[6] = {altitude, az, latitude, longitude, roll_rate, velocity};
   //For testing
   float sensorData[6] = {0.55, 2.5, 40.110558, -88.228333, 3.1415, 9.7235};
   write(serial_port, sensorData, 24);
@@ -99,11 +99,11 @@ int main() {
 
   
   //This isthe order in which data is sent from the teensy!
-  //float sensorData[6] = {altitude, az, lattitude, longitude, roll_rate, velocity};
+  //float sensorData[6] = {altitude, az, latitude, longitude, roll_rate, velocity};
   
   unsigned char altitude_byte_array[4];
   unsigned char az_byte_array[4];
-  unsigned char lattitude_byte_array[4];
+  unsigned char latitude_byte_array[4];
   unsigned char longitude_byte_array[4];
   unsigned char rr_byte_array[4];
   unsigned char velocity_byte_array[4];
@@ -115,7 +115,7 @@ int main() {
     } else if (i < 8) { 
       az_byte_array[i % 4] = dataBuffer[i];
     } else if (i < 12) {
-      lattitude_byte_array[i % 4] = dataBuffer[i];
+      latitude_byte_array[i % 4] = dataBuffer[i];
     } else if (i < 16) {
       longitude_byte_array[i % 4] = dataBuffer[i];
     } else if (i < 20) {
@@ -128,7 +128,7 @@ int main() {
   //Converting all from byte arrays (4 bytes each) to floats!
   altitude = *( (float*) altitude_byte_array ); 
   az = *( (float*) az_byte_array ); 
-  lattitude = *( (float*) lattitude_byte_array ); 
+  latitude = *( (float*) latitude_byte_array ); 
   longitude = *( (float*) longitude_byte_array );
   roll_rate = *( (float*) rr_byte_array );
   velocity = *( (float*) velocity_byte_array);
@@ -139,7 +139,7 @@ int main() {
   printf("Read %i bytes\n", num_bytes);
   printf("Altitude: %f\n", altitude);
   printf("Az: %f\n", az);
-  printf("Lattitude: %f\n", lattitude);
+  printf("Latitude: %f\n", latitude);
   printf("Longitude: %f\n", longitude);
   printf("Roll Rate: %f\n", roll_rate);
   printf("Velocity: %f\n", velocity);

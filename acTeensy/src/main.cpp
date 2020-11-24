@@ -12,7 +12,7 @@ const unsigned int TERMINATE = 99000000;
 PWMServo servo1;
 PWMServo servo2;
 PWMServo servo3;
-PWMServo servo4;
+PWMServo servo4; //Remove the fourth servo for test flight
 
 
 int currentAngle; //Current angle of the servos. 
@@ -22,16 +22,20 @@ float az; //Acceleration in the z direction
 float altitude; //current altitude from altimiter
 float roll_rate; //angular velocity in the z direction
 float g = 9.81; //Acceleration due to gravity in m/s
-float lattitude; //current lattitude from gps
+float latitude; //current latitude from gps
 float longitude; //current longitude from gps
-
+float Kp; //Proportionality constant for roll control PID
+float rr_thresh; //Maximum roll rate that we ignore.
+float roll_alt_cutoff; //Altitude when roll control stops and we do active drag
+float des_alt; //Final altitude goal
+float buffer; //Buffer for the active drag
 
 
 //Gives thread 32 bytes. STATIC, so size will not change.
 static THD_WORKING_AREA(waThread, 32);
 //May have to change the size
 static THD_WORKING_AREA(waThread2, 32);
-//Workign area thread for logger
+//Working area thread for logger
 static THD_WORKING_AREA(waThread3, 32);
 
 //Thread to get data from sensors
@@ -54,7 +58,7 @@ static THD_FUNCTION(dataThread, arg) {
    az = 0;
    altitude = 0;
    roll_rate = 0; 
-   lattitude = 0;
+   latitude = 0;
    longitude = 0;
    
 }
@@ -64,7 +68,7 @@ static THD_FUNCTION(loggerThread, arg) {
     //Fastest Baud Rate Possible (Teensy should be able to handle it but can the BBB?)
     Serial.begin(9600); //Maximum is 4608000. We will have to test to see how much higher we can go before packets are lost.
     //Sending data in alphabetical order. First 4 bytes is altitude,  second 4 bytes is az, etc.
-    float sensorData[6] = {altitude, az, lattitude, longitude, roll_rate, velocity};
+    float sensorData[6] = {altitude, az, latitude, longitude, roll_rate, velocity};
     //Creates a byte array of length 24
     byte *data_asByteArray = (byte*)sensorData;
     Serial.write(data_asByteArray, sizeof(data_asByteArray));
@@ -72,10 +76,59 @@ static THD_FUNCTION(loggerThread, arg) {
 //Thread for actuating servos for active control
 static THD_FUNCTION(servoThread, arg) {
     (void)arg;
-    //while loop is in place of loop() at the bototom
+    //while loop is in place of loop() at the bottom. Anshuk: I don't get why this is here.
     while(true) {
         if(servo1.attached() == false || servo2.attached() == false || servo3.attached() == false || servo4.attached() == false) {
             delay(TERMINATE); //basically end the program
+        
+        //To determine whether the rocket should use roll/drag control or not. Maybe use the FSM
+        // if(rocket is still burning):
+            //record time using millis
+        // else if(rocket is in coast phase):
+            //record time using millis
+            if((roll_rate > rr_thresh || roll_rate < -rr_thresh) && alt < roll_off_alt)//If the rocket is rolling below a certain altitude..
+            {
+                //...reduce the roll
+                //Proportional controller to reduce the roll of the rocket. Kp is the proportional gain.
+                float roll_err = -roll_rate; //The desired roll rate is 0, so the error = 0-roll
+                float theta = Kp*roll_err; //Make sure the Kp accounts for radian-degree conversion!
+        
+                //Make sure this block behaves as expected and outputs an angle of theta
+                servo1.write(constrain(initialAngle+theta,initialAngle-15,initialAngle+15));
+                servo2.write(constrain(initialAngle+theta,initialAngle-15,initialAngle+15)); 
+                servo3.write(constrain(initialAngle+theta,initialAngle-15,initialAngle+15));
+            }
+
+            else {
+                //implement active drag. This needs to be tested
+                //control_vel = f(altitude)
+                float native_drag; //Need to calculate this using velocity and CD of rocket without flaps
+                float control_vel = sqrt(2*(g+(native_drag/m)*(des_alt-alt))); //From v^2 - u^2 = 2*a*s equation. THe final velocity is zero,...
+                //...u is the desired velocity considering flap drag isn't applied throughout
+                if (alt > des_alt) {
+                    //flaps are vertical
+                    servo1.write(initialAngle);
+                    servo2.write(initialAngle); 
+                    servo3.write(initialAngle); 
+                }
+                else {
+                    if (vel > control_vel*(1+buffer/100))
+                    {
+                        //flaps are deployed
+                        servo1.write(initialAngle);
+                        servo2.write(initialAngle);
+                        servo3.write(initialAngle);
+                    }
+                    else {
+                        //go to vertical
+                        servo1.write(initialAngle);
+                        servo2.write(initialAngle);
+                        servo3.write(initialAngle);
+                    }
+                } 
+            }
+  }
+
         }
     }
 }
@@ -124,7 +177,7 @@ void setup() {
     chBegin(chSetup);
     while(true) {}
     //Must stay in while true loop to keep the chSetup thread running
-    }
+}
 
 void loop() {
     //Could cause problems if used for ChibiOS, 
