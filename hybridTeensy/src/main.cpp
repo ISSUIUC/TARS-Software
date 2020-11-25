@@ -91,7 +91,7 @@ static THD_FUNCTION(hybridPT_THD, arg){
 //----------------------------------------------------------------
 //setup thread
 
-void chSetup(){
+void chSetup() {
   //start ball valve control thread
   ballValve_Pointer = chThdCreateStatic(ballValve_WA, sizeof(ballValve_WA), NORMALPRIO, ballValve_THD, NULL);
 
