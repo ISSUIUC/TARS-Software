@@ -9,6 +9,15 @@
 #define SERVO4_PIN 9
 const unsigned int TERMINATE = 99000000;
 
+#define HYBRID_PT_1_PIN 20
+#define HYBRID_PT_2_PIN 21
+#define HYBRID_PT_3_PIN 22
+
+#define DEBUG_LED_1 6
+#define DEBUG_LED_2 7
+#define DEBUG_LED_3 8
+#define DEBUG_LED_4 9
+
 #define BALL_VALVE_1_PIN 2
 #define BALL_VALVE_2_PIN 3
 
@@ -17,6 +26,26 @@ PWMServo servo2;
 PWMServo servo3;
 PWMServo servo4; //Remove the fourth servo for test flight
 
+//create servo objects for the ball valve servos
+PWMServo ballValve1;
+PWMServo ballValve2;
+
+//structs for hybrid teensy stuff
+//data struct for FSM to send to ballValve_THD
+struct ballValve_Message{
+  bool isOpen;
+  int timeStamp; //timeStamp is set when open or close command is sent.
+  //more data can be added as needed
+};
+
+//data struct for hybridPT_THD to send pressure transducer data to FSM
+struct pressureData{
+  int PT1;
+  int PT2;
+  int PT3;
+  int timeStamp; //timeStamp is set when pressure data is read.
+  //more data can be added as needed
+};
 
 int currentAngle; //Current angle of the servos. 
 int initialAngle = 0; //Initial angle of servos. This may not be zero.
@@ -29,9 +58,10 @@ float latitude; //current latitude from gps
 float longitude; //current longitude from gps
 float Kp; //Proportionality constant for roll control PID
 float rr_thresh; //Maximum roll rate that we ignore.
-float roll_alt_cutoff; //Altitude when roll control stops and we do active drag
+float roll_off_alt; //Altitude when roll control stops and we do active drag
 float des_alt; //Final altitude goal
 float buffer; //Buffer for the active drag
+float m; //Mass of the rocket
 
 
 //Gives thread 32 bytes. STATIC, so size will not change.
@@ -94,7 +124,7 @@ static THD_FUNCTION(servoThread, arg) {
             //record time using millis
         // else if(rocket is in coast phase):
             //record time using millis
-            if((roll_rate > rr_thresh || roll_rate < -rr_thresh) && alt < roll_off_alt)//If the rocket is rolling below a certain altitude..
+            if((roll_rate > rr_thresh || roll_rate < -rr_thresh) && altitude < roll_off_alt)//If the rocket is rolling below a certain altitude..
             {
                 //...reduce the roll
                 //Proportional controller to reduce the roll of the rocket. Kp is the proportional gain.
@@ -111,16 +141,16 @@ static THD_FUNCTION(servoThread, arg) {
                 //implement active drag. This needs to be tested
                 //control_vel = f(altitude)
                 float native_drag; //Need to calculate this using velocity and CD of rocket without flaps
-                float control_vel = sqrt(2*(g+(native_drag/m)*(des_alt-alt))); //From v^2 - u^2 = 2*a*s equation. THe final velocity is zero,...
+                float control_vel = sqrt(2*(g+(native_drag/m)*(des_alt-altitude))); //From v^2 - u^2 = 2*a*s equation. THe final velocity is zero,...
                 //...u is the desired velocity considering flap drag isn't applied throughout
-                if (alt > des_alt) {
+                if (altitude > des_alt) {
                     //flaps are vertical
                     servo1.write(initialAngle);
                     servo2.write(initialAngle); 
                     servo3.write(initialAngle); 
                 }
                 else {
-                    if (vel > control_vel*(1+buffer/100))
+                    if (velocity > control_vel*(1+buffer/100))
                     {
                         //flaps are deployed
                         servo1.write(initialAngle);
@@ -188,7 +218,7 @@ static THD_FUNCTION(hybridPT_THD, arg){
 
 //--------------------------------------------------------
 
-
+//Is this being used?
 void testServos() {
     currentAngle = initialAngle;
     //For loops test the functionality of the servo's movements;
