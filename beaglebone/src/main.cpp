@@ -13,13 +13,14 @@
 
 int main(void)
 {
-	int rfm95_fd;
 
-    rfm95_fd = rfm95_open();
+    RFM95 rfm95;
 
-	printf("RFM95 Open Success.\n");
+    int rfm95_fd = rfm95.spi_open();
 
-    if (rfm95_test(rfm95_fd)) {
+	printf("RFM95 open success with fd: %d\n", rfm95_fd);
+
+    if (rfm95.spi_test()) {
         printf("### RFM95 ID Check PASS ###\n");
     } else {
         printf("### RFM95 ID Check FAIL ###\n");
