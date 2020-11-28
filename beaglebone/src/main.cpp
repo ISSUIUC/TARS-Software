@@ -20,11 +20,7 @@ int main(void)
 
 	printf("RFM95 open success with fd: %d\n", rfm95_fd);
 
-    if (rfm95.spi_test()) {
-        printf("### RFM95 ID Check PASS ###\n");
-    } else {
-        printf("### RFM95 ID Check FAIL ###\n");
-    }
+    rfm95.spi_test();
 
 	return 0;
 }

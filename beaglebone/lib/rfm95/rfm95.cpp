@@ -1,4 +1,5 @@
-/*
+/* rfm95.cpp
+ *
  * HopeRF RFM95W device driver for TARS-MK1 (wrapping spidev)
  *
  * Illinois Space Society - IREC 2021 Avioinics Team
@@ -6,8 +7,6 @@
  * Ayberk Yaraneri
  *
  */
-
-
 
 #include "rfm95.h"
 
@@ -67,14 +66,27 @@ bool RFM95::spi_test() {
 
     int ret;
 
-    _spi_txBuf[0] = 0xC2;
+    _spi_txBuf[0] = REG_VERSION;
 
     _spi_transfer.len = 2;
+
+#ifdef DEBUG
+    printf("##### Performing RFM95 ID Check #####\n");
+#endif
 
     ret = ioctl(_fd, SPI_IOC_MESSAGE(1), &_spi_transfer);
     if (ret < 1) return false;
 
-    if (_spi_rxBuf[1] != 0x12) return false;
+    if (_spi_rxBuf[1] != 0x12) {
+#ifdef DEBUG
+        printf("##### RFM95 ID Check FAIL #####\n");
+#endif
+        return false;
+    }
+
+#ifdef DEBUG
+    printf("##### RFM95 ID Check PASS #####\n");
+#endif
 
     return true;
 
