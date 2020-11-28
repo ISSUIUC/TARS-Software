@@ -2,6 +2,8 @@
 #include <ChRt.h>
 #include <PWMServo.h>
 
+#include "teensyShared.h"
+
 #define BALL_VALVE_1_PIN 2
 #define BALL_VALVE_2_PIN 3
 
@@ -14,31 +16,17 @@
 #define DEBUG_LED_3 8
 #define DEBUG_LED_4 9
 
-//data struct for FSM to send to ballValve_THD
-struct ballValve_Message{
-  bool isOpen;
-  int timeStamp; //timeStamp is set when open or close command is sent.
-  //more data can be added as needed
-};
-
-//data struct for hybridPT_THD to send pressure transducer data to FSM
-struct pressureData{
-  int PT1;
-  int PT2;
-  int PT3;
-  int timeStamp; //timeStamp is set when pressure data is read.
-  //more data can be added as needed
-};
-
 //create servo objects for the ball valve servos
 PWMServo ballValve1;
 PWMServo ballValve2;
 
-//Anshuk: Where will the FSM go?
-//Anshuk: Add provisions for reading other sensor data, and thread for relaying to BeagleBone
+//Anshuk: TODO:Add provisions for reading other sensor data, and thread for relaying to BeagleBone
 
 //----------------------------------------------------------------
 //create thread working areas
+
+static THD_WORKING_AREA(fsm_WA, 32);
+thread_t *fsm_Pointer;
 
 static THD_WORKING_AREA(ballValve_WA, 32);
 thread_t *ballValve_Pointer;
@@ -49,13 +37,20 @@ thread_t *hybridPT_Pointer;
 //----------------------------------------------------------------
 //defining threads
 
+//FSM Thread
+static THD_FUNCTION(fsm_THD, arg){
+  //TODO: implement FSM
+  //ballValve_THD is waiting for message from FSM
+  //hybridPT_THD is sending a message to FSM
+}
+
 //thread that controls the ball valve servos for the hybrid engine.
 static THD_FUNCTION(ballValve_THD, arg){
   ballValve_Message *incomingMessage; //create empty pointer for incoming message from FSM
   
   while(true){
     chMsgWait(); //sleep until message is recieved
-    incomingMessage = (ballValve_Message*)chMsgGet(/*TODO: Insert pointer to FSM thread here*/);
+    incomingMessage = (ballValve_Message*)chMsgGet(fsm_Pointer);
 
     //Anshuk: Once FSM is developed, make conditionals below more 
     if(incomingMessage->isOpen == false){
@@ -69,7 +64,7 @@ static THD_FUNCTION(ballValve_THD, arg){
       digitalWrite(DEBUG_LED_1, LOW);
     }
 
-    chMsgRelease(/*TODO: Insert pointer to FSM thread here*/, (msg_t)&incomingMessage); //releases FSM thread and returns incoming message
+    chMsgRelease(fsm_Pointer, (msg_t)&incomingMessage); //releases FSM thread and returns incoming message
   }
 }
 
@@ -84,7 +79,7 @@ static THD_FUNCTION(hybridPT_THD, arg){
 
     outgoingMessage.timeStamp = chVTGetSystemTime();
 
-    chMsgSend(/*TODO: Insert pointer to FSM thread here*/, (msg_t)&outgoingMessage);
+    chMsgSend(fsm_Pointer, (msg_t)&outgoingMessage);
   }
 }
 
@@ -92,6 +87,9 @@ static THD_FUNCTION(hybridPT_THD, arg){
 //setup thread
 
 void chSetup(){
+  //start FSM thread
+  fsm_Pointer = chThdCreateStatic(fsm_WA, sizeof(fsm_WA), NORMALPRIO, fsm_THD, NULL);//TODO: Tweak priority
+  
   //start ball valve control thread
   ballValve_Pointer = chThdCreateStatic(ballValve_WA, sizeof(ballValve_WA), NORMALPRIO, ballValve_THD, NULL);
 
