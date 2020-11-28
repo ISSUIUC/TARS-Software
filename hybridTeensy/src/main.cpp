@@ -20,13 +20,16 @@
 PWMServo ballValve1;
 PWMServo ballValve2;
 
-//Anshuk: TODO:Add provisions for reading other sensor data, and thread for relaying to BeagleBone
+//Anshuk: TODO:Add provisions for reading other sensor data
 
 //----------------------------------------------------------------
 //create thread working areas
 
 static THD_WORKING_AREA(fsm_WA, 32);
 thread_t *fsm_Pointer;
+
+static THD_WORKING_AREA(bbComm_WA, 32);
+thread_t *bbComm_Pointer;
 
 static THD_WORKING_AREA(ballValve_WA, 32);
 thread_t *ballValve_Pointer;
@@ -39,9 +42,18 @@ thread_t *hybridPT_Pointer;
 
 //FSM Thread
 static THD_FUNCTION(fsm_THD, arg){
-  //TODO: implement FSM
   //ballValve_THD is waiting for message from FSM
   //hybridPT_THD is sending a message to FSM
+  while(true){
+    //TODO: implement FSM
+  }
+}
+
+//thread for communicating with BeagleBone Black
+static THD_FUNCTION(bbComm_THD, arg){
+  while(true){
+    //TODO: implement BeagleBone communication
+  }
 }
 
 //thread that controls the ball valve servos for the hybrid engine.
@@ -89,6 +101,9 @@ static THD_FUNCTION(hybridPT_THD, arg){
 void chSetup(){
   //start FSM thread
   fsm_Pointer = chThdCreateStatic(fsm_WA, sizeof(fsm_WA), NORMALPRIO, fsm_THD, NULL);//TODO: Tweak priority
+
+  //start BeagleBone communication thread
+  bbComm_Pointer = chThdCreateStatic(bbComm_WA, sizeof(bbComm_WA), NORMALPRIO, bbComm_THD, NULL);
   
   //start ball valve control thread
   ballValve_Pointer = chThdCreateStatic(ballValve_WA, sizeof(ballValve_WA), NORMALPRIO, ballValve_THD, NULL);
