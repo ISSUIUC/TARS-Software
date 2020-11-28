@@ -1,6 +1,6 @@
 #include <Arduino.h>
 #include <ChRt.h>
-#include <Servo.h>
+#include <PWMServo.h>
 
 #define BALL_VALVE_1_PIN 2
 #define BALL_VALVE_2_PIN 3
@@ -31,8 +31,8 @@ struct pressureData{
 };
 
 //create servo objects for the ball valve servos
-Servo ballValve1;
-Servo ballValve2;
+PWMServo ballValve1;
+PWMServo ballValve2;
 
 //Anshuk: Where will the FSM go?
 //Anshuk: Add provisions for reading other sensor data, and thread for relaying to BeagleBone
