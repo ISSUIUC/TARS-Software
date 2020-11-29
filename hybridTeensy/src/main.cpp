@@ -22,6 +22,7 @@ PWMServo ballValve1;
 PWMServo ballValve2;
 
 //Anshuk: TODO:Add provisions for reading other sensor data
+//TODO: Change thread activation to use global variables instead of sync messages
 
 //----------------------------------------------------------------
 //create thread working areas
@@ -86,9 +87,9 @@ static THD_FUNCTION(hybridPT_THD, arg){
   pressureData outgoingMessage;
   
   while(true){
-    outgoingMessage.PT1 = analogRead(HYBRID_PT_1_PIN);
-    outgoingMessage.PT2 = analogRead(HYBRID_PT_2_PIN);
-    outgoingMessage.PT3 = analogRead(HYBRID_PT_3_PIN);
+    outgoingMessage.PT1 = ptConversion(analogRead(HYBRID_PT_1_PIN));
+    outgoingMessage.PT2 = ptConversion(analogRead(HYBRID_PT_2_PIN));
+    outgoingMessage.PT3 = ptConversion(analogRead(HYBRID_PT_3_PIN));
 
     outgoingMessage.timeStamp = chVTGetSystemTime();
 

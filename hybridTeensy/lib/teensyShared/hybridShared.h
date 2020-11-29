@@ -12,9 +12,9 @@ struct ballValve_Message{
 
 //data struct for hybridPT_THD to send pressure transducer data to FSM
 struct pressureData{
-  int PT1;
-  int PT2;
-  int PT3;
+  float PT1;
+  float PT2;
+  float PT3;
   int timeStamp; //timeStamp is set when pressure data is read.
   //more data can be added as needed
 };
