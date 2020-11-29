@@ -24,6 +24,10 @@ float roll_rate; //angular velocity in the z direction
 float g = 9.81; //Acceleration due to gravity in m/s
 float lattitude; //current lattitude from gps
 float longitude; //current longitude from gps
+float pt1; //Pressure data from struct...
+float pt2;
+float pt3;
+int timeStamp;
 
 
 
@@ -56,6 +60,10 @@ static THD_FUNCTION(dataThread, arg) {
    roll_rate = 0; 
    lattitude = 0;
    longitude = 0;
+   pt1 = 0;
+   pt2 = 0;
+   pt3 = 0;
+   timeStamp = 0;
    
 }
 //Thread to log information to BeagleBone. This will be done after data is read.
@@ -64,10 +72,10 @@ static THD_FUNCTION(loggerThread, arg) {
     //Should do fastest Baud Rate Possible (Teensy should be able to handle it but can the BBB?)
     Serial.begin(115200); //Maximum is 4608000. We will have to test to see how much higher we can go before packets are lost.
     //Sending data in alphabetical order. First 4 bytes is altitude,  second 4 bytes is az, etc.
-    float sensorData[6] = {altitude, az, lattitude, longitude, roll_rate, velocity};
+    float sensorData[10] = {altitude, az, lattitude, longitude, roll_rate, velocity, pt1, pt2, pt3, (float) timeStamp};
     //Creates a byte array of length 24
     byte *data_asByteArray = (byte*)sensorData;
-    Serial.write(data_asByteArray, 24);
+    Serial.write(data_asByteArray, 40);
 }
 //Thread for actuating servos for active control
 static THD_FUNCTION(servoThread, arg) {
