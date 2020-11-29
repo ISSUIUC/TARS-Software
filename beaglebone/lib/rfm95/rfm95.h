@@ -24,6 +24,8 @@
 // uncomment for debug output
 #define DEBUG
 
+#define RFM9X_VER 0x12 /* Expected RFM9X RegVersion */
+
 /******************************************************************************/
 /* REGISTER ADDRESS AND BITMAP DEFINITIONS - (not exhaustive) */
 
@@ -78,11 +80,16 @@
 class RFM95 {
     public:
 
-        int spi_open();
-        int spi_close();
-        bool spi_test();
+        RFM95();
+
+        bool RFM_test();
+        bool RFM_write(uint8_t RegAddr, uint8_t data);
+        uint8_t RFM_read(uint8_t RegAddr);
 
     private:
+
+        void _spi_open();
+        void _spi_close();
 
         int _fd;                  /* Linux file descriptor */
 
@@ -90,16 +97,16 @@ class RFM95 {
         uint8_t _mode = 0;
         uint8_t _bits = 8;
         uint32_t _speed = 500000;
-        uint16_t _delay;
+        uint16_t _delay = 10;
+        uint32_t _len = 0;
 
         uint8_t _spi_txBuf[64];
         uint8_t _spi_rxBuf[64];
 
-
         struct spi_ioc_transfer _spi_transfer = {
             (unsigned long) _spi_txBuf,
             (unsigned long) _spi_rxBuf,
-            0,
+            _len,
             _speed,
             _delay,
             _bits

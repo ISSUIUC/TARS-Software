@@ -16,11 +16,7 @@ int main(void)
 
     RFM95 rfm95;
 
-    int rfm95_fd = rfm95.spi_open();
-
-	printf("RFM95 open success with fd: %d\n", rfm95_fd);
-
-    rfm95.spi_test();
+    rfm95.RFM_test();
 
 	return 0;
 }

@@ -18,7 +18,13 @@ static void pabort(const char *s)
 	abort();
 }
 
-int RFM95::spi_open() {
+RFM95::RFM95() {
+
+    _spi_open();
+
+}
+
+void RFM95::_spi_open() {
 
     int ret;
 
@@ -59,34 +65,66 @@ int RFM95::spi_open() {
 	if (ret == -1)
 		pabort("can't get max speed hz");
 
-    return _fd;
+#ifdef DEBUG
+    printf("\n##### RFM95 file opened with fd = %d #####\n", _fd);
+#endif
+
 }
 
-bool RFM95::spi_test() {
+bool RFM95::RFM_write(uint8_t RegAddr, uint8_t data) {
+
+#ifdef DEBUG
+    printf("\n##### Write to RFM95 ADDRESS: 0x%X\tDATA: 0x%X #####",
+            RegAddr, data);
+#endif
 
     int ret;
 
-    _spi_txBuf[0] = REG_VERSION;
-
+    _spi_txBuf[0] = (RegAddr | 0x80); /* Set MSB to 1 to indicate write */
+    _spi_txBuf[1] = data;
     _spi_transfer.len = 2;
 
-#ifdef DEBUG
-    printf("##### Performing RFM95 ID Check #####\n");
-#endif
-
     ret = ioctl(_fd, SPI_IOC_MESSAGE(1), &_spi_transfer);
-    if (ret < 1) return false;
-
-    if (_spi_rxBuf[1] != 0x12) {
-#ifdef DEBUG
-        printf("##### RFM95 ID Check FAIL #####\n");
-#endif
+    if (ret < 1) {
+        printf("\n##### RFM95 WRITE FAILED #####\n");
         return false;
     }
 
+    return true;
+}
+
+uint8_t RFM95::RFM_read(uint8_t RegAddr) {
+
 #ifdef DEBUG
-    printf("##### RFM95 ID Check PASS #####\n");
+    printf("\n##### Read from RFM95 ADDRESS: 0x%X #####\n", RegAddr);
 #endif
+
+    int ret;
+
+    _spi_txBuf[0] = (RegAddr & 0x7F); /* Set MSB to 0 to indicate read */
+    _spi_transfer.len = 2;
+
+    ret = ioctl(_fd, SPI_IOC_MESSAGE(1), &_spi_transfer);
+    if (ret < 1) {
+        printf("\n##### RFM95 READ FAILED #####\n");
+        return 0x00;
+    }
+
+    return _spi_rxBuf[1];
+}
+
+bool RFM95::RFM_test() {
+    
+    printf("\n##### Performing RFM95 Checks #####\n");
+
+    uint8_t rfm_id = RFM_read(REG_VERSION);
+
+    if (rfm_id != RFM9X_VER) return false;
+
+
+    printf("\t--> ID CHECK PASS\n");
+
+    // TODO - Add more tests?
 
     return true;
 
