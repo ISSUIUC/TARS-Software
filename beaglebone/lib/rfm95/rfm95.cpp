@@ -22,6 +22,17 @@ RFM95::RFM95() {
 
     _spi_open();
 
+    /* Set to LoRa mode */
+    RFM_write(REG_OP_MODE, LORA_MODE);
+
+    /* Set power registers */
+    RFM_write(REG_OCP, OCP_SETTING);
+    RFM_write(REG_PA_DAC, PA_DAC_SETTING);
+    RFM_write(REG_PA_CONFIG, PA_CFG_SETTING);
+
+    /* Set FIFO base pointers */
+    RFM_write(REG_FIFO_RX_BASE_ADDR, 0x00);
+    RFM_write(REG_FIFO_TX_BASE_ADDR, 0x80);
 }
 
 void RFM95::_spi_open() {
@@ -74,7 +85,7 @@ void RFM95::_spi_open() {
 bool RFM95::RFM_write(uint8_t RegAddr, uint8_t data) {
 
 #ifdef DEBUG
-    printf("\n##### Write to RFM95 ADDRESS: 0x%X\tDATA: 0x%X #####",
+    printf("##### Write to RFM95 ADDRESS: 0x%.2X\tDATA: 0x%.2X #####\n",
             RegAddr, data);
 #endif
 
@@ -86,7 +97,7 @@ bool RFM95::RFM_write(uint8_t RegAddr, uint8_t data) {
 
     ret = ioctl(_fd, SPI_IOC_MESSAGE(1), &_spi_transfer);
     if (ret < 1) {
-        printf("\n##### RFM95 WRITE FAILED #####\n");
+        printf("##### RFM95 WRITE FAILED #####\n");
         return false;
     }
 
@@ -96,7 +107,7 @@ bool RFM95::RFM_write(uint8_t RegAddr, uint8_t data) {
 uint8_t RFM95::RFM_read(uint8_t RegAddr) {
 
 #ifdef DEBUG
-    printf("\n##### Read from RFM95 ADDRESS: 0x%X #####\n", RegAddr);
+    printf("##### Read from RFM95 ADDRESS: 0x%.2X ", RegAddr);
 #endif
 
     int ret;
@@ -106,23 +117,67 @@ uint8_t RFM95::RFM_read(uint8_t RegAddr) {
 
     ret = ioctl(_fd, SPI_IOC_MESSAGE(1), &_spi_transfer);
     if (ret < 1) {
-        printf("\n##### RFM95 READ FAILED #####\n");
+        printf("##### RFM95 READ FAILED #####\n");
         return 0x00;
     }
+
+#ifdef DEBUG
+    printf("\tDATA: 0x%.2X\n", _spi_rxBuf[1]);
+#endif
 
     return _spi_rxBuf[1];
 }
 
+bool RFM95::RFM_transmit(uint8_t* txBuf, uint8_t length) {
+
+    if (txBuf == NULL) return false;
+    if (length == 0 || length > 64) return false;
+
+#ifdef DEBUG
+    printf("##### Transmitting package of length: .2d bytes #####\n", length);
+#endif
+
+    uint8_t i;
+
+    RFM_write(REG_OP_MODE, MODE_STDBY);     /* Switch to standby mode */
+    RFM_write(REG_PAYLOAD_LENGTH, length);  /* Set payload length */
+    RFM_write(REG_FIFO_ADDR_PTR, 0x80);     /* Set FIFO pointer location */
+
+    /* Copy <length> bytes from txBuf into RFM95 FIFO */
+    for (i = 0; i < length; ++i) {
+        RFM_write(REG_FIFO, *txBuf);
+        ++txBuf;
+    }
+
+    RFM_write(REG_OP_MODE, MODE_TX);    /* Trigger a transmission */
+
+    /* Block by spinning (interrupt support would be MUCH better here) */
+    while ((RFM_read(REG_OP_MODE) & 0x7F) != MODE_STDBY) {
+        for (volatile int q = 0; q < 10000; ++q) {}
+    }
+
+    return true;
+}
+
+
 bool RFM95::RFM_test() {
-    
-    printf("\n##### Performing RFM95 Checks #####\n");
 
-    uint8_t rfm_id = RFM_read(REG_VERSION);
+    printf("##### Performing RFM95 Checks #####\n");
 
-    if (rfm_id != RFM9X_VER) return false;
-
+    if (RFM_read(REG_VERSION) != RFM9X_VER) return false;
 
     printf("\t--> ID CHECK PASS\n");
+
+    if (RFM_read(REG_OCP) != OCP_SETTING) return false;
+    if (RFM_read(REG_PA_DAC) != PA_DAC_SETTING) return false;
+    if (RFM_read(REG_PA_CONFIG) != PA_CFG_SETTING) return false;
+
+    printf("\t--> POWER SETTING CHECK PASS\n");
+
+    if (RFM_read(REG_FIFO_RX_BASE_ADDR) != 0x00) return false;
+    if (RFM_read(REG_FIFO_TX_BASE_ADDR) != 0x80) return false;
+
+    printf("\t--> FIFO BASE ADDR CHECK PASS\n");
 
     // TODO - Add more tests?
 

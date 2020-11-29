@@ -24,7 +24,14 @@
 // uncomment for debug output
 #define DEBUG
 
-#define RFM9X_VER 0x12 /* Expected RFM9X RegVersion */
+#define RFM9X_VER 0x12      /* Expected RFM9X RegVersion */
+
+/******************************************************************************/
+/* MODEM SETTINGS */
+
+#define OCP_SETTING 0x1F    /* Set over-current protection to 240mA */
+#define PA_DAC_SETTING 0x84 /* Setting for non +20dBm power */
+#define PA_CFG_SETTING 0xFF /* PA Boost ON and +17dBm power */
 
 /******************************************************************************/
 /* REGISTER ADDRESS AND BITMAP DEFINITIONS - (not exhaustive) */
@@ -60,6 +67,7 @@
 #define REG_DIO_MAPPING1        0x40 /* Mapping of pins DIO0 to DIO3 */
 #define REG_DIO_MAPPING2        0x41 /* Mapping of pins DIO4 to DIO5 */
 #define REG_VERSION             0x42 /* Semtech ID relating the silicon rev */
+#define REG_PA_DAC              0x4D /* Higher power settings of the PA */
 
 // REG_OP_MODE Register Bitmap
 #define LORA_MODE           0x80
@@ -85,6 +93,7 @@ class RFM95 {
         bool RFM_test();
         bool RFM_write(uint8_t RegAddr, uint8_t data);
         uint8_t RFM_read(uint8_t RegAddr);
+        bool RFM_transmit(uint8_t* txBuf, uint8_t length);
 
     private:
 
@@ -112,12 +121,12 @@ class RFM95 {
             _bits
         };
 
-        uint8_t* _txFifo;       /* Pointer to transmit FIFO buffer */
-        uint8_t* _rxFifo;       /* Pointer to receive FIFO buffer */
-        uint32_t _txFifo_size;  /* Maximum size of txBuf */
-        uint32_t _rxFifo_size;  /* Maximum size of rxBuf */
-        uint32_t _txFifo_len;   /* Current length of transmit FIFO */
-        uint32_t _rxFifo_len;   /* Current length of receive FIFO */
+        // uint8_t* _txFifo;       /* Pointer to transmit FIFO buffer */
+        // uint8_t* _rxFifo;       /* Pointer to receive FIFO buffer */
+        // uint32_t _txFifo_size;  /* Maximum size of txBuf */
+        // uint32_t _rxFifo_size;  /* Maximum size of rxBuf */
+        // uint32_t _txFifo_len;   /* Current length of transmit FIFO */
+        // uint32_t _rxFifo_len;   /* Current length of receive FIFO */
 
 };
 
