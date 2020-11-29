@@ -23,6 +23,10 @@ float lattitude; //current lattitude from gps
 float longitude; //current longitude from gps
 float roll_rate; //angular velocity in the z direction
 float velocity; //current velocity of the rocket
+float pt1;
+float pt2;
+float pt3;
+int timeStamp;
 
 
 int main() {
@@ -74,7 +78,7 @@ int main() {
   }
 
   // Allocate memory for read buffer, set size according to your needs
-  unsigned char dataBuffer[24];
+  unsigned char dataBuffer[40];
 
   // Read bytes. The behaviour of read() (e.g. does it block?,
   // how long does it block for?) depends on the configuration
@@ -88,8 +92,8 @@ int main() {
       return 1;
   }
 
-  //This isthe order in which data is sent from the teensy!
-  //float sensorData[6] = {altitude, az, lattitude, longitude, roll_rate, velocity};
+  //This is the order in which data is sent from the teensy!
+  //float sensorData[10] = {altitude, az, lattitude, longitude, roll_rate, velocity, PT1, PT2, PT3, timeStamp};
 
    while (1) {
     int num_bytes = read(serial_port, &dataBuffer, sizeof(dataBuffer));
@@ -100,9 +104,14 @@ int main() {
       unsigned char longitude_byte_array[4];
       unsigned char rr_byte_array[4];
       unsigned char velocity_byte_array[4];
+      unsigned char pt1_byte_array[4];
+      unsigned char pt2_byte_array[4];
+      unsigned char pt3_byte_array[4];
+      unsigned char timeStamp_byte_array[4];
+      
 
       //Unpacking respective bytes.
-      for(int i = 0; i < 24; i++) {
+      for(int i = 0; i < 40; i++) {
         if (i < 4) {
           altitude_byte_array[i % 4] = dataBuffer[i];
         } else if (i < 8) {
@@ -113,8 +122,16 @@ int main() {
           longitude_byte_array[i % 4] = dataBuffer[i];
         } else if (i < 20) {
           rr_byte_array[i % 4] = dataBuffer[i];
-        } else {
+        } else if (i < 24) {
           velocity_byte_array[i % 4] = dataBuffer[i];
+        } else if (i < 28) {
+          pt1_byte_array[i % 4] = dataBuffer[i];
+        } else if (i < 32) {
+          pt2_byte_array[i % 4] = dataBuffer[i];
+        } else if (i < 36) {
+          pt3_byte_array[i % 4] = dataBuffer[i];
+        } else {
+          timeStamp_byte_array[i % 4] = dataBuffer[i];
         }
       }
 
@@ -125,7 +142,11 @@ int main() {
       longitude = *( (float*) longitude_byte_array );
       roll_rate = *( (float*) rr_byte_array );
       velocity = *( (float*) velocity_byte_array);
-
+      pt1 = *( (float*) pt1_byte_array);
+      pt2 = *( (float*) pt2_byte_array);
+      pt3 = *( (float*) pt3_byte_array);
+      float timeStamp_asFloat = *( (float*) timeStamp_byte_array);
+      timeStamp = (int) timeStamp_asFloat;
       //For debugging
       printf("Read %i bytes\n", num_bytes);
       printf("Received Data:\n");
@@ -135,6 +156,11 @@ int main() {
       printf("Longitude: %f\n", longitude);
       printf("Roll Rate: %f\n", roll_rate);
       printf("Velocity: %f\n", velocity);
+      printf("PT1: %f\n", pt1);
+      printf("PT2: %f\n", pt2);
+      printf("PT3: %f\n", pt3);
+      printf("Time Stamp: %i\n", timeStamp);
+
       printf("End of Transfer\n");
       printf("\n");
     }
