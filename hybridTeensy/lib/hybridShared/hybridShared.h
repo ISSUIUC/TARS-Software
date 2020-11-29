@@ -1,5 +1,5 @@
-#ifndef TEENSYSHARED_H
-#define TEENSYSHARED_H
+#ifndef HYBRIDSHARED_H
+#define HYBRIDSHARED_H
 
 #include <inttypes.h>
 

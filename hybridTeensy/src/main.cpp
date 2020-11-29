@@ -2,7 +2,8 @@
 #include <ChRt.h>
 #include <PWMServo.h>
 
-#include "teensyShared.h"
+#include "hybridShared.h"
+#include "acShared.h"
 
 #define BALL_VALVE_1_PIN 2
 #define BALL_VALVE_2_PIN 3
