@@ -27,7 +27,7 @@
 #define RFM9X_VER 0x12      /* Expected RFM9X RegVersion */
 
 /******************************************************************************/
-/* MODEM SETTINGS */
+/* MODEM SETTINGS - (up to our choosing, written to RFM in constructor)*/
 
 #define OCP_SETTING 0x1F    /* Set over-current protection to 240mA */
 #define PA_DAC_SETTING 0x84 /* Setting for non +20dBm power */
@@ -90,18 +90,24 @@ class RFM95 {
 
         RFM95();
 
-        bool RFM_test();
+        /* RFM module register access API */
         bool RFM_write(uint8_t RegAddr, uint8_t data);
         uint8_t RFM_read(uint8_t RegAddr);
+
+        /* Copy to FIFO and transmit */
         bool RFM_transmit(uint8_t* txBuf, uint8_t length);
+
+        /* Perform a suite of tests */
+        bool RFM_test();
 
     private:
 
         void _spi_open();
         void _spi_close();
 
-        int _fd;                  /* Linux file descriptor */
+        int _fd;    /* Linux file descriptor */
 
+        /* Default SPI bus settings (can be tweaked)*/
         const char *_device = "/dev/spidev1.0";
         uint8_t _mode = 0;
         uint8_t _bits = 8;
@@ -109,9 +115,15 @@ class RFM95 {
         uint16_t _delay = 10;
         uint32_t _len = 0;
 
-        uint8_t _spi_txBuf[64];
-        uint8_t _spi_rxBuf[64];
+        /*
+         * Buffers to store SPI data to transmit and received. Kept at only 4
+         * bytes as SPI transactions to RFM module only ever happen 2 bytes at
+         * a time. (1 byte address + 1 byte data)
+         */
+        uint8_t _spi_txBuf[4];
+        uint8_t _spi_rxBuf[4];
 
+        /* SPI struct as defined in spidev.h that dicates transaction params */
         struct spi_ioc_transfer _spi_transfer = {
             (unsigned long) _spi_txBuf,
             (unsigned long) _spi_rxBuf,
@@ -120,14 +132,6 @@ class RFM95 {
             _delay,
             _bits
         };
-
-        // uint8_t* _txFifo;       /* Pointer to transmit FIFO buffer */
-        // uint8_t* _rxFifo;       /* Pointer to receive FIFO buffer */
-        // uint32_t _txFifo_size;  /* Maximum size of txBuf */
-        // uint32_t _rxFifo_size;  /* Maximum size of rxBuf */
-        // uint32_t _txFifo_len;   /* Current length of transmit FIFO */
-        // uint32_t _rxFifo_len;   /* Current length of receive FIFO */
-
 };
 
 
