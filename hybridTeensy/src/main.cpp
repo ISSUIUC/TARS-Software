@@ -21,6 +21,9 @@
 PWMServo ballValve1;
 PWMServo ballValve2;
 
+//thread state booleans
+bool hybridPT_isOn; 
+
 //Anshuk: TODO:Add provisions for reading other sensor data
 //TODO: Change thread activation to use global variables instead of sync messages
 
@@ -44,8 +47,7 @@ thread_t *hybridPT_Pointer;
 
 //FSM Thread
 static THD_FUNCTION(fsm_THD, arg){
-  //ballValve_THD is waiting for message from FSM
-  //hybridPT_THD is sending a message to FSM
+  //FSM should change thread state bools according to current state.
   while(true){
     //TODO: implement FSM
   }
@@ -85,15 +87,17 @@ static THD_FUNCTION(ballValve_THD, arg){
 //thread that recieves pressure transducer data from the hybrid engine.
 static THD_FUNCTION(hybridPT_THD, arg){
   pressureData outgoingMessage;
-  
   while(true){
-    outgoingMessage.PT1 = ptConversion(analogRead(HYBRID_PT_1_PIN));
-    outgoingMessage.PT2 = ptConversion(analogRead(HYBRID_PT_2_PIN));
-    outgoingMessage.PT3 = ptConversion(analogRead(HYBRID_PT_3_PIN));
+    if(hybridPT_isOn){
+      outgoingMessage.PT1 = ptConversion(analogRead(HYBRID_PT_1_PIN));
+      outgoingMessage.PT2 = ptConversion(analogRead(HYBRID_PT_2_PIN));
+      outgoingMessage.PT3 = ptConversion(analogRead(HYBRID_PT_3_PIN));
 
-    outgoingMessage.timeStamp = chVTGetSystemTime();
+      outgoingMessage.timeStamp = chVTGetSystemTime();
 
-    chMsgSend(fsm_Pointer, (msg_t)&outgoingMessage);
+      chMsgSend(fsm_Pointer, (msg_t)&outgoingMessage); //send PT data to FSM
+    }
+    
   }
 }
 
