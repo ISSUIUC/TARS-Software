@@ -2,6 +2,8 @@
 #include <ChRt.h>
 #include <PWMServo.h>
 #include <SPI.h>
+#include "hybridShared.h"
+#include "acShared.h"
 
 #define SERVO1_PIN 3
 #define SERVO2_PIN 5
@@ -29,23 +31,6 @@ PWMServo servo4; //Remove the fourth servo for test flight
 //create servo objects for the ball valve servos
 PWMServo ballValve1;
 PWMServo ballValve2;
-
-//structs for hybrid teensy stuff
-//data struct for FSM to send to ballValve_THD
-struct ballValve_Message{
-  bool isOpen;
-  int timeStamp; //timeStamp is set when open or close command is sent.
-  //more data can be added as needed
-};
-
-//data struct for hybridPT_THD to send pressure transducer data to FSM
-struct pressureData{
-  int PT1;
-  int PT2;
-  int PT3;
-  int timeStamp; //timeStamp is set when pressure data is read.
-  //more data can be added as needed
-};
 
 int currentAngle; //Current angle of the servos. 
 int initialAngle = 0; //Initial angle of servos. This may not be zero.
@@ -110,6 +95,8 @@ static THD_FUNCTION(loggerThread, arg) {
     byte *data_asByteArray = (byte*)sensorData;
     Serial.write(data_asByteArray, sizeof(data_asByteArray));
 }
+
+
 //Thread for actuating servos for active control
 static THD_FUNCTION(servoThread, arg) {
     (void)arg;

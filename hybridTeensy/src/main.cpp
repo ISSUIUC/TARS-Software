@@ -104,9 +104,6 @@ static THD_FUNCTION(hybridPT_THD, arg){
 //----------------------------------------------------------------
 //setup thread
 
-<<<<<<< HEAD
-void chSetup() {
-=======
 void chSetup(){
   //start FSM thread
   fsm_Pointer = chThdCreateStatic(fsm_WA, sizeof(fsm_WA), NORMALPRIO, fsm_THD, NULL);//TODO: Tweak priority
@@ -114,7 +111,6 @@ void chSetup(){
   //start BeagleBone communication thread
   bbComm_Pointer = chThdCreateStatic(bbComm_WA, sizeof(bbComm_WA), NORMALPRIO, bbComm_THD, NULL);
   
->>>>>>> master
   //start ball valve control thread
   ballValve_Pointer = chThdCreateStatic(ballValve_WA, sizeof(ballValve_WA), NORMALPRIO, ballValve_THD, NULL);
 
