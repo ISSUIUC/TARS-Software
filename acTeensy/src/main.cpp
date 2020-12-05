@@ -37,6 +37,7 @@ int initialAngle = 0; //Initial angle of servos. This may not be zero.
 float velocity; //current velocity of the rocket
 float az; //Acceleration in the z direction
 float altitude; //current altitude from altimiter
+float old_alt; //Altitude from previous cycle
 float roll_rate; //angular velocity in the z direction
 float g = 9.81; //Acceleration due to gravity in m/s
 float latitude; //current latitude from gps
@@ -49,6 +50,25 @@ float buffer; //Buffer for the active drag
 float m; //Mass of the rocket
 
 
+//Need to convert some of this stuff into a struct and put it in the shared libraries
+int rocket_state; //This is the rocket state. 0 is IDLE, 1 is LAUNCHED, 2 is COAST, 3 is APOGEE
+float launch_time; //First time acceleration above threshold is detected
+bool launch_init = false; //True when high acc is detected
+float launch_az_thresh; //Minimum vert acc. for launch detection
+float launch_time_thresh; //Minimum time to confirm launch
+bool coast_init = false; //
+float burnout_time;
+float coast_thresh;
+float coast_timer;
+float coast_time_thresh;
+float apogee_init;
+float apogee_time;
+float apogee_time_thresh;
+float descent_timer;
+
+
+
+
 //Gives thread 32 bytes. STATIC, so size will not change.
 static THD_WORKING_AREA(waThread, 32);
 //May have to change the size
@@ -59,6 +79,8 @@ static THD_WORKING_AREA(waThread3, 32);
 static THD_WORKING_AREA(ballValve_WA, 32);
 //Working area for pressure transducers
 static THD_WORKING_AREA(hybridPT_WA, 32);
+//create another thread for FSM
+static THD_WORKING_AREA(rocket_FSM_WA, 32);
 
 //Thread to get data from sensors
 static THD_FUNCTION(dataThread, arg) {
@@ -82,8 +104,8 @@ static THD_FUNCTION(dataThread, arg) {
     roll_rate = 0; 
     latitude = 0;
     longitude = 0;
-    
 }
+
 //Thread to log information to BeagleBone. This will be done after data is read.
 static THD_FUNCTION(loggerThread, arg) {
     (void)arg;
@@ -96,7 +118,6 @@ static THD_FUNCTION(loggerThread, arg) {
     Serial.write(data_asByteArray, sizeof(data_asByteArray));
 }
 
-
 //Thread for actuating servos for active control
 static THD_FUNCTION(servoThread, arg) {
     (void)arg;
@@ -106,10 +127,8 @@ static THD_FUNCTION(servoThread, arg) {
             delay(TERMINATE); //basically end the program. Anshuk: Maybe we should just end this thread rather than the whole program
         }
         
-        //To determine whether the rocket should use roll/drag control or not. Maybe use the FSM
-        // if(rocket is still burning):
-            //record time using millis
-        // else if(rocket is in coast phase):
+        //To determine whether the rocket should use roll/drag control or not. Only done in the coast phase
+        if(rocket_state == 2):
             //record time using millis
             if((roll_rate > rr_thresh || roll_rate < -rr_thresh) && altitude < roll_off_alt)//If the rocket is rolling below a certain altitude..
             {
@@ -152,6 +171,7 @@ static THD_FUNCTION(servoThread, arg) {
                     }
                 } 
             }
+        }   
     }
 }
 
@@ -167,7 +187,7 @@ static THD_FUNCTION(ballValve_THD, arg){
         //if fail safe switch is active, then don't active this thread
 
         chMsgWait(); //sleep until message is recieved
-        incomingMessage = (ballValve_Message*)chMsgGet(/*TODO: Insert pointer to FSM thread here*/);
+        //Messsage from FSM: incomingMessage = (ballValve_Message*)chMsgGet(/*TODO: Insert pointer to FSM thread here*/);
 
         //Anshuk: Once FSM is developed, make conditionals below more involved
         if(incomingMessage->isOpen == false){
@@ -203,6 +223,74 @@ static THD_FUNCTION(hybridPT_THD, arg){
     }
 }
 
+
+//Thread for the rocket status logic
+static THD_FUNCTION(rocket_FSM, arg) {
+    void(arg);
+    while(true) {
+        if(az > launch_az_thresh && launch_init == false)     //If high acceleration is observed in z direction...
+        {
+            launch_time = millis();                             //...assume launch and store launch time
+            launch_init = true;
+        }
+        
+        if(az > launch_az_thresh && launch_init == true && rocket_state != 2)   //If the acceleration continues...
+        {
+            burn_timer = millis() - launch_time;                //...start measuring the lenght of the burn time
+            if(burn_timer > launch_time_thresh)                 //If the acceleration lasts long enough...
+            {
+                rocket_state = 1;                                    //...the launch has occured
+                //Serial.println(String(millis()/1000) + "s: Launch detected");
+            }
+        }
+        
+        else if(az < launch_az_thresh && launch_init == true && rocket_state != 2)   //If the acceleration was too brief...
+        {
+            launch_init = false;                                //...reset the launch detection (the acceleration was just an anomaly)
+        }
+
+        //BURNOUT DETECTION LOGIC:
+        if(az < coast_thresh && rocket_state == 1 && coast_init == false)    //If large negative acceleration is observed after launch...
+        {
+            burnout_time = millis();                            //...assume burnout and store time of burnout
+            coast_init = true;
+        }
+
+        if(az < coast_thresh && coast_init == true && rocket_state != 2)   //If the negative acceleration continues...
+        {
+            coast_timer = millis() - burnout_time;             //...start measuring the lenght of the coast time
+            if(coast_timer > coast_time_thresh)             //If the negative acceleration lasts long enough...  
+            {
+                rocket_state = 2;                                 //...burnout has occured, and the rocket is now coasting
+                //Serial.println(String(millis()/1000) + "s: Burnout detected");
+            }
+        }
+
+        else if(az > coast_thresh && coast_init == true && rocket_state != 2)   //If the negative acceleration was too brief...
+        {
+            coast_init = false;                             //...reset the burnout detection (the acceleration was just an anomaly)
+        }
+        
+        //APOGEE DETECTION LOGIC:
+        if(velocity < 0 && rocket_state == 2 && apogee_init == false)    //If velocity is negative during free fall...      
+        {
+            apogee_time = millis();                             //...assume apogee and store time of apogee
+            apogee_init = true;
+        }
+        if(velocity < 0 && apogee_init == true && rocket_state != 3)       //If descent continues...
+        {
+            descent_timer = millis() - apogee_time;             //...start measuring time since apogee
+            if(descent_timer > apogee_time_thresh)              //If time since apogee exceeds a threshold...
+            {
+                rocket_state = 3;                                    //...apogee has occured
+            }
+        }
+        else if(velocity > 0 && apogee_init == true && rocket_state != 3)  //If velocity is positive again...
+        {
+            apogee_init == false;                               //...reset the apogee detection
+        }
+    }
+}
 //--------------------------------------------------------
 
 //Is this being used?
@@ -243,6 +331,7 @@ void chSetup() {
     chThdCreateStatic(waThread3, sizeof(waThread3), NORMALPRIO, loggerThread,NULL);
     chThdCreateStatic(hybridPT_WA, sizeof(hybridPT_WA), NORMALPRIO, hybridPT_THD, NULL);
     chThdCreateStatic(ballValve_WA, sizeof(ballValve_WA), NORMALPRIO, ballValve_THD, NULL);
+    chdThdCreateStatic(rocket_FSM_WA, sizeof(rocket_FSM_WA), NORMALPRIO, rocket_FSM, NULL);
 
     while(true) {
         //Spawning Thread. We just need to keep it running in order to no lose servoThread
