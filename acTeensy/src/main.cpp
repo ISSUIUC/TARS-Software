@@ -56,6 +56,7 @@ float launch_time; //First time acceleration above threshold is detected
 bool launch_init = false; //True when high acc is detected
 float launch_az_thresh; //Minimum vert acc. for launch detection
 float launch_time_thresh; //Minimum time to confirm launch
+float burn_timer; //Measuring how long the burn happens
 bool coast_init = false; //
 float burnout_time;
 float coast_thresh;
@@ -70,17 +71,28 @@ float descent_timer;
 
 
 //Gives thread 32 bytes. STATIC, so size will not change.
-static THD_WORKING_AREA(waThread, 32);
+static THD_WORKING_AREA(dataThread_WA, 32);
+thread_t *dataThread_Pointer;
+
 //May have to change the size
-static THD_WORKING_AREA(waThread2, 32);
+static THD_WORKING_AREA(bbComm_WA, 32);
+thread_t *bbComm_Pointer;
+
 //Working area thread for logger
-static THD_WORKING_AREA(waThread3, 32);
+static THD_WORKING_AREA(servoThread_WA, 32);
+thread_t *servoThread_Pointer;
+
 //Working area for ball_valve
 static THD_WORKING_AREA(ballValve_WA, 32);
+thread_t *ballValve_Pointer;
+
 //Working area for pressure transducers
 static THD_WORKING_AREA(hybridPT_WA, 32);
+thread_t *hybridPT_Pointer;
+
 //create another thread for FSM
 static THD_WORKING_AREA(rocket_FSM_WA, 32);
+thread_t *rocket_FSM_Pointer;
 
 //Thread to get data from sensors
 static THD_FUNCTION(dataThread, arg) {
@@ -107,7 +119,7 @@ static THD_FUNCTION(dataThread, arg) {
 }
 
 //Thread to log information to BeagleBone. This will be done after data is read.
-static THD_FUNCTION(loggerThread, arg) {
+static THD_FUNCTION(bbComm_THD, arg) {
     (void)arg;
     //Fastest Baud Rate Possible (Teensy should be able to handle it but can the BBB?)
     Serial.begin(9600); //Maximum is 4608000. We will have to test to see how much higher we can go before packets are lost.
@@ -128,7 +140,7 @@ static THD_FUNCTION(servoThread, arg) {
         }
         
         //To determine whether the rocket should use roll/drag control or not. Only done in the coast phase
-        if(rocket_state == 2):
+        if(rocket_state == 2) {
             //record time using millis
             if((roll_rate > rr_thresh || roll_rate < -rr_thresh) && altitude < roll_off_alt)//If the rocket is rolling below a certain altitude..
             {
@@ -201,7 +213,7 @@ static THD_FUNCTION(ballValve_THD, arg){
             digitalWrite(DEBUG_LED_1, LOW);
         }
 
-    chMsgRelease(/*TODO: Insert pointer to FSM thread here*/, (msg_t)&incomingMessage); //releases FSM thread and returns incoming message
+    //chMsgRelease(/*TODO: Insert pointer to FSM thread here*/, (msg_t)&incomingMessage); //releases FSM thread and returns incoming message
   }
 }
 
@@ -219,14 +231,14 @@ static THD_FUNCTION(hybridPT_THD, arg){
 
         outgoingMessage.timeStamp = chVTGetSystemTime();
 
-        chMsgSend(/*TODO: Insert pointer to FSM thread here*/, (msg_t)&outgoingMessage);
+        //chMsgSend(/*TODO: Insert pointer to FSM thread here*/, (msg_t)&outgoingMessage);
     }
 }
 
 
 //Thread for the rocket status logic
 static THD_FUNCTION(rocket_FSM, arg) {
-    void(arg);
+    (void)arg;
     while(true) {
         if(az > launch_az_thresh && launch_init == false)     //If high acceleration is observed in z direction...
         {
@@ -287,7 +299,7 @@ static THD_FUNCTION(rocket_FSM, arg) {
         }
         else if(velocity > 0 && apogee_init == true && rocket_state != 3)  //If velocity is positive again...
         {
-            apogee_init == false;                               //...reset the apogee detection
+            apogee_init = false;                               //...reset the apogee detection
         }
     }
 }
@@ -295,23 +307,22 @@ static THD_FUNCTION(rocket_FSM, arg) {
 
 //Is this being used?
 void testServos() {
-    currentAngle = initialAngle;
     //For loops test the functionality of the servo's movements;
-    for (currentAngle; currentAngle <= initialAngle + 90; currentAngle++) {
+    for (currentAngle = initialAngle; currentAngle <= initialAngle + 90; currentAngle++) {
         servo1.write(currentAngle);
         servo2.write(currentAngle);
     }
-    for (currentAngle; currentAngle >= initialAngle; currentAngle--) {
+    for (currentAngle = initialAngle; currentAngle >= initialAngle; currentAngle--) {
         servo1.write(currentAngle);
         servo2.write(currentAngle);
     }
 
     //Testing second set of servos
-    for (currentAngle; currentAngle <= initialAngle + 90; currentAngle++) {
+    for (currentAngle = initialAngle; currentAngle <= initialAngle + 90; currentAngle++) {
         servo3.write(currentAngle);
         servo4.write(currentAngle);
     }
-    for (currentAngle; currentAngle >= initialAngle; currentAngle--) {
+    for (currentAngle = initialAngle; currentAngle >= initialAngle; currentAngle--) {
         servo3.write(currentAngle);
         servo4.write(currentAngle);
     }
@@ -326,12 +337,12 @@ void chSetup() {
     servo4.attach(SERVO4_PIN);
     testServos();
     //Start servoThread
-    chThdCreateStatic(waThread, sizeof(waThread), NORMALPRIO, servoThread, NULL);
-    chThdCreateStatic(waThread2, sizeof(waThread2), NORMALPRIO, dataThread,NULL);
-    chThdCreateStatic(waThread3, sizeof(waThread3), NORMALPRIO, loggerThread,NULL);
-    chThdCreateStatic(hybridPT_WA, sizeof(hybridPT_WA), NORMALPRIO, hybridPT_THD, NULL);
-    chThdCreateStatic(ballValve_WA, sizeof(ballValve_WA), NORMALPRIO, ballValve_THD, NULL);
-    chdThdCreateStatic(rocket_FSM_WA, sizeof(rocket_FSM_WA), NORMALPRIO, rocket_FSM, NULL);
+    servoThread_Pointer = chThdCreateStatic(servoThread_WA, sizeof(servoThread_WA), NORMALPRIO, servoThread, NULL);
+    dataThread_Pointer = chThdCreateStatic(dataThread_WA, sizeof(dataThread_WA), NORMALPRIO, dataThread,NULL);
+    bbComm_Pointer = chThdCreateStatic(bbComm_WA, sizeof(bbComm_WA), NORMALPRIO, bbComm_THD,NULL);
+    hybridPT_Pointer = chThdCreateStatic(hybridPT_WA, sizeof(hybridPT_WA), NORMALPRIO, hybridPT_THD, NULL);
+    ballValve_Pointer = chThdCreateStatic(ballValve_WA, sizeof(ballValve_WA), NORMALPRIO, ballValve_THD, NULL);
+    rocket_FSM_Pointer = chThdCreateStatic(rocket_FSM_WA, sizeof(rocket_FSM_WA), NORMALPRIO, rocket_FSM, NULL);
 
     while(true) {
         //Spawning Thread. We just need to keep it running in order to no lose servoThread
