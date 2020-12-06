@@ -30,6 +30,9 @@ bool hybridPT_isOn;
 //----------------------------------------------------------------
 //create thread working areas
 
+static THD_WORKING_AREA(ttComm_WA, 32);
+thread_t *ttComm_Pointer;
+
 static THD_WORKING_AREA(fsm_WA, 32);
 thread_t *fsm_Pointer;
 
@@ -44,6 +47,16 @@ thread_t *hybridPT_Pointer;
 
 //----------------------------------------------------------------
 //defining threads
+
+//Teensy-Teensy communication thread
+static THD_FUNCTION(ttComm_THD, arg) {
+
+  while(true) {
+    //activate the call to the other teensy. It waits a certain amount of time (lets say 2 seconds) before it thinks it might have failed. If this is the case, it sends ~4 more times. 
+    //on 5 failed responses we activate the other threads
+  }
+
+}
 
 //FSM Thread
 static THD_FUNCTION(fsm_THD, arg){
