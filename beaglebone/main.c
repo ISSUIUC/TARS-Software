@@ -23,6 +23,10 @@ float latitude; //current latitude from gps
 float longitude; //current longitude from gps
 float roll_rate; //angular velocity in the z direction
 float velocity; //current velocity of the rocket
+float pt1;
+float pt2;
+float pt3;
+int timeStamp;
 
 
 int main() {
@@ -64,8 +68,8 @@ int main() {
 
   // Set in/out baud rate to be 9600. NEEDS SAME BAUD RATE AS TEENSY
   // Remember we will need to test for the optimal speed once the teensy's are set up.
-  cfsetispeed(&tty, B9600);
-  cfsetospeed(&tty, B9600);
+  cfsetispeed(&tty, B115200);
+  cfsetospeed(&tty, B115200);
 
   // Save tty settings, also checking for error
   if (tcsetattr(serial_port, TCSANOW, &tty) != 0) {
@@ -73,17 +77,8 @@ int main() {
       return 1;
   }
 
-  
-  //Write 24 bytes to serial port-
-  //This is the order in which data is sent from the teensy!
-  //float sensorData[6] = {altitude, az, latitude, longitude, roll_rate, velocity};
-  //For testing
-  float sensorData[6] = {0.55, 2.5, 40.110558, -88.228333, 3.1415, 9.7235};
-  write(serial_port, sensorData, 24);
-
-
   // Allocate memory for read buffer, set size according to your needs
-  unsigned char dataBuffer[24];
+  unsigned char dataBuffer[40];
 
   // Read bytes. The behaviour of read() (e.g. does it block?,
   // how long does it block for?) depends on the configuration
@@ -97,53 +92,79 @@ int main() {
       return 1;
   }
 
-  
-  //This isthe order in which data is sent from the teensy!
-  //float sensorData[6] = {altitude, az, latitude, longitude, roll_rate, velocity};
-  
-  unsigned char altitude_byte_array[4];
-  unsigned char az_byte_array[4];
-  unsigned char latitude_byte_array[4];
-  unsigned char longitude_byte_array[4];
-  unsigned char rr_byte_array[4];
-  unsigned char velocity_byte_array[4];
+  //This is the order in which data is sent from the teensy!
+  //float sensorData[10] = {altitude, az, lattitude, longitude, roll_rate, velocity, PT1, PT2, PT3, timeStamp};
 
-  //Unpacking respective bytes.
-  for(int i = 0; i < 24; i++) {
-    if (i < 4) {
-      altitude_byte_array[i % 4] = dataBuffer[i];
-    } else if (i < 8) { 
-      az_byte_array[i % 4] = dataBuffer[i];
-    } else if (i < 12) {
-      latitude_byte_array[i % 4] = dataBuffer[i];
-    } else if (i < 16) {
-      longitude_byte_array[i % 4] = dataBuffer[i];
-    } else if (i < 20) {
-      rr_byte_array[i % 4] = dataBuffer[i];
-    } else {
-      velocity_byte_array[i % 4] = dataBuffer[i];
+   while (1) {
+    int num_bytes = read(serial_port, &dataBuffer, sizeof(dataBuffer));
+    if (num_bytes > 0) {
+      unsigned char altitude_byte_array[4];
+      unsigned char az_byte_array[4];
+      unsigned char lattitude_byte_array[4];
+      unsigned char longitude_byte_array[4];
+      unsigned char rr_byte_array[4];
+      unsigned char velocity_byte_array[4];
+      unsigned char pt1_byte_array[4];
+      unsigned char pt2_byte_array[4];
+      unsigned char pt3_byte_array[4];
+      unsigned char timeStamp_byte_array[4];
+      
+
+      //Unpacking respective bytes.
+      for(int i = 0; i < 40; i++) {
+        if (i < 4) {
+          altitude_byte_array[i % 4] = dataBuffer[i];
+        } else if (i < 8) {
+          az_byte_array[i % 4] = dataBuffer[i];
+        } else if (i < 12) {
+          lattitude_byte_array[i % 4] = dataBuffer[i];
+        } else if (i < 16) {
+          longitude_byte_array[i % 4] = dataBuffer[i];
+        } else if (i < 20) {
+          rr_byte_array[i % 4] = dataBuffer[i];
+        } else if (i < 24) {
+          velocity_byte_array[i % 4] = dataBuffer[i];
+        } else if (i < 28) {
+          pt1_byte_array[i % 4] = dataBuffer[i];
+        } else if (i < 32) {
+          pt2_byte_array[i % 4] = dataBuffer[i];
+        } else if (i < 36) {
+          pt3_byte_array[i % 4] = dataBuffer[i];
+        } else {
+          timeStamp_byte_array[i % 4] = dataBuffer[i];
+        }
+      }
+
+      //Converting all from byte arrays (4 bytes each) to floats!
+      altitude = *( (float*) altitude_byte_array );
+      az = *( (float*) az_byte_array );
+      lattitude = *( (float*) lattitude_byte_array );
+      longitude = *( (float*) longitude_byte_array );
+      roll_rate = *( (float*) rr_byte_array );
+      velocity = *( (float*) velocity_byte_array);
+      pt1 = *( (float*) pt1_byte_array);
+      pt2 = *( (float*) pt2_byte_array);
+      pt3 = *( (float*) pt3_byte_array);
+      float timeStamp_asFloat = *( (float*) timeStamp_byte_array);
+      timeStamp = (int) timeStamp_asFloat;
+      //For debugging
+      printf("Read %i bytes\n", num_bytes);
+      printf("Received Data:\n");
+      printf("Altitude: %f\n", altitude);
+      printf("Az: %f\n", az);
+      printf("Lattitude: %f\n", lattitude);
+      printf("Longitude: %f\n", longitude);
+      printf("Roll Rate: %f\n", roll_rate);
+      printf("Velocity: %f\n", velocity);
+      printf("PT1: %f\n", pt1);
+      printf("PT2: %f\n", pt2);
+      printf("PT3: %f\n", pt3);
+      printf("Time Stamp: %i\n", timeStamp);
+
+      printf("End of Transfer\n");
+      printf("\n");
     }
   }
-
-  //Converting all from byte arrays (4 bytes each) to floats!
-  altitude = *( (float*) altitude_byte_array ); 
-  az = *( (float*) az_byte_array ); 
-  latitude = *( (float*) latitude_byte_array ); 
-  longitude = *( (float*) longitude_byte_array );
-  roll_rate = *( (float*) rr_byte_array );
-  velocity = *( (float*) velocity_byte_array);
-
-
-  
-  //For debugging
-  printf("Read %i bytes\n", num_bytes);
-  printf("Altitude: %f\n", altitude);
-  printf("Az: %f\n", az);
-  printf("Latitude: %f\n", latitude);
-  printf("Longitude: %f\n", longitude);
-  printf("Roll Rate: %f\n", roll_rate);
-  printf("Velocity: %f\n", velocity);
-
 
   close(serial_port);
   return 0; // success

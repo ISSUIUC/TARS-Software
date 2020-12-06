@@ -43,12 +43,19 @@ float roll_rate; //angular velocity in the z direction
 float g = 9.81; //Acceleration due to gravity in m/s
 float latitude; //current latitude from gps
 float longitude; //current longitude from gps
+<<<<<<< HEAD
 float Kp; //Proportionality constant for roll control PID
 float rr_thresh; //Maximum roll rate that we ignore.
 float roll_off_alt; //Altitude when roll control stops and we do active drag
 float des_alt; //Final altitude goal
 float buffer; //Buffer for the active drag
 float m; //Mass of the rocket
+=======
+float pt1; //Pressure data from struct...
+float pt2;
+float pt3;
+int timeStamp;
+>>>>>>> dev/Matt
 
 fsm_struct fsm_states; 
 
@@ -104,24 +111,29 @@ static THD_FUNCTION(dataThread, arg) {
     Initalize the data and chip select pins:
     The values will be filled soon
     */
-    velocity = 0;
-    az = 0;
-    altitude = 0;
-    roll_rate = 0; 
-    latitude = 0;
-    longitude = 0;
+   velocity = 0;
+   az = 0;
+   altitude = 0;
+   roll_rate = 0; 
+   lattitude = 0;
+   longitude = 0;
+   pt1 = 0;
+   pt2 = 0;
+   pt3 = 0;
+   timeStamp = 0;
+   
 }
 
 //Thread to log information to BeagleBone. This will be done after data is read.
 static THD_FUNCTION(bbComm_THD, arg) {
     (void)arg;
-    //Fastest Baud Rate Possible (Teensy should be able to handle it but can the BBB?)
-    Serial.begin(9600); //Maximum is 4608000. We will have to test to see how much higher we can go before packets are lost.
+    //Should do fastest Baud Rate Possible (Teensy should be able to handle it but can the BBB?)
+    Serial.begin(115200); //Maximum is 4608000. We will have to test to see how much higher we can go before packets are lost.
     //Sending data in alphabetical order. First 4 bytes is altitude,  second 4 bytes is az, etc.
-    float sensorData[6] = {altitude, az, latitude, longitude, roll_rate, velocity};
+    float sensorData[10] = {altitude, az, lattitude, longitude, roll_rate, velocity, pt1, pt2, pt3, (float) timeStamp};
     //Creates a byte array of length 24
     byte *data_asByteArray = (byte*)sensorData;
-    Serial.write(data_asByteArray, sizeof(data_asByteArray));
+    Serial.write(data_asByteArray, 40);
 }
 
 //Thread for actuating servos for active control
