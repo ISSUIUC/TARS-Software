@@ -116,7 +116,7 @@ static THD_FUNCTION(dataThread, arg) {
    az = 0;
    altitude = 0;
    roll_rate = 0; 
-   lattitude = 0;
+   latitude = 0;
    longitude = 0;
    hybridData.PT1 = 0;
    hybridData.PT2 = 0;
@@ -144,7 +144,7 @@ static THD_FUNCTION(bbComm_THD, arg) {
             //Should do fastest Baud Rate Possible (Teensy should be able to handle it but can the BBB?)
             Serial.begin(115200); //Maximum is 4608000. We will have to test to see how much higher we can go before packets are lost.
             //Sending data in alphabetical order. First 4 bytes is altitude,  second 4 bytes is az, etc.
-            float sensorData[10] = {altitude, az, lattitude, longitude, roll_rate, velocity, hybridData.PT1, hybridData.PT2, hybridData.PT3, (float) hybridData.timeStamp};
+            float sensorData[10] = {altitude, az, latitude, longitude, roll_rate, velocity, hybridData.PT1, hybridData.PT2, hybridData.PT3, (float) hybridData.timeStamp};
             //Creates a byte array of length 24
             byte *data_asByteArray = (byte*)sensorData;
             Serial.write(data_asByteArray, 40);
@@ -370,7 +370,7 @@ void chSetup() {
     hybridPT_Pointer = chThdCreateStatic(hybridPT_WA, sizeof(hybridPT_WA), NORMALPRIO, hybridPT_THD, NULL);
     ballValve_Pointer = chThdCreateStatic(ballValve_WA, sizeof(ballValve_WA), NORMALPRIO, ballValve_THD, NULL);
     rocket_FSM_Pointer = chThdCreateStatic(rocket_FSM_WA, sizeof(rocket_FSM_WA), NORMALPRIO, rocket_FSM, NULL);
-    ttComm_Pointer = chThdCreateStatic(ttComm_WA, sizeof(ttComm_WA), NORMALPRIO, ttComm_THD, NULL  )
+    ttComm_Pointer = chThdCreateStatic(ttComm_WA, sizeof(ttComm_WA), NORMALPRIO, ttComm_THD, NULL  );
     
 
     while(true) {
