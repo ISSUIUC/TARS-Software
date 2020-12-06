@@ -2,6 +2,7 @@
 #include <ChRt.h>
 #include <PWMServo.h>
 #include <SPI.h>
+
 #include "hybridShared.h"
 #include "acShared.h"
 
@@ -49,26 +50,19 @@ float des_alt; //Final altitude goal
 float buffer; //Buffer for the active drag
 float m; //Mass of the rocket
 
+fsm_struct fsm_states; 
 
-//Need to convert some of this stuff into a struct and put it in the shared libraries
-int rocket_state; //This is the rocket state. 0 is IDLE, 1 is LAUNCHED, 2 is COAST, 3 is APOGEE
-float launch_time; //First time acceleration above threshold is detected
-bool launch_init = false; //True when high acc is detected
-float launch_az_thresh; //Minimum vert acc. for launch detection
-float launch_time_thresh; //Minimum time to confirm launch
-float burn_timer; //Measuring how long the burn happens
-bool coast_init = false; //
-float burnout_time;
+float coast_time_thresh;
 float coast_thresh;
 float coast_timer;
-float coast_time_thresh;
-float apogee_init;
-float apogee_time;
-float apogee_time_thresh;
 float descent_timer;
-
-
-
+float burn_timer; //Measuring how long the burn happens
+float launch_az_thresh; //Minimum vert acc. for launch detection
+float launch_time_thresh; //Minimum time to confirm launch
+float apogee_time_thresh;
+bool launch_init = false;
+bool coast_init = false;
+bool apogee_init;
 
 //Gives thread 32 bytes. STATIC, so size will not change.
 static THD_WORKING_AREA(dataThread_WA, 32);
@@ -140,7 +134,7 @@ static THD_FUNCTION(servoThread, arg) {
         }
         
         //To determine whether the rocket should use roll/drag control or not. Only done in the coast phase
-        if(rocket_state == 2) {
+        if(fsm_states.rocket_state == 2) {
             //record time using millis
             if((roll_rate > rr_thresh || roll_rate < -rr_thresh) && altitude < roll_off_alt)//If the rocket is rolling below a certain altitude..
             {
@@ -242,62 +236,62 @@ static THD_FUNCTION(rocket_FSM, arg) {
     while(true) {
         if(az > launch_az_thresh && launch_init == false)     //If high acceleration is observed in z direction...
         {
-            launch_time = millis();                             //...assume launch and store launch time
+            fsm_states.launch_time = millis();                             //...assume launch and store launch time
             launch_init = true;
         }
         
-        if(az > launch_az_thresh && launch_init == true && rocket_state != 2)   //If the acceleration continues...
+        if(az > launch_az_thresh && launch_init == true && fsm_states.rocket_state != 2)   //If the acceleration continues...
         {
-            burn_timer = millis() - launch_time;                //...start measuring the lenght of the burn time
+            burn_timer = millis() - fsm_states.launch_time;                //...start measuring the lenght of the burn time
             if(burn_timer > launch_time_thresh)                 //If the acceleration lasts long enough...
             {
-                rocket_state = 1;                                    //...the launch has occured
+                fsm_states.rocket_state = 1;                                    //...the launch has occured
                 //Serial.println(String(millis()/1000) + "s: Launch detected");
             }
         }
         
-        else if(az < launch_az_thresh && launch_init == true && rocket_state != 2)   //If the acceleration was too brief...
+        else if(az < launch_az_thresh && launch_init == true && fsm_states.rocket_state != 2)   //If the acceleration was too brief...
         {
             launch_init = false;                                //...reset the launch detection (the acceleration was just an anomaly)
         }
 
         //BURNOUT DETECTION LOGIC:
-        if(az < coast_thresh && rocket_state == 1 && coast_init == false)    //If large negative acceleration is observed after launch...
+        if(az < coast_thresh && fsm_states.rocket_state == 1 && coast_init == false)    //If large negative acceleration is observed after launch...
         {
-            burnout_time = millis();                            //...assume burnout and store time of burnout
+            fsm_states.burnout_time = millis();                            //...assume burnout and store time of burnout
             coast_init = true;
         }
 
-        if(az < coast_thresh && coast_init == true && rocket_state != 2)   //If the negative acceleration continues...
+        if(az < coast_thresh && coast_init == true && fsm_states.rocket_state != 2)   //If the negative acceleration continues...
         {
-            coast_timer = millis() - burnout_time;             //...start measuring the lenght of the coast time
+            coast_timer = millis() - fsm_states.burnout_time;             //...start measuring the lenght of the coast time
             if(coast_timer > coast_time_thresh)             //If the negative acceleration lasts long enough...  
             {
-                rocket_state = 2;                                 //...burnout has occured, and the rocket is now coasting
+                fsm_states.rocket_state = 2;                                 //...burnout has occured, and the rocket is now coasting
                 //Serial.println(String(millis()/1000) + "s: Burnout detected");
             }
         }
 
-        else if(az > coast_thresh && coast_init == true && rocket_state != 2)   //If the negative acceleration was too brief...
+        else if(az > coast_thresh && coast_init == true && fsm_states.rocket_state != 2)   //If the negative acceleration was too brief...
         {
             coast_init = false;                             //...reset the burnout detection (the acceleration was just an anomaly)
         }
         
         //APOGEE DETECTION LOGIC:
-        if(velocity < 0 && rocket_state == 2 && apogee_init == false)    //If velocity is negative during free fall...      
+        if(velocity < 0 && fsm_states.rocket_state == 2 && apogee_init == false)    //If velocity is negative during free fall...      
         {
-            apogee_time = millis();                             //...assume apogee and store time of apogee
+            fsm_states.apogee_time = millis();                             //...assume apogee and store time of apogee
             apogee_init = true;
         }
-        if(velocity < 0 && apogee_init == true && rocket_state != 3)       //If descent continues...
+        if(velocity < 0 && apogee_init == true && fsm_states.rocket_state != 3)       //If descent continues...
         {
-            descent_timer = millis() - apogee_time;             //...start measuring time since apogee
+            descent_timer = millis() - fsm_states.apogee_time;             //...start measuring time since apogee
             if(descent_timer > apogee_time_thresh)              //If time since apogee exceeds a threshold...
             {
-                rocket_state = 3;                                    //...apogee has occured
+                fsm_states.rocket_state = 3;                                    //...apogee has occured
             }
         }
-        else if(velocity > 0 && apogee_init == true && rocket_state != 3)  //If velocity is positive again...
+        else if(velocity > 0 && apogee_init == true && fsm_states.rocket_state != 3)  //If velocity is positive again...
         {
             apogee_init = false;                               //...reset the apogee detection
         }
