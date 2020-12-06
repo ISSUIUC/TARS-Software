@@ -43,22 +43,17 @@ float roll_rate; //angular velocity in the z direction
 float g = 9.81; //Acceleration due to gravity in m/s
 float latitude; //current latitude from gps
 float longitude; //current longitude from gps
-<<<<<<< HEAD
 float Kp; //Proportionality constant for roll control PID
 float rr_thresh; //Maximum roll rate that we ignore.
 float roll_off_alt; //Altitude when roll control stops and we do active drag
 float des_alt; //Final altitude goal
 float buffer; //Buffer for the active drag
 float m; //Mass of the rocket
-=======
-float pt1; //Pressure data from struct...
-float pt2;
-float pt3;
-int timeStamp;
->>>>>>> dev/Matt
+pressureData hybridData;
 
 fsm_struct fsm_states; 
 
+//TODO set values for the thresholds
 float coast_time_thresh;
 float coast_thresh;
 float coast_timer;
@@ -70,6 +65,8 @@ float apogee_time_thresh;
 bool launch_init = false;
 bool coast_init = false;
 bool apogee_init;
+
+bool teensy_fail = false; //Status of the other teensy, initialized to false. False means active, true means failed.
 
 //Gives thread 32 bytes. STATIC, so size will not change.
 static THD_WORKING_AREA(dataThread_WA, 32);
@@ -95,6 +92,10 @@ thread_t *hybridPT_Pointer;
 static THD_WORKING_AREA(rocket_FSM_WA, 32);
 thread_t *rocket_FSM_Pointer;
 
+//Thread for Teensy Teensy detection
+static THD_WORKING_AREA(ttComm_WA, 32);
+thread_t *ttComm_Pointer;
+
 //Thread to get data from sensors
 static THD_FUNCTION(dataThread, arg) {
     (void)arg;
@@ -117,23 +118,38 @@ static THD_FUNCTION(dataThread, arg) {
    roll_rate = 0; 
    lattitude = 0;
    longitude = 0;
-   pt1 = 0;
-   pt2 = 0;
-   pt3 = 0;
-   timeStamp = 0;
-   
+   hybridData.PT1 = 0;
+   hybridData.PT2 = 0;
+   hybridData.PT3 = 0;
+   hybridData.timeStamp = 0;
+
 }
+
+//Teensy-Teensy communication thread
+static THD_FUNCTION(ttComm_THD, arg) {
+
+  while(true) {
+    //activate the call to the other teensy. It waits a certain amount of time (lets say 2 seconds) before it thinks it might have failed. If this is the case, it sends ~4 more times. 
+    //on 5 failed responses we activate the other threads
+  }
+
+}
+
 
 //Thread to log information to BeagleBone. This will be done after data is read.
 static THD_FUNCTION(bbComm_THD, arg) {
     (void)arg;
-    //Should do fastest Baud Rate Possible (Teensy should be able to handle it but can the BBB?)
-    Serial.begin(115200); //Maximum is 4608000. We will have to test to see how much higher we can go before packets are lost.
-    //Sending data in alphabetical order. First 4 bytes is altitude,  second 4 bytes is az, etc.
-    float sensorData[10] = {altitude, az, lattitude, longitude, roll_rate, velocity, pt1, pt2, pt3, (float) timeStamp};
-    //Creates a byte array of length 24
-    byte *data_asByteArray = (byte*)sensorData;
-    Serial.write(data_asByteArray, 40);
+    while(true) {
+        while(teensy_fail = true) {
+            //Should do fastest Baud Rate Possible (Teensy should be able to handle it but can the BBB?)
+            Serial.begin(115200); //Maximum is 4608000. We will have to test to see how much higher we can go before packets are lost.
+            //Sending data in alphabetical order. First 4 bytes is altitude,  second 4 bytes is az, etc.
+            float sensorData[10] = {altitude, az, lattitude, longitude, roll_rate, velocity, hybridData.PT1, hybridData.PT2, hybridData.PT3, (float) hybridData.timeStamp};
+            //Creates a byte array of length 24
+            byte *data_asByteArray = (byte*)sensorData;
+            Serial.write(data_asByteArray, 40);
+        }
+    }
 }
 
 //Thread for actuating servos for active control
@@ -201,43 +217,48 @@ static THD_FUNCTION(ballValve_THD, arg){
     ballValve_Message *incomingMessage; //create empty pointer for incoming message from FSM
   
     while(true){
+        while(teensy_fail = true) {
 
-        //if fail safe switch is active, then don't active this thread
+            //if fail safe switch is active, then don't active this thread
 
-        chMsgWait(); //sleep until message is recieved
-        //Messsage from FSM: incomingMessage = (ballValve_Message*)chMsgGet(/*TODO: Insert pointer to FSM thread here*/);
+            chMsgWait(); //sleep until message is recieved
+            //Messsage from FSM: incomingMessage = (ballValve_Message*)chMsgGet(/*TODO: Insert pointer to FSM thread here*/);
 
-        //Anshuk: Once FSM is developed, make conditionals below more involved
-        if(incomingMessage->isOpen == false){
-            ballValve1.write(180);
-            ballValve2.write(180);
-            digitalWrite(DEBUG_LED_1, HIGH);
+            //Anshuk: Once FSM is developed, make conditionals below more involved
+            if(incomingMessage->isOpen == false){
+                ballValve1.write(180);
+                ballValve2.write(180);
+                digitalWrite(DEBUG_LED_1, HIGH);
+            }
+            else if(incomingMessage->isOpen == true){
+                ballValve1.write(0);
+                ballValve2.write(0);
+                digitalWrite(DEBUG_LED_1, LOW);
+            }
+
+        //chMsgRelease(/*TODO: Insert pointer to FSM thread here*/, (msg_t)&incomingMessage); //releases FSM thread and returns incoming message
         }
-        else if(incomingMessage->isOpen == true){
-            ballValve1.write(0);
-            ballValve2.write(0);
-            digitalWrite(DEBUG_LED_1, LOW);
-        }
-
-    //chMsgRelease(/*TODO: Insert pointer to FSM thread here*/, (msg_t)&incomingMessage); //releases FSM thread and returns incoming message
-  }
+    }
 }
 
 //thread that recieves pressure transducer data from the hybrid engine. We should incorporate this into the sensor data thread
+//TODO: FIX this thread
 static THD_FUNCTION(hybridPT_THD, arg){
     pressureData outgoingMessage;
   
     while(true){
+        while(teensy_fail = true) {
 
-        //if fail safe switch is active, then don't active this thread..?
+            //if fail safe switch is active, then don't active this thread..?
 
-        outgoingMessage.PT1 = analogRead(HYBRID_PT_1_PIN);
-        outgoingMessage.PT2 = analogRead(HYBRID_PT_2_PIN);
-        outgoingMessage.PT3 = analogRead(HYBRID_PT_3_PIN);
+            outgoingMessage.PT1 = analogRead(HYBRID_PT_1_PIN);
+            outgoingMessage.PT2 = analogRead(HYBRID_PT_2_PIN);
+            outgoingMessage.PT3 = analogRead(HYBRID_PT_3_PIN);
 
-        outgoingMessage.timeStamp = chVTGetSystemTime();
+            outgoingMessage.timeStamp = chVTGetSystemTime();
 
-        //chMsgSend(/*TODO: Insert pointer to FSM thread here*/, (msg_t)&outgoingMessage);
+            //chMsgSend(/*TODO: Insert pointer to FSM thread here*/, (msg_t)&outgoingMessage);
+        }
     }
 }
 
@@ -349,6 +370,8 @@ void chSetup() {
     hybridPT_Pointer = chThdCreateStatic(hybridPT_WA, sizeof(hybridPT_WA), NORMALPRIO, hybridPT_THD, NULL);
     ballValve_Pointer = chThdCreateStatic(ballValve_WA, sizeof(ballValve_WA), NORMALPRIO, ballValve_THD, NULL);
     rocket_FSM_Pointer = chThdCreateStatic(rocket_FSM_WA, sizeof(rocket_FSM_WA), NORMALPRIO, rocket_FSM, NULL);
+    ttComm_Pointer = chThdCreateStatic(ttComm_WA, sizeof(ttComm_WA), NORMALPRIO, ttComm_THD, NULL  )
+    
 
     while(true) {
         //Spawning Thread. We just need to keep it running in order to no lose servoThread
