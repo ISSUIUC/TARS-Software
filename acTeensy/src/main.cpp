@@ -168,7 +168,7 @@ static THD_FUNCTION(dataThread, arg) {
 //Heartbeat listening thread
 static THD_FUNCTION(ttRecieve_THD, arg){
     while(true){
-        // checks every 1/4 second if the other teensy has NOT responded
+        // checks every 250 millisecond if the other teensy has NOT responded
         while(!(pulseIn(TT_RECIEVE_PIN, HIGH, 250000) > 0)) {
             //other teensy has failed...activate other threads
             teensy_fail = true;
