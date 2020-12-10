@@ -51,9 +51,9 @@ const unsigned int TERMINATE = 99000000;
 #define TT_RECIEVE_PIN 39
 
 //define magnetometer chip select pin
-#define LSM9DS1_M_CS 1 //TODO: figure out which pins and replace placeholders
+#define LSM9DS1_M_CS 37
 //define accel/gyro chip select pin
-#define LSM9DS1_AG_CS 2
+#define LSM9DS1_AG_CS 36
 
 PWMServo servo1;
 PWMServo servo2;
