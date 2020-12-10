@@ -46,6 +46,10 @@ const unsigned int TERMINATE = 99000000;
 #define BALL_VALVE_1_PIN 2
 #define BALL_VALVE_2_PIN 3
 
+//TODO: SWAP THESE IN HYBRID TEENSY!!!!!!!!!!
+#define TT_SEND_PIN 38
+#define TT_RECIEVE_PIN 39
+
 //define magnetometer chip select pin
 #define LSM9DS1_M_CS 1 //TODO: figure out which pins and replace placeholders
 //define accel/gyro chip select pin
@@ -169,9 +173,13 @@ static THD_FUNCTION(ttRecieve_THD, arg){
     }
 }
 
+//sends heartbeat for other teensy to listen to
 static THD_FUNCTION(ttSend_THD, arg){
     while(true){
-        //sends heartbeat for other teensy to listen to
+        digitalWrite(TT_SEND_PIN, HIGH);
+        chThdSleepMilliseconds(100);
+        digitalWrite(TT_SEND_PIN, LOW);
+        chThdSleepMilliseconds(100);
     }
 }
 
@@ -437,6 +445,9 @@ void setup() {
        //TODO: this is what executes if it failed to communicate with the IMU. If this happens DON'T LAUNCH! That would be poopoo
        while(true){}
    }
+
+   pinMode(TT_SEND_PIN, OUTPUT);
+   pinMode(TT_RECIEVE_PIN, INPUT);
     
     //Initialize and start ChibiOS (Technically the first thread)
     chBegin(chSetup);
