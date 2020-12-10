@@ -1,8 +1,30 @@
+/* main.cpp
+ *   ______  ___     ___    ____        __  _____ __   ___
+ *  /_  __/ / _ |   / _ \  / __/ ____  /  |/  / //_/  <  /
+ *   / /   / __ |  / , _/ _\ \  /___/ / /|_/ / ,<     / / 
+ *  /_/   /_/ |_| /_/|_| /___/       /_/  /_/_/|_|   /_/  
+ *
+ * Active Control Teensy Program
+ *
+ * Illinois Space Society - IREC 2021 Avioinics Team
+ *
+ * Anshuk Chigullapalli
+ * Josh Blustein
+ * Ayberk Yaraneri
+ * David Robbins
+ * Matt Taylor
+ * James Bayus
+ * Ben Olaivar
+ * TODO: add missing names if any
+ */
+
 #include <Arduino.h>
 #include <ChRt.h>
 #include <PWMServo.h>
+#include <Wire.h>
 #include <SPI.h>
 
+#include "SparkFunLSM9DS1.h"
 #include "hybridShared.h"
 #include "acShared.h"
 
@@ -24,6 +46,11 @@ const unsigned int TERMINATE = 99000000;
 #define BALL_VALVE_1_PIN 2
 #define BALL_VALVE_2_PIN 3
 
+//define magnetometer chip select pin
+#define LSM9DS1_M_CS 1 //TODO: figure out which pins and replace placeholders
+//define accel/gyro chip select pin
+#define LSM9DS1_AG_CS 2
+
 PWMServo servo1;
 PWMServo servo2;
 PWMServo servo3;
@@ -32,6 +59,9 @@ PWMServo servo4; //Remove the fourth servo for test flight
 //create servo objects for the ball valve servos
 PWMServo ballValve1;
 PWMServo ballValve2;
+
+//create imu object
+LSM9DS1 imu;
 
 int currentAngle; //Current angle of the servos. 
 int initialAngle = 0; //Initial angle of servos. This may not be zero.
@@ -51,7 +81,7 @@ float buffer; //Buffer for the active drag
 float m; //Mass of the rocket
 pressureData hybridData;
 
-fsm_struct fsm_states; 
+fsm_struct fsm_states;
 
 //TODO set values for the thresholds
 float coast_time_thresh;
@@ -92,15 +122,17 @@ thread_t *hybridPT_Pointer;
 static THD_WORKING_AREA(rocket_FSM_WA, 32);
 thread_t *rocket_FSM_Pointer;
 
-//Thread for Teensy Teensy detection
-static THD_WORKING_AREA(ttComm_WA, 32);
-thread_t *ttComm_Pointer;
+//Thread for recieving other teensy's heartbeat
+static THD_WORKING_AREA(ttRecieve_WA, 32);
+thread_t *ttRecieve_Pointer;
+
+//Thread to send heartbeat
+static THD_WORKING_AREA(ttSend_WA, 32);
+thread_t *ttSend_Pointer;
 
 //Thread to get data from sensors
 static THD_FUNCTION(dataThread, arg) {
     (void)arg;
-    // start the SPI library:
-    SPI.begin();
     /*
     Need IMU, Pitot, and GPS data from Beaglebone...
     
@@ -112,27 +144,35 @@ static THD_FUNCTION(dataThread, arg) {
     Initalize the data and chip select pins:
     The values will be filled soon
     */
+
+   imu.readAccel(); //update IMU accelerometer data
+   imu.readGyro();
+
    velocity = 0;
-   az = 0;
+   az = imu.calcAccel(imu.az);
    altitude = 0;
-   roll_rate = 0; 
+   roll_rate = imu.calcGyro(imu.gz); 
    latitude = 0;
    longitude = 0;
-   hybridData.PT1 = 0;
+   hybridData.PT1 = 0; //Does this happen here or in it's own thread?
    hybridData.PT2 = 0;
    hybridData.PT3 = 0;
    hybridData.timeStamp = 0;
 
 }
 
-//Teensy-Teensy communication thread
-static THD_FUNCTION(ttComm_THD, arg) {
+//Heartbeat listening thread
+static THD_FUNCTION(ttRecieve_THD, arg){
+    while(true){
+        //activate the call to the other teensy. It waits a certain amount of time (lets say 2 seconds) before it thinks it might have failed. If this is the case, it sends ~4 more times. 
+        //on 5 failed responses we activate the other threads
+    }
+}
 
-  while(true) {
-    //activate the call to the other teensy. It waits a certain amount of time (lets say 2 seconds) before it thinks it might have failed. If this is the case, it sends ~4 more times. 
-    //on 5 failed responses we activate the other threads
-  }
-
+static THD_FUNCTION(ttSend_THD, arg){
+    while(true){
+        //sends heartbeat for other teensy to listen to
+    }
 }
 
 
@@ -140,7 +180,7 @@ static THD_FUNCTION(ttComm_THD, arg) {
 static THD_FUNCTION(bbComm_THD, arg) {
     (void)arg;
     while(true) {
-        while(teensy_fail = true) {
+        while(teensy_fail == true) {
             //Should do fastest Baud Rate Possible (Teensy should be able to handle it but can the BBB?)
             Serial.begin(115200); //Maximum is 4608000. We will have to test to see how much higher we can go before packets are lost.
             //Sending data in alphabetical order. First 4 bytes is altitude,  second 4 bytes is az, etc.
@@ -217,15 +257,15 @@ static THD_FUNCTION(ballValve_THD, arg){
     ballValve_Message *incomingMessage; //create empty pointer for incoming message from FSM
   
     while(true){
-        while(teensy_fail = true) {
-
+        while(teensy_fail == true) {
+            
             //if fail safe switch is active, then don't active this thread
 
-            chMsgWait(); //sleep until message is recieved
-            //Messsage from FSM: incomingMessage = (ballValve_Message*)chMsgGet(/*TODO: Insert pointer to FSM thread here*/);
+            //chMsgWait(); //sleep until message is recieved
+            //Messsage from FSM: incomingMessage = (ballValve_Message*)chMsgGet(TODO: Insert pointer to FSM thread here);
 
             //Anshuk: Once FSM is developed, make conditionals below more involved
-            if(incomingMessage->isOpen == false){
+            /*if(incomingMessage->isOpen == false){
                 ballValve1.write(180);
                 ballValve2.write(180);
                 digitalWrite(DEBUG_LED_1, HIGH);
@@ -234,8 +274,8 @@ static THD_FUNCTION(ballValve_THD, arg){
                 ballValve1.write(0);
                 ballValve2.write(0);
                 digitalWrite(DEBUG_LED_1, LOW);
-            }
-
+            }*/
+        
         //chMsgRelease(/*TODO: Insert pointer to FSM thread here*/, (msg_t)&incomingMessage); //releases FSM thread and returns incoming message
         }
     }
@@ -247,7 +287,7 @@ static THD_FUNCTION(hybridPT_THD, arg){
     pressureData outgoingMessage;
   
     while(true){
-        while(teensy_fail = true) {
+        while(teensy_fail == true) {
 
             //if fail safe switch is active, then don't active this thread..?
 
@@ -370,7 +410,8 @@ void chSetup() {
     hybridPT_Pointer = chThdCreateStatic(hybridPT_WA, sizeof(hybridPT_WA), NORMALPRIO, hybridPT_THD, NULL);
     ballValve_Pointer = chThdCreateStatic(ballValve_WA, sizeof(ballValve_WA), NORMALPRIO, ballValve_THD, NULL);
     rocket_FSM_Pointer = chThdCreateStatic(rocket_FSM_WA, sizeof(rocket_FSM_WA), NORMALPRIO, rocket_FSM, NULL);
-    ttComm_Pointer = chThdCreateStatic(ttComm_WA, sizeof(ttComm_WA), NORMALPRIO, ttComm_THD, NULL  );
+    ttRecieve_Pointer = chThdCreateStatic(ttRecieve_WA, sizeof(ttRecieve_WA), NORMALPRIO, ttRecieve_THD, NULL);
+    ttSend_Pointer = chThdCreateStatic(ttSend_WA, sizeof(ttSend_WA), NORMALPRIO, ttSend_THD, NULL);
     
 
     while(true) {
@@ -380,6 +421,23 @@ void chSetup() {
 }
 
 void setup() {
+    
+    //set initial rocket state to idle
+    fsm_states.rocket_state = 0;
+    
+    // start the SPI library:
+    SPI.begin();
+
+    //IMU Sensor Setup
+    imu.settings.device.commInterface = IMU_MODE_SPI; // Set mode to SPI
+    imu.settings.device.mAddress = LSM9DS1_M_CS; // Mag CS pin connected to D9
+    imu.settings.device.agAddress = LSM9DS1_AG_CS; // AG CS pin connected to D10
+
+    if(!imu.begin()){
+       //TODO: this is what executes if it failed to communicate with the IMU. If this happens DON'T LAUNCH! That would be poopoo
+       while(true){}
+   }
+    
     //Initialize and start ChibiOS (Technically the first thread)
     chBegin(chSetup);
     while(true) {}
