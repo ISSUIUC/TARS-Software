@@ -168,18 +168,21 @@ static THD_FUNCTION(dataThread, arg) {
 //Heartbeat listening thread
 static THD_FUNCTION(ttRecieve_THD, arg){
     while(true){
-        //activate the call to the other teensy. It waits a certain amount of time (lets say 2 seconds) before it thinks it might have failed. If this is the case, it sends ~4 more times. 
-        //on 5 failed responses we activate the other threads
+        // checks every 1/4 second if the other teensy has NOT responded
+        while(!(pulseIn(TT_RECIEVE_PIN, HIGH, 250000) > 0)) {
+            //other teensy has failed...activate other threads
+            teensy_fail = true;
+        }
     }
 }
 
-//sends heartbeat for other teensy to listen to
+//sends heartbeat for other teensy to listen to every 50 milliseconds
 static THD_FUNCTION(ttSend_THD, arg){
     while(true){
         digitalWrite(TT_SEND_PIN, HIGH);
-        chThdSleepMilliseconds(100);
+        chThdSleepMilliseconds(50);
         digitalWrite(TT_SEND_PIN, LOW);
-        chThdSleepMilliseconds(100);
+        chThdSleepMilliseconds(50);
     }
 }
 
