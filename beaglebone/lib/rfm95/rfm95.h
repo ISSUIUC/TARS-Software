@@ -24,7 +24,7 @@
 // uncomment for debug output
 #define DEBUG
 
-#define RFM9X_VER 0x12      /* Expected RFM9X RegVersion */
+#define RFM9X_VER 0x12          /* Expected RFM9X RegVersion */
 
 /******************************************************************************/
 /* MODEM SETTINGS - (up to our choosing, written to RFM in constructor)*/
@@ -90,6 +90,10 @@ class RFM95 {
 
         RFM95();
 
+        /* RFM module TX/RX mode initialization */
+        void RFM_init_TX();
+        void RFM_init_RX();
+
         /* RFM module register access API */
         bool RFM_write(uint8_t RegAddr, uint8_t data);
         uint8_t RFM_read(uint8_t RegAddr);
@@ -107,6 +111,8 @@ class RFM95 {
 
         void _spi_open();
         void _spi_close();
+
+        uint8_t _rfm_mode;  /* Internal representation of module mode */
 
         int _fd;    /* Linux file descriptor */
 

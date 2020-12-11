@@ -21,15 +21,22 @@ static void pabort(const char *s)
 }
 
 /** RFM95::RFM95 Constructor
- * DESCRIPTION: Opens spidev file, writes necessary settings to registers
- * INPUTS: none
- * RETURNS: none
+ * DESCRIPTION: Opens spidev file
+ * INPUTS:      none
+ * RETURNS:     none
  */
 RFM95::RFM95() {
 
-    // RFM_reset();
-
     _spi_open();
+
+}
+
+/** RFM95::RFM_init_TX
+ * DESCRIPTION: Writes necessary settings to registers for transmit mode
+ * INPUTS:      none
+ * RETURNS:     none
+ */
+void RFM95::RFM_init_TX() {
 
     /* Set to LoRa mode */
     RFM_write(REG_OP_MODE, LORA_MODE);
@@ -42,13 +49,38 @@ RFM95::RFM95() {
     /* Set FIFO base pointers */
     RFM_write(REG_FIFO_RX_BASE_ADDR, 0x00);
     RFM_write(REG_FIFO_TX_BASE_ADDR, 0x80);
+
+    /* Set internal state to show TX mode */
+    _rfm_mode = MODE_TX;
+
+}
+
+/** RFM95::RFM_init_RX
+ * DESCRIPTION: Writes necessary settings to registers for receive mode
+ * INPUTS:      none
+ * RETURNS:     none
+ */
+void RFM95::RFM_init_RX() {
+
+    /* Set to LoRa mode */
+    RFM_write(REG_OP_MODE, LORA_MODE);
+
+    /* Set FIFO base pointers */
+    RFM_write(REG_FIFO_RX_BASE_ADDR, 0x00);
+    RFM_write(REG_FIFO_TX_BASE_ADDR, 0x80);
+
+    RFM_write(REG_OP_MODE, MODE_RXCONTINUOUS);
+
+    /* Set internal state to show TX mode */
+    _rfm_mode = MODE_RXCONTINUOUS;
+
 }
 
 /** RFM95::RFM_write
  * DESCRIPTION: Writes a byte to an RFM register via SPI
- * INPUTS: RegAddr - address of register in RFM95 module to write to
- *         data - byte of data to be written
- * RETURNS: false on failure
+ * INPUTS:      RegAddr - address of register in RFM95 module to write to
+ *              data - byte of data to be written
+ * RETURNS:     false on failure
  */
 bool RFM95::RFM_write(uint8_t RegAddr, uint8_t data) {
 
@@ -74,8 +106,8 @@ bool RFM95::RFM_write(uint8_t RegAddr, uint8_t data) {
 
 /** RFM95::RFM_read
  * DESCRIPTION: Reads a byte from an RFM register via SPI
- * INPUTS: RegAddr - address of register in RFM95 module to read from
- * RETURNS: byte that was read, 0x00 on failure
+ * INPUTS:      RegAddr - address of register in RFM95 module to read from
+ * RETURNS:     byte that was read, 0x00 on failure
  */
 uint8_t RFM95::RFM_read(uint8_t RegAddr) {
 
@@ -103,12 +135,12 @@ uint8_t RFM95::RFM_read(uint8_t RegAddr) {
 
 /** RFM95::RFM_transmit
  * DESCRIPTION: Transfers a sequence of bytes to the RFM module's FIFO buffer,
- *      then puts module into transmit mode.
- * NOTE: Function blocks until RFM module goes back into standby mode! i.e. it
- *      will not return until transmission completes.
- * INPUTS: txBuf - pointer to an array of bytes that will be sent
- *         length - number of bytes to be transmitted
- * RETURNS: false on failure
+ *              then puts module into transmit mode.
+ * NOTE:        Function blocks until RFM module goes back into standby mode!
+ *              i.e. it will not return until transmission completes.
+ * INPUTS:      txBuf - pointer to an array of bytes that will be sent
+ *              length - number of bytes to be transmitted
+ * RETURNS:     false on failure
  */
 bool RFM95::RFM_transmit(uint8_t* txBuf, uint8_t length) {
 
@@ -143,28 +175,34 @@ bool RFM95::RFM_transmit(uint8_t* txBuf, uint8_t length) {
 
 /** RFM95::RFM_test
  * DESCRIPTION: Performans a sequence of tests to ensure that the RFM module is
- *      functioning, and that the proper settings have been written.
- * INPUTS: none
- * RETURNS: false on any failure, true if all tests pass
+ *              functioning, and that the proper settings have been written.
+ * INPUTS:      none
+ * RETURNS:     false on any failure, true if all tests pass
  */
 bool RFM95::RFM_test() {
 
     printf("##### Performing RFM95 Checks #####\n");
 
-    if (RFM_read(REG_VERSION) != RFM9X_VER) return false;
+    if (_rfm_mode == MODE_TX) {
+        if (RFM_read(REG_VERSION) != RFM9X_VER) return false;
+        printf("\t--> ID CHECK PASS\n");
+        if (RFM_read(REG_OCP) != OCP_SETTING) return false;
+        if (RFM_read(REG_PA_DAC) != PA_DAC_SETTING) return false;
+        if (RFM_read(REG_PA_CONFIG) != PA_CFG_SETTING) return false;
+        printf("\t--> POWER SETTING CHECK PASS\n");
+        if (RFM_read(REG_FIFO_RX_BASE_ADDR) != 0x00) return false;
+        if (RFM_read(REG_FIFO_TX_BASE_ADDR) != 0x80) return false;
+        printf("\t--> FIFO BASE ADDR CHECK PASS\n");
+    }
 
-    printf("\t--> ID CHECK PASS\n");
-
-    if (RFM_read(REG_OCP) != OCP_SETTING) return false;
-    if (RFM_read(REG_PA_DAC) != PA_DAC_SETTING) return false;
-    if (RFM_read(REG_PA_CONFIG) != PA_CFG_SETTING) return false;
-
-    printf("\t--> POWER SETTING CHECK PASS\n");
-
-    if (RFM_read(REG_FIFO_RX_BASE_ADDR) != 0x00) return false;
-    if (RFM_read(REG_FIFO_TX_BASE_ADDR) != 0x80) return false;
-
-    printf("\t--> FIFO BASE ADDR CHECK PASS\n");
+    if (_rfm_mode == MODE_RXCONTINUOUS) {
+        if (RFM_read(REG_VERSION) != RFM9X_VER) return false;
+        printf("\t--> ID CHECK PASS\n");
+        if (RFM_read(REG_FIFO_RX_BASE_ADDR) != 0x00) return false;
+        if (RFM_read(REG_FIFO_TX_BASE_ADDR) != 0x80) return false;
+        printf("\t--> FIFO BASE ADDR CHECK PASS\n");
+        // TODO - implement more receiver mode tests
+    }
 
     // TODO - Add more tests?
 
@@ -198,9 +236,9 @@ void RFM95::RFM_reset() {
 
 /** RFM95::_spi_open
  * DESCRIPTION: Opens spi file in linux, stores file descriptor in private class
- *      variable _fd
- * INPUTS: none
- * RETURNS: none
+ *              variable _fd
+ * INPUTS:      none
+ * RETURNS:     none
  */
 void RFM95::_spi_open() {
 
