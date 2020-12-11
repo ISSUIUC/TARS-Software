@@ -1,3 +1,12 @@
+/* main.cpp
+ *
+ * TARS-MK1 beaglebone flight software
+ *
+ * Illinois Space Society - IREC 2021 Avioinics Team
+ *
+ * Ayberk Yaraneri
+ *
+ */
 
 #include <stdint.h>
 #include <unistd.h>
@@ -21,13 +30,13 @@ int main(void)
 
     rfm95.RFM_test();
 
-    // printf("Sending data\n");
-    //
-    // uint8_t buf[4] = {0xDE, 0xAD, 0xBE, 0xEF};
-    //
-    // rfm95.RFM_transmit(buf, 4);
-    //
-    // printf("transmit complete\n");
+    printf("Sending data\n");
+    
+    uint8_t buf[4] = {0xDE, 0xAD, 0xBE, 0xEF};
+    
+    rfm95.RFM_transmit(buf, 4);
+    
+    printf("transmit complete\n");
 
-	return 0;
+    return 0;
 }
