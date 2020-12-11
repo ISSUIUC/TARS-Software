@@ -100,6 +100,9 @@ class RFM95 {
         /* Perform a suite of tests */
         bool RFM_test();
 
+        /* Reset RFM module */
+        void RFM_reset();
+
     private:
 
         void _spi_open();

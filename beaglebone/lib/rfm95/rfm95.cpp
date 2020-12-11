@@ -8,6 +8,8 @@
  *
  */
 
+#include <stdio.h>
+
 #include "rfm95.h"
 
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
@@ -24,6 +26,8 @@ static void pabort(const char *s)
  * RETURNS: none
  */
 RFM95::RFM95() {
+
+    // RFM_reset();
 
     _spi_open();
 
@@ -166,6 +170,30 @@ bool RFM95::RFM_test() {
 
     return true;
 
+}
+
+/** RFM95::RFM_reset
+ * DESCRIPTION:     Cycles RFM module reset line to trigger reset
+ * INPUTS: none
+ * RETURNS: none
+ */
+void RFM95::RFM_reset() {
+
+    FILE *fp;
+
+    fp = fopen("/sys/class/gpio/gpio48/direction", "w");
+    fputs("out", fp);
+    fclose(fp);
+
+    fp = fopen("/sys/class/gpio/gpio48/value", "w");
+    fputs("0", fp);
+    fclose(fp);
+
+    for (volatile int i = 0; i < 1000000 ; ++i) {}
+
+    fp = fopen("/sys/class/gpio/gpio48/value", "w");
+    fputs("1", fp);
+    fclose(fp);
 }
 
 /** RFM95::_spi_open
