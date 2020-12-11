@@ -26,15 +26,18 @@ int main(void)
 
     RFM95 rfm95;
 
+    rfm95.RFM_init_RX();
+
     rfm95.RFM_test();
 
     printf("Sending data\n");
 
-    uint8_t buf[4] = {0xDE, 0xAD, 0xBE, 0xEF};
+    while (1) {
+        uint8_t val = rfm95.RFM_read(REG_RX_NB_BYTES);
+        printf("Received Bytes: %d\n", val);
 
-    // rfm95.RFM_transmit(buf, 4);
-
-    printf("transmit complete\n");
+        for (volatile int i = 0; i < 1000000; ++i) {}
+    }
 
 	return 0;
 }
