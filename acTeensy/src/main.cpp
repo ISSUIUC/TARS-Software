@@ -23,6 +23,7 @@
 #include <PWMServo.h>
 #include <Wire.h>
 #include <SPI.h>
+#include <SD.h>
 
 #include "SparkFunLSM9DS1.h"
 #include "hybridShared.h"
@@ -102,6 +103,8 @@ bool apogee_init;
 
 bool teensy_fail = false; //Status of the other teensy, initialized to false. False means active, true means failed.
 
+bool ballValveOpen = false; //True if ball valve is open, false if closed.
+
 //Gives thread 32 bytes. STATIC, so size will not change.
 static THD_WORKING_AREA(dataThread_WA, 32);
 thread_t *dataThread_Pointer;
@@ -117,10 +120,6 @@ thread_t *servoThread_Pointer;
 //Working area for ball_valve
 static THD_WORKING_AREA(ballValve_WA, 32);
 thread_t *ballValve_Pointer;
-
-//Working area for pressure transducers
-static THD_WORKING_AREA(hybridPT_WA, 32);
-thread_t *hybridPT_Pointer;
 
 //create another thread for FSM
 static THD_WORKING_AREA(rocket_FSM_WA, 32);
@@ -158,9 +157,9 @@ static THD_FUNCTION(dataThread, arg) {
    roll_rate = imu.calcGyro(imu.gz); 
    latitude = 0;
    longitude = 0;
-   hybridData.PT1 = 0; //Does this happen here or in it's own thread?
-   hybridData.PT2 = 0;
-   hybridData.PT3 = 0;
+   hybridData.PT1 = ptConversion(analogRead(HYBRID_PT_1_PIN));
+   hybridData.PT2 = ptConversion(analogRead(HYBRID_PT_2_PIN));
+   hybridData.PT3 = ptConversion(analogRead(HYBRID_PT_3_PIN));
    hybridData.timeStamp = 0;
 
 }
@@ -264,55 +263,23 @@ static THD_FUNCTION(servoThread, arg) {
 //Hybrid teensy threads that need to be ASLEEP if hybrid teensy is working
 //thread that controls the ball valve servos for the hybrid engine.
 static THD_FUNCTION(ballValve_THD, arg){
-
-    ballValve_Message *incomingMessage; //create empty pointer for incoming message from FSM
-  
     while(true){
         while(teensy_fail == true) {
-            
             //if fail safe switch is active, then don't active this thread
-
-            //chMsgWait(); //sleep until message is recieved
-            //Messsage from FSM: incomingMessage = (ballValve_Message*)chMsgGet(TODO: Insert pointer to FSM thread here);
-
             //Anshuk: Once FSM is developed, make conditionals below more involved
-            /*if(incomingMessage->isOpen == false){
+            if(ballValveOpen == false){
                 ballValve1.write(180);
                 ballValve2.write(180);
                 digitalWrite(DEBUG_LED_1, HIGH);
             }
-            else if(incomingMessage->isOpen == true){
+            else if(ballValveOpen == true){
                 ballValve1.write(0);
                 ballValve2.write(0);
                 digitalWrite(DEBUG_LED_1, LOW);
-            }*/
-        
-        //chMsgRelease(/*TODO: Insert pointer to FSM thread here*/, (msg_t)&incomingMessage); //releases FSM thread and returns incoming message
+            }
         }
     }
 }
-
-//thread that recieves pressure transducer data from the hybrid engine. We should incorporate this into the sensor data thread
-//TODO: FIX this thread
-static THD_FUNCTION(hybridPT_THD, arg){
-    pressureData outgoingMessage;
-  
-    while(true){
-        while(teensy_fail == true) {
-
-            //if fail safe switch is active, then don't active this thread..?
-
-            outgoingMessage.PT1 = analogRead(HYBRID_PT_1_PIN);
-            outgoingMessage.PT2 = analogRead(HYBRID_PT_2_PIN);
-            outgoingMessage.PT3 = analogRead(HYBRID_PT_3_PIN);
-
-            outgoingMessage.timeStamp = chVTGetSystemTime();
-
-            //chMsgSend(/*TODO: Insert pointer to FSM thread here*/, (msg_t)&outgoingMessage);
-        }
-    }
-}
-
 
 //Thread for the rocket status logic
 static THD_FUNCTION(rocket_FSM, arg) {
@@ -418,7 +385,6 @@ void chSetup() {
     servoThread_Pointer = chThdCreateStatic(servoThread_WA, sizeof(servoThread_WA), NORMALPRIO, servoThread, NULL);
     dataThread_Pointer = chThdCreateStatic(dataThread_WA, sizeof(dataThread_WA), NORMALPRIO, dataThread,NULL);
     bbComm_Pointer = chThdCreateStatic(bbComm_WA, sizeof(bbComm_WA), NORMALPRIO, bbComm_THD,NULL);
-    hybridPT_Pointer = chThdCreateStatic(hybridPT_WA, sizeof(hybridPT_WA), NORMALPRIO, hybridPT_THD, NULL);
     ballValve_Pointer = chThdCreateStatic(ballValve_WA, sizeof(ballValve_WA), NORMALPRIO, ballValve_THD, NULL);
     rocket_FSM_Pointer = chThdCreateStatic(rocket_FSM_WA, sizeof(rocket_FSM_WA), NORMALPRIO, rocket_FSM, NULL);
     ttRecieve_Pointer = chThdCreateStatic(ttRecieve_WA, sizeof(ttRecieve_WA), NORMALPRIO, ttRecieve_THD, NULL);
@@ -445,8 +411,8 @@ void setup() {
     imu.settings.device.agAddress = LSM9DS1_AG_CS; // AG CS pin connected to D10
 
     if(!imu.begin()){
-       //TODO: this is what executes if it failed to communicate with the IMU. If this happens DON'T LAUNCH! That would be poopoo
-       while(true){}
+       //this is what executes if it failed to communicate with the IMU. If this happens DON'T LAUNCH! That would be poopoo
+       //TODO:for testing make this light a red LED
    }
 
    pinMode(TT_SEND_PIN, OUTPUT);
