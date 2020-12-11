@@ -68,6 +68,10 @@ PWMServo ballValve2;
 //create imu object
 LSM9DS1 imu;
 
+//create file object for SD card
+File dataFile;
+char fileName[12];
+
 int currentAngle; //Current angle of the servos. 
 int initialAngle = 0; //Initial angle of servos. This may not be zero.
 float velocity; //current velocity of the rocket
@@ -148,19 +152,64 @@ static THD_FUNCTION(dataThread, arg) {
     The values will be filled soon
     */
 
-   imu.readAccel(); //update IMU accelerometer data
-   imu.readGyro();
+    imu.readAccel(); //update IMU accelerometer data
+    imu.readGyro();
 
-   velocity = 0;
-   az = imu.calcAccel(imu.az);
-   altitude = 0;
-   roll_rate = imu.calcGyro(imu.gz); 
-   latitude = 0;
-   longitude = 0;
-   hybridData.PT1 = ptConversion(analogRead(HYBRID_PT_1_PIN));
-   hybridData.PT2 = ptConversion(analogRead(HYBRID_PT_2_PIN));
-   hybridData.PT3 = ptConversion(analogRead(HYBRID_PT_3_PIN));
-   hybridData.timeStamp = 0;
+    velocity = 0;
+    az = imu.calcAccel(imu.az);
+    altitude = 0;
+    roll_rate = imu.calcGyro(imu.gz); 
+    latitude = 0;
+    longitude = 0;
+    hybridData.PT1 = ptConversion(analogRead(HYBRID_PT_1_PIN));
+    hybridData.PT2 = ptConversion(analogRead(HYBRID_PT_2_PIN));
+    hybridData.PT3 = ptConversion(analogRead(HYBRID_PT_3_PIN));
+    hybridData.timeStamp = chVTGetSystemTime();
+
+    //string to hold data to write all at once.
+    char dataStr[100] = "";
+    char buffer[8];
+
+    dtostrf(velocity,6,6,buffer); //convert float to char[]
+    strcat(dataStr,buffer); //cat char[] to end of dataStr
+    strcat(dataStr,","); //add comma to seperate values
+
+    dtostrf(az,6,6,buffer);
+    strcat(dataStr,buffer);
+    strcat(dataStr,",");
+
+    dtostrf(altitude,6,6,buffer);
+    strcat(dataStr,buffer);
+    strcat(dataStr,",");
+
+    dtostrf(roll_rate,6,6,buffer);
+    strcat(dataStr,buffer);
+    strcat(dataStr,",");
+
+    dtostrf(latitude,6,6,buffer);
+    strcat(dataStr,buffer);
+    strcat(dataStr,",");
+
+    dtostrf(longitude,6,6,buffer);
+    strcat(dataStr,buffer);
+    strcat(dataStr,",");
+
+    dtostrf(hybridData.PT1,6,6,buffer);
+    strcat(dataStr,buffer);
+    strcat(dataStr,",");
+
+    dtostrf(hybridData.PT2,6,6,buffer);
+    strcat(dataStr,buffer);
+    strcat(dataStr,",");
+
+    dtostrf(hybridData.PT3,6,6,buffer);
+    strcat(dataStr,buffer);
+
+    //Writing line of data to SD card
+    SD.open(fileName, FILE_WRITE);
+    dataFile.println(dataStr);
+    dataFile.close();
+
 
 }
 
@@ -411,12 +460,55 @@ void setup() {
     imu.settings.device.agAddress = LSM9DS1_AG_CS; // AG CS pin connected to D10
 
     if(!imu.begin()){
-       //this is what executes if it failed to communicate with the IMU. If this happens DON'T LAUNCH! That would be poopoo
+       //this is what executes if it failed to communicate with the IMU. If this happens DON'T LAUNCH!
        //TODO:for testing make this light a red LED
-   }
+    }
 
-   pinMode(TT_SEND_PIN, OUTPUT);
-   pinMode(TT_RECIEVE_PIN, INPUT);
+    //SD Card Setup
+    if(!SD.begin(BUILTIN_SDCARD)){
+        //this is what executes if Teensy fails to communicate with SD card. That is not good. Probably no-go for launch
+    }
+    
+    strcpy(fileName,"data.csv");
+
+    //checks to see if file already exists and adds 1 to filename if it does.
+    if (SD.exists(fileName)){
+        bool fileExists = false;
+        int i = 1;
+        while(fileExists==false){
+            if(i > 999){
+                //max number of files reached. Don't want to overflow fileName[]. Will write new data to already existing data999.csv
+                strcpy(fileName, "data999.csv");
+                break;
+            }
+            
+            //converts int i to char[]
+            char iStr[16];
+            __itoa(i, iStr, 10);
+            
+            //writes "data(number).csv to fileNameTemp"
+            char fileNameTemp[10+strlen(iStr)];
+            strcpy(fileNameTemp,"data");
+            strcat(fileNameTemp,iStr);
+            strcat(fileNameTemp,".csv");
+
+            if(!SD.exists(fileNameTemp)){
+                strcpy(fileName, fileNameTemp);
+                fileExists = true;
+            }
+
+            i++;
+        }
+    }
+
+    //write header for csv file
+    SD.open(fileName);
+    dataFile.println("velocity,z acceleration,altitude,roll rate,latitude,longitude,PT1,PT2,PT3");
+    dataFile.close();
+    
+
+    pinMode(TT_SEND_PIN, OUTPUT);
+    pinMode(TT_RECIEVE_PIN, INPUT);
     
     //Initialize and start ChibiOS (Technically the first thread)
     chBegin(chSetup);
