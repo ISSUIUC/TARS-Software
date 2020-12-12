@@ -3,13 +3,6 @@
 
 #include <inttypes.h>
 
-//data struct for FSM to send to ballValve_THD
-struct ballValve_Message{
-  bool isOpen;
-  int timeStamp; //timeStamp is set when open or close command is sent.
-  //more data can be added as needed
-};
-
 //data struct for hybridPT_THD to send pressure transducer data to FSM
 struct pressureData{
   float PT1;
