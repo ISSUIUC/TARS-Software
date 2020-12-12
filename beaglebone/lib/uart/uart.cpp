@@ -28,7 +28,6 @@
   */
 int UART::uart_init(char* port) {
 
-
     _fd = open(port, O_RDWR);
 
     struct termios tty;
@@ -72,6 +71,13 @@ int UART::uart_init(char* port) {
         return -1;
     }
 
+	/* Internal fields for packetFifio */
+	fifoHead = 0;
+	fifoTail = 0;
+	fifoLen = 0;
+	sentinel_detected = false;
+	fsm_state = 0;
+
     return _fd;
 }
 
@@ -105,4 +111,52 @@ int32_t UART::uart_write(uint8_t* buf, uint32_t numBytes) {
         return -1;
     }
     return ret;
+}
+
+/* UART::uart_write
+ * DESCRIPTION:     Finds a sequence of sentinel bytes in uart input buffer
+ *					using a simple finite state machine
+ * INPUTS:          none
+ * RETURNS:         index after sentinel bytes, returns -1 if no sentinel
+ *					sequence is detected or on error
+ */
+int32_t UART::sentinel_detect() {
+
+	for (uint32_t i = 0; i < INPUT_BUF_SIZE; ++i) {
+		switch(fsm_state) {
+			case 0:
+				if (input_buf[i] == SENTINEL_1) {
+					fsm_state = 1;
+				}
+				break;
+			case 1:
+				if (input_buf[i] == SENTINEL_2) {
+					fsm_state = 2;
+				}
+				else {
+					fsm_state = 0;
+				}
+				break;
+			case 2:
+				if (input_buf[i] == SENTINEL_3) {
+					fsm_state = 0;
+					sentinel_detected = true;
+					if (i == INPUT_BUF_SIZE-1) {
+						return 0;
+					}
+					else {
+						return i+1;
+					}
+				}
+				else {
+					fsm_state = 0;
+				}
+			default:
+				printf("UART PacketFifo Error!\n");
+				return -1;
+		}
+
+	}
+	return -1;
+
 }

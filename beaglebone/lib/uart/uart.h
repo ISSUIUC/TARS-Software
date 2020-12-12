@@ -47,10 +47,11 @@ class UART {
 
         int _fd;    // Linux file descriptor
 
-        uint8_t uart_input_buf[INPUT_BUF_SIZE];
-        uint8_t uart_output_buf[OUTPUT_BUF_SIZE];
+        uint8_t input_buf[INPUT_BUF_SIZE];
+        uint8_t output_buf[OUTPUT_BUF_SIZE];
 
         /* Packet FIFO buffer interface */
+		int32_t sentinel_detect();
         void push_fifo();
         void pop_fifo();
 
@@ -58,4 +59,6 @@ class UART {
         uint32_t fifoHead;
         uint32_t fifoTail;
         uint32_t fifoLen;
+		bool sentinel_detected;
+		uint8_t fsm_state;
 };
