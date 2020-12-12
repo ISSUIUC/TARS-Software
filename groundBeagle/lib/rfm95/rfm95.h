@@ -22,7 +22,7 @@
 #include <linux/spi/spidev.h>
 
 // uncomment for debug output
-#define DEBUG
+// #define DEBUG
 
 #define RFM9X_VER 0x12          /* Expected RFM9X RegVersion */
 
@@ -82,6 +82,16 @@
 #define MODE_RXSINGLE       0x06
 #define MODE_CAD            0x07
 
+// IRQ Flags Bitmap
+#define IRQ_RXTIMEOUT       0x80
+#define IRQ_RXDONE          0x40
+#define IRQ_PAYLOADCRCERR   0x20
+#define IRQ_VALIDHEADER     0x10
+#define IRQ_TXDONE          0x08
+#define IRQ_CADDONE         0x04
+#define IRQ_FHSSCHNGCHNL    0x02
+#define IRQ_CADDETECTED     0x01
+
 /******************************************************************************/
 /* RFM95 CLASS DEFINITION */
 
@@ -98,8 +108,9 @@ class RFM95 {
         bool RFM_write(uint8_t RegAddr, uint8_t data);
         uint8_t RFM_read(uint8_t RegAddr);
 
-        /* Copy to FIFO and transmit */
+        /* Copy to FIFO and transmit and receive */
         bool RFM_transmit(uint8_t* txBuf, uint8_t length);
+        uint8_t RFM_receive(uint8_t* rxBuf, uint16_t maxLen);
 
         /* Perform a suite of tests */
         bool RFM_test();

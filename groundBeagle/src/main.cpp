@@ -30,13 +30,23 @@ int main(void)
 
     rfm95.RFM_test();
 
-    printf("Sending data\n");
+    uint8_t rxBuf[256];
 
     while (1) {
-        uint8_t val = rfm95.RFM_read(REG_RX_NB_BYTES);
-        printf("Received Bytes: %d\n", val);
+        uint8_t numBytes = rfm95.RFM_receive(rxBuf, 256);
+
+        if (numBytes > 0) {
+            printf("##### Received %d Bytes:\n", numBytes);
+
+            for (int q = 0; q < numBytes; ++q) {
+                printf("0x%.2X\t", rxBuf[q]);
+            }
+            printf("\n");
+        }
 
         for (volatile int i = 0; i < 1000000; ++i) {}
+
+        // printf("##### hmmm: %d\n", rfm95.RFM_read(REG_RX_NB_BYTES));
     }
 
 	return 0;

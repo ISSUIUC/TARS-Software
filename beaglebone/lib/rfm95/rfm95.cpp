@@ -148,7 +148,7 @@ bool RFM95::RFM_transmit(uint8_t* txBuf, uint8_t length) {
     if (length == 0 || length > 64) return false;
 
 #ifdef DEBUG
-    printf("##### Transmitting package of length: %.2d bytes #####\n", length);
+    printf("##### Transmitting packet of length: %.2d bytes #####\n", length);
 #endif
 
     uint8_t i;
@@ -171,6 +171,50 @@ bool RFM95::RFM_transmit(uint8_t* txBuf, uint8_t length) {
     }
 
     return true;
+}
+
+/** RFM95::RFM_receive
+ * DESCRIPTION: Polls modem until received bytes > 0, and copies received bytes
+                into rxBuf
+ * NOTE:        Function blocks until RFM module receives a packet
+ * INPUTS:      rxBuf - pointer to array to populate with received bytes
+ *              maxLen - maximum number of bytes to copy
+ * RETURNS:     number of bytes read, 0 on failure
+ */
+uint8_t RFM95::RFM_receive(uint8_t* rxBuf, uint16_t maxLen) {
+
+    if (rxBuf == NULL) return 0;
+    if (maxLen == 0) return 0;
+
+#ifdef DEBUG
+    printf("##### Waiting for packet reception #####\n");
+#endif
+
+    uint32_t count = 0;
+
+    uint8_t irq_flags = RFM_read(REG_IRQ_FLAGS);    // read IRQ flags
+
+    while ((~irq_flags & IRQ_RXDONE)) {
+        for (volatile int q = 0; q < 1000; ++q) {}  // spin
+        irq_flags = RFM_read(REG_IRQ_FLAGS);        // read again
+
+        if (count == 1000) return 0;    // timeout, return false
+        ++count;
+    }
+
+    uint8_t numBytes = RFM_read(REG_RX_NB_BYTES);           // get packet size
+    uint8_t packetStart = RFM_read(FIFO_RX_CURRENT_ADDR);   // packet start addr
+    RFM_write(REG_FIFO_ADDR_PTR, packetStart);      // read form packet start
+
+    /* Copy <numBytes> bytes from RFM95 FIFO to rxBuf */
+    for (uint8_t i = 0 ; (i < numBytes) && (i < maxLen) ; ++i) {
+        *rxBuf = RFM_read(REG_FIFO);
+        ++rxBuf;
+    }
+
+    RFM_write(REG_IRQ_FLAGS, IRQ_RXDONE);   // Clear RxDone IRQ
+
+    return numBytes;
 }
 
 /** RFM95::RFM_test
