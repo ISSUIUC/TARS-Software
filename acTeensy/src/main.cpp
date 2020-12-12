@@ -206,7 +206,7 @@ static THD_FUNCTION(dataThread, arg) {
         strcat(dataStr,buffer);
 
         //Writing line of data to SD card
-        SD.open(fileName, FILE_WRITE);
+        dataFile = SD.open(fileName, FILE_WRITE);
         dataFile.println(dataStr);
         dataFile.close();
     }
@@ -503,7 +503,7 @@ void setup() {
     }
 
     //write header for csv file
-    SD.open(fileName);
+    dataFile=SD.open(fileName);
     dataFile.println("velocity,z acceleration,altitude,roll rate,latitude,longitude,PT1,PT2,PT3");
     dataFile.close();
 
