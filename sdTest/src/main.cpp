@@ -19,6 +19,10 @@ float roll_off_alt; //Altitude when roll control stops and we do active drag
 float des_alt; //Final altitude goal
 float buffer; //Buffer for the active drag
 float m; //Mass of the rocket
+float PT1;
+float PT2;
+float PT3;
+int timeStamp;
 
 //create file object for SD card
 File dataFile;
@@ -48,10 +52,10 @@ static THD_FUNCTION(dataThread, arg) {
         roll_rate = 0;
         latitude = 0;
         longitude = 0;
-        hybridData.PT1 = 0;
-        hybridData.PT2 = 0;
-        hybridData.PT3 = 0;
-        hybridData.timeStamp = 0;
+        PT1 = 0;
+        PT2 = 0;
+        PT3 = 0;
+        timeStamp = 0;
 
         //string to hold data to write all at once.
         char dataStr[100] = "";
@@ -81,15 +85,15 @@ static THD_FUNCTION(dataThread, arg) {
         strcat(dataStr,buffer);
         strcat(dataStr,",");
 
-        dtostrf(hybridData.PT1,6,6,buffer);
+        dtostrf(PT1,6,6,buffer);
         strcat(dataStr,buffer);
         strcat(dataStr,",");
 
-        dtostrf(hybridData.PT2,6,6,buffer);
+        dtostrf(PT2,6,6,buffer);
         strcat(dataStr,buffer);
         strcat(dataStr,",");
 
-        dtostrf(hybridData.PT3,6,6,buffer);
+        dtostrf(PT3,6,6,buffer);
         strcat(dataStr,buffer);
 
         //Writing line of data to SD card
@@ -114,6 +118,7 @@ void chSetup() {
 void setup() {
     // start the SPI library:
     SPI.begin();
+    Serial.begin(9600);
 
     //SD Card Setup
     if(!SD.begin(BUILTIN_SDCARD)){
@@ -152,11 +157,17 @@ void setup() {
         }
     }
 
+    Serial.println("opening SD");
+    Serial.println(fileName);
     //write header for csv file
     dataFile=SD.open(fileName);
+    Serial.println("SD opened");
     dataFile.println("velocity,z acceleration,altitude,roll rate,latitude,longitude,PT1,PT2,PT3");
+    Serial.println("wrote header");
     dataFile.close();
+    Serial.println("closed file");
 
+    Serial.println("starting chibiOS");
     //Initialize and start ChibiOS (Technically the first thread)
     chBegin(chSetup);
     while(true) {}
