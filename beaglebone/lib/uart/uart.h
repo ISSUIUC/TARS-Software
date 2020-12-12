@@ -30,8 +30,7 @@ typedef struct dataPacket_t {
     uint32_t timestamp;
 };
 
-#define FIFO_SIZE      32  // Number of dataPackets to be stored in FIFO
-#define FIFO_SIZE_B    FIFO_SIZE * sizeof(dataPacket_t)
+#define PACKET_SIZE		sizeof(dataPacket_t)
 
 class UART {
     public:
@@ -50,15 +49,13 @@ class UART {
         uint8_t input_buf[INPUT_BUF_SIZE];
         uint8_t output_buf[OUTPUT_BUF_SIZE];
 
-        /* Packet FIFO buffer interface */
+        /* Packet detection and assembly */
+		dataPacket_t* uart_readPacket();
 		int32_t sentinel_detect();
-        void push_fifo();
-        void pop_fifo();
 
-        dataPacket_t packetFifo[FIFO_SIZE_B];
-        uint32_t fifoHead;
-        uint32_t fifoTail;
-        uint32_t fifoLen;
+		uint8_t	packetBuf[PACKET_SIZE];
+		uint32_t packet_bytes_received;
+
 		bool sentinel_detected;
 		uint8_t fsm_state;
 };

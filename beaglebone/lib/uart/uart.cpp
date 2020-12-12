@@ -71,10 +71,8 @@ int UART::uart_init(char* port) {
         return -1;
     }
 
-	/* Internal fields for packetFifio */
-	fifoHead = 0;
-	fifoTail = 0;
-	fifoLen = 0;
+	/* Internal fields for packet detection */
+	packet_bytes_received = 0;
 	sentinel_detected = false;
 	fsm_state = 0;
 
@@ -111,6 +109,37 @@ int32_t UART::uart_write(uint8_t* buf, uint32_t numBytes) {
         return -1;
     }
     return ret;
+}
+
+/* UART::uart_readPacket
+ * DESCRIPTION:     reads a dataPacket from the uart input buffer, assembles
+ *					a dataPacket struct
+ * INPUTS:          none
+ * RETURNS:         pointer to assembled dataPacket struct,
+ *					NULL if no dataPacket is asembled yet
+ */
+dataPacket_t* UART::uart_readPacket() {
+
+	uart_read(input_buf, INPUT_BUF_SIZE);
+
+	int32_t startIdx = -1;
+	if (sentinel_detected == false) {
+		startIdx = sentinel_detect();
+		if (startIdx < 0) return NULL;
+	}
+
+	for (int32_t idx = startIdx; idx < INPUT_BUF_SIZE; ++idx) {
+		packetBuf[packet_bytes_received] = input_buf[idx];
+		++packet_bytes_received;
+
+		if (packet_bytes_received == PACKET_SIZE) {
+			packet_bytes_received = 0;
+			sentinel_detected = false;
+			return (dataPacket_t*) packetBuf;
+		}
+	}
+
+	return NULL;
 }
 
 /* UART::uart_write
