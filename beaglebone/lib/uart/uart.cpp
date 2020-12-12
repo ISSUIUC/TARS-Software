@@ -170,6 +170,7 @@ int32_t UART::sentinel_detect() {
 				if (input_buf[i] == SENTINEL_3) {
 					fsm_state = 0;
 					sentinel_detected = true;
+					// printf("##### SENTINEL DETECTED #####\n");
 					if (i == INPUT_BUF_SIZE-1) {
 						return 0;
 					}

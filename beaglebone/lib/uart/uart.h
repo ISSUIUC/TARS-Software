@@ -35,6 +35,8 @@ typedef struct dataPacket_t {
 class UART {
     public:
 
+	    	int uart_init(char* port);
+
 		int32_t uart_read(uint8_t* buf, uint32_t numBytes);
 		int32_t uart_write(uint8_t* buf, uint32_t numBytes);
 
@@ -44,7 +46,7 @@ class UART {
     private:
 
         /* UART interface */
-        int uart_init(char* port);
+        //int uart_init(char* port);
 
         int _fd;    // Linux file descriptor
 
