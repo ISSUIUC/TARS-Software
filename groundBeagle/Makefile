@@ -12,7 +12,7 @@ INC_DIRS := $(shell find $(SRC_DIRS) -type d)
 INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 
 # CPPFLAGS ?= $(INC_FLAGS) -MMD -MP
-CPPFLAGS ?= $(INC_FLAGS) -ltdc++ -save-temps=obj -MMD -MP	# Outputs intermediate assembly! (for fun)
+CPPFLAGS ?= $(INC_FLAGS) -save-temps=obj -MMD -MP	# Outputs intermediate assembly! (for fun)
 
 $(BUILD_DIR)/$(TARGET_EXEC): $(OBJS)
 	$(CC) $(OBJS) -o $@ $(LDFLAGS)
