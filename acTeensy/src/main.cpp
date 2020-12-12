@@ -1,8 +1,8 @@
 /* main.cpp
  *   ______  ___     ___    ____        __  _____ __   ___
  *  /_  __/ / _ |   / _ \  / __/ ____  /  |/  / //_/  <  /
- *   / /   / __ |  / , _/ _\ \  /___/ / /|_/ / ,<     / / 
- *  /_/   /_/ |_| /_/|_| /___/       /_/  /_/_/|_|   /_/  
+ *   / /   / __ |  / , _/ _\ \  /___/ / /|_/ / ,<     / /
+ *  /_/   /_/ |_| /_/|_| /___/       /_/  /_/_/|_|   /_/
  *
  * Active Control Teensy Program
  *
@@ -72,7 +72,7 @@ LSM9DS1 imu;
 File dataFile;
 char fileName[12];
 
-int currentAngle; //Current angle of the servos. 
+int currentAngle; //Current angle of the servos.
 int initialAngle = 0; //Initial angle of servos. This may not be zero.
 float velocity; //current velocity of the rocket
 float az; //Acceleration in the z direction
@@ -142,7 +142,7 @@ static THD_FUNCTION(dataThread, arg) {
     (void)arg;
     /*
     Need IMU, Pitot, and GPS data from Beaglebone...
-    
+
     Datasheet for IMU: https://www.mouser.com/datasheet/2/389/lsm9ds1-1849526.pdf
     Datasheet for Pressure Sensor: https://www.te.com/commerce/DocumentDelivery/DDEController?Action=srchrtrv&DocNm=MS5611-01BA03&DocType=Data+Sheet&DocLang=English
     Datasheet for Accelerometer: https://www.mouser.com/datasheet/2/348/KX134-1211-Specifications-Rev-1.0-1659717.pdf
@@ -151,64 +151,65 @@ static THD_FUNCTION(dataThread, arg) {
     Initalize the data and chip select pins:
     The values will be filled soon
     */
+    while (true) {
+        imu.readAccel(); //update IMU accelerometer data
+        imu.readGyro();
 
-    imu.readAccel(); //update IMU accelerometer data
-    imu.readGyro();
+        velocity = 0;
+        az = imu.calcAccel(imu.az);
+        altitude = 0;
+        roll_rate = imu.calcGyro(imu.gz);
+        latitude = 0;
+        longitude = 0;
+        hybridData.PT1 = ptConversion(analogRead(HYBRID_PT_1_PIN));
+        hybridData.PT2 = ptConversion(analogRead(HYBRID_PT_2_PIN));
+        hybridData.PT3 = ptConversion(analogRead(HYBRID_PT_3_PIN));
+        hybridData.timeStamp = chVTGetSystemTime();
 
-    velocity = 0;
-    az = imu.calcAccel(imu.az);
-    altitude = 0;
-    roll_rate = imu.calcGyro(imu.gz); 
-    latitude = 0;
-    longitude = 0;
-    hybridData.PT1 = ptConversion(analogRead(HYBRID_PT_1_PIN));
-    hybridData.PT2 = ptConversion(analogRead(HYBRID_PT_2_PIN));
-    hybridData.PT3 = ptConversion(analogRead(HYBRID_PT_3_PIN));
-    hybridData.timeStamp = chVTGetSystemTime();
+        //string to hold data to write all at once.
+        char dataStr[100] = "";
+        char buffer[8];
 
-    //string to hold data to write all at once.
-    char dataStr[100] = "";
-    char buffer[8];
+        dtostrf(velocity,6,6,buffer); //convert float to char[]
+        strcat(dataStr,buffer); //cat char[] to end of dataStr
+        strcat(dataStr,","); //add comma to seperate values
 
-    dtostrf(velocity,6,6,buffer); //convert float to char[]
-    strcat(dataStr,buffer); //cat char[] to end of dataStr
-    strcat(dataStr,","); //add comma to seperate values
+        dtostrf(az,6,6,buffer);
+        strcat(dataStr,buffer);
+        strcat(dataStr,",");
 
-    dtostrf(az,6,6,buffer);
-    strcat(dataStr,buffer);
-    strcat(dataStr,",");
+        dtostrf(altitude,6,6,buffer);
+        strcat(dataStr,buffer);
+        strcat(dataStr,",");
 
-    dtostrf(altitude,6,6,buffer);
-    strcat(dataStr,buffer);
-    strcat(dataStr,",");
+        dtostrf(roll_rate,6,6,buffer);
+        strcat(dataStr,buffer);
+        strcat(dataStr,",");
 
-    dtostrf(roll_rate,6,6,buffer);
-    strcat(dataStr,buffer);
-    strcat(dataStr,",");
+        dtostrf(latitude,6,6,buffer);
+        strcat(dataStr,buffer);
+        strcat(dataStr,",");
 
-    dtostrf(latitude,6,6,buffer);
-    strcat(dataStr,buffer);
-    strcat(dataStr,",");
+        dtostrf(longitude,6,6,buffer);
+        strcat(dataStr,buffer);
+        strcat(dataStr,",");
 
-    dtostrf(longitude,6,6,buffer);
-    strcat(dataStr,buffer);
-    strcat(dataStr,",");
+        dtostrf(hybridData.PT1,6,6,buffer);
+        strcat(dataStr,buffer);
+        strcat(dataStr,",");
 
-    dtostrf(hybridData.PT1,6,6,buffer);
-    strcat(dataStr,buffer);
-    strcat(dataStr,",");
+        dtostrf(hybridData.PT2,6,6,buffer);
+        strcat(dataStr,buffer);
+        strcat(dataStr,",");
 
-    dtostrf(hybridData.PT2,6,6,buffer);
-    strcat(dataStr,buffer);
-    strcat(dataStr,",");
+        dtostrf(hybridData.PT3,6,6,buffer);
+        strcat(dataStr,buffer);
 
-    dtostrf(hybridData.PT3,6,6,buffer);
-    strcat(dataStr,buffer);
-
-    //Writing line of data to SD card
-    SD.open(fileName, FILE_WRITE);
-    dataFile.println(dataStr);
-    dataFile.close();
+        //Writing line of data to SD card
+        SD.open(fileName, FILE_WRITE);
+        dataFile.println(dataStr);
+        dataFile.close();
+    }
 
 
 }
@@ -259,7 +260,7 @@ static THD_FUNCTION(servoThread, arg) {
         if(servo1.attached() == false || servo2.attached() == false || servo3.attached() == false || servo4.attached() == false) {
             delay(TERMINATE); //basically end the program. Anshuk: Maybe we should just end this thread rather than the whole program
         }
-        
+
         //To determine whether the rocket should use roll/drag control or not. Only done in the coast phase
         if(fsm_states.rocket_state == 2) {
             //record time using millis
@@ -269,10 +270,10 @@ static THD_FUNCTION(servoThread, arg) {
                 //Proportional controller to reduce the roll of the rocket. Kp is the proportional gain.
                 float roll_err = -roll_rate; //The desired roll rate is 0, so the error = 0-roll
                 float theta = Kp*roll_err; //Make sure the Kp accounts for radian-degree conversion!
-        
+
                 //Make sure this block behaves as expected and outputs an angle of theta
                 servo1.write(constrain(initialAngle+theta,initialAngle-15,initialAngle+15));
-                servo2.write(constrain(initialAngle+theta,initialAngle-15,initialAngle+15)); 
+                servo2.write(constrain(initialAngle+theta,initialAngle-15,initialAngle+15));
                 servo3.write(constrain(initialAngle+theta,initialAngle-15,initialAngle+15));
             }
 
@@ -285,8 +286,8 @@ static THD_FUNCTION(servoThread, arg) {
                 if (altitude > des_alt) {
                     //flaps are vertical
                     servo1.write(initialAngle);
-                    servo2.write(initialAngle); 
-                    servo3.write(initialAngle); 
+                    servo2.write(initialAngle);
+                    servo3.write(initialAngle);
                 }
                 else {
                     if (velocity > control_vel*(1+buffer/100))
@@ -302,9 +303,9 @@ static THD_FUNCTION(servoThread, arg) {
                         servo2.write(initialAngle);
                         servo3.write(initialAngle);
                     }
-                } 
+                }
             }
-        }   
+        }
     }
 }
 
@@ -339,7 +340,7 @@ static THD_FUNCTION(rocket_FSM, arg) {
             fsm_states.launch_time = millis();                             //...assume launch and store launch time
             launch_init = true;
         }
-        
+
         if(az > launch_az_thresh && launch_init == true && fsm_states.rocket_state != 2)   //If the acceleration continues...
         {
             burn_timer = millis() - fsm_states.launch_time;                //...start measuring the lenght of the burn time
@@ -349,7 +350,7 @@ static THD_FUNCTION(rocket_FSM, arg) {
                 //Serial.println(String(millis()/1000) + "s: Launch detected");
             }
         }
-        
+
         else if(az < launch_az_thresh && launch_init == true && fsm_states.rocket_state != 2)   //If the acceleration was too brief...
         {
             launch_init = false;                                //...reset the launch detection (the acceleration was just an anomaly)
@@ -365,7 +366,7 @@ static THD_FUNCTION(rocket_FSM, arg) {
         if(az < coast_thresh && coast_init == true && fsm_states.rocket_state != 2)   //If the negative acceleration continues...
         {
             coast_timer = millis() - fsm_states.burnout_time;             //...start measuring the lenght of the coast time
-            if(coast_timer > coast_time_thresh)             //If the negative acceleration lasts long enough...  
+            if(coast_timer > coast_time_thresh)             //If the negative acceleration lasts long enough...
             {
                 fsm_states.rocket_state = 2;                                 //...burnout has occured, and the rocket is now coasting
                 //Serial.println(String(millis()/1000) + "s: Burnout detected");
@@ -376,9 +377,9 @@ static THD_FUNCTION(rocket_FSM, arg) {
         {
             coast_init = false;                             //...reset the burnout detection (the acceleration was just an anomaly)
         }
-        
+
         //APOGEE DETECTION LOGIC:
-        if(velocity < 0 && fsm_states.rocket_state == 2 && apogee_init == false)    //If velocity is negative during free fall...      
+        if(velocity < 0 && fsm_states.rocket_state == 2 && apogee_init == false)    //If velocity is negative during free fall...
         {
             fsm_states.apogee_time = millis();                             //...assume apogee and store time of apogee
             apogee_init = true;
@@ -438,7 +439,7 @@ void chSetup() {
     rocket_FSM_Pointer = chThdCreateStatic(rocket_FSM_WA, sizeof(rocket_FSM_WA), NORMALPRIO, rocket_FSM, NULL);
     ttRecieve_Pointer = chThdCreateStatic(ttRecieve_WA, sizeof(ttRecieve_WA), NORMALPRIO, ttRecieve_THD, NULL);
     ttSend_Pointer = chThdCreateStatic(ttSend_WA, sizeof(ttSend_WA), NORMALPRIO, ttSend_THD, NULL);
-    
+
 
     while(true) {
         //Spawning Thread. We just need to keep it running in order to no lose servoThread
@@ -447,10 +448,10 @@ void chSetup() {
 }
 
 void setup() {
-    
+
     //set initial rocket state to idle
     fsm_states.rocket_state = 0;
-    
+
     // start the SPI library:
     SPI.begin();
 
@@ -468,7 +469,7 @@ void setup() {
     if(!SD.begin(BUILTIN_SDCARD)){
         //this is what executes if Teensy fails to communicate with SD card. That is not good. Probably no-go for launch
     }
-    
+
     strcpy(fileName,"data.csv");
 
     //checks to see if file already exists and adds 1 to filename if it does.
@@ -481,11 +482,11 @@ void setup() {
                 strcpy(fileName, "data999.csv");
                 break;
             }
-            
+
             //converts int i to char[]
             char iStr[16];
             __itoa(i, iStr, 10);
-            
+
             //writes "data(number).csv to fileNameTemp"
             char fileNameTemp[10+strlen(iStr)];
             strcpy(fileNameTemp,"data");
@@ -505,11 +506,11 @@ void setup() {
     SD.open(fileName);
     dataFile.println("velocity,z acceleration,altitude,roll rate,latitude,longitude,PT1,PT2,PT3");
     dataFile.close();
-    
+
 
     pinMode(TT_SEND_PIN, OUTPUT);
     pinMode(TT_RECIEVE_PIN, INPUT);
-    
+
     //Initialize and start ChibiOS (Technically the first thread)
     chBegin(chSetup);
     while(true) {}
@@ -517,6 +518,6 @@ void setup() {
 }
 
 void loop() {
-    //Could cause problems if used for ChibiOS, 
+    //Could cause problems if used for ChibiOS,
     //but needed to make teensy happy.
 }
