@@ -35,14 +35,16 @@ typedef struct dataPacket_t {
 class UART {
     public:
 
+		int32_t uart_read(uint8_t* buf, uint32_t numBytes);
+		int32_t uart_write(uint8_t* buf, uint32_t numBytes);
 
+		dataPacket_t* uart_readPacket();
+		int32_t sentinel_detect();
 
     private:
 
         /* UART interface */
         int uart_init(char* port);
-        int32_t uart_read(uint8_t* buf, uint32_t numBytes);
-        int32_t uart_write(uint8_t* buf, uint32_t numBytes);
 
         int _fd;    // Linux file descriptor
 
@@ -50,9 +52,6 @@ class UART {
         uint8_t output_buf[OUTPUT_BUF_SIZE];
 
         /* Packet detection and assembly */
-		dataPacket_t* uart_readPacket();
-		int32_t sentinel_detect();
-
 		uint8_t	packetBuf[PACKET_SIZE];
 		uint32_t packet_bytes_received;
 
