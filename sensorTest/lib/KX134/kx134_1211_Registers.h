@@ -1,5 +1,6 @@
 #ifndef __KX134_Registers_H__
 #define __KS134_Registers_H__
+
 #define KX134_CS_PIN 	10
 
 /////////////////////////////////////////
@@ -79,5 +80,9 @@
 #define BUF_STATUS_2    0x61
 #define BUF_CLEAR       0x62
 #define BUF_READ        0x63
-#define ADP_CNTL(1-19)  0x64-76
+// #define ADP_CNTL(1-19)  0x64-76  // something wrong in parens?
 //?Konix Reserved 0x77-7F
+
+
+
+#endif

@@ -1,34 +1,34 @@
 #include <Arduino.h>
 #include <SPI.h>
+
 #include "KX134-1211.h"
 
-#define LSM_AG_CS_PIN	36    // LSM9DS1 Accel/Gyro
-#define LSM_M_CS_PIN	37
-#define KX_CS_PIN   10     // KX132
-#define GPS_CS_PIN   34     // ZOE-M8Q
-#define MS_CS_PIN	18		// MS5611
-
-#define CS_PIN KX_CS_PIN
-
-// #define WHOAMI_REG 0x0F  // LSM9 Accel/Gyro/Mag
-#define WHOAMI_REG 0x00
-// #define WHOAMI_REG 0x13
-// #define WHOAMI_REG 0xA2
+KX134 imu;
 
 void setup(){
-  Serial.begin(115200);
-  while(!Serial){}
-  Serial.println();
-  Serial.println("Henlo");
 
-  KX134 imu;
-  imu.init();
-  imu.update_data();
+    Serial.begin(115200);
+    while(!Serial){}
+    Serial.println();
+    Serial.println("Henlo");
 
-
-  }
+}
 
 void loop()
 {
-  //weee
+    imu.update_data();
+
+    int16_t ax = imu.get_x_accel_raw();
+    int16_t ay = imu.get_y_accel_raw();
+    int16_t az = imu.get_z_accel_raw();
+
+    Serial.print("X: ");
+    Serial.print(ax);
+    Serial.print("\t\t Y: ");
+    Serial.print(ay);
+    Serial.print("\t\t Z: ");
+    Serial.println(az);
+
+    delay(50);
+
 }
