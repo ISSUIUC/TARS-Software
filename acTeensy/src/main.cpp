@@ -28,38 +28,21 @@
 #include "SparkFunLSM9DS1.h"
 #include "hybridShared.h"
 #include "acShared.h"
+#include "dataLog.h"
+#include "thresholds.h"
+#include "pins.h"
 
-#define SERVO1_PIN 3
-#define SERVO2_PIN 5
-#define SERVO3_PIN 6
-#define SERVO4_PIN 9
-const unsigned int TERMINATE = 99000000;
-
-#define HYBRID_PT_1_PIN 20
-#define HYBRID_PT_2_PIN 21
-#define HYBRID_PT_3_PIN 22
-
-#define DEBUG_LED_1 6
-#define DEBUG_LED_2 7
-#define DEBUG_LED_3 8
-#define DEBUG_LED_4 9
-
-#define BALL_VALVE_1_PIN 2
-#define BALL_VALVE_2_PIN 3
+// #define USB_SERIAL_BEGIN
+// #define THREAD_DEBUG
+// #define SENSOR_DEBUG
 
 //TODO: SWAP THESE IN HYBRID TEENSY!!!!!!!!!!
 #define TT_SEND_PIN 38
-#define TT_RECIEVE_PIN 39
-
-//define magnetometer chip select pin
-#define LSM9DS1_M_CS 37
-//define accel/gyro chip select pin
-#define LSM9DS1_AG_CS 36
+#define TT_RECEIVE_PIN 39
 
 PWMServo servo1;
 PWMServo servo2;
 PWMServo servo3;
-PWMServo servo4; //Remove the fourth servo for test flight
 
 //create servo objects for the ball valve servos
 PWMServo ballValve1;
@@ -70,7 +53,6 @@ LSM9DS1 imu;
 
 //create file object for SD card
 File dataFile;
-char fileName[12];
 
 int currentAngle; //Current angle of the servos.
 int initialAngle = 0; //Initial angle of servos. This may not be zero.
@@ -92,142 +74,124 @@ pressureData hybridData;
 
 fsm_struct fsm_states;
 
-//TODO set values for the thresholds
-float coast_time_thresh;
-float coast_thresh;
-float coast_timer;
-float descent_timer;
-float burn_timer; //Measuring how long the burn happens
-float launch_az_thresh; //Minimum vert acc. for launch detection
-float launch_time_thresh; //Minimum time to confirm launch
-float apogee_time_thresh;
-bool launch_init = false;
-bool coast_init = false;
-bool apogee_init;
+FSM_State rocketState;
+
+dataStruct_t sensorData;
 
 bool teensy_fail = false; //Status of the other teensy, initialized to false. False means active, true means failed.
 
 bool ballValveOpen = false; //True if ball valve is open, false if closed.
 
-//Gives thread 32 bytes. STATIC, so size will not change.
-static THD_WORKING_AREA(dataThread_WA, 32);
+uint8_t BB_data[26] = {0x49, 0x53, 0x53};
+
+//------------------------------------------------------------------------------
+// dataThread - collects data from sensors, stored to SD card.
+static THD_WORKING_AREA(dataThread_WA, 256);
 thread_t *dataThread_Pointer;
 
-//May have to change the size
-static THD_WORKING_AREA(bbComm_WA, 32);
-thread_t *bbComm_Pointer;
+static THD_FUNCTION(dataThread, arg) {
+    (void)arg;
 
-//Working area thread for logger
-static THD_WORKING_AREA(servoThread_WA, 32);
-thread_t *servoThread_Pointer;
+    systime_t last = chVTGetSystemTime();
+    systime_t duration = 0;
 
-//Working area for ball_valve
-static THD_WORKING_AREA(ballValve_WA, 32);
-thread_t *ballValve_Pointer;
+    while (true) {
 
-//create another thread for FSM
-static THD_WORKING_AREA(rocket_FSM_WA, 32);
-thread_t *rocket_FSM_Pointer;
+#ifdef THREAD_DEBUG
+        Serial.println("### data thread entrance");
+#endif
 
-//Thread for recieving other teensy's heartbeat
-static THD_WORKING_AREA(ttRecieve_WA, 32);
-thread_t *ttRecieve_Pointer;
+        digitalWrite(LED_BLUE, HIGH);
 
-//Thread to send heartbeat
+        // TODO - Acquire lock on rocketState and sensorData!!!!
+
+        imu.readAccel(); //update IMU accelerometer data
+        imu.readGyro();
+        imu.readMag();
+
+        sensorData.ax = imu.az;
+        sensorData.ay = imu.ax;
+        sensorData.az = -imu.ay;
+        sensorData.gx = imu.gx;
+        sensorData.gy = imu.gy;
+        sensorData.gz = imu.gz;
+        sensorData.mx = imu.mx;
+        sensorData.my = imu.my;
+        sensorData.mz = imu.mz;
+        // sensorData.pt1 = ptConversion(analogRead(HYBRID_PT_1_PIN));
+        // sensorData.pt2 = ptConversion(analogRead(HYBRID_PT_2_PIN));
+        // sensorData.pt2 = ptConversion(analogRead(HYBRID_PT_2_PIN));
+        sensorData.timeStamp = chVTGetSystemTime();
+
+#ifdef SENSOR_DEBUG
+        Serial.print(sensorData.ax);
+        Serial.print(", ");
+        Serial.print(sensorData.ay);
+        Serial.print(", ");
+        Serial.print(sensorData.az);
+        Serial.print(", ");
+        Serial.print(sensorData.gx);
+        Serial.print(", ");
+        Serial.print(sensorData.gy);
+        Serial.print(", ");
+        Serial.print(sensorData.gz);
+        Serial.print(", ");
+        Serial.print(sensorData.mx);
+        Serial.print(", ");
+        Serial.print(sensorData.my);
+        Serial.print(", ");
+        Serial.println(sensorData.mz);
+#endif
+
+        logData(&dataFile, &sensorData, rocketState);
+
+        digitalWrite(LED_BLUE, LOW);
+
+        // Just for verifying DAQ frequency
+        // duration = chVTGetSystemTime() - last;
+        // Serial.print("\t\t\t\t\t DURATION: ");
+        // Serial.println(duration);
+        // last = chVTGetSystemTime();
+
+        chThdSleepMilliseconds(6); // Sensor DAQ @ ~100 Hz
+    }
+
+}
+
+//------------------------------------------------------------------------------
+// ttReceive - Thread for recieving other teensy's heartbeat
+static THD_WORKING_AREA(ttReceive_WA, 32);
+thread_t *ttReceive_Pointer;
+
+static THD_FUNCTION(ttReceive_THD, arg){
+    while(true){
+
+#ifdef THREAD_DEBUG
+        Serial.println("### ttReceive thread entrance");
+#endif
+
+        // // checks every 250 millisecond if the other teensy has NOT responded
+        // while(!(pulseIn(TT_Receive_PIN, HIGH, 250000) > 0)) {
+        //     //other teensy has failed...activate other threads
+        //     teensy_fail = true;
+        // }
+
+        chThdSleepMilliseconds(50);
+    }
+}
+
+//------------------------------------------------------------------------------
+// ttSend - sends heartbeat for other teensy to listen to every 50 milliseconds
 static THD_WORKING_AREA(ttSend_WA, 32);
 thread_t *ttSend_Pointer;
 
-//Thread to get data from sensors
-static THD_FUNCTION(dataThread, arg) {
-    (void)arg;
-    /*
-    Need IMU, Pitot, and GPS data from Beaglebone...
-
-    Datasheet for IMU: https://www.mouser.com/datasheet/2/389/lsm9ds1-1849526.pdf
-    Datasheet for Pressure Sensor: https://www.te.com/commerce/DocumentDelivery/DDEController?Action=srchrtrv&DocNm=MS5611-01BA03&DocType=Data+Sheet&DocLang=English
-    Datasheet for Accelerometer: https://www.mouser.com/datasheet/2/348/KX134-1211-Specifications-Rev-1.0-1659717.pdf
-    Datasheet for GPS: https://www.u-blox.com/sites/default/files/ZOE-M8_DataSheet_%28UBX-16008094%29.pdf
-
-    Initalize the data and chip select pins:
-    The values will be filled soon
-    */
-    while (true) {
-        imu.readAccel(); //update IMU accelerometer data
-        imu.readGyro();
-
-        velocity = 0;
-        az = imu.calcAccel(imu.az);
-        altitude = 0;
-        roll_rate = imu.calcGyro(imu.gz);
-        latitude = 0;
-        longitude = 0;
-        hybridData.PT1 = ptConversion(analogRead(HYBRID_PT_1_PIN));
-        hybridData.PT2 = ptConversion(analogRead(HYBRID_PT_2_PIN));
-        hybridData.PT3 = ptConversion(analogRead(HYBRID_PT_3_PIN));
-        hybridData.timeStamp = chVTGetSystemTime();
-
-        //string to hold data to write all at once.
-        char dataStr[100] = "";
-        char buffer[8];
-
-        dtostrf(velocity,6,6,buffer); //convert float to char[]
-        strcat(dataStr,buffer); //cat char[] to end of dataStr
-        strcat(dataStr,","); //add comma to seperate values
-
-        dtostrf(az,6,6,buffer);
-        strcat(dataStr,buffer);
-        strcat(dataStr,",");
-
-        dtostrf(altitude,6,6,buffer);
-        strcat(dataStr,buffer);
-        strcat(dataStr,",");
-
-        dtostrf(roll_rate,6,6,buffer);
-        strcat(dataStr,buffer);
-        strcat(dataStr,",");
-
-        dtostrf(latitude,6,6,buffer);
-        strcat(dataStr,buffer);
-        strcat(dataStr,",");
-
-        dtostrf(longitude,6,6,buffer);
-        strcat(dataStr,buffer);
-        strcat(dataStr,",");
-
-        dtostrf(hybridData.PT1,6,6,buffer);
-        strcat(dataStr,buffer);
-        strcat(dataStr,",");
-
-        dtostrf(hybridData.PT2,6,6,buffer);
-        strcat(dataStr,buffer);
-        strcat(dataStr,",");
-
-        dtostrf(hybridData.PT3,6,6,buffer);
-        strcat(dataStr,buffer);
-
-        //Writing line of data to SD card
-        dataFile = SD.open(fileName, FILE_WRITE);
-        dataFile.println(dataStr);
-        dataFile.close();
-    }
-
-
-}
-
-//Heartbeat listening thread
-static THD_FUNCTION(ttRecieve_THD, arg){
-    while(true){
-        // checks every 250 millisecond if the other teensy has NOT responded
-        while(!(pulseIn(TT_RECIEVE_PIN, HIGH, 250000) > 0)) {
-            //other teensy has failed...activate other threads
-            teensy_fail = true;
-        }
-    }
-}
-
-//sends heartbeat for other teensy to listen to every 50 milliseconds
 static THD_FUNCTION(ttSend_THD, arg){
     while(true){
+
+#ifdef THREAD_DEBUG
+        Serial.println("### ttSend thread entrance");
+#endif
+
         digitalWrite(TT_SEND_PIN, HIGH);
         chThdSleepMilliseconds(50);
         digitalWrite(TT_SEND_PIN, LOW);
@@ -235,34 +199,64 @@ static THD_FUNCTION(ttSend_THD, arg){
     }
 }
 
+//------------------------------------------------------------------------------
+// bbComm - sends information to BeagleBone at 5 Hz
+static THD_WORKING_AREA(bbComm_WA, 64);
+thread_t *bbComm_Pointer;
 
-//Thread to log information to BeagleBone. This will be done after data is read.
 static THD_FUNCTION(bbComm_THD, arg) {
     (void)arg;
+
+    Serial1.begin(115200);
+
     while(true) {
-        while(teensy_fail == true) {
-            //Should do fastest Baud Rate Possible (Teensy should be able to handle it but can the BBB?)
-            Serial.begin(115200); //Maximum is 4608000. We will have to test to see how much higher we can go before packets are lost.
-            //Sending data in alphabetical order. First 4 bytes is altitude,  second 4 bytes is az, etc.
-            float sensorData[10] = {altitude, az, latitude, longitude, roll_rate, velocity, hybridData.PT1, hybridData.PT2, hybridData.PT3, (float) hybridData.timeStamp};
-            //Creates a byte array of length 24
-            byte *data_asByteArray = (byte*)sensorData;
-            Serial.write(data_asByteArray, 40);
-        }
+
+#ifdef THREAD_DEBUG
+        Serial.println("### bbComm thread entrance");
+#endif
+
+        digitalWrite(LED_WHITE, HIGH);
+        //
+        // int i = 3;
+        //
+        // uint8_t* data = (uint8_t*) &sensorData;
+        //
+        // for (; i < 3 + sizeof(sensorData); ++i) {
+        //     BB_data[i] = data;
+        //     ++data;
+        // }
+        //
+        // BB_data[25] = rocketState;
+        //
+        // Serial1.write(BB_data, 25);
+        //
+        digitalWrite(LED_WHITE, LOW);
+
+        chThdSleepMilliseconds(100);
     }
 }
 
-//Thread for actuating servos for active control
+//------------------------------------------------------------------------------
+// servoThread - Thread for actuating servos for active control, updates at 20Hz
+static THD_WORKING_AREA(servoThread_WA, 32);
+thread_t *servoThread_Pointer;
+
 static THD_FUNCTION(servoThread, arg) {
     (void)arg;
     //while loop is in place of loop() at the bottom. Anshuk: I don't get why this is here.
     while(true) {
-        if(servo1.attached() == false || servo2.attached() == false || servo3.attached() == false || servo4.attached() == false) {
-            delay(TERMINATE); //basically end the program. Anshuk: Maybe we should just end this thread rather than the whole program
-        }
+
+#ifdef THREAD_DEBUG
+        Serial.println("### servoThread thread entrance");
+#endif
+
+        /* THOU SHALL NOT END THE PROGRAM */
+        // if(servo1.attached() == false || servo2.attached() == false || servo3.attached() == false || servo4.attached() == false) {
+        //     delay(TERMINATE); //basically end the program. Anshuk: Maybe we should just end this thread rather than the whole program
+        // }
 
         //To determine whether the rocket should use roll/drag control or not. Only done in the coast phase
-        if(fsm_states.rocket_state == 2) {
+        if(rocketState == STATE_COAST) {
             //record time using millis
             if((roll_rate > rr_thresh || roll_rate < -rr_thresh) && altitude < roll_off_alt)//If the rocket is rolling below a certain altitude..
             {
@@ -306,218 +300,217 @@ static THD_FUNCTION(servoThread, arg) {
                 }
             }
         }
+
+        chThdSleepMilliseconds(50);
     }
 }
 
-//-----------------------------------------
-//Hybrid teensy threads that need to be ASLEEP if hybrid teensy is working
-//thread that controls the ball valve servos for the hybrid engine.
+//------------------------------------------------------------------------------
+// ballValve- thread that controls the ball valve servos for the hybrid engine.
+// Hybrid teensy threads that need to be ASLEEP if hybrid teensy is working
+static THD_WORKING_AREA(ballValve_WA, 32);
+thread_t *ballValve_Pointer;
+
 static THD_FUNCTION(ballValve_THD, arg){
     while(true){
+
+#ifdef THREAD_DEBUG
+        Serial.println("### ballValve thread entrance");
+#endif
+
         while(teensy_fail == true) {
             //if fail safe switch is active, then don't active this thread
             //Anshuk: Once FSM is developed, make conditionals below more involved
             if(ballValveOpen == false){
                 ballValve1.write(180);
                 ballValve2.write(180);
-                digitalWrite(DEBUG_LED_1, HIGH);
+                digitalWrite(LED_RED, HIGH);
             }
             else if(ballValveOpen == true){
                 ballValve1.write(0);
                 ballValve2.write(0);
-                digitalWrite(DEBUG_LED_1, LOW);
+                digitalWrite(LED_RED, LOW);
             }
         }
+
+        chThdSleepMilliseconds(100);
     }
 }
 
-//Thread for the rocket status logic
+//------------------------------------------------------------------------------
+// ballValve- Thread for the rocket state transition logic
+static THD_WORKING_AREA(rocket_FSM_WA, 32);
+thread_t *rocket_FSM_Pointer;
+
 static THD_FUNCTION(rocket_FSM, arg) {
     (void)arg;
+
     while(true) {
-        if(az > launch_az_thresh && launch_init == false)     //If high acceleration is observed in z direction...
-        {
-            fsm_states.launch_time = millis();                             //...assume launch and store launch time
-            launch_init = true;
-        }
 
-        if(az > launch_az_thresh && launch_init == true && fsm_states.rocket_state != 2)   //If the acceleration continues...
-        {
-            burn_timer = millis() - fsm_states.launch_time;                //...start measuring the lenght of the burn time
-            if(burn_timer > launch_time_thresh)                 //If the acceleration lasts long enough...
-            {
-                fsm_states.rocket_state = 1;                                    //...the launch has occured
-                //Serial.println(String(millis()/1000) + "s: Launch detected");
+#ifdef THREAD_DEBUG
+        Serial.println("### rocket_FSM thread entrance");
+#endif
+        // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        // TODO - Acquire lock on data struct!
+
+        switch (rocketState) {
+            case STATE_INIT:
+                // TODO
+            break;
+
+            case STATE_IDLE:
+
+                // If high acceleration is observed in z direction...
+                if(sensorData.az > launch_az_thresh) {
+                    fsm_states.launch_time = chVTGetSystemTime();
+                    rocketState = STATE_LAUNCH_DETECT;
+                }
+
+            break;
+
+            case STATE_LAUNCH_DETECT:
+
+                //If the acceleration was too brief, go back to IDLE
+                if (sensorData.az < launch_az_thresh) {
+                    rocketState = STATE_IDLE;
+                    break;
+                }
+
+                // measure the length of the burn time (for hysteresis)
+                fsm_states.burn_timer =
+                    chVTGetSystemTime() - fsm_states.launch_time;
+
+                // If the acceleration lasts long enough, boost is detected
+                if (fsm_states.burn_timer > launch_time_thresh) {
+                    rocketState = STATE_BOOST;
+                    digitalWrite(LED_ORANGE, HIGH);
+                }
+
+            break;
+
+            case STATE_BOOST:
+
+            // If low acceleration in the Z direction...
+            if (sensorData.az < coast_thresh) {
+                fsm_states.burnout_time = chVTGetSystemTime();
+                rocketState = STATE_BURNOUT_DETECT;
             }
+
+            break;
+
+            case STATE_BURNOUT_DETECT:
+
+                //If the low acceleration was too brief, go back to BOOST
+                if (sensorData.az > coast_thresh) {
+                    rocketState = STATE_BOOST;
+                    break;
+                }
+
+                // measure the length of the coast time (for hysteresis)
+                fsm_states.coast_timer =
+                    chVTGetSystemTime() - fsm_states.burnout_time;
+
+                // If the low acceleration lasts long enough, coast is detected
+                if (fsm_states.coast_timer > coast_time_thresh) {
+                    rocketState = STATE_BOOST;
+                }
+
+            break;
+
+            case STATE_COAST:
+                // TODO
+            break;
+
+            case STATE_APOGEE_DETECT:
+                // TODO
+            break;
+
+            case STATE_APOGEE:
+                // TODO
+            break;
+
+            case STATE_DROGUE:
+                // TODO
+            break;
+
+            case STATE_MAIN:
+                // TODO
+            break;
+
+
         }
 
-        else if(az < launch_az_thresh && launch_init == true && fsm_states.rocket_state != 2)   //If the acceleration was too brief...
-        {
-            launch_init = false;                                //...reset the launch detection (the acceleration was just an anomaly)
-        }
-
-        //BURNOUT DETECTION LOGIC:
-        if(az < coast_thresh && fsm_states.rocket_state == 1 && coast_init == false)    //If large negative acceleration is observed after launch...
-        {
-            fsm_states.burnout_time = millis();                            //...assume burnout and store time of burnout
-            coast_init = true;
-        }
-
-        if(az < coast_thresh && coast_init == true && fsm_states.rocket_state != 2)   //If the negative acceleration continues...
-        {
-            coast_timer = millis() - fsm_states.burnout_time;             //...start measuring the lenght of the coast time
-            if(coast_timer > coast_time_thresh)             //If the negative acceleration lasts long enough...
-            {
-                fsm_states.rocket_state = 2;                                 //...burnout has occured, and the rocket is now coasting
-                //Serial.println(String(millis()/1000) + "s: Burnout detected");
-            }
-        }
-
-        else if(az > coast_thresh && coast_init == true && fsm_states.rocket_state != 2)   //If the negative acceleration was too brief...
-        {
-            coast_init = false;                             //...reset the burnout detection (the acceleration was just an anomaly)
-        }
-
-        //APOGEE DETECTION LOGIC:
-        if(velocity < 0 && fsm_states.rocket_state == 2 && apogee_init == false)    //If velocity is negative during free fall...
-        {
-            fsm_states.apogee_time = millis();                             //...assume apogee and store time of apogee
-            apogee_init = true;
-        }
-        if(velocity < 0 && apogee_init == true && fsm_states.rocket_state != 3)       //If descent continues...
-        {
-            descent_timer = millis() - fsm_states.apogee_time;             //...start measuring time since apogee
-            if(descent_timer > apogee_time_thresh)              //If time since apogee exceeds a threshold...
-            {
-                fsm_states.rocket_state = 3;                                    //...apogee has occured
-            }
-        }
-        else if(velocity > 0 && apogee_init == true && fsm_states.rocket_state != 3)  //If velocity is positive again...
-        {
-            apogee_init = false;                               //...reset the apogee detection
-        }
+        chThdSleepMilliseconds(10); // FSM runs at 100 Hz
     }
 }
-//--------------------------------------------------------
 
-//Is this being used?
-void testServos() {
-    //For loops test the functionality of the servo's movements;
-    for (currentAngle = initialAngle; currentAngle <= initialAngle + 90; currentAngle++) {
-        servo1.write(currentAngle);
-        servo2.write(currentAngle);
-    }
-    for (currentAngle = initialAngle; currentAngle >= initialAngle; currentAngle--) {
-        servo1.write(currentAngle);
-        servo2.write(currentAngle);
-    }
-
-    //Testing second set of servos
-    for (currentAngle = initialAngle; currentAngle <= initialAngle + 90; currentAngle++) {
-        servo3.write(currentAngle);
-        servo4.write(currentAngle);
-    }
-    for (currentAngle = initialAngle; currentAngle >= initialAngle; currentAngle--) {
-        servo3.write(currentAngle);
-        servo4.write(currentAngle);
-    }
-}
-
+//------------------------------------------------------------------------------
+// chSetup - let there be threads
 void chSetup() {
+
     ballValve1.attach(BALL_VALVE_1_PIN);
     ballValve2.attach(BALL_VALVE_2_PIN);
     servo1.attach(SERVO1_PIN);
     servo2.attach(SERVO2_PIN);
     servo3.attach(SERVO3_PIN);
-    servo4.attach(SERVO4_PIN);
-    testServos();
-    //Start servoThread
+    // testServos();
+
     servoThread_Pointer = chThdCreateStatic(servoThread_WA, sizeof(servoThread_WA), NORMALPRIO, servoThread, NULL);
     dataThread_Pointer = chThdCreateStatic(dataThread_WA, sizeof(dataThread_WA), NORMALPRIO, dataThread,NULL);
-    bbComm_Pointer = chThdCreateStatic(bbComm_WA, sizeof(bbComm_WA), NORMALPRIO, bbComm_THD,NULL);
+    // bbComm_Pointer = chThdCreateStatic(bbComm_WA, sizeof(bbComm_WA), NORMALPRIO, bbComm_THD, NULL);
     ballValve_Pointer = chThdCreateStatic(ballValve_WA, sizeof(ballValve_WA), NORMALPRIO, ballValve_THD, NULL);
     rocket_FSM_Pointer = chThdCreateStatic(rocket_FSM_WA, sizeof(rocket_FSM_WA), NORMALPRIO, rocket_FSM, NULL);
-    ttRecieve_Pointer = chThdCreateStatic(ttRecieve_WA, sizeof(ttRecieve_WA), NORMALPRIO, ttRecieve_THD, NULL);
-    ttSend_Pointer = chThdCreateStatic(ttSend_WA, sizeof(ttSend_WA), NORMALPRIO, ttSend_THD, NULL);
+    // ttReceive_Pointer = chThdCreateStatic(ttReceive_WA, sizeof(ttReceive_WA), NORMALPRIO, ttReceive_THD, NULL);
+    // ttSend_Pointer = chThdCreateStatic(ttSend_WA, sizeof(ttSend_WA), NORMALPRIO, ttSend_THD, NULL);
 
-
-    while(true) {
-        //Spawning Thread. We just need to keep it running in order to no lose servoThread
-        chThdSleep(100);
-    }
 }
 
 void setup() {
 
-    //set initial rocket state to idle
-    fsm_states.rocket_state = 0;
 
-    // start the SPI library:
-    SPI.begin();
+    pinMode(LED_WHITE, OUTPUT);
+    pinMode(LED_ORANGE, OUTPUT);
+    pinMode(LED_RED, OUTPUT);
+    pinMode(LED_BLUE, OUTPUT);
+
+    digitalWrite(LED_WHITE, HIGH);
+
+#ifdef USB_SERIAL_BEGIN
+    Serial.begin(9600);
+    while (!Serial) {}
+#endif
+
+    //set initial rocket state to idle
+    rocketState = STATE_IDLE;
 
     //IMU Sensor Setup
-    imu.settings.device.commInterface = IMU_MODE_SPI; // Set mode to SPI
-    imu.settings.device.mAddress = LSM9DS1_M_CS; // Mag CS pin connected to D9
-    imu.settings.device.agAddress = LSM9DS1_AG_CS; // AG CS pin connected to D10
-
-    if(!imu.begin()){
-       //this is what executes if it failed to communicate with the IMU. If this happens DON'T LAUNCH!
-       //TODO:for testing make this light a red LED
+    if(!imu.beginSPI(LSM9DS1_AG_CS, LSM9DS1_M_CS)){
+       digitalWrite(LED_RED, HIGH);
     }
 
     //SD Card Setup
-    if(!SD.begin(BUILTIN_SDCARD)){
-        //this is what executes if Teensy fails to communicate with SD card. That is not good. Probably no-go for launch
+    if(SD.begin(BUILTIN_SDCARD)){
+        init_dataLog(&dataFile);
     }
-
-    strcpy(fileName,"data.csv");
-
-    //checks to see if file already exists and adds 1 to filename if it does.
-    if (SD.exists(fileName)){
-        bool fileExists = false;
-        int i = 1;
-        while(fileExists==false){
-            if(i > 999){
-                //max number of files reached. Don't want to overflow fileName[]. Will write new data to already existing data999.csv
-                strcpy(fileName, "data999.csv");
-                break;
-            }
-
-            //converts int i to char[]
-            char iStr[16];
-            __itoa(i, iStr, 10);
-
-            //writes "data(number).csv to fileNameTemp"
-            char fileNameTemp[10+strlen(iStr)];
-            strcpy(fileNameTemp,"data");
-            strcat(fileNameTemp,iStr);
-            strcat(fileNameTemp,".csv");
-
-            if(!SD.exists(fileNameTemp)){
-                strcpy(fileName, fileNameTemp);
-                fileExists = true;
-            }
-
-            i++;
-        }
+    else {
+#ifdef THREAD_DEBUG
+        Serial.println("SD Begin Failed");
+#endif
+        digitalWrite(LED_RED, HIGH);
     }
-
-    //write header for csv file
-    dataFile=SD.open(fileName);
-    dataFile.println("velocity,z acceleration,altitude,roll rate,latitude,longitude,PT1,PT2,PT3");
-    dataFile.close();
-
 
     pinMode(TT_SEND_PIN, OUTPUT);
-    pinMode(TT_RECIEVE_PIN, INPUT);
+    pinMode(TT_RECEIVE_PIN, INPUT);
 
+    Serial.println("starting chibiOS");
     //Initialize and start ChibiOS (Technically the first thread)
     chBegin(chSetup);
+
     while(true) {}
-    //Must stay in while true loop to keep the chSetup thread running
+
 }
 
 void loop() {
-    //Could cause problems if used for ChibiOS,
-    //but needed to make teensy happy.
+
+    chThdSleepMilliseconds(1000);
 }
