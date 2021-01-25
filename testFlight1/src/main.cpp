@@ -12,6 +12,9 @@
 #include "thresholds.h"
 #include "pins.h"
 
+#define THREAD_DEBUG
+#define SENSOR_DEBUG
+
 dataStruct_t sensorData;
 
 FSM_State rocketState;
