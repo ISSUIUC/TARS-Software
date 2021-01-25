@@ -70,6 +70,8 @@ static THD_FUNCTION(imu_THD, arg){
   #endif
 
   logData(&dataFile, &sensorData, rocketState);
+
+  chThdSleepMilliseconds(6); // Sensor DAQ @ ~100 Hz
 }
 
 static THD_FUNCTION(gps_THD, arg){
@@ -85,13 +87,27 @@ void chSetup(){
 void setup() {
   Serial.begin(115200);
 
+  rocketState = STATE_IDLE;
+
   //lowGimu setup
   if (lowGimu.beginSPI(LSM9DS1_AG_CS, LSM9DS1_M_CS) == false) // note, we need to sent this our CS pins (defined above)
   {
+    digitalWrite(LED_RED, HIGH);
     Serial.println("Failed to communicate with LSM9DS1. Stalling Program");
     while (1);
   }
 
+  //SD Card Setup
+  if(SD.begin(BUILTIN_SDCARD)){
+    init_dataLog(&dataFile);
+  }
+  else {
+    digitalWrite(LED_RED, HIGH);
+    Serial.println("SD Begin Failed. Stalling Program");
+    while(true);
+  }
+
+  Serial.println("Starting ChibiOS");
   chBegin(chSetup);
   while(true);
 }
