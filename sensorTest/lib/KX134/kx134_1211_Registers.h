@@ -83,6 +83,4 @@
 // #define ADP_CNTL(1-19)  0x64-76  // something wrong in parens?
 //?Konix Reserved 0x77-7F
 
-
-
 #endif

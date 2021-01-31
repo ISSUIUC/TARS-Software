@@ -18,9 +18,9 @@ void loop()
 {
     imu.update_data();
 
-    int16_t ax = imu.get_x_accel_raw();
-    int16_t ay = imu.get_y_accel_raw();
-    int16_t az = imu.get_z_accel_raw();
+    int16_t ax = imu.get_x_gforce();
+    int16_t ay = imu.get_y_gforce();
+    int16_t az = imu.get_z_gforce();
 
     Serial.print("X: ");
     Serial.print(ax);
