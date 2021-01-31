@@ -123,6 +123,9 @@ void setup() {
   Serial.println("Starting ChibiOS");
   chBegin(chSetup);
   while(true);
+
+  
+  while (!Serial) {}
 }
 
 void loop() {

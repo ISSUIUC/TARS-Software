@@ -71,6 +71,7 @@ float KX134::get_z_accel() {
     1000 0000 0000 0001   --  -32767
 */
 
+
 int16_t KX134::binary_to_decimal(int16_t binary) {
     int16_t temp;
     int16_t decimal = 0;
