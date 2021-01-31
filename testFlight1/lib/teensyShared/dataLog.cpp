@@ -40,7 +40,7 @@ void init_dataLog(File* dataFile) {
 
     Serial.println(fileName);
     *dataFile = SD.open(fileName, O_CREAT | O_WRITE | O_TRUNC);
-    dataFile->println("ax, ay, az, gx, gy, gz, mx, my ,mz, rocketState, timeStamp");
+    dataFile->println("ax, ay, az, gx, gy, gz, mx, my, mz, hg_ax, hg_ay, hg_az, rocketState, timeStamp");
 
 }
 
@@ -65,6 +65,14 @@ void logData(File* dataFile, dataStruct_t* data, FSM_State rocketState) {
     dataFile->print(",");
     dataFile->print(data->mz);
     dataFile->print(",");
+    //!highG imu data
+    dataFile->print(data->hg_ax);
+    dataFile->print(",");
+    dataFile->print(data->hg_ay);
+    dataFile->print(",");
+    dataFile->print(data->hg_az);
+    dataFile->print(",");
+
     // dataFile->print(data->pt1);
     // dataFile->print(",");
     // dataFile->print(data->pt2);

@@ -16,6 +16,11 @@ struct dataStruct_t {
     int16_t mx;
     int16_t my;
     int16_t mz;
+
+    //! data for highGimu accel data (hg_x, hg_y, hg_z) 
+    int16_t hg_ax;
+    int16_t hg_ay;
+    int16_t hg_az;
     // int16_t pt1;
     // int16_t pt2;
     // int16_t pt3;

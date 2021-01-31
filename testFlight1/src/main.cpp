@@ -15,16 +15,21 @@
 #define THREAD_DEBUG
 #define SENSOR_DEBUG
 
+//!possibly change name to account for both high & lowG (logGData)
 dataStruct_t sensorData;
 
 FSM_State rocketState;
 
 File dataFile;
 
-struct highGData{
+//?dont really need
+// struct highGData{
+//   x_accel,
+//   y_accel,
+//   z_accel
+// };
 
-};
-
+KX134 highGimu;
 LSM9DS1 lowGimu;
 
 static THD_WORKING_AREA(imu_WA, 32);
@@ -50,6 +55,10 @@ static THD_FUNCTION(imu_THD, arg){
   sensorData.mx = lowGimu.mx;
   sensorData.my = lowGimu.my;
   sensorData.mz = lowGimu.mz;
+  //!addition for highG IMU
+  sensorData.hg_ax = highGimu.get_hg_ax();
+  sensorData.hg_ay = highGimu.get_hg_ay();
+  sensorData.hg_az = highGimu.get_hg_az();
   sensorData.timeStamp = chVTGetSystemTime();
 
   #ifdef SENSOR_DEBUG
@@ -69,8 +78,16 @@ static THD_FUNCTION(imu_THD, arg){
     Serial.print(", ");
     Serial.print(sensorData.my);
     Serial.print(", ");
-    Serial.println(sensorData.mz);
+    Serial.print(sensorData.mz);
+    //!high g data
+    Serial.print(highGData.hg_ax);
+    Serial.print(", ");
+    Serial.print(highGData.hg_ay);
+    Serial.print(", ");
+    Serial.println(highGData.hg_az);
   #endif
+
+
 
   logData(&dataFile, &sensorData, rocketState);
 
