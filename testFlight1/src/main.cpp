@@ -22,13 +22,6 @@ FSM_State rocketState;
 
 File dataFile;
 
-//?dont really need
-// struct highGData{
-//   x_accel,
-//   y_accel,
-//   z_accel
-// };
-
 KX134 highGimu;
 LSM9DS1 lowGimu;
 
@@ -56,9 +49,9 @@ static THD_FUNCTION(imu_THD, arg){
   sensorData.my = lowGimu.my;
   sensorData.mz = lowGimu.mz;
   //!addition for highG IMU
-  sensorData.hg_ax = highGimu.get_hg_ax();
-  sensorData.hg_ay = highGimu.get_hg_ay();
-  sensorData.hg_az = highGimu.get_hg_az();
+  sensorData.hg_ax = highGimu.get_x_gforce();
+  sensorData.hg_ay = highGimu.get_y_gforce();
+  sensorData.hg_az = highGimu.get_z_gforce();
   sensorData.timeStamp = chVTGetSystemTime();
 
   #ifdef SENSOR_DEBUG
@@ -80,11 +73,11 @@ static THD_FUNCTION(imu_THD, arg){
     Serial.print(", ");
     Serial.print(sensorData.mz);
     //!high g data
-    Serial.print(highGData.hg_ax);
+    Serial.print(sensorData.hg_ax);
     Serial.print(", ");
-    Serial.print(highGData.hg_ay);
+    Serial.print(sensorData.hg_ay);
     Serial.print(", ");
-    Serial.println(highGData.hg_az);
+    Serial.println(sensorData.hg_az);
   #endif
 
 
