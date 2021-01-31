@@ -29,18 +29,18 @@ int16_t KX134::get_z_accel_raw() {
 
 //  Range from -64 to 64 Gs. 511.98 obtained by dividing 32767 (max decimal) by 64 (mag gs)
 float KX134::get_x_gforce() {
-    float decimal = binary_to_decimal(get_x_accel_raw());
-    float gForce = decimal / 511.98;
+    int16_t decimal = get_x_accel_raw();
+    float gForce = (float)decimal / 511.98;
     return gForce;
 }
 float KX134::get_y_gforce() {
-    float decimal = binary_to_decimal(get_y_accel_raw());
-    float gForce = decimal / 511.98;
+    int16_t decimal = get_y_accel_raw();
+    float gForce = (float)decimal / 511.98;
     return gForce;
 }
 float KX134::get_z_gforce() {
-    float decimal = binary_to_decimal(get_z_accel_raw());
-    float gForce = decimal / 511.98;
+    int16_t decimal = get_z_accel_raw();
+    float gForce = (float)decimal / 511.98;
     return gForce;
 }
 
@@ -71,25 +71,27 @@ float KX134::get_z_accel() {
     1000 0000 0000 0001   --  -32767
 */
 
-int16_t binary_to_decimal(int16_t binary) {
-    int16_t temp;
-    int16_t decimal = 0;
-    int16_t base = 1;
+//!binary to decimal not needed because input/output are already binary
+//!Conversion may add bugs
+// int16_t KX134::binary_to_decimal(int16_t binary) {
+//     int16_t temp;
+//     int16_t decimal = 0;
+//     int16_t base = 1;
 
-    while (binary > 0) {
-        temp = binary % 10;
-        decimal = decimal + temp * base;
-        binary = binary / 10;
-        base = base * 2;
-    }
-    if (decimal > 32768) {
-        decimal = decimal - 32768;
-        decimal = -(32768 - decimal);
-    } else if (decimal == 32768) {
-        return 0;
-    }
-    return decimal;
-}
+//     while (binary > 0) {
+//         temp = binary % 10;
+//         decimal = decimal + temp * base;
+//         binary = binary / 10;
+//         base = base * 2;
+//     }
+//     if (decimal > 32768) {
+//         decimal = decimal - 32768;
+//         decimal = -(32768 - decimal);
+//     } else if (decimal == 32768) {
+//         return 0;
+//     }
+//     return decimal;
+// }
 
 void KX134::init()
 {
