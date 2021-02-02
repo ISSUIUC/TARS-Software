@@ -105,7 +105,7 @@ void KX134::init()
     // Set PC1 bit of CNTL1 register to enable measurements
     digitalWrite(KX134_CS_PIN, LOW);   // select chip
     SPI.transfer(CNTL1);
-    SPI.transfer(0x80);
+    SPI.transfer(0x98);
     digitalWrite(KX134_CS_PIN, HIGH);   // de-select chip
 
 }
