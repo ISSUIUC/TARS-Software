@@ -99,6 +99,7 @@ void chSetup(){
 
 void setup() {
   Serial.begin(115200);
+  while (!Serial) {}
 
   rocketState = STATE_IDLE;
 
@@ -125,7 +126,6 @@ void setup() {
   while(true);
 
   
-  while (!Serial) {}
 }
 
 void loop() {
