@@ -24,6 +24,12 @@ struct dataStruct_t {
     // int16_t pt1;
     // int16_t pt2;
     // int16_t pt3;
+
+    //GPS DATA
+    float latitude;
+    float longitude;
+    float altitude;
+    
     int32_t timeStamp;
 
 };

@@ -6,6 +6,7 @@
 
 #include "SparkFunLSM9DS1.h" //Low-G IMU Library
 #include "KX134-1211.h" //High-G IMU Library
+#include "ZOEM8Q0.hpp" //GPS Library
 #include "hybridShared.h"
 #include "acShared.h"
 #include "dataLog.h"
@@ -13,7 +14,8 @@
 #include "pins.h"
 
 #define THREAD_DEBUG
-#define SENSOR_DEBUG
+#define IMU_DEBUG
+#define GPS_DEBUG
 
 //!possibly change name to account for both high & lowG (logGData)
 dataStruct_t sensorData;
@@ -24,11 +26,12 @@ File dataFile;
 
 KX134 highGimu;
 LSM9DS1 lowGimu;
+ZOEM8Q0 gps = ZOEM8Q0();
 
-static THD_WORKING_AREA(imu_WA, 32);
-static THD_WORKING_AREA(gps_WA, 32);
 
-static THD_FUNCTION(imu_THD, arg){
+static THD_WORKING_AREA(sensor_WA, 256);
+
+static THD_FUNCTION(sensor_THD, arg){
   (void)arg;
 
   #ifdef THREAD_DEBUG
@@ -58,7 +61,7 @@ static THD_FUNCTION(imu_THD, arg){
     sensorData.hg_az = highGimu.get_z_gforce();
     sensorData.timeStamp = chVTGetSystemTime();
 
-    #ifdef SENSOR_DEBUG
+    #ifdef IMU_DEBUG
       Serial.print(sensorData.ax);
       Serial.print(", ");
       Serial.print(sensorData.ay);
@@ -85,7 +88,33 @@ static THD_FUNCTION(imu_THD, arg){
       Serial.println(sensorData.hg_az);
     #endif
 
-
+    #ifdef GPS_DEBUG
+      while (!gps.update_data()) {
+        Serial.println(".");
+        chThdSleepMilliseconds(500);
+      }
+      Serial.println("");
+      bool position_lock = gps.get_position_lock();
+      if (position_lock) {
+        sensorData.latitude = gps.get_latitude();
+        sensorData.longitude = gps.get_longitude();
+        sensorData.altitude = gps.get_altitude();
+        Serial.println("GPS Data in sensorData struct: ");
+        Serial.print("Latitude: ");
+        Serial.println(sensorData.latitude);
+        Serial.print("Longitude: ");
+        Serial.println(sensorData.longitude);
+        Serial.print("Altitude: ");
+        Serial.println(sensorData.altitude);
+      } else {
+        Serial.println("Searching...");
+        sensorData.latitude = 0;
+        sensorData.longitude = 0;
+        sensorData.altitude = 0;
+      }
+      chThdSleepMilliseconds(500);
+    #endif
+    chThdSleepMilliseconds(6); // Sensor DAQ @ ~100 Hz
 
     logData(&dataFile, &sensorData, rocketState);
 
@@ -93,13 +122,8 @@ static THD_FUNCTION(imu_THD, arg){
   }
 }
 
-static THD_FUNCTION(gps_THD, arg){
-
-}
-
 void chSetup(){
-  chThdCreateStatic(imu_WA, sizeof(imu_WA), NORMALPRIO, imu_THD, NULL);
-  chThdCreateStatic(gps_WA, sizeof(gps_WA), NORMALPRIO, gps_THD, NULL);
+  chThdCreateStatic(sensor_WA, sizeof(sensor_WA), NORMALPRIO, sensor_THD, NULL);
   while(true);
 }
 
@@ -116,6 +140,9 @@ void setup() {
     Serial.println("Failed to communicate with LSM9DS1. Stalling Program");
     while (1);
   }
+  
+  //GPS Setup
+ 	gps.beginSPI(ZOEM8Q0_CS);
 
   //SD Card Setup
   if(SD.begin(BUILTIN_SDCARD)){

@@ -228,25 +228,12 @@ bool ZOEM8Q0::decode_xxgga_sentence(uint8_t *buffer, uint16_t dataLength){
     }
     char* lat = arr_substring(buffer, lat_start, lat_end);
     nmea_data.std_lat = (float)atof(lat);
-#ifdef GPS_SERIAL_DEBUG
-    Serial.print("Parsed Latitude (deg + min format): ");
-    Serial.println(nmea_data.std_lat);
-#endif
 
     char* lon = arr_substring(buffer, lon_start, lon_end);
     nmea_data.std_lon = (float)atof(lon);
-#ifdef GPS_SERIAL_DEBUG
-    Serial.print("Parsed Longitude (deg + min format): ");
-    Serial.println(nmea_data.std_lon);
-#endif
-
 
     char* ht = arr_substring(buffer, ht_start, ht_end);
     nmea_data.height = (float)atof(ht);
-#ifdef GPS_SERIAL_DEBUG
-    Serial.print("Parsed Altitude: ");
-    Serial.println(nmea_data.height);
-#endif
 
     //position fix is anything other than 0 since we made it though the loop without returning false
     return true;
