@@ -7,20 +7,20 @@
 #include "acShared.h"
 
 struct dataStruct_t {
-    int16_t ax;
-    int16_t ay;
-    int16_t az;
-    int16_t gx;
-    int16_t gy;
-    int16_t gz;
-    int16_t mx;
-    int16_t my;
-    int16_t mz;
+    float ax;
+    float ay;
+    float az;
+    float gx;
+    float gy;
+    float gz;
+    float mx;
+    float my;
+    float mz;
 
     //! data for highGimu accel data (hg_x, hg_y, hg_z) 
-    int16_t hg_ax;
-    int16_t hg_ay;
-    int16_t hg_az;
+    float hg_ax;
+    float hg_ay;
+    float hg_az;
     // int16_t pt1;
     // int16_t pt2;
     // int16_t pt3;

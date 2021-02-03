@@ -35,56 +35,62 @@ static THD_FUNCTION(imu_THD, arg){
     Serial.println("### data thread entrance");
   #endif
   
-  lowGimu.readAccel();
-  lowGimu.readGyro();
-  lowGimu.readMag();
+  while(true){
+    lowGimu.readAccel();
+    lowGimu.readGyro();
+    lowGimu.readMag();
 
-  sensorData.ax = lowGimu.az;
-  sensorData.ay = lowGimu.ax;
-  sensorData.az = -lowGimu.ay;
-  sensorData.gx = lowGimu.gx;
-  sensorData.gy = lowGimu.gy;
-  sensorData.gz = lowGimu.gz;
-  sensorData.mx = lowGimu.mx;
-  sensorData.my = lowGimu.my;
-  sensorData.mz = lowGimu.mz;
-  //!addition for highG IMU
-  sensorData.hg_ax = highGimu.get_x_gforce();
-  sensorData.hg_ay = highGimu.get_y_gforce();
-  sensorData.hg_az = highGimu.get_z_gforce();
-  sensorData.timeStamp = chVTGetSystemTime();
+    //acceleration in Gs
+    sensorData.ax = lowGimu.calcAccel(lowGimu.ax);
+    sensorData.ay = lowGimu.calcAccel(lowGimu.ay);
+    sensorData.az = lowGimu.calcAccel(lowGimu.az); //There was a minus here. We don't know why that did that
+    //rotational speed in degrees per second
+    sensorData.gx = lowGimu.calcGyro(lowGimu.gx);
+    sensorData.gy = lowGimu.calcGyro(lowGimu.gy);
+    sensorData.gz = lowGimu.calcGyro(lowGimu.gz);
+    //magnatometer data in gauss 
+    sensorData.mx = lowGimu.calcMag(lowGimu.mx);
+    sensorData.my = lowGimu.calcMag(lowGimu.my);
+    sensorData.mz = lowGimu.calcMag(lowGimu.mz);
+    //!addition for highG IMU
+    sensorData.hg_ax = highGimu.get_x_gforce();
+    sensorData.hg_ay = highGimu.get_y_gforce();
+    sensorData.hg_az = highGimu.get_z_gforce();
+    sensorData.timeStamp = chVTGetSystemTime();
 
-  #ifdef SENSOR_DEBUG
-    Serial.print(sensorData.ax);
-    Serial.print(", ");
-    Serial.print(sensorData.ay);
-    Serial.print(", ");
-    Serial.print(sensorData.az);
-    Serial.print(", ");
-    Serial.print(sensorData.gx);
-    Serial.print(", ");
-    Serial.print(sensorData.gy);
-    Serial.print(", ");
-    Serial.print(sensorData.gz);
-    Serial.print(", ");
-    Serial.print(sensorData.mx);
-    Serial.print(", ");
-    Serial.print(sensorData.my);
-    Serial.print(", ");
-    Serial.print(sensorData.mz);
-    //!high g data
-    Serial.print(sensorData.hg_ax);
-    Serial.print(", ");
-    Serial.print(sensorData.hg_ay);
-    Serial.print(", ");
-    Serial.println(sensorData.hg_az);
-  #endif
+    #ifdef SENSOR_DEBUG
+      Serial.print(sensorData.ax);
+      Serial.print(", ");
+      Serial.print(sensorData.ay);
+      Serial.print(", ");
+      Serial.print(sensorData.az);
+      Serial.print(", ");
+      Serial.print(sensorData.gx);
+      Serial.print(", ");
+      Serial.print(sensorData.gy);
+      Serial.print(", ");
+      Serial.print(sensorData.gz);
+      Serial.print(", ");
+      Serial.print(sensorData.mx);
+      Serial.print(", ");
+      Serial.print(sensorData.my);
+      Serial.print(", ");
+      Serial.print(sensorData.mz);
+      Serial.print(", ");
+      //!high g data
+      Serial.print(sensorData.hg_ax);
+      Serial.print(", ");
+      Serial.print(sensorData.hg_ay);
+      Serial.print(", ");
+      Serial.println(sensorData.hg_az);
+    #endif
 
 
 
-  logData(&dataFile, &sensorData, rocketState);
+    logData(&dataFile, &sensorData, rocketState);
 
-  chThdSleepMilliseconds(6); // Sensor DAQ @ ~100 Hz
+    chThdSleepMilliseconds(6); // Sensor DAQ @ ~100 Hz
+  }
 }
 
 static THD_FUNCTION(gps_THD, arg){
