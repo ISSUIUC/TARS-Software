@@ -101,19 +101,19 @@ static THD_FUNCTION(sensor_THD, arg){
       Serial.print(", ");
       Serial.println(sensorData.hg_az);
     #endif
+    while (!gps.update_data()) {
+        chThdSleepMilliseconds(10);
+    }
+    //Have the availability to wait until a lock is aquired with gps.get_position_lock();
+    sensorData.latitude = gps.get_latitude();
+    sensorData.longitude = gps.get_longitude();
+    sensorData.altitude = gps.get_altitude();
 
     #ifdef GPS_DEBUG
-      while (!gps.update_data()) {
-        Serial.println(".");
-        chThdSleepMilliseconds(500);
-      }
-      Serial.println("");
       bool position_lock = gps.get_position_lock();
       if (position_lock) {
-        sensorData.latitude = gps.get_latitude();
-        sensorData.longitude = gps.get_longitude();
-        sensorData.altitude = gps.get_altitude();
-        Serial.println("GPS Data in sensorData struct: ");
+        Serial.println("POSITION LOCK!");
+        Serial.println("GPS Data: ");
         Serial.print("Latitude: ");
         Serial.println(sensorData.latitude);
         Serial.print("Longitude: ");
@@ -122,11 +122,14 @@ static THD_FUNCTION(sensor_THD, arg){
         Serial.println(sensorData.altitude);
       } else {
         Serial.println("Searching...");
-        sensorData.latitude = 0;
-        sensorData.longitude = 0;
-        sensorData.altitude = 0;
+        Serial.print("Latitude: ");
+        Serial.println(sensorData.latitude);
+        Serial.print("Longitude: ");
+        Serial.println(sensorData.longitude);
+        Serial.print("Altitude: ");
+        Serial.println(sensorData.altitude);
+	Serial.println("");
       }
-      chThdSleepMilliseconds(500);
     #endif
     chThdSleepMilliseconds(6); // Sensor DAQ @ ~100 Hz
 
