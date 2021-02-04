@@ -13,11 +13,16 @@
 #include "thresholds.h"
 #include "pins.h"
 
-#define THREAD_DEBUG
-//#define IMU_DEBUG
+//!Creating mutex to prevent overlapping reads from play_THD and THD_FUNCTION
+//!for reading sensorData struct
+static MUTEX_DECL(dataMutex);
+
+#define PLAY_DEBUG
+// #define THREAD_DEBUG
+#define IMU_DEBUG
 //#define GPS_DEBUG
 
-//!possibly change name to account for both high & lowG (logGData)
+//changed name to account for both high & lowG (logGData)
 dataStruct_t sensorData;
 
 FSM_State rocketState;
@@ -30,15 +35,21 @@ ZOEM8Q0 gps = ZOEM8Q0();
 
 
 static THD_WORKING_AREA(sensor_WA, 256);
+static THD_WORKING_AREA(play_WA, 256);
 
 static THD_FUNCTION(sensor_THD, arg){
   (void)arg;
+
+
 
   #ifdef THREAD_DEBUG
     Serial.println("### data thread entrance");
   #endif
   
   while(true){
+    //!locking data from sensorData struct
+    chMtxLock(&dataMutex);
+
     lowGimu.readAccel();
     lowGimu.readGyro();
     lowGimu.readMag();
@@ -57,13 +68,14 @@ static THD_FUNCTION(sensor_THD, arg){
     sensorData.mx = lowGimu.calcMag(lowGimu.mx);
     sensorData.my = lowGimu.calcMag(lowGimu.my);
     sensorData.mz = lowGimu.calcMag(lowGimu.mz);
-    //!addition for highG IMU
+    //addition for highG IMU
     sensorData.hg_ax = highGimu.get_x_gforce();
     sensorData.hg_ay = highGimu.get_y_gforce();
     sensorData.hg_az = highGimu.get_z_gforce();
     sensorData.timeStamp = chVTGetSystemTime();
 
     #ifdef IMU_DEBUG
+      Serial.println("------------- IMU THREAD ---------------")
       Serial.print(sensorData.ax);
       Serial.print(", ");
       Serial.print(sensorData.ay);
@@ -82,7 +94,7 @@ static THD_FUNCTION(sensor_THD, arg){
       Serial.print(", ");
       Serial.print(sensorData.mz);
       Serial.print(", ");
-      //!high g data
+      //high g data
       Serial.print(sensorData.hg_ax);
       Serial.print(", ");
       Serial.print(sensorData.hg_ay);
@@ -118,14 +130,65 @@ static THD_FUNCTION(sensor_THD, arg){
     #endif
     chThdSleepMilliseconds(6); // Sensor DAQ @ ~100 Hz
 
+    //!Unlocking &dataMutex
+    chMtxUnlock(&dataMutex);
+
+
     logData(&dataFile, &sensorData, rocketState);
 
     chThdSleepMilliseconds(6); // Sensor DAQ @ ~100 Hz
   }
 }
 
+
+static THD_FUNCTION(play_THD, arg){
+  (void)arg;
+
+  while(true){
+    //!locking mutex to get data from sensorData struct
+    chMtxLock(&dataMutex);
+
+    #ifdef PLAY_DEBUG
+      //! taking the data from sensorData and multiplying by 69
+      //!nice
+      Serial.println("------------ Play thread -------------")
+      Serial.print(sensorData.ax * 69);
+      Serial.print(", ");
+      Serial.print(sensorData.ay * 69);
+      Serial.print(", ");
+      Serial.print(sensorData.az * 69);
+      Serial.print(", ");
+      Serial.print(sensorData.gx * 69);
+      Serial.print(", ");
+      Serial.print(sensorData.gy * 69);
+      Serial.print(", ");
+      Serial.print(sensorData.gz * 69);
+      Serial.print(", ");
+      Serial.print(sensorData.mx * 69);
+      Serial.print(", ");
+      Serial.print(sensorData.my * 69);
+      Serial.print(", ");
+      Serial.print(sensorData.mz * 69);
+      Serial.print(", ");
+      //high g data
+      Serial.print(sensorData.hg_ax * 69);
+      Serial.print(", ");
+      Serial.print(sensorData.hg_ay * 69);
+      Serial.print(", ");
+      Serial.println(sensorData.hg_az * 69);
+    #endif
+
+    //!unlocking &dataMutex mutex
+    chMtxUnlock(&dataMutex);
+  }
+
+}
+
+
 void chSetup(){
+  //added play_THD for creation
   chThdCreateStatic(sensor_WA, sizeof(sensor_WA), NORMALPRIO, sensor_THD, NULL);
+  chThdCreateStatic(play_WA, sizeof(play_WA), NORMALPRIO, play_THD, NULL);
   while(true);
 }
 
