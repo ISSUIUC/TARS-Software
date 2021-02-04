@@ -47,6 +47,7 @@ void init_dataLog(File* dataFile) {
 
 void logData(File* dataFile, dataStruct_t* data, FSM_State rocketState) {
 
+    //TODO: make this just use one print
     dataFile->print(data->ax);
     dataFile->print(",");
     dataFile->print(data->ay);

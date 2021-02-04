@@ -14,8 +14,8 @@
 #include "pins.h"
 
 #define THREAD_DEBUG
-#define IMU_DEBUG
-#define GPS_DEBUG
+//#define IMU_DEBUG
+//#define GPS_DEBUG
 
 //!possibly change name to account for both high & lowG (logGData)
 dataStruct_t sensorData;
@@ -42,6 +42,8 @@ static THD_FUNCTION(sensor_THD, arg){
     lowGimu.readAccel();
     lowGimu.readGyro();
     lowGimu.readMag();
+
+    highGimu.update_data();
 
     //acceleration in Gs
     sensorData.ax = lowGimu.calcAccel(lowGimu.ax);
