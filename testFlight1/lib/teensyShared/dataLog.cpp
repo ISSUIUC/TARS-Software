@@ -47,7 +47,7 @@ void init_dataLog(File* dataFile) {
 
 void logData(File* dataFile, dataStruct_t* data, FSM_State rocketState) {
 
-    //TODO: make this just use one print
+    /*//TODO: make this just use one print
     dataFile->print(data->ax);
     dataFile->print(",");
     dataFile->print(data->ay);
@@ -83,6 +83,32 @@ void logData(File* dataFile, dataStruct_t* data, FSM_State rocketState) {
     dataFile->print(rocketState);
     dataFile->print(",");
     dataFile->print(data->timeStamp);
+    dataFile->print("\n");*/
+
+    char buffer[100];
+
+    sprintf(buffer, "%f, ", data->ax);
+    sprintf(buffer, "%f, ", data->ay);
+    sprintf(buffer, "%f, ", data->az);
+
+    sprintf(buffer, "%f, ", data->gx);
+    sprintf(buffer, "%f, ", data->gy);
+    sprintf(buffer, "%f, ", data->gz);
+
+    sprintf(buffer, "%f, ", data->mx);
+    sprintf(buffer, "%f, ", data->my);
+    sprintf(buffer, "%f, ", data->mz);
+
+    sprintf(buffer, "%f, ", data->hg_ax);
+    sprintf(buffer, "%f, ", data->hg_ay);
+    sprintf(buffer, "%f, ", data->hg_az);
+
+    strcat(buffer, "dummystate, ");
+    //TODO: add rocket state here
+
+    __itoa(data->timeStamp, buffer, 10);
+    
+    dataFile->println(buffer);
 
     //Writing line of data to SD card
     dataFile->flush();

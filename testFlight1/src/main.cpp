@@ -14,7 +14,7 @@
 #include "pins.h"
 
 #define THREAD_DEBUG
-//#define IMU_DEBUG
+#define IMU_DEBUG
 //#define GPS_DEBUG
 
 //!possibly change name to account for both high & lowG (logGData)
