@@ -56,7 +56,6 @@ bool ZOEM8Q0::process_GPS_NMEA(uint16_t CS_pin) {
 
     // select GPS chip
     digitalWrite(CS_pin, LOW);
-    delayMicroseconds(1);
 
     SPI.transfer(0x80 | 0xA2);
 
@@ -133,14 +132,14 @@ bool ZOEM8Q0::process_GPS_NMEA(uint16_t CS_pin) {
     }
 
     digitalWrite(CS_pin, HIGH);
-
+    
+#ifdef GPS_SERIAL_DEBUG
     //Printing XXGGA Message if it is detected
     for (int i = 0; i < buffer_idx; ++i) {
-#ifdef GPS_SERIAL_DEBUG
         Serial.print((char) buffer[i]);
-#endif
     }
-    
+#endif
+   
     if (parser_state == END_DETECTED) {
         position_lock = decode_xxgga_sentence(buffer, buffer_idx);
 #ifdef GPS_SERIAL_DEBUG
@@ -161,6 +160,7 @@ bool ZOEM8Q0::process_GPS_NMEA(uint16_t CS_pin) {
     return (parser_state == END_DETECTED);
 
 }
+
 char* ZOEM8Q0::arr_substring(uint8_t* buffer, int start, int end) {
     int len = end - start;
     char* data = new char[len];

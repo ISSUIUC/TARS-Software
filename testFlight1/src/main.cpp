@@ -75,7 +75,7 @@ static THD_FUNCTION(sensor_THD, arg){
     sensorData.timeStamp = chVTGetSystemTime();
 
     #ifdef IMU_DEBUG
-      Serial.println("------------- IMU THREAD ---------------")
+      Serial.println("------------- IMU THREAD ---------------");
       Serial.print(sensorData.ax);
       Serial.print(", ");
       Serial.print(sensorData.ay);
@@ -128,7 +128,7 @@ static THD_FUNCTION(sensor_THD, arg){
         Serial.println(sensorData.longitude);
         Serial.print("Altitude: ");
         Serial.println(sensorData.altitude);
-	Serial.println("");
+	      Serial.println("");
       }
     #endif
     chThdSleepMilliseconds(6); // Sensor DAQ @ ~100 Hz
@@ -154,7 +154,7 @@ static THD_FUNCTION(play_THD, arg){
     #ifdef PLAY_DEBUG
       //! taking the data from sensorData and multiplying by 69
       //!nice
-      Serial.println("------------ Play thread -------------")
+      Serial.println("------------ Play thread -------------");
       Serial.print(sensorData.ax * 69);
       Serial.print(", ");
       Serial.print(sensorData.ay * 69);
