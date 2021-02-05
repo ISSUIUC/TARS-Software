@@ -92,7 +92,7 @@ static THD_FUNCTION(sensor_THD, arg){
       Serial.println(sensorData.hg_az);
     #endif
     while (!gps.update_data()) {
-        chThdSleepMilliseconds(10);
+        chThdSleepMilliseconds(6);
     }
     //Have the availability to wait until a lock is aquired with gps.get_position_lock();
     sensorData.latitude = gps.get_latitude();
