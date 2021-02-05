@@ -13,14 +13,9 @@
 #include "thresholds.h"
 #include "pins.h"
 
-//!Creating mutex to prevent overlapping reads from play_THD and THD_FUNCTION
-//!for reading sensorData struct
-static MUTEX_DECL(dataMutex);
-
-#define PLAY_DEBUG
-// #define THREAD_DEBUG
-#define IMU_DEBUG
-//#define GPS_DEBUG
+#define THREAD_DEBUG
+//#define IMU_DEBUG
+#define GPS_DEBUG
 
 //changed name to account for both high & lowG (logGData)
 dataStruct_t sensorData;
@@ -33,14 +28,10 @@ KX134 highGimu;
 LSM9DS1 lowGimu;
 ZOEM8Q0 gps = ZOEM8Q0();
 
-
 static THD_WORKING_AREA(sensor_WA, 256);
-static THD_WORKING_AREA(play_WA, 256);
 
 static THD_FUNCTION(sensor_THD, arg){
   (void)arg;
-
-
 
   #ifdef THREAD_DEBUG
     Serial.println("### data thread entrance");
@@ -48,7 +39,6 @@ static THD_FUNCTION(sensor_THD, arg){
   
   while(true){
     //!locking data from sensorData struct
-    chMtxLock(&dataMutex);
 
     lowGimu.readAccel();
     lowGimu.readGyro();
@@ -113,29 +103,19 @@ static THD_FUNCTION(sensor_THD, arg){
       bool position_lock = gps.get_position_lock();
       if (position_lock) {
         Serial.println("POSITION LOCK!");
-        Serial.println("GPS Data: ");
-        Serial.print("Latitude: ");
-        Serial.println(sensorData.latitude);
-        Serial.print("Longitude: ");
-        Serial.println(sensorData.longitude);
-        Serial.print("Altitude: ");
-        Serial.println(sensorData.altitude);
       } else {
-        Serial.println("Searching...");
-        Serial.print("Latitude: ");
-        Serial.println(sensorData.latitude);
-        Serial.print("Longitude: ");
-        Serial.println(sensorData.longitude);
-        Serial.print("Altitude: ");
-        Serial.println(sensorData.altitude);
-	      Serial.println("");
+        Serial.println("No lock found");
       }
+      Serial.println("GPS Data: ");
+      Serial.print("Latitude: ");
+      Serial.println(sensorData.latitude);
+      Serial.print("Longitude: ");
+      Serial.println(sensorData.longitude);
+      Serial.print("Altitude: ");
+      Serial.println(sensorData.altitude);
+      Serial.println("");
     #endif
-    chThdSleepMilliseconds(6); // Sensor DAQ @ ~100 Hz
-
-    //!Unlocking &dataMutex
-    chMtxUnlock(&dataMutex);
-
+    //chThdSleepMilliseconds(6); // Sensor DAQ @ ~100 Hz
 
     logData(&dataFile, &sensorData, rocketState);
 
@@ -143,55 +123,8 @@ static THD_FUNCTION(sensor_THD, arg){
   }
 }
 
-
-static THD_FUNCTION(play_THD, arg){
-  (void)arg;
-
-  while(true){
-    //!locking mutex to get data from sensorData struct
-    chMtxLock(&dataMutex);
-
-    #ifdef PLAY_DEBUG
-      //! taking the data from sensorData and multiplying by 69
-      //!nice
-      Serial.println("------------ Play thread -------------");
-      Serial.print(sensorData.ax * 69);
-      Serial.print(", ");
-      Serial.print(sensorData.ay * 69);
-      Serial.print(", ");
-      Serial.print(sensorData.az * 69);
-      Serial.print(", ");
-      Serial.print(sensorData.gx * 69);
-      Serial.print(", ");
-      Serial.print(sensorData.gy * 69);
-      Serial.print(", ");
-      Serial.print(sensorData.gz * 69);
-      Serial.print(", ");
-      Serial.print(sensorData.mx * 69);
-      Serial.print(", ");
-      Serial.print(sensorData.my * 69);
-      Serial.print(", ");
-      Serial.print(sensorData.mz * 69);
-      Serial.print(", ");
-      //high g data
-      Serial.print(sensorData.hg_ax * 69);
-      Serial.print(", ");
-      Serial.print(sensorData.hg_ay * 69);
-      Serial.print(", ");
-      Serial.println(sensorData.hg_az * 69);
-    #endif
-
-    //!unlocking &dataMutex mutex
-    chMtxUnlock(&dataMutex);
-  }
-
-}
-
-
 void chSetup(){
-  //added play_THD for creation
   chThdCreateStatic(sensor_WA, sizeof(sensor_WA), NORMALPRIO, sensor_THD, NULL);
-  chThdCreateStatic(play_WA, sizeof(play_WA), NORMALPRIO, play_THD, NULL);
   while(true);
 }
 
@@ -225,8 +158,7 @@ void setup() {
   Serial.println("Starting ChibiOS");
   chBegin(chSetup);
   while(true);
-
-  
+ 
 }
 
 void loop() {
