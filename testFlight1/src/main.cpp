@@ -65,7 +65,7 @@ static THD_FUNCTION(sensor_THD, arg){
     sensorData.timeStamp = chVTGetSystemTime();
 
     #ifdef IMU_DEBUG
-      Serial.println("------------- IMU THREAD ---------------");
+      Serial.println("------------- IMU ---------------");
       Serial.print(sensorData.ax);
       Serial.print(", ");
       Serial.print(sensorData.ay);
@@ -90,6 +90,7 @@ static THD_FUNCTION(sensor_THD, arg){
       Serial.print(sensorData.hg_ay);
       Serial.print(", ");
       Serial.println(sensorData.hg_az);
+      Serial.println("");
     #endif
     while (!gps.update_data()) {
         chThdSleepMilliseconds(6);
@@ -100,6 +101,7 @@ static THD_FUNCTION(sensor_THD, arg){
     sensorData.altitude = gps.get_altitude();
 
     #ifdef GPS_DEBUG
+        Serial.println("------------- GPS ---------------");
       bool position_lock = gps.get_position_lock();
       if (position_lock) {
         Serial.println("POSITION LOCK!");
