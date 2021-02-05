@@ -2,7 +2,7 @@
 #include "Arduino.h"
 #include "SPI.h"
 
-#define GPS_SERIAL_DEBUG
+//#define GPS_SERIAL_DEBUG
 
 //Constructor
 ZOEM8Q0::ZOEM8Q0() {
