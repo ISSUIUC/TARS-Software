@@ -83,6 +83,7 @@ void logData(File* dataFile, dataStruct_t* data, FSM_State rocketState) {
     dataFile->print(rocketState);
     dataFile->print(",");
     dataFile->print(data->timeStamp);
+    dataFile->print("\n");
 
     //Writing line of data to SD card
     dataFile->flush();
