@@ -13,7 +13,7 @@
 #include "thresholds.h"
 #include "pins.h"
 
-#define THREAD_DEBUG
+//#define THREAD_DEBUG
 //#define IMU_DEBUG
 //#define GPS_DEBUG
 
@@ -131,8 +131,8 @@ void chSetup(){
 }
 
 void setup() {
-  Serial.begin(115200);
-  while (!Serial) {}
+  //Serial.begin(115200);
+  //while (!Serial) {}
 
   pinMode(LED_BLUE, OUTPUT);
   digitalWrite(LED_BLUE, HIGH);
