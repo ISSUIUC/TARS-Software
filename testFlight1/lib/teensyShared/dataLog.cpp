@@ -47,86 +47,42 @@ void init_dataLog(File* dataFile) {
 
 void logData(File* dataFile, dataStruct_t* data, FSM_State rocketState) {
 
-    char buffer[400];
+    //TODO: make this just use one print
+    dataFile->print(data->ax);
+    dataFile->print(",");
+    dataFile->print(data->ay);
+    dataFile->print(",");
+    dataFile->print(data->az);
+    dataFile->print(",");
+    dataFile->print(data->gx);
+    dataFile->print(",");
+    dataFile->print(data->gy);
+    dataFile->print(",");
+    dataFile->print(data->gz);
+    dataFile->print(",");
+    dataFile->print(data->mx);
+    dataFile->print(",");
+    dataFile->print(data->my);
+    dataFile->print(",");
+    dataFile->print(data->mz);
+    dataFile->print(",");
+    //!highG imu data
+    dataFile->print(data->hg_ax);
+    dataFile->print(",");
+    dataFile->print(data->hg_ay);
+    dataFile->print(",");
+    dataFile->print(data->hg_az);
+    dataFile->print(",");
 
-    char buffer1[100];
-    snprintf(buffer1,4, "%f, ", data->ax);
-    strcat(buffer, buffer1);
-    sprintf(buffer1, "%f, ", data->ay);
-    strcat(buffer, buffer1);
-    sprintf(buffer1, "%f, ", data->az);
-    strcat(buffer, buffer1);
-
-    sprintf(buffer1, "%f, ", data->gx);
-    strcat(buffer, buffer1);
-    sprintf(buffer1, "%f, ", data->gy);
-    strcat(buffer, buffer1);
-    sprintf(buffer1, "%f, ", data->gz);
-    strcat(buffer, buffer1);
-
-    sprintf(buffer1, "%f, ", data->mx);
-    strcat(buffer, buffer1);
-    sprintf(buffer1, "%f, ", data->my);
-    strcat(buffer, buffer1);
-    sprintf(buffer1, "%f, ", data->mz);
-    strcat(buffer, buffer1);
-
-    sprintf(buffer1, "%f, ", data->hg_ax);
-    strcat(buffer, buffer1);
-    sprintf(buffer1, "%f, ", data->hg_ay);
-    strcat(buffer, buffer1);
-    sprintf(buffer1, "%f, ", data->hg_az);
-    strcat(buffer, buffer1);
-
-    sprintf(buffer1, "%f, ", data->latitude);
-    strcat(buffer, buffer1);
-    sprintf(buffer1, "%f, ", data->longitude);
-    strcat(buffer, buffer1);
-    sprintf(buffer1, "%f, ", data->altitude);
-    strcat(buffer, buffer1);
-
-    switch(rocketState){
-        case STATE_INIT:
-            strcat(buffer, "STATE_INIT, ");
-            break;
-        case STATE_IDLE:
-            strcat(buffer, "STATE_IDLE, ");
-            break;
-        case STATE_LAUNCH_DETECT:
-            strcat(buffer, "STATE_LAUNCH_DETECT, ");
-            break;
-        case STATE_BOOST:
-            strcat(buffer, "STATE_BOOST, ");
-            break;
-        case STATE_BURNOUT_DETECT:
-            strcat(buffer, "STATE_BURNOUT_DETECT, ");
-            break;
-        case STATE_COAST:
-            strcat(buffer, "STATE_COAST, ");
-            break;
-        case STATE_APOGEE_DETECT:
-            strcat(buffer, "STATE_APOGEE_DETECT, ");
-            break;
-        case STATE_APOGEE:
-            strcat(buffer, "STATE_APOGEE, ");
-            break;
-        case STATE_DROGUE:
-            strcat(buffer, "STATE_DROGUE, ");
-            break;
-        case STATE_MAIN:
-            strcat(buffer, "STATE_MAIN, ");
-            break;
-        default:
-            strcat(buffer, "bruh, ");
-            break;
-    }
-
-    __itoa(data->timeStamp, buffer1, 10);
-    strcat(buffer, buffer1);
-    strcat(buffer, "\n");
-
-    //Serial.println(buffer);
-    dataFile->print(buffer);
+    dataFile->print(data->latitude);
+    dataFile->print(",");
+    dataFile->print(data->longitude);
+    dataFile->print(",");
+    dataFile->print(data->altitude);
+    dataFile->print(",");
+    dataFile->print(rocketState);
+    dataFile->print(",");
+    dataFile->print(data->timeStamp);
 
     //Writing line of data to SD card
     dataFile->flush();
