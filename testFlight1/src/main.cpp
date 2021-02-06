@@ -13,14 +13,14 @@
 #include "thresholds.h"
 #include "pins.h"
 
-//#define THREAD_DEBUG
+#define THREAD_DEBUG
 //#define IMU_DEBUG
 //#define GPS_DEBUG
 
 //changed name to account for both high & lowG (logGData)
 dataStruct_t sensorData;
 
-FSM_State rocketState;
+FSM_State rocketState = STATE_INIT;
 
 File dataFile;
 
@@ -28,7 +28,7 @@ KX134 highGimu;
 LSM9DS1 lowGimu;
 ZOEM8Q0 gps = ZOEM8Q0();
 
-static THD_WORKING_AREA(sensor_WA, 256);
+static THD_WORKING_AREA(sensor_WA, 512);
 
 static THD_FUNCTION(sensor_THD, arg){
   (void)arg;
@@ -117,7 +117,7 @@ static THD_FUNCTION(sensor_THD, arg){
       Serial.println(sensorData.altitude);
       Serial.println("");
     #endif
-    //chThdSleepMilliseconds(6); // Sensor DAQ @ ~100 Hz
+    chThdSleepMilliseconds(6); // Sensor DAQ @ ~100 Hz
 
     logData(&dataFile, &sensorData, rocketState);
 
@@ -134,15 +134,18 @@ void setup() {
   Serial.begin(115200);
   while (!Serial) {}
 
-  rocketState = STATE_IDLE;
+  pinMode(LED_BLUE, OUTPUT);
+  digitalWrite(LED_BLUE, HIGH);
 
   //lowGimu setup
   if (lowGimu.beginSPI(LSM9DS1_AG_CS, LSM9DS1_M_CS) == false) // note, we need to sent this our CS pins (defined above)
   {
     digitalWrite(LED_RED, HIGH);
     Serial.println("Failed to communicate with LSM9DS1. Stalling Program");
-    while (1);
+    while (true);
   }
+
+  lowGimu.setAccelScale(16);
   
   //GPS Setup
  	gps.beginSPI(ZOEM8Q0_CS);

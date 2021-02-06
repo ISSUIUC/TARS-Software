@@ -40,7 +40,7 @@ void init_dataLog(File* dataFile) {
 
     Serial.println(fileName);
     *dataFile = SD.open(fileName, O_CREAT | O_WRITE | O_TRUNC);
-    dataFile->println("ax, ay, az, gx, gy, gz, mx, my, mz, hg_ax, hg_ay, hg_az, rocketState, timeStamp");
+    dataFile->println("ax, ay, az, gx, gy, gz, mx, my, mz, hg_ax, hg_ay, hg_az, latitude, longitude, altitude, rocketState, timeStamp");
 
 }
 
@@ -74,15 +74,16 @@ void logData(File* dataFile, dataStruct_t* data, FSM_State rocketState) {
     dataFile->print(data->hg_az);
     dataFile->print(",");
 
-    // dataFile->print(data->pt1);
-    // dataFile->print(",");
-    // dataFile->print(data->pt2);
-    // dataFile->print(",");
-    // dataFile->print(data->pt3);
-    // dataFile->print(",");
+    dataFile->print(data->latitude);
+    dataFile->print(",");
+    dataFile->print(data->longitude);
+    dataFile->print(",");
+    dataFile->print(data->altitude);
+    dataFile->print(",");
     dataFile->print(rocketState);
     dataFile->print(",");
     dataFile->print(data->timeStamp);
+    dataFile->print("\n");
 
     //Writing line of data to SD card
     dataFile->flush();
