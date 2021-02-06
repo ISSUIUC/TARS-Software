@@ -144,6 +144,8 @@ void setup() {
     Serial.println("Failed to communicate with LSM9DS1. Stalling Program");
     while (true);
   }
+
+  lowGimu.setAccelScale(16);
   
   //GPS Setup
  	gps.beginSPI(ZOEM8Q0_CS);
