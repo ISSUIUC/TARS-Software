@@ -47,10 +47,10 @@ void init_dataLog(File* dataFile) {
 
 void logData(File* dataFile, dataStruct_t* data, FSM_State rocketState) {
 
-    char buffer[200];
+    char buffer[400];
 
-    char buffer1[50];
-    sprintf(buffer1, "%f, ", data->ax);
+    char buffer1[100];
+    snprintf(buffer1,4, "%f, ", data->ax);
     strcat(buffer, buffer1);
     sprintf(buffer1, "%f, ", data->ay);
     strcat(buffer, buffer1);
@@ -123,7 +123,9 @@ void logData(File* dataFile, dataStruct_t* data, FSM_State rocketState) {
 
     __itoa(data->timeStamp, buffer1, 10);
     strcat(buffer, buffer1);
+    strcat(buffer, "\n");
 
+    //Serial.println(buffer);
     dataFile->print(buffer);
 
     //Writing line of data to SD card
