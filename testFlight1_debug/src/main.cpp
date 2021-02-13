@@ -45,7 +45,7 @@ static THD_FUNCTION(sensor_THD, arg){
     lowGimu.readGyro();
     lowGimu.readMag();
     highGimu.update_data();
-    chSysLock();
+    chSysUnlock();
 
     //acceleration in Gs
     sensorData.ax = lowGimu.calcAccel(lowGimu.ax);
@@ -82,7 +82,7 @@ static THD_FUNCTION(sensor_THD, arg){
 
     chSysLock();
     gps.update_data();
-    chSysLock();
+    chSysUnlock();
 
     //Have the availability to wait until a lock is aquired with gps.get_position_lock();
     sensorData.latitude = gps.get_latitude();
