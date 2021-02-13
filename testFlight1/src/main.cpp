@@ -35,7 +35,7 @@ ZOEM8Q0 gps = ZOEM8Q0();
 
 
 static THD_WORKING_AREA(sensor_WA, 256);
-static THD_WORKING_AREA(play_WA, 256);
+static THD_WORKING_AREA(rocket_FSM_WA, 256);
 
 static THD_FUNCTION(sensor_THD, arg){
   (void)arg;
@@ -50,11 +50,15 @@ static THD_FUNCTION(sensor_THD, arg){
     //!locking data from sensorData struct
     chMtxLock(&dataMutex);
 
+    chSysLock();
     lowGimu.readAccel();
     lowGimu.readGyro();
     lowGimu.readMag();
+    chSysUnlock();
 
+    chSysLock();
     highGimu.update_data();
+    chSysUnlock();
 
     //acceleration in Gs
     sensorData.ax = lowGimu.calcAccel(lowGimu.ax);
@@ -104,9 +108,11 @@ static THD_FUNCTION(sensor_THD, arg){
 
     //gps.update_data();
     //Have the availability to wait until a lock is aquired with gps.get_position_lock();
+    chSysLock();
     sensorData.latitude = gps.get_latitude();
     sensorData.longitude = gps.get_longitude();
     sensorData.altitude = gps.get_altitude();
+    chSysUnlock();
 
     #ifdef GPS_DEBUG
       bool position_lock = gps.get_position_lock();
@@ -127,7 +133,7 @@ static THD_FUNCTION(sensor_THD, arg){
         Serial.println(sensorData.longitude);
         Serial.print("Altitude: ");
         Serial.println(sensorData.altitude);
-	Serial.println("");
+	      Serial.println("");
       }
     #endif
     //chThdSleepMilliseconds(6); // Sensor DAQ @ ~100 Hz
@@ -147,49 +153,124 @@ static THD_FUNCTION(sensor_THD, arg){
 }
 
 
-static THD_FUNCTION(play_THD, arg){
+static THD_FUNCTION(rocket_FSM, arg){
   (void)arg;
 
   #ifdef THREAD_DEBUG
-    Serial.println("### play thread entrance");
+    Serial.println("### Rocket FSM thread entrance");
   #endif
 
   while(true){
-    //!locking mutex to get data from sensorData struct
-    chMtxLock(&dataMutex);
 
-    #ifdef PLAY_DEBUG
-      //! taking the data from sensorData and multiplying by 69
-      //!nice
-      Serial.println("------------ Play thread -------------");
-      Serial.print(sensorData.ax * 69);
-      Serial.print(", ");
-      Serial.print(sensorData.ay * 69);
-      Serial.print(", ");
-      Serial.print(sensorData.az * 69);
-      Serial.print(", ");
-      Serial.print(sensorData.gx * 69);
-      Serial.print(", ");
-      Serial.print(sensorData.gy * 69);
-      Serial.print(", ");
-      Serial.print(sensorData.gz * 69);
-      Serial.print(", ");
-      Serial.print(sensorData.mx * 69);
-      Serial.print(", ");
-      Serial.print(sensorData.my * 69);
-      Serial.print(", ");
-      Serial.print(sensorData.mz * 69);
-      Serial.print(", ");
-      //high g data
-      Serial.print(sensorData.hg_ax * 69);
-      Serial.print(", ");
-      Serial.print(sensorData.hg_ay * 69);
-      Serial.print(", ");
-      Serial.println(sensorData.hg_az * 69);
-    #endif
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        // TODO - Acquire lock on data struct!
 
-    //!unlocking &dataMutex mutex
-    chMtxUnlock(&dataMutex);
+        switch (rocketState) {
+            case STATE_INIT:
+                // TODO
+            break;
+
+            case STATE_IDLE:
+
+                // If high acceleration is observed in z direction...
+                //!locking mutex to get data from sensorData struct
+                chMtxLock(&dataMutex);
+                if(sensorData.az > launch_az_thresh) {
+                    fsm_states.launch_time = chVTGetSystemTime();
+                    rocketState = STATE_LAUNCH_DETECT;
+                }
+                //!unlocking &dataMutex mutex
+                chMtxUnlock(&dataMutex);
+
+            break;
+
+            case STATE_LAUNCH_DETECT:
+
+                //If the acceleration was too brief, go back to IDLE
+                //!locking mutex to get data from sensorData struct
+                chMtxLock(&dataMutex);
+                if (sensorData.az < launch_az_thresh) {
+                    rocketState = STATE_IDLE;
+                    break;
+                }
+                //!unlocking &dataMutex mutex
+                chMtxUnlock(&dataMutex);
+
+                // measure the length of the burn time (for hysteresis)
+                fsm_states.burn_timer =
+                    chVTGetSystemTime() - fsm_states.launch_time;
+
+                // If the acceleration lasts long enough, boost is detected
+                if (fsm_states.burn_timer > launch_time_thresh) {
+                    rocketState = STATE_BOOST;
+                    digitalWrite(LED_ORANGE, HIGH);
+                }
+
+            break;
+
+            case STATE_BOOST:
+
+            // If low acceleration in the Z direction...
+            //!locking mutex to get data from sensorData struct
+            chMtxLock(&dataMutex);
+            if (sensorData.az < coast_thresh) {
+                fsm_states.burnout_time = chVTGetSystemTime();
+                rocketState = STATE_BURNOUT_DETECT;
+            }
+            //!unlocking &dataMutex mutex
+            chMtxUnlock(&dataMutex);
+
+            break;
+
+            case STATE_BURNOUT_DETECT:
+
+                //If the low acceleration was too brief, go back to BOOST
+                //!locking mutex to get data from sensorData struct
+                chMtxLock(&dataMutex);
+                if (sensorData.az > coast_thresh) {
+                    rocketState = STATE_BOOST;
+                    break;
+                }
+                //!unlocking &dataMutex mutex
+                chMtxUnlock(&dataMutex);
+
+                // measure the length of the coast time (for hysteresis)
+                fsm_states.coast_timer =
+                    chVTGetSystemTime() - fsm_states.burnout_time;
+
+                // If the low acceleration lasts long enough, coast is detected
+                if (fsm_states.coast_timer > coast_time_thresh) {
+                    rocketState = STATE_BOOST;
+                }
+
+            break;
+
+            case STATE_COAST:
+                // TODO
+            break;
+
+            case STATE_APOGEE_DETECT:
+                // TODO
+            break;
+
+            case STATE_APOGEE:
+                // TODO
+            break;
+
+            case STATE_DROGUE:
+                // TODO
+            break;
+
+            case STATE_MAIN:
+                // TODO
+            break;
+
+
+        }
+
+        chThdSleepMilliseconds(10); // FSM runs at 100 Hz
+    }
+
   }
 
 }
@@ -198,7 +279,7 @@ static THD_FUNCTION(play_THD, arg){
 void chSetup(){
   //added play_THD for creation
   chThdCreateStatic(sensor_WA, sizeof(sensor_WA), NORMALPRIO, sensor_THD, NULL);
-  chThdCreateStatic(play_WA, sizeof(play_WA), NORMALPRIO, play_THD, NULL);
+  chThdCreateStatic(rocket_FSM_WA, sizeof(rocket_FSM_WA), NORMALPRIO, rocket_FSM, NULL);
   while(true);
 }
 
