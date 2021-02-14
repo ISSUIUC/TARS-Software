@@ -40,7 +40,7 @@ void init_dataLog(File* dataFile) {
 
     Serial.println(fileName);
     *dataFile = SD.open(fileName, O_CREAT | O_WRITE | O_TRUNC);
-    dataFile->println("ax, ay, az, gx, gy, gz, mx, my, mz, hg_ax, hg_ay, hg_az, latitude, longitude, altitude, rocketState, timeStamp");
+    dataFile->println("ax, ay, az, gx, gy, gz, mx, my, mz, hg_ax, hg_ay, hg_az, latitude, longitude, altitude, rocketState, GPS Lock, timeStamp");
 
 }
 
