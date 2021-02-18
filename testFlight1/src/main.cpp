@@ -26,6 +26,7 @@ static MUTEX_DECL(dataMutex);
 dataStruct_t sensorData;
 
 FSM_State rocketState;
+fsm_struct rocketTimers;
 
 File dataFile;
 
@@ -176,7 +177,7 @@ static THD_FUNCTION(rocket_FSM, arg){
                 //!locking mutex to get data from sensorData struct
                 chMtxLock(&dataMutex);
                 if(sensorData.az > launch_az_thresh) {
-                    fsm_states.launch_time = chVTGetSystemTime();
+                    rocketTimers.launch_time = chVTGetSystemTime();
                     rocketState = STATE_LAUNCH_DETECT;
                 }
                 //!unlocking &dataMutex mutex
@@ -197,11 +198,11 @@ static THD_FUNCTION(rocket_FSM, arg){
                 chMtxUnlock(&dataMutex);
 
                 // measure the length of the burn time (for hysteresis)
-                fsm_states.burn_timer =
-                    chVTGetSystemTime() - fsm_states.launch_time;
+                rocketTimers.burn_timer =
+                    chVTGetSystemTime() - rocketTimers.launch_time;
 
                 // If the acceleration lasts long enough, boost is detected
-                if (fsm_states.burn_timer > launch_time_thresh) {
+                if (rocketTimers.burn_timer > launch_time_thresh) {
                     rocketState = STATE_BOOST;
                     digitalWrite(LED_ORANGE, HIGH);
                 }
@@ -214,7 +215,7 @@ static THD_FUNCTION(rocket_FSM, arg){
             //!locking mutex to get data from sensorData struct
             chMtxLock(&dataMutex);
             if (sensorData.az < coast_thresh) {
-                fsm_states.burnout_time = chVTGetSystemTime();
+                rocketTimers.burnout_time = chVTGetSystemTime();
                 rocketState = STATE_BURNOUT_DETECT;
             }
             //!unlocking &dataMutex mutex
@@ -235,11 +236,11 @@ static THD_FUNCTION(rocket_FSM, arg){
                 chMtxUnlock(&dataMutex);
 
                 // measure the length of the coast time (for hysteresis)
-                fsm_states.coast_timer =
-                    chVTGetSystemTime() - fsm_states.burnout_time;
+                rocketTimers.coast_timer =
+                    chVTGetSystemTime() - rocketTimers.burnout_time;
 
                 // If the low acceleration lasts long enough, coast is detected
-                if (fsm_states.coast_timer > coast_time_thresh) {
+                if (rocketTimers.coast_timer > coast_time_thresh) {
                     rocketState = STATE_BOOST;
                 }
 
@@ -269,7 +270,6 @@ static THD_FUNCTION(rocket_FSM, arg){
         }
 
         chThdSleepMilliseconds(10); // FSM runs at 100 Hz
-    }
 
   }
 
