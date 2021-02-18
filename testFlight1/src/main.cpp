@@ -204,7 +204,7 @@ static THD_FUNCTION(rocket_FSM, arg){
                 // If the acceleration lasts long enough, boost is detected
                 if (rocketTimers.burn_timer > launch_time_thresh) {
                     rocketState = STATE_BOOST;
-                    digitalWrite(LED_ORANGE, HIGH);
+                    digitalWrite(LED_RED, HIGH);
                 }
 
             break;
@@ -266,13 +266,10 @@ static THD_FUNCTION(rocket_FSM, arg){
                 // TODO
             break;
 
-
         }
 
         chThdSleepMilliseconds(10); // FSM runs at 100 Hz
-
   }
-
 }
 
 
