@@ -6,7 +6,7 @@
 
 #include "SparkFunLSM9DS1.h" //Low-G IMU Library
 #include "KX134-1211.h" //High-G IMU Library
-#include "ZOEM8Q0.hpp" //GPS Library
+#include "ZOEM8Q0.h" //GPS Library
 #include "hybridShared.h"
 #include "acShared.h"
 #include "dataLog.h"
@@ -25,7 +25,7 @@ static MUTEX_DECL(dataMutex);
 //changed name to account for both high & lowG (logGData)
 dataStruct_t sensorData;
 
-FSM_State rocketState;
+FSM_State rocketState = STATE_INIT;
 fsm_struct rocketTimers;
 
 File dataFile;
@@ -40,8 +40,6 @@ static THD_WORKING_AREA(rocket_FSM_WA, 256);
 
 static THD_FUNCTION(sensor_THD, arg){
   (void)arg;
-
-
 
   #ifdef THREAD_DEBUG
     Serial.println("### data thread entrance");
@@ -107,13 +105,22 @@ static THD_FUNCTION(sensor_THD, arg){
       Serial.println(sensorData.hg_az);
     #endif
 
-    //gps.update_data();
-    //Have the availability to wait until a lock is aquired with gps.get_position_lock();
     chSysLock();
+    gps.update_data();
+
+
+    //Have the availability to wait until a lock is aquired with gps.get_position_lock();
     sensorData.latitude = gps.get_latitude();
     sensorData.longitude = gps.get_longitude();
     sensorData.altitude = gps.get_altitude();
+    sensorData.posLock = gps.get_position_lock();
     chSysUnlock();
+
+    if(sensorData.posLock == true){
+      digitalWrite(LED_ORANGE, HIGH);
+    }else{
+      digitalWrite(LED_ORANGE, LOW);
+    }
 
     #ifdef GPS_DEBUG
       bool position_lock = gps.get_position_lock();
@@ -139,8 +146,7 @@ static THD_FUNCTION(sensor_THD, arg){
     #endif
     //chThdSleepMilliseconds(6); // Sensor DAQ @ ~100 Hz
 
-    //TODO: uncomment
-    //logData(&dataFile, &sensorData, rocketState);
+    logData(&dataFile, &sensorData, rocketState);
 
     Serial.println("pre-unlock");
 
@@ -268,7 +274,7 @@ static THD_FUNCTION(rocket_FSM, arg){
 
         }
 
-        chThdSleepMilliseconds(10); // FSM runs at 100 Hz
+        //chThdSleepMilliseconds(10); // FSM runs at 100 Hz
   }
 }
 
@@ -281,21 +287,31 @@ void chSetup(){
 }
 
 void setup() {
-  Serial.begin(115200);
+  #if defined(THREAD_DEBUG) || defined(IMU_DEBUG) || defined(GPS_DEBUG)
+    Serial.begin(115200);
+    while (!Serial) {}
+  #endif
 
-  while (!Serial) {}
+  pinMode(LED_BLUE, OUTPUT);
+  pinMode(LED_RED, OUTPUT);
+  pinMode(LED_ORANGE, OUTPUT);
+  pinMode(LED_WHITE, OUTPUT);
+
+  digitalWrite(LED_BLUE, HIGH);
+  digitalWrite(LED_ORANGE, HIGH);
 
   //TODO: Don't forget this
   Serial.println("------------------------------------------------");
-  rocketState = STATE_IDLE;
 
   //lowGimu setup
   if (lowGimu.beginSPI(LSM9DS1_AG_CS, LSM9DS1_M_CS) == false) // note, we need to sent this our CS pins (defined above)
   {
     digitalWrite(LED_RED, HIGH);
     Serial.println("Failed to communicate with LSM9DS1. Stalling Program");
-    while (1);
+    while (true);
   }
+
+  lowGimu.setAccelScale(16);
   
   //GPS Setup
  	gps.beginSPI(ZOEM8Q0_CS);

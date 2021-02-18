@@ -1,4 +1,4 @@
-#include "ZOEM8Q0.hpp"
+#include "ZOEM8Q0.h"
 #include "Arduino.h"
 #include "SPI.h"
 
@@ -11,11 +11,6 @@ ZOEM8Q0::ZOEM8Q0() {
     latitude = 0;
     longitude = 0;
     altitude = 0;
-}
-
-//Destructor
-ZOEM8Q0::~ZOEM8Q0() {
-
 }
 
 void ZOEM8Q0::beginSPI(uint16_t CS_pin) {
@@ -35,9 +30,6 @@ void ZOEM8Q0::initSPI(uint16_t CS_pin) {
     // Clock starting position is low.
     // Data is recieved on falling edge of clock
     SPI.setDataMode(SPI_MODE0);
-
-    //transferData
-    process_GPS_NMEA(ZOEM8Q0_CS);
 }
 
 void ZOEM8Q0::endSPI() {
@@ -56,7 +48,6 @@ bool ZOEM8Q0::process_GPS_NMEA(uint16_t CS_pin) {
 
     // select GPS chip
     digitalWrite(CS_pin, LOW);
-    //delayMicroseconds(1);
 
     SPI.transfer(0x80 | 0xA2);
 
@@ -133,13 +124,14 @@ bool ZOEM8Q0::process_GPS_NMEA(uint16_t CS_pin) {
     }
 
     digitalWrite(CS_pin, HIGH);
-
-    #ifdef GPS_SERIAL_DEBUG
+    
+#ifdef GPS_SERIAL_DEBUG
     //Printing XXGGA Message if it is detected
     for (int i = 0; i < buffer_idx; ++i) {
         Serial.print((char) buffer[i]);
     }
-    #endif
+#endif
+   
     if (parser_state == END_DETECTED) {
         position_lock = decode_xxgga_sentence(buffer, buffer_idx);
 #ifdef GPS_SERIAL_DEBUG
@@ -160,13 +152,13 @@ bool ZOEM8Q0::process_GPS_NMEA(uint16_t CS_pin) {
     return (parser_state == END_DETECTED);
 
 }
+
 char* ZOEM8Q0::arr_substring(uint8_t* buffer, int start, int end) {
     int len = end - start;
     char* data = new char[len];
     for (int i = 0; i < len; i++) {
-        data[i] = *(buffer + start + i);
+        data[i] = buffer[start + i];
     }
-    data[len] = '\0';
     return data;
 }
 
@@ -223,16 +215,18 @@ bool ZOEM8Q0::decode_xxgga_sentence(uint8_t *buffer, uint16_t dataLength){
         } else {
             continue;
         }
-
     }
     char* lat = arr_substring(buffer, lat_start, lat_end);
     nmea_data.std_lat = (float)atof(lat);
+    delete[] lat;
 
     char* lon = arr_substring(buffer, lon_start, lon_end);
     nmea_data.std_lon = (float)atof(lon);
+    delete[] lon;
 
     char* ht = arr_substring(buffer, ht_start, ht_end);
     nmea_data.height = (float)atof(ht);
+    delete[] ht;
 
     //position fix is anything other than 0 since we made it though the loop without returning false
     return true;
