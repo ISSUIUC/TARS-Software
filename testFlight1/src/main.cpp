@@ -20,7 +20,7 @@ static MUTEX_DECL(dataMutex);
 #define PLAY_DEBUG
 #define THREAD_DEBUG
 #define IMU_DEBUG
-//#define GPS_DEBUG
+#define GPS_DEBUG
 
 //changed name to account for both high & lowG (logGData)
 dataStruct_t sensorData;
@@ -75,6 +75,7 @@ static THD_FUNCTION(sensor_THD, arg){
     sensorData.hg_ax = highGimu.get_x_gforce();
     sensorData.hg_ay = highGimu.get_y_gforce();
     sensorData.hg_az = highGimu.get_z_gforce();
+
     sensorData.timeStamp = chVTGetSystemTime();
 
     #ifdef IMU_DEBUG
@@ -107,14 +108,14 @@ static THD_FUNCTION(sensor_THD, arg){
 
     chSysLock();
     gps.update_data();
-
+    chSysUnlock();
 
     //Have the availability to wait until a lock is aquired with gps.get_position_lock();
     sensorData.latitude = gps.get_latitude();
     sensorData.longitude = gps.get_longitude();
     sensorData.altitude = gps.get_altitude();
     sensorData.posLock = gps.get_position_lock();
-    chSysUnlock();
+    
 
     if(sensorData.posLock == true){
       digitalWrite(LED_ORANGE, HIGH);
@@ -155,7 +156,7 @@ static THD_FUNCTION(sensor_THD, arg){
 
     Serial.println("post-unlock");
 
-    //chThdSleepMilliseconds(6); // Sensor DAQ @ ~100 Hz
+    chThdSleepMilliseconds(6); // Sensor DAQ @ ~100 Hz
   }
 }
 
@@ -163,11 +164,11 @@ static THD_FUNCTION(sensor_THD, arg){
 static THD_FUNCTION(rocket_FSM, arg){
   (void)arg;
 
+  while(true){
+  
   #ifdef THREAD_DEBUG
     Serial.println("### Rocket FSM thread entrance");
   #endif
-
-  while(true){
 
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         // TODO - Acquire lock on data struct!
@@ -274,7 +275,7 @@ static THD_FUNCTION(rocket_FSM, arg){
 
         }
 
-        //chThdSleepMilliseconds(10); // FSM runs at 100 Hz
+        chThdSleepMilliseconds(6); // FSM runs at 100 Hz
   }
 }
 
@@ -282,12 +283,12 @@ static THD_FUNCTION(rocket_FSM, arg){
 void chSetup(){
   //added play_THD for creation
   chThdCreateStatic(sensor_WA, sizeof(sensor_WA), NORMALPRIO, sensor_THD, NULL);
-  chThdCreateStatic(rocket_FSM_WA, sizeof(rocket_FSM_WA), NORMALPRIO, rocket_FSM, NULL);
+  chThdCreateStatic(rocket_FSM_WA, sizeof(rocket_FSM_WA), NORMALPRIO , rocket_FSM, NULL);
   while(true);
 }
 
 void setup() {
-  #if defined(THREAD_DEBUG) || defined(IMU_DEBUG) || defined(GPS_DEBUG)
+  #if defined(THREAD_DEBUG) || defined(IMU_DEBUG) || defined(GPS_DEBUG) || defined (PLAY_DEBUG)
     Serial.begin(115200);
     while (!Serial) {}
   #endif
