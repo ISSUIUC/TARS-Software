@@ -19,8 +19,8 @@ static MUTEX_DECL(dataMutex);
 
 #define PLAY_DEBUG
 #define THREAD_DEBUG
-#define IMU_DEBUG
-#define GPS_DEBUG
+//#define IMU_DEBUG
+//#define GPS_DEBUG
 
 //changed name to account for both high & lowG (logGData)
 dataStruct_t sensorData;
@@ -37,41 +37,23 @@ ZOEM8Q0 gps = ZOEM8Q0();
 
 static THD_WORKING_AREA(sensor_WA, 256);
 static THD_WORKING_AREA(rocket_FSM_WA, 256);
-// static THD_WORKING_AREA(lowgIMU_WA, 256);
+static THD_WORKING_AREA(lowgIMU_WA, 256);
 
 static THD_FUNCTION(sensor_THD, arg){
   (void)arg;
-
-  #ifdef THREAD_DEBUG
-    Serial.println("### data thread entrance");
-  #endif
-  
   while(true){
+    
+    #ifdef THREAD_DEBUG
+      Serial.println("### data thread entrance");
+    #endif
+
     //!locking data from sensorData struct
     chMtxLock(&dataMutex);
-
-    chSysLock();
-    lowGimu.readAccel();
-    lowGimu.readGyro();
-    lowGimu.readMag();
-    chSysUnlock();
 
     chSysLock();
     highGimu.update_data();
     chSysUnlock();
 
-    //acceleration in Gs
-    sensorData.ax = lowGimu.calcAccel(lowGimu.ax);
-    sensorData.ay = lowGimu.calcAccel(lowGimu.ay);
-    sensorData.az = lowGimu.calcAccel(lowGimu.az); //There was a minus here. We don't know why that did that
-    //rotational speed in degrees per second
-    sensorData.gx = lowGimu.calcGyro(lowGimu.gx);
-    sensorData.gy = lowGimu.calcGyro(lowGimu.gy);
-    sensorData.gz = lowGimu.calcGyro(lowGimu.gz);
-    //magnatometer data in gauss 
-    sensorData.mx = lowGimu.calcMag(lowGimu.mx);
-    sensorData.my = lowGimu.calcMag(lowGimu.my);
-    sensorData.mz = lowGimu.calcMag(lowGimu.mz);
     //addition for highG IMU
     sensorData.hg_ax = highGimu.get_x_gforce();
     sensorData.hg_ay = highGimu.get_y_gforce();
@@ -81,24 +63,6 @@ static THD_FUNCTION(sensor_THD, arg){
 
     #ifdef IMU_DEBUG
       Serial.println("------------- IMU THREAD ---------------");
-      Serial.print(sensorData.ax);
-      Serial.print(", ");
-      Serial.print(sensorData.ay);
-      Serial.print(", ");
-      Serial.print(sensorData.az);
-      Serial.print(", ");
-      Serial.print(sensorData.gx);
-      Serial.print(", ");
-      Serial.print(sensorData.gy);
-      Serial.print(", ");
-      Serial.print(sensorData.gz);
-      Serial.print(", ");
-      Serial.print(sensorData.mx);
-      Serial.print(", ");
-      Serial.print(sensorData.my);
-      Serial.print(", ");
-      Serial.print(sensorData.mz);
-      Serial.print(", ");
       //high g data
       Serial.print(sensorData.hg_ax);
       Serial.print(", ");
@@ -161,25 +125,71 @@ static THD_FUNCTION(sensor_THD, arg){
   }
 }
 
-// static THD_FUNCTION(lowGimu, arg) {
-/*  (void)arg;
-
+static THD_FUNCTION(lowgIMU_THD, arg) {
+  (void)arg;
   while(true){
-  
-  #ifdef THREAD_DEBUG
-    Serial.println("### Low G IMU thread entrance");
-  #endif
+
+    #ifdef THREAD_DEBUG
+      Serial.println("### Low G IMU thread entrance");
+    #endif
+
+    chMtxLock(&dataMutex);
+
+    chSysLock();
+    lowGimu.readAccel();
+    lowGimu.readGyro();
+    lowGimu.readMag();
+    chSysUnlock();
+
+    //acceleration in Gs
+    sensorData.ax = lowGimu.calcAccel(lowGimu.ax);
+    sensorData.ay = lowGimu.calcAccel(lowGimu.ay);
+    sensorData.az = lowGimu.calcAccel(lowGimu.az); //There was a minus here. We don't know why that did that
+    //rotational speed in degrees per second
+    sensorData.gx = lowGimu.calcGyro(lowGimu.gx);
+    sensorData.gy = lowGimu.calcGyro(lowGimu.gy);
+    sensorData.gz = lowGimu.calcGyro(lowGimu.gz);
+    //magnatometer data in gauss 
+    sensorData.mx = lowGimu.calcMag(lowGimu.mx);
+    sensorData.my = lowGimu.calcMag(lowGimu.my);
+    sensorData.mz = lowGimu.calcMag(lowGimu.mz);
+
+    #ifdef IMU_DEBUG
+      Serial.println("------------- IMU THREAD ---------------");
+      Serial.print(sensorData.ax);
+      Serial.print(", ");
+      Serial.print(sensorData.ay);
+      Serial.print(", ");
+      Serial.print(sensorData.az);
+      Serial.print(", ");
+      Serial.print(sensorData.gx);
+      Serial.print(", ");
+      Serial.print(sensorData.gy);
+      Serial.print(", ");
+      Serial.print(sensorData.gz);
+      Serial.print(", ");
+      Serial.print(sensorData.mx);
+      Serial.print(", ");
+      Serial.print(sensorData.my);
+      Serial.print(", ");
+      Serial.print(sensorData.mz);
+      Serial.print(", ");
+    #endif
+
+    chMtxUnlock(&dataMutex);
+
+    chThdSleepMilliseconds(6);
+  }
 }
-*/
+
 
 static THD_FUNCTION(rocket_FSM, arg){
   (void)arg;
-
   while(true){
-  
-  #ifdef THREAD_DEBUG
-    Serial.println("### Rocket FSM thread entrance");
-  #endif
+
+    #ifdef THREAD_DEBUG
+      Serial.println("### Rocket FSM thread entrance");
+    #endif
 
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         // TODO - Acquire lock on data struct!
@@ -286,8 +296,11 @@ static THD_FUNCTION(rocket_FSM, arg){
 
 void chSetup(){
   //added play_THD for creation
+  chMtxUnlock(&dataMutex);
+
+  chThdCreateStatic(rocket_FSM_WA, sizeof(rocket_FSM_WA), NORMALPRIO, rocket_FSM, NULL);
   chThdCreateStatic(sensor_WA, sizeof(sensor_WA), NORMALPRIO, sensor_THD, NULL);
-  chThdCreateStatic(rocket_FSM_WA, sizeof(rocket_FSM_WA), NORMALPRIO , rocket_FSM, NULL);
+  chThdCreateStatic(lowgIMU_WA, sizeof(lowgIMU_WA), NORMALPRIO, lowgIMU_THD, NULL);
   while(true);
 }
 
