@@ -35,9 +35,9 @@ LSM9DS1 lowGimu;
 ZOEM8Q0 gps = ZOEM8Q0();
 
 
-static THD_WORKING_AREA(sensor_WA, 256);
-static THD_WORKING_AREA(rocket_FSM_WA, 256);
-static THD_WORKING_AREA(lowgIMU_WA, 256);
+static THD_WORKING_AREA(sensor_WA, 512);
+static THD_WORKING_AREA(rocket_FSM_WA, 512);
+static THD_WORKING_AREA(lowgIMU_WA, 512);
 
 static THD_FUNCTION(sensor_THD, arg){
   (void)arg;
@@ -114,12 +114,12 @@ static THD_FUNCTION(sensor_THD, arg){
 
     logData(&dataFile, &sensorData, rocketState);
 
-    Serial.println("pre-unlock");
+    //Serial.println("pre-unlock");
 
     //!Unlocking &dataMutex
-    chMtxUnlock(&dataMutex);
+    chMtxUnlock(&dataMutex);  
 
-    Serial.println("post-unlock");
+    //Serial.println("post-unlock");
 
     chThdSleepMilliseconds(6); // Sensor DAQ @ ~100 Hz
   }
@@ -296,7 +296,6 @@ static THD_FUNCTION(rocket_FSM, arg){
 
 void chSetup(){
   //added play_THD for creation
-  chMtxUnlock(&dataMutex);
 
   chThdCreateStatic(rocket_FSM_WA, sizeof(rocket_FSM_WA), NORMALPRIO, rocket_FSM, NULL);
   chThdCreateStatic(sensor_WA, sizeof(sensor_WA), NORMALPRIO, sensor_THD, NULL);
