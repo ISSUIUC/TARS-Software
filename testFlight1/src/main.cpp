@@ -37,6 +37,7 @@ ZOEM8Q0 gps = ZOEM8Q0();
 
 static THD_WORKING_AREA(sensor_WA, 256);
 static THD_WORKING_AREA(rocket_FSM_WA, 256);
+// static THD_WORKING_AREA(lowgIMU_WA, 256);
 
 static THD_FUNCTION(sensor_THD, arg){
   (void)arg;
@@ -160,6 +161,16 @@ static THD_FUNCTION(sensor_THD, arg){
   }
 }
 
+// static THD_FUNCTION(lowGimu, arg) {
+/*  (void)arg;
+
+  while(true){
+  
+  #ifdef THREAD_DEBUG
+    Serial.println("### Low G IMU thread entrance");
+  #endif
+}
+*/
 
 static THD_FUNCTION(rocket_FSM, arg){
   (void)arg;
@@ -172,8 +183,8 @@ static THD_FUNCTION(rocket_FSM, arg){
 
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         // TODO - Acquire lock on data struct!
-
-        switch (rocketState) {
+      chMtxLock(&dataMutex);
+      switch (rocketState) {
             case STATE_INIT:
                 // TODO
             break;
@@ -182,13 +193,11 @@ static THD_FUNCTION(rocket_FSM, arg){
 
                 // If high acceleration is observed in z direction...
                 //!locking mutex to get data from sensorData struct
-                chMtxLock(&dataMutex);
                 if(sensorData.az > launch_az_thresh) {
                     rocketTimers.launch_time = chVTGetSystemTime();
                     rocketState = STATE_LAUNCH_DETECT;
                 }
                 //!unlocking &dataMutex mutex
-                chMtxUnlock(&dataMutex);
 
             break;
 
@@ -196,13 +205,11 @@ static THD_FUNCTION(rocket_FSM, arg){
 
                 //If the acceleration was too brief, go back to IDLE
                 //!locking mutex to get data from sensorData struct
-                chMtxLock(&dataMutex);
                 if (sensorData.az < launch_az_thresh) {
                     rocketState = STATE_IDLE;
                     break;
                 }
                 //!unlocking &dataMutex mutex
-                chMtxUnlock(&dataMutex);
 
                 // measure the length of the burn time (for hysteresis)
                 rocketTimers.burn_timer =
@@ -220,13 +227,11 @@ static THD_FUNCTION(rocket_FSM, arg){
 
             // If low acceleration in the Z direction...
             //!locking mutex to get data from sensorData struct
-            chMtxLock(&dataMutex);
             if (sensorData.az < coast_thresh) {
                 rocketTimers.burnout_time = chVTGetSystemTime();
                 rocketState = STATE_BURNOUT_DETECT;
             }
             //!unlocking &dataMutex mutex
-            chMtxUnlock(&dataMutex);
 
             break;
 
@@ -234,13 +239,11 @@ static THD_FUNCTION(rocket_FSM, arg){
 
                 //If the low acceleration was too brief, go back to BOOST
                 //!locking mutex to get data from sensorData struct
-                chMtxLock(&dataMutex);
                 if (sensorData.az > coast_thresh) {
                     rocketState = STATE_BOOST;
                     break;
                 }
                 //!unlocking &dataMutex mutex
-                chMtxUnlock(&dataMutex);
 
                 // measure the length of the coast time (for hysteresis)
                 rocketTimers.coast_timer =
@@ -274,6 +277,7 @@ static THD_FUNCTION(rocket_FSM, arg){
             break;
 
         }
+        chMtxUnlock(&dataMutex);
 
         chThdSleepMilliseconds(6); // FSM runs at 100 Hz
   }
