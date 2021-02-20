@@ -19,7 +19,8 @@ static MUTEX_DECL(dataMutex);
 
 #define PLAY_DEBUG
 #define THREAD_DEBUG
-//#define IMU_DEBUG
+//#define LOWGIMU_DEBUG
+//#define HIGHGIMU_DEBUG
 //#define GPS_DEBUG
 
 //changed name to account for both high & lowG (logGData)
@@ -35,41 +36,24 @@ LSM9DS1 lowGimu;
 ZOEM8Q0 gps = ZOEM8Q0();
 
 
-static THD_WORKING_AREA(sensor_WA, 512);
+static THD_WORKING_AREA(gps_WA, 512);
 static THD_WORKING_AREA(rocket_FSM_WA, 512);
 static THD_WORKING_AREA(lowgIMU_WA, 512);
+static THD_WORKING_AREA(highgIMU_WA, 512);
 
-static THD_FUNCTION(sensor_THD, arg){
+
+static THD_FUNCTION(gps_THD, arg){
   (void)arg;
   while(true){
     
     #ifdef THREAD_DEBUG
-      Serial.println("### data thread entrance");
+      Serial.println("### GPS thread entrance");
     #endif
 
     //!locking data from sensorData struct
     chMtxLock(&dataMutex);
 
-    chSysLock();
-    highGimu.update_data();
-    chSysUnlock();
-
-    //addition for highG IMU
-    sensorData.hg_ax = highGimu.get_x_gforce();
-    sensorData.hg_ay = highGimu.get_y_gforce();
-    sensorData.hg_az = highGimu.get_z_gforce();
-
     sensorData.timeStamp = chVTGetSystemTime();
-
-    #ifdef IMU_DEBUG
-      Serial.println("------------- IMU THREAD ---------------");
-      //high g data
-      Serial.print(sensorData.hg_ax);
-      Serial.print(", ");
-      Serial.print(sensorData.hg_ay);
-      Serial.print(", ");
-      Serial.println(sensorData.hg_az);
-    #endif
 
     chSysLock();
     gps.update_data();
@@ -110,20 +94,16 @@ static THD_FUNCTION(sensor_THD, arg){
 	      Serial.println("");
       }
     #endif
-    //chThdSleepMilliseconds(6); // Sensor DAQ @ ~100 Hz
 
     logData(&dataFile, &sensorData, rocketState);
-
-    //Serial.println("pre-unlock");
 
     //!Unlocking &dataMutex
     chMtxUnlock(&dataMutex);  
 
-    //Serial.println("post-unlock");
-
     chThdSleepMilliseconds(6); // Sensor DAQ @ ~100 Hz
   }
 }
+
 
 static THD_FUNCTION(lowgIMU_THD, arg) {
   (void)arg;
@@ -154,8 +134,8 @@ static THD_FUNCTION(lowgIMU_THD, arg) {
     sensorData.my = lowGimu.calcMag(lowGimu.my);
     sensorData.mz = lowGimu.calcMag(lowGimu.mz);
 
-    #ifdef IMU_DEBUG
-      Serial.println("------------- IMU THREAD ---------------");
+    #ifdef LOWGIMU_DEBUG
+      Serial.println("------------- LOW-G THREAD ---------------");
       Serial.print(sensorData.ax);
       Serial.print(", ");
       Serial.print(sensorData.ay);
@@ -174,6 +154,42 @@ static THD_FUNCTION(lowgIMU_THD, arg) {
       Serial.print(", ");
       Serial.print(sensorData.mz);
       Serial.print(", ");
+    #endif
+
+    chMtxUnlock(&dataMutex);
+
+    chThdSleepMilliseconds(6);
+  }
+}
+
+
+static THD_FUNCTION(highgIMU_THD, arg){
+  (void)arg;
+  while(true){
+
+    #ifdef THREAD_DEBUG
+      Serial.println("### High G IMU thread entrance");
+    #endif
+
+    chMtxLock(&dataMutex);
+
+    chSysLock();
+    highGimu.update_data();
+    chSysUnlock();
+
+    //addition for highG IMU
+    sensorData.hg_ax = highGimu.get_x_gforce();
+    sensorData.hg_ay = highGimu.get_y_gforce();
+    sensorData.hg_az = highGimu.get_z_gforce();
+
+    #ifdef HIGHGIMU_DEBUG
+      Serial.println("------------- HIGH-G THREAD ---------------");
+      //high g data
+      Serial.print(sensorData.hg_ax);
+      Serial.print(", ");
+      Serial.print(sensorData.hg_ay);
+      Serial.print(", ");
+      Serial.println(sensorData.hg_az);
     #endif
 
     chMtxUnlock(&dataMutex);
@@ -298,13 +314,15 @@ void chSetup(){
   //added play_THD for creation
 
   chThdCreateStatic(rocket_FSM_WA, sizeof(rocket_FSM_WA), NORMALPRIO, rocket_FSM, NULL);
-  chThdCreateStatic(sensor_WA, sizeof(sensor_WA), NORMALPRIO, sensor_THD, NULL);
+  chThdCreateStatic(gps_WA, sizeof(gps_WA), NORMALPRIO, gps_THD, NULL);
   chThdCreateStatic(lowgIMU_WA, sizeof(lowgIMU_WA), NORMALPRIO, lowgIMU_THD, NULL);
+  chThdCreateStatic(highgIMU_WA, sizeof(highgIMU_WA), NORMALPRIO, highgIMU_THD, NULL);
   while(true);
 }
 
+
 void setup() {
-  #if defined(THREAD_DEBUG) || defined(IMU_DEBUG) || defined(GPS_DEBUG) || defined (PLAY_DEBUG)
+  #if defined(THREAD_DEBUG) || defined(LOWGIMU_DEBUG) || defined(HIGHGIMU_DEBUG) || defined(GPS_DEBUG) || defined (PLAY_DEBUG)
     Serial.begin(115200);
     while (!Serial) {}
   #endif
