@@ -17,8 +17,7 @@
 //!for reading sensorData struct
 static MUTEX_DECL(dataMutex);
 
-#define PLAY_DEBUG
-#define THREAD_DEBUG
+//#define THREAD_DEBUG
 //#define LOWGIMU_DEBUG
 //#define HIGHGIMU_DEBUG
 //#define GPS_DEBUG
@@ -322,7 +321,7 @@ void chSetup(){
 
 
 void setup() {
-  #if defined(THREAD_DEBUG) || defined(LOWGIMU_DEBUG) || defined(HIGHGIMU_DEBUG) || defined(GPS_DEBUG) || defined (PLAY_DEBUG)
+  #if defined(THREAD_DEBUG) || defined(LOWGIMU_DEBUG) || defined(HIGHGIMU_DEBUG) || defined(GPS_DEBUG)
     Serial.begin(115200);
     while (!Serial) {}
   #endif
