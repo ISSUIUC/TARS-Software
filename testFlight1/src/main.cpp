@@ -3,6 +3,7 @@
 #include <Wire.h>
 #include <SPI.h>
 #include <SD.h>
+#include <Servo.h>
 
 #include "SparkFunLSM9DS1.h" //Low-G IMU Library
 #include "KX134-1211.h" //High-G IMU Library
@@ -21,6 +22,7 @@ static MUTEX_DECL(dataMutex);
 //#define LOWGIMU_DEBUG
 //#define HIGHGIMU_DEBUG
 //#define GPS_DEBUG
+#define SERVO_DEBUG
 
 //changed name to account for both high & lowG (logGData)
 dataStruct_t sensorData;
@@ -34,12 +36,20 @@ KX134 highGimu;
 LSM9DS1 lowGimu;
 ZOEM8Q0 gps = ZOEM8Q0();
 
+Servo servo_cw; //Servo that controlls roll in the clockwise direction
+Servo servo_ccw; //Servo that controlls roll in the counter clockwise direction
+
+int servo_cw_angle; //The current angle of the clockwise roll controlled servo.
+int servo_ccw_angle; //The current angle of the counter clockwise roll controlled servo.
+float flap_drag;
+float native_drag;
+
 
 static THD_WORKING_AREA(gps_WA, 512);
 static THD_WORKING_AREA(rocket_FSM_WA, 512);
 static THD_WORKING_AREA(lowgIMU_WA, 512);
 static THD_WORKING_AREA(highgIMU_WA, 512);
-
+static THD_WORKING_AREA(servo_WA, 512);
 
 static THD_FUNCTION(gps_THD, arg){
   (void)arg;
@@ -308,7 +318,54 @@ static THD_FUNCTION(rocket_FSM, arg){
   }
 }
 
+static THD_FUNCTION(servo_THD, arg){
+  (void)arg;
+  while(true){
 
+    #ifdef SERVO_DEBUG
+      Serial.println("### Servo thread entrance");
+    #endif
+    int ccw_angle = 90;
+    int cw_angle = 90;
+
+    chMtxLock(&dataMutex);
+
+    switch(rocketState) {
+      case STATE_INIT :
+        //todo
+        break;
+      case STATE_IDLE:
+        //todo
+        break;
+      case STATE_LAUNCH_DETECT :
+        //todo
+        break;
+      case STATE_BOOST :
+        //todo
+        break;
+      case STATE_BURNOUT_DETECT :
+        //todo
+        break;
+      case STATE_COAST :
+        //todo
+        break;
+      case STATE_APOGEE_DETECT :
+        //todo
+        break;
+      default :
+      break;
+    }
+
+    servo_cw.write(cw_angle);
+    servo_ccw.write(ccw_angle);  
+    servo_cw_angle = cw_angle;
+    servo_ccw_angle = ccw_angle;
+
+    chMtxUnlock(&dataMutex);
+    chThdSleepMilliseconds(6); // FSM runs at 100 Hz
+  }
+
+}
 void chSetup(){
   //added play_THD for creation
 
@@ -316,6 +373,8 @@ void chSetup(){
   chThdCreateStatic(gps_WA, sizeof(gps_WA), NORMALPRIO, gps_THD, NULL);
   chThdCreateStatic(lowgIMU_WA, sizeof(lowgIMU_WA), NORMALPRIO, lowgIMU_THD, NULL);
   chThdCreateStatic(highgIMU_WA, sizeof(highgIMU_WA), NORMALPRIO, highgIMU_THD, NULL);
+  chThdCreateStatic(servo_WA, sizeof(servo_WA), NORMALPRIO, servo_THD, NULL);
+
   while(true);
 }
 
@@ -359,6 +418,10 @@ void setup() {
     Serial.println("SD Begin Failed. Stalling Program");
     while(true);
   }
+
+  //Servo Setup
+  servo_cw.attach(1);
+  servo_ccw.attach(2);
 
   Serial.println("Starting ChibiOS");
   chBegin(chSetup);
