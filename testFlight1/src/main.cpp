@@ -17,6 +17,15 @@
 //!for reading sensorData struct
 static MUTEX_DECL(dataMutex);
 
+//Variables for creating a ring buffer of dataStruct_t's:
+#define FIFO_SIZE 3000
+SEMAPHORE_DECL(fifoData, 0);
+SEMAPHORE_DECL(fifoSpace, FIFO_SIZE);
+static dataStruct_t fifoArray[FIFO_SIZE];
+uint16_t fifoHead = 0;
+uint16_t fifoTail = 0;
+uint16_t bufferErrors = 0;
+
 //#define THREAD_DEBUG
 //#define LOWGIMU_DEBUG
 //#define HIGHGIMU_DEBUG
@@ -39,7 +48,25 @@ static THD_WORKING_AREA(gps_WA, 512);
 static THD_WORKING_AREA(rocket_FSM_WA, 512);
 static THD_WORKING_AREA(lowgIMU_WA, 512);
 static THD_WORKING_AREA(highgIMU_WA, 512);
+static THD_WORKING_AREA(dataLogger_WA, 512);
 
+static THD_FUNCTION(dataLogger_THD, arg){
+  (void)arg;
+  while(true){
+    #ifdef THREAD_DEBUG
+      Serial.println("### Data Logging thread entrance");
+    #endif
+    chSemWait(&fifoData);
+    chMtxLock(&dataMutex);
+
+    dataStruct_t data = fifoArray[fifoTail];
+    fifoTail = fifoTail < (FIFO_SIZE - 1) ? fifoTail + 1 : 0;
+    chSemSignal(&fifoSpace);
+    chMtxUnlock(&dataMutex);
+    
+    logData(&dataFile, &data, rocketState);
+  }
+}
 
 static THD_FUNCTION(gps_THD, arg){
   (void)arg;
@@ -93,8 +120,7 @@ static THD_FUNCTION(gps_THD, arg){
 	      Serial.println("");
       }
     #endif
-
-    logData(&dataFile, &sensorData, rocketState);
+ 
 
     //!Unlocking &dataMutex
     chMtxUnlock(&dataMutex);  
@@ -106,13 +132,12 @@ static THD_FUNCTION(gps_THD, arg){
 
 static THD_FUNCTION(lowgIMU_THD, arg) {
   (void)arg;
+  dataStruct_t lowgSensorData;
   while(true){
 
     #ifdef THREAD_DEBUG
       Serial.println("### Low G IMU thread entrance");
     #endif
-
-    chMtxLock(&dataMutex);
 
     chSysLock();
     lowGimu.readAccel();
@@ -121,17 +146,17 @@ static THD_FUNCTION(lowgIMU_THD, arg) {
     chSysUnlock();
 
     //acceleration in Gs
-    sensorData.ax = lowGimu.calcAccel(lowGimu.ax);
-    sensorData.ay = lowGimu.calcAccel(lowGimu.ay);
-    sensorData.az = lowGimu.calcAccel(lowGimu.az); //There was a minus here. We don't know why that did that
+    lowgSensorData.ax = lowGimu.calcAccel(lowGimu.ax);
+    lowgSensorData.ay = lowGimu.calcAccel(lowGimu.ay);
+    lowgSensorData.az = lowGimu.calcAccel(lowGimu.az); //There was a minus here. We don't know why that did that
     //rotational speed in degrees per second
-    sensorData.gx = lowGimu.calcGyro(lowGimu.gx);
-    sensorData.gy = lowGimu.calcGyro(lowGimu.gy);
-    sensorData.gz = lowGimu.calcGyro(lowGimu.gz);
+    lowgSensorData.gx = lowGimu.calcGyro(lowGimu.gx);
+    lowgSensorData.gy = lowGimu.calcGyro(lowGimu.gy);
+    lowgSensorData.gz = lowGimu.calcGyro(lowGimu.gz);
     //magnatometer data in gauss 
-    sensorData.mx = lowGimu.calcMag(lowGimu.mx);
-    sensorData.my = lowGimu.calcMag(lowGimu.my);
-    sensorData.mz = lowGimu.calcMag(lowGimu.mz);
+    lowgSensorData.mx = lowGimu.calcMag(lowGimu.mx);
+    lowgSensorData.my = lowGimu.calcMag(lowGimu.my);
+    lowgSensorData.mz = lowGimu.calcMag(lowGimu.mz);
 
     #ifdef LOWGIMU_DEBUG
       Serial.println("------------- LOW-G THREAD ---------------");
@@ -153,8 +178,22 @@ static THD_FUNCTION(lowgIMU_THD, arg) {
       Serial.print(", ");
       Serial.print(sensorData.mz);
       Serial.print(", ");
-    #endif
+    #endif 
 
+    // logData(&dataFile, &sensorData, rocketState);
+    // add the data to the butter here!
+    if (chSemWaitTimeout(&fifoSpace, TIME_IMMEDIATE) != MSG_OK) {
+        bufferErrors++;
+        digitalWrite(LED_BUILTIN, HIGH);
+        continue;
+    }
+    chMtxLock(&dataMutex);
+    fifoArray[fifoHead] = lowgSensorData;
+    bufferErrors = 0;
+    fifoHead = fifoHead < (FIFO_SIZE - 1) ? fifoHead + 1 : 0;
+    chSemSignal(&fifoData);
+
+    //!Unlocking &dataMutex
     chMtxUnlock(&dataMutex);
 
     chThdSleepMilliseconds(6);
@@ -316,6 +355,7 @@ void chSetup(){
   chThdCreateStatic(gps_WA, sizeof(gps_WA), NORMALPRIO, gps_THD, NULL);
   chThdCreateStatic(lowgIMU_WA, sizeof(lowgIMU_WA), NORMALPRIO, lowgIMU_THD, NULL);
   chThdCreateStatic(highgIMU_WA, sizeof(highgIMU_WA), NORMALPRIO, highgIMU_THD, NULL);
+  chThdCreateStatic(dataLogger_WA, sizeof(dataLogger_WA), NORMALPRIO, dataLogger_THD, NULL);
   while(true);
 }
 
