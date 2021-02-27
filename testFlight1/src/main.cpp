@@ -3,7 +3,7 @@
 #include <Wire.h>
 #include <SPI.h>
 #include <SD.h>
-#include <Servo.h>
+#include <PWMServo.h>
 
 #include "SparkFunLSM9DS1.h" //Low-G IMU Library
 #include "KX134-1211.h" //High-G IMU Library
@@ -36,8 +36,8 @@ KX134 highGimu;
 LSM9DS1 lowGimu;
 ZOEM8Q0 gps = ZOEM8Q0();
 
-Servo servo_cw; //Servo that controlls roll in the clockwise direction
-Servo servo_ccw; //Servo that controlls roll in the counter clockwise direction
+PWMServo servo_cw; //Servo that controlls roll in the clockwise direction
+PWMServo servo_ccw; //Servo that controlls roll in the counter clockwise direction
 
 int servo_cw_angle; //The current angle of the clockwise roll controlled servo.
 int servo_ccw_angle; //The current angle of the counter clockwise roll controlled servo.
