@@ -501,14 +501,19 @@ void setup() {
 
   //SD Card Setup
   if(SD.begin(BUILTIN_SDCARD)){
-    char datatype[5] = "lwG_";
-    init_dataLog(&lowg_dataFile,datatype);
 
-    strcpy(datatype,"hgG_");
-    init_dataLog(&highg_dataFile,datatype);
+    char lwG_data_name[16] = "lwG_data";
+    lowg_dataFile = SD.open(name_dataLog(lwG_data_name),O_CREAT | O_WRITE | O_TRUNC);
+    lowg_dataFile.println("ax, ay, az, gx, gy, gz, mx, my, mz, rocketState, timeStamp");
 
-    strcpy(datatype,"gps_");
-    init_dataLog(&gps_dataFile,datatype);
+    char highg_data_name[16] = "hgG_data";
+    highg_dataFile = SD.open(name_dataLog(highg_data_name),O_CREAT | O_WRITE | O_TRUNC);
+    highg_dataFile.println("hg_ax, hg_ay, hg_az, rocketState, timeStamp");
+
+    char gps_data_name[16] = "gps_data";
+    gps_dataFile = SD.open(name_dataLog(gps_data_name),O_CREAT | O_WRITE | O_TRUNC);
+    gps_dataFile.println("latitude, longitude, altitude, rocketState, GPS Lock, timeStamp");
+    
   }
   else {
     digitalWrite(LED_RED, HIGH);

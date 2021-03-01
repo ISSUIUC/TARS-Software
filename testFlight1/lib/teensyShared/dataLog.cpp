@@ -2,12 +2,13 @@
 
 #include "dataLog.h"
 
-void init_dataLog(File* dataFile, char * datatype) {
+char* name_dataLog(char* fileName) {
 
-    char fileName[16];
+    char inputName[strlen(fileName)];
 
-    strcpy(fileName,datatype);
-    strcat(fileName,"data.csv");
+    strcpy(inputName,fileName);
+
+    strcat(fileName,".csv");
 
     //checks to see if file already exists and adds 1 to filename if it does.
     if (SD.exists(fileName)){
@@ -16,8 +17,8 @@ void init_dataLog(File* dataFile, char * datatype) {
         while(fileExists==false){
             if(i > 999){
                 //max number of files reached. Don't want to overflow fileName[]. Will write new data to already existing data999.csv
-                strcpy(fileName,datatype);
-                strcat(fileName, "data999.csv");
+                strcat(fileName, inputName);
+                strcat(fileName, "999.csv");
                 break;
             }
 
@@ -26,9 +27,8 @@ void init_dataLog(File* dataFile, char * datatype) {
             __itoa(i, iStr, 10);
 
             //writes "(sensor)_data(number).csv to fileNameTemp"
-            char fileNameTemp[14+strlen(iStr)];
-            strcpy(fileNameTemp,datatype);
-            strcat(fileNameTemp,"data");
+            char fileNameTemp[strlen(inputName)+strlen(iStr)+6];
+            strcat(fileNameTemp, inputName);
             strcat(fileNameTemp,iStr);
             strcat(fileNameTemp,".csv");
 
@@ -41,17 +41,8 @@ void init_dataLog(File* dataFile, char * datatype) {
         }
     }
 
-    Serial.println(fileName);
-    *dataFile = SD.open(fileName, O_CREAT | O_WRITE | O_TRUNC);
-
-
-    if (datatype == "lwG_"){
-        dataFile->println("ax, ay, az, gx, gy, gz, mx, my, mz, rocketState, timeStamp");
-    } else if (datatype == "hgG_") {
-        dataFile->println("hg_ax, hg_ay, hg_az, rocketState, timeStamp");
-    } else if (datatype == "gps_") {
-        dataFile->println("latitude, longitude, altitude, rocketState, GPS Lock, timeStamp");
-    }
+    //Serial.println(fileName);
+    return fileName;
 }
 
 // logData overload for lowg_dataStruct_t
