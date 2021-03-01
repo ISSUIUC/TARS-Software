@@ -15,29 +15,49 @@
 
 //!Creating mutex to prevent overlapping reads from play_THD and THD_FUNCTION
 //!for reading sensorData struct
-static MUTEX_DECL(dataMutex);
+static MUTEX_DECL(lowg_dataMutex);
+static MUTEX_DECL(highg_dataMutex);
+static MUTEX_DECL(gps_dataMutex);
 
 //Variables for creating a ring buffer of dataStruct_t's:
 #define FIFO_SIZE 3000
-SEMAPHORE_DECL(fifoData, 0);
-SEMAPHORE_DECL(fifoSpace, FIFO_SIZE);
-static dataStruct_t fifoArray[FIFO_SIZE];
-uint16_t fifoHead = 0;
-uint16_t fifoTail = 0;
-uint16_t bufferErrors = 0;
+SEMAPHORE_DECL(lowg_fifoData, 0);
+SEMAPHORE_DECL(lowg_fifoSpace, FIFO_SIZE);
+static lowg_dataStruct_t lowg_fifoArray[FIFO_SIZE];
+uint16_t lowg_fifoHead = 0;
+uint16_t lowg_fifoTail = 0;
+uint16_t lowg_bufferErrors = 0;
 
-//#define THREAD_DEBUG
+SEMAPHORE_DECL(highg_fifoData, 0);
+SEMAPHORE_DECL(highg_fifoSpace, FIFO_SIZE);
+static highg_dataStruct_t highg_fifoArray[FIFO_SIZE];
+uint16_t highg_fifoHead = 0;
+uint16_t highg_fifoTail = 0;
+uint16_t highg_bufferErrors = 0;
+
+SEMAPHORE_DECL(gps_fifoData, 0);
+SEMAPHORE_DECL(gps_fifoSpace, FIFO_SIZE);
+static gps_dataStruct_t gps_fifoArray[FIFO_SIZE];
+uint16_t gps_fifoHead = 0;
+uint16_t gps_fifoTail = 0;
+uint16_t gps_bufferErrors = 0;
+
+#define THREAD_DEBUG
 //#define LOWGIMU_DEBUG
 //#define HIGHGIMU_DEBUG
 //#define GPS_DEBUG
 
 //changed name to account for both high & lowG (logGData)
-dataStruct_t sensorData;
+gps_dataStruct_t gpsSensorData;
+lowg_dataStruct_t lowgSensorData;
+highg_dataStruct_t highgSensorData;
 
 FSM_State rocketState = STATE_INIT;
 fsm_struct rocketTimers;
 
-File dataFile;
+File lowg_dataFile;
+File highg_dataFile;
+File gps_dataFile;
 
 KX134 highGimu;
 LSM9DS1 lowGimu;
@@ -48,23 +68,87 @@ static THD_WORKING_AREA(gps_WA, 512);
 static THD_WORKING_AREA(rocket_FSM_WA, 512);
 static THD_WORKING_AREA(lowgIMU_WA, 512);
 static THD_WORKING_AREA(highgIMU_WA, 512);
-static THD_WORKING_AREA(dataLogger_WA, 512);
-
+static THD_WORKING_AREA(lowg_dataLogger_WA, 512);
+static THD_WORKING_AREA(highg_dataLogger_WA, 512);
+static THD_WORKING_AREA(gps_dataLogger_WA, 512);
+/*
 static THD_FUNCTION(dataLogger_THD, arg){
   (void)arg;
+  //struct dataLogger_args *myarg = arg;
   while(true){
     #ifdef THREAD_DEBUG
       Serial.println("### Data Logging thread entrance");
     #endif
-    chSemWait(&fifoData);
+    chSemWait(myarg->fifoData);
     chMtxLock(&dataMutex);
 
-    dataStruct_t data = fifoArray[fifoTail];
+    lowg_dataStruct_t data = fifoArray[fifoTail];
     fifoTail = fifoTail < (FIFO_SIZE - 1) ? fifoTail + 1 : 0;
-    chSemSignal(&fifoSpace);
+    chSemSignal(myarg->fifoSpace);
     chMtxUnlock(&dataMutex);
     
-    logData(&dataFile, &data, rocketState);
+    logData(myarg->dataFile, &data, rocketState);
+  }
+}
+*/
+
+static THD_FUNCTION(lowg_dataLogger_THD, arg){
+  (void)arg;
+  while(true){
+    #ifdef THREAD_DEBUG
+      Serial.println("### Low g Data Logging thread entrance");
+    #endif
+    chSemWait(&lowg_fifoData);
+    chMtxLock(&lowg_dataMutex);
+
+    lowg_dataStruct_t data = lowg_fifoArray[lowg_fifoTail];
+    lowg_fifoTail = lowg_fifoTail < (FIFO_SIZE - 1) ? lowg_fifoTail + 1 : 0;
+    chSemSignal(&lowg_fifoSpace);
+    chMtxUnlock(&lowg_dataMutex);
+    
+    logData(&lowg_dataFile, &data, rocketState);
+
+    chThdSleepMilliseconds(6);
+  }
+}
+
+static THD_FUNCTION(highg_dataLogger_THD, arg){
+  (void)arg;
+  while(true){
+    #ifdef THREAD_DEBUG
+      Serial.println("### High g Data Logging thread entrance");
+    #endif
+    chSemWait(&highg_fifoData);
+    chMtxLock(&highg_dataMutex);
+
+    highg_dataStruct_t data = highg_fifoArray[highg_fifoTail];
+    highg_fifoTail = highg_fifoTail < (FIFO_SIZE - 1) ? highg_fifoTail + 1 : 0;
+    chSemSignal(&highg_fifoSpace);
+    chMtxUnlock(&highg_dataMutex);
+    
+    logData(&highg_dataFile, &data, rocketState);
+
+    chThdSleepMilliseconds(6);
+  }
+}
+
+static THD_FUNCTION(gps_dataLogger_THD, arg){
+  (void)arg;
+  while(true){
+    #ifdef THREAD_DEBUG
+      Serial.println("### gps Data Logging thread entrance");
+    #endif
+    chSemWait(&gps_fifoData);
+    chMtxLock(&gps_dataMutex);
+
+    gps_dataStruct_t data = gps_fifoArray[gps_fifoTail];
+    gps_fifoTail = gps_fifoTail < (FIFO_SIZE - 1) ? gps_fifoTail + 1 : 0;
+    chSemSignal(&gps_fifoSpace);
+    chMtxUnlock(&gps_dataMutex);
+    
+    logData(&gps_dataFile, &data, rocketState);
+
+    chThdSleepMilliseconds(6);
   }
 }
 
@@ -76,23 +160,20 @@ static THD_FUNCTION(gps_THD, arg){
       Serial.println("### GPS thread entrance");
     #endif
 
-    //!locking data from sensorData struct
-    chMtxLock(&dataMutex);
-
-    sensorData.timeStamp = chVTGetSystemTime();
+    gpsSensorData.timeStamp = chVTGetSystemTime();
 
     chSysLock();
     gps.update_data();
     chSysUnlock();
 
     //Have the availability to wait until a lock is aquired with gps.get_position_lock();
-    sensorData.latitude = gps.get_latitude();
-    sensorData.longitude = gps.get_longitude();
-    sensorData.altitude = gps.get_altitude();
-    sensorData.posLock = gps.get_position_lock();
+    gpsSensorData.latitude = gps.get_latitude();
+    gpsSensorData.longitude = gps.get_longitude();
+    gpsSensorData.altitude = gps.get_altitude();
+    gpsSensorData.posLock = gps.get_position_lock();
     
 
-    if(sensorData.posLock == true){
+    if(gpsSensorData.posLock == true){
       digitalWrite(LED_ORANGE, HIGH);
     }else{
       digitalWrite(LED_ORANGE, LOW);
@@ -104,26 +185,38 @@ static THD_FUNCTION(gps_THD, arg){
         Serial.println("POSITION LOCK!");
         Serial.println("GPS Data: ");
         Serial.print("Latitude: ");
-        Serial.println(sensorData.latitude);
+        Serial.println(gpsSensorData.latitude);
         Serial.print("Longitude: ");
-        Serial.println(sensorData.longitude);
+        Serial.println(gpsSensorData.longitude);
         Serial.print("Altitude: ");
-        Serial.println(sensorData.altitude);
+        Serial.println(gpsSensorData.altitude);
       } else {
         Serial.println("Searching...");
         Serial.print("Latitude: ");
-        Serial.println(sensorData.latitude);
+        Serial.println(gpsSensorData.latitude);
         Serial.print("Longitude: ");
-        Serial.println(sensorData.longitude);
+        Serial.println(gpsSensorData.longitude);
         Serial.print("Altitude: ");
-        Serial.println(sensorData.altitude);
+        Serial.println(gpsSensorData.altitude);
 	      Serial.println("");
       }
     #endif
+
+    // add the data to the buffer here!
+    if (chSemWaitTimeout(&gps_fifoSpace, TIME_IMMEDIATE) != MSG_OK) {
+        gps_bufferErrors++;
+        digitalWrite(LED_BUILTIN, HIGH);
+        continue;
+    }
+    chMtxLock(&gps_dataMutex);
+    gps_fifoArray[gps_fifoHead] = gpsSensorData;
+    gps_bufferErrors = 0;
+    gps_fifoHead = gps_fifoHead < (FIFO_SIZE - 1) ? gps_fifoHead + 1 : 0;
+    chSemSignal(&gps_fifoData);
  
 
     //!Unlocking &dataMutex
-    chMtxUnlock(&dataMutex);  
+    chMtxUnlock(&gps_dataMutex);  
 
     chThdSleepMilliseconds(6); // Sensor DAQ @ ~100 Hz
   }
@@ -132,7 +225,6 @@ static THD_FUNCTION(gps_THD, arg){
 
 static THD_FUNCTION(lowgIMU_THD, arg) {
   (void)arg;
-  dataStruct_t lowgSensorData;
   while(true){
 
     #ifdef THREAD_DEBUG
@@ -160,41 +252,41 @@ static THD_FUNCTION(lowgIMU_THD, arg) {
 
     #ifdef LOWGIMU_DEBUG
       Serial.println("------------- LOW-G THREAD ---------------");
-      Serial.print(sensorData.ax);
+      Serial.print(lowgSensorData.ax);
       Serial.print(", ");
-      Serial.print(sensorData.ay);
+      Serial.print(lowgSensorData.ay);
       Serial.print(", ");
-      Serial.print(sensorData.az);
+      Serial.print(lowgSensorData.az);
       Serial.print(", ");
-      Serial.print(sensorData.gx);
+      Serial.print(lowgSensorData.gx);
       Serial.print(", ");
-      Serial.print(sensorData.gy);
+      Serial.print(lowgSensorData.gy);
       Serial.print(", ");
-      Serial.print(sensorData.gz);
+      Serial.print(lowgSensorData.gz);
       Serial.print(", ");
-      Serial.print(sensorData.mx);
+      Serial.print(lowgSensorData.mx);
       Serial.print(", ");
-      Serial.print(sensorData.my);
+      Serial.print(lowgSensorData.my);
       Serial.print(", ");
-      Serial.print(sensorData.mz);
+      Serial.print(lowgSensorData.mz);
       Serial.print(", ");
     #endif 
 
     // logData(&dataFile, &sensorData, rocketState);
-    // add the data to the butter here!
-    if (chSemWaitTimeout(&fifoSpace, TIME_IMMEDIATE) != MSG_OK) {
-        bufferErrors++;
+    // add the data to the buffer here!
+    if (chSemWaitTimeout(&lowg_fifoSpace, TIME_IMMEDIATE) != MSG_OK) {
+        lowg_bufferErrors++;
         digitalWrite(LED_BUILTIN, HIGH);
         continue;
     }
-    chMtxLock(&dataMutex);
-    fifoArray[fifoHead] = lowgSensorData;
-    bufferErrors = 0;
-    fifoHead = fifoHead < (FIFO_SIZE - 1) ? fifoHead + 1 : 0;
-    chSemSignal(&fifoData);
+    chMtxLock(&lowg_dataMutex);
+    lowg_fifoArray[lowg_fifoHead] = lowgSensorData;
+    lowg_bufferErrors = 0;
+    lowg_fifoHead = lowg_fifoHead < (FIFO_SIZE - 1) ? lowg_fifoHead + 1 : 0;
+    chSemSignal(&lowg_fifoData);
 
     //!Unlocking &dataMutex
-    chMtxUnlock(&dataMutex);
+    chMtxUnlock(&lowg_dataMutex);
 
     chThdSleepMilliseconds(6);
   }
@@ -209,28 +301,41 @@ static THD_FUNCTION(highgIMU_THD, arg){
       Serial.println("### High G IMU thread entrance");
     #endif
 
-    chMtxLock(&dataMutex);
+    
 
     chSysLock();
     highGimu.update_data();
     chSysUnlock();
 
     //addition for highG IMU
-    sensorData.hg_ax = highGimu.get_x_gforce();
-    sensorData.hg_ay = highGimu.get_y_gforce();
-    sensorData.hg_az = highGimu.get_z_gforce();
+    highgSensorData.hg_ax = highGimu.get_x_gforce();
+    highgSensorData.hg_ay = highGimu.get_y_gforce();
+    highgSensorData.hg_az = highGimu.get_z_gforce();
 
     #ifdef HIGHGIMU_DEBUG
       Serial.println("------------- HIGH-G THREAD ---------------");
       //high g data
-      Serial.print(sensorData.hg_ax);
+      Serial.print(highgSensorData.hg_ax);
       Serial.print(", ");
-      Serial.print(sensorData.hg_ay);
+      Serial.print(highgSensorData.hg_ay);
       Serial.print(", ");
-      Serial.println(sensorData.hg_az);
+      Serial.println(highgSensorData.hg_az);
     #endif
 
-    chMtxUnlock(&dataMutex);
+    // add the data to the buffer here!
+    if (chSemWaitTimeout(&highg_fifoSpace, TIME_IMMEDIATE) != MSG_OK) {
+        highg_bufferErrors++;
+        digitalWrite(LED_BUILTIN, HIGH);
+        continue;
+    }
+    chMtxLock(&highg_dataMutex);
+    highg_fifoArray[highg_fifoHead] = highgSensorData;
+    highg_bufferErrors = 0;
+    highg_fifoHead = highg_fifoHead < (FIFO_SIZE - 1) ? highg_fifoHead + 1 : 0;
+    chSemSignal(&highg_fifoData);
+
+
+    chMtxUnlock(&highg_dataMutex);
 
     chThdSleepMilliseconds(6);
   }
@@ -247,7 +352,7 @@ static THD_FUNCTION(rocket_FSM, arg){
 
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         // TODO - Acquire lock on data struct!
-      chMtxLock(&dataMutex);
+      chMtxLock(&lowg_dataMutex);
       switch (rocketState) {
             case STATE_INIT:
                 // TODO
@@ -257,7 +362,7 @@ static THD_FUNCTION(rocket_FSM, arg){
 
                 // If high acceleration is observed in z direction...
                 //!locking mutex to get data from sensorData struct
-                if(sensorData.az > launch_az_thresh) {
+                if(lowgSensorData.az > launch_az_thresh) {
                     rocketTimers.launch_time = chVTGetSystemTime();
                     rocketState = STATE_LAUNCH_DETECT;
                 }
@@ -269,7 +374,7 @@ static THD_FUNCTION(rocket_FSM, arg){
 
                 //If the acceleration was too brief, go back to IDLE
                 //!locking mutex to get data from sensorData struct
-                if (sensorData.az < launch_az_thresh) {
+                if (lowgSensorData.az < launch_az_thresh) {
                     rocketState = STATE_IDLE;
                     break;
                 }
@@ -291,7 +396,7 @@ static THD_FUNCTION(rocket_FSM, arg){
 
             // If low acceleration in the Z direction...
             //!locking mutex to get data from sensorData struct
-            if (sensorData.az < coast_thresh) {
+            if (lowgSensorData.az < coast_thresh) {
                 rocketTimers.burnout_time = chVTGetSystemTime();
                 rocketState = STATE_BURNOUT_DETECT;
             }
@@ -303,7 +408,7 @@ static THD_FUNCTION(rocket_FSM, arg){
 
                 //If the low acceleration was too brief, go back to BOOST
                 //!locking mutex to get data from sensorData struct
-                if (sensorData.az > coast_thresh) {
+                if (lowgSensorData.az > coast_thresh) {
                     rocketState = STATE_BOOST;
                     break;
                 }
@@ -341,7 +446,9 @@ static THD_FUNCTION(rocket_FSM, arg){
             break;
 
         }
-        chMtxUnlock(&dataMutex);
+        chMtxUnlock(&lowg_dataMutex);
+
+        
 
         chThdSleepMilliseconds(6); // FSM runs at 100 Hz
   }
@@ -355,7 +462,9 @@ void chSetup(){
   chThdCreateStatic(gps_WA, sizeof(gps_WA), NORMALPRIO, gps_THD, NULL);
   chThdCreateStatic(lowgIMU_WA, sizeof(lowgIMU_WA), NORMALPRIO, lowgIMU_THD, NULL);
   chThdCreateStatic(highgIMU_WA, sizeof(highgIMU_WA), NORMALPRIO, highgIMU_THD, NULL);
-  chThdCreateStatic(dataLogger_WA, sizeof(dataLogger_WA), NORMALPRIO, dataLogger_THD, NULL);
+  chThdCreateStatic(lowg_dataLogger_WA, sizeof(lowg_dataLogger_WA), NORMALPRIO, lowg_dataLogger_THD, NULL);
+  chThdCreateStatic(highg_dataLogger_WA, sizeof(highg_dataLogger_WA), NORMALPRIO, highg_dataLogger_THD, NULL);
+  chThdCreateStatic(gps_dataLogger_WA, sizeof(gps_dataLogger_WA), NORMALPRIO, gps_dataLogger_THD, NULL);
   while(true);
 }
 
@@ -392,7 +501,14 @@ void setup() {
 
   //SD Card Setup
   if(SD.begin(BUILTIN_SDCARD)){
-    init_dataLog(&dataFile);
+    char datatype[5] = "lwG_";
+    init_dataLog(&lowg_dataFile,datatype);
+
+    strcpy(datatype,"hgG_");
+    init_dataLog(&highg_dataFile,datatype);
+
+    strcpy(datatype,"gps_");
+    init_dataLog(&gps_dataFile,datatype);
   }
   else {
     digitalWrite(LED_RED, HIGH);
