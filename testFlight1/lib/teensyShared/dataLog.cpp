@@ -2,6 +2,12 @@
 
 #include "dataLog.h"
 
+/**
+ * @brief Creates the name for a file to be written to SD card.
+ * 
+ * @param fileName Pointer to char[] containing intended name of file. Do not include number or file extension at end of name.
+ * @return char* Pointer to inputted char[]. It now contains number (if duplicate file existed) and .csv file extension.
+ */
 char* name_dataLog(char* fileName) {
 
     char inputName[strlen(fileName)];
@@ -46,10 +52,16 @@ char* name_dataLog(char* fileName) {
 }
 
 // logData overload for lowg_dataStruct_t
+/**
+ * @brief Logs low-G IMU data to 1 line of a specified .csv file on SD card.
+ * 
+ * @param dataFile File on SD card. Object from SD library.
+ * @param data Low-G IMU data structure to be logged.
+ * @param rocketState Enum containing rocket state to be logged.
+ */
 void logData(File* dataFile, lowg_dataStruct_t* data, FSM_State rocketState) {
 
     //TODO: make this just use one print
-    //TODO: log GPS timestamps
     dataFile->print(data->ax, 4);
     dataFile->print(",");
     dataFile->print(data->ay, 4);
@@ -80,6 +92,13 @@ void logData(File* dataFile, lowg_dataStruct_t* data, FSM_State rocketState) {
 }
 
 // logData overload for highg_dataStruct_t
+/**
+ * @brief Logs high-G IMU data to 1 line of a specified .csv file on SD card.
+ * 
+ * @param dataFile File on SD card. Object from SD library.
+ * @param data High-G IMU data structure to be logged.
+ * @param rocketState Enum containing rocket state to be logged.
+ */
 void logData(File* dataFile, highg_dataStruct_t* data, FSM_State rocketState) {
 
     //TODO: make this just use one print
@@ -103,6 +122,13 @@ void logData(File* dataFile, highg_dataStruct_t* data, FSM_State rocketState) {
 }
 
 // logData overload for gps_dataStruct_t
+/**
+ * @brief Logs GPS data to 1 line of a specified .csv file on SD card.
+ * 
+ * @param dataFile File on SD card. Object from SD library.
+ * @param data GPS data structure to be logged.
+ * @param rocketState Enum containing rocket state to be logged.
+ */
 void logData(File* dataFile, gps_dataStruct_t* data, FSM_State rocketState) {
 
     //TODO: make this just use one print
