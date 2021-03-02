@@ -32,8 +32,8 @@ void test_dataName_noFoundFile(void){
         TEST_IGNORE();
     #endif
 
-    char test_data_name[16] = "test_data";
-    TEST_ASSERT_EQUAL_STRING_LEN("test_data.csv", name_dataLog(test_data_name), 13);
+    char test_data_name[32] = "testdatanoexist";
+    TEST_ASSERT_EQUAL_STRING_LEN("testdatanoexist.csv", name_dataLog(test_data_name), 15);
 }
 
 //tests file naming function with 1 pre-exisiting file
@@ -42,26 +42,38 @@ void test_dataName_testcsvFound(void){
         TEST_IGNORE();
     #endif
 
-    File testFile = SD.open("test_data.csv", FILE_WRITE);
-    testFile.write("e");
+    char preexistFilePath[32] = "testdata.csv";
+
+    File testFile = SD.open(preexistFilePath, FILE_WRITE);
+    testFile.println("deadbeef");
+    testFile.flush();
     testFile.close();
 
-    if(!SD.exists("test_data.csv")){
-        TEST_IGNORE_MESSAGE ("[TEST FAILIURE] file was not created properly by test");
+    if(!SD.exists(preexistFilePath)){
+        TEST_FAIL_MESSAGE ("file was not created properly by test");
     }
 
-    char test_data_name[16] = "test_data";
-    TEST_ASSERT_EQUAL_STRING_LEN("test_data1.csv", name_dataLog(test_data_name), 14);
-    SD.remove("test_data.csv");
+    char newFilename[16] = "testdata";
+    TEST_ASSERT_EQUAL_STRING_LEN("testdata1.csv", name_dataLog(newFilename), 13);
+
+    SD.remove(preexistFilePath);
 }
 
 //----------------------------------------------------------------------------------------
 void setup(){
+
+    pinMode(LED_RED, OUTPUT);
+    pinMode(LED_WHITE, OUTPUT);
+
     Serial.begin(115200);
     while (!Serial) {}
 
     #ifdef SDTESTING
-        SD.begin(BUILTIN_SDCARD);
+        if(SD.begin(BUILTIN_SDCARD)){
+            digitalWrite(LED_WHITE, HIGH);
+        } else {
+            digitalWrite(LED_RED, HIGH);
+        }
     #endif
 
     UNITY_BEGIN();
