@@ -20,13 +20,19 @@
 //test_[function]_[test being done]
 
 //------------------------------------CONTROL-TESTS---------------------------------------
-//Control test. Will always pass
+/**
+ * @brief Control test. Will always pass
+ * 
+ */
 void test_alwaysPasses(void){
     TEST_ASSERT_TRUE(true);
 }
 
 //------------------------------------SD-TESTING------------------------------------------
-//tests file naming function with no pre-existing file
+/**
+ * @brief tests file naming function with no pre-existing file
+ * 
+ */
 void test_dataName_noFoundFile(void){
     #ifndef SDTESTING
         TEST_IGNORE();
@@ -36,7 +42,10 @@ void test_dataName_noFoundFile(void){
     TEST_ASSERT_EQUAL_STRING_LEN("testdatanoexist.csv", name_dataLog(test_data_name), 15);
 }
 
-//tests file naming function with 1 pre-exisiting file
+/**
+ * @brief tests file naming function with 1 pre-exisiting file
+ * 
+ */
 void test_dataName_testcsvFound(void){
     #ifndef SDTESTING
         TEST_IGNORE();
