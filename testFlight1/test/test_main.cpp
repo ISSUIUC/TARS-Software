@@ -42,7 +42,14 @@ void test_dataName_testcsvFound(void){
         TEST_IGNORE();
     #endif
 
-    File testFile = SD.open("test_data.csv");
+    File testFile = SD.open("test_data.csv", FILE_WRITE);
+    testFile.write("e");
+    testFile.close();
+
+    if(!SD.exists("test_data.csv")){
+        TEST_IGNORE_MESSAGE ("[TEST FAILIURE] file was not created properly by test");
+    }
+
     char test_data_name[16] = "test_data";
     TEST_ASSERT_EQUAL_STRING_LEN("test_data1.csv", name_dataLog(test_data_name), 14);
     SD.remove("test_data.csv");
