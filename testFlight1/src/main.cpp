@@ -43,7 +43,8 @@ int servo_cw_angle; //The current angle of the clockwise roll controlled servo.
 int servo_ccw_angle; //The current angle of the counter clockwise roll controlled servo.
 float flap_drag;
 float native_drag;
-void round_off_angle(int value) {
+
+void round_off_angle(int &value) {
   if (value > 180) {
     value = 180;
   }
@@ -335,7 +336,7 @@ static THD_FUNCTION(servo_THD, arg){
     #endif
     int ccw_angle = 90;
     int cw_angle = 90;
-    bool active_control = true;
+    bool active_control = false;
 
     chMtxLock(&dataMutex);
 
@@ -367,6 +368,7 @@ static THD_FUNCTION(servo_THD, arg){
       cw_angle = sensorData.gz;
       ccw_angle = sensorData.gz;
     } else {
+      //Turns active control off if not in coast state.
       cw_angle = 0;
       ccw_angle = 0;
     }
