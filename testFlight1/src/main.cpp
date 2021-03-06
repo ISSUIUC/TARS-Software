@@ -350,7 +350,7 @@ static THD_FUNCTION(servo_THD, arg){
         active_control = true;
         break;
       case STATE_BOOST :
-        active_control = true;
+        active_control = false;
         break;
       case STATE_COAST :
         active_control = true;
@@ -363,7 +363,7 @@ static THD_FUNCTION(servo_THD, arg){
       break;
     }
     // turns active control off if not in takeoff/coast sequence
-    if (true) {
+    if (active_control) {
       cw_angle = sensorData.gz;
       ccw_angle = sensorData.gz;
     } else {
@@ -376,6 +376,8 @@ static THD_FUNCTION(servo_THD, arg){
     servo_ccw.write(ccw_angle);  
     servo_cw_angle = cw_angle;
     servo_ccw_angle = ccw_angle;
+
+    
 
     chMtxUnlock(&dataMutex);
     chThdSleepMilliseconds(6); // FSM runs at 100 Hz
