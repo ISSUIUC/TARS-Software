@@ -443,7 +443,7 @@ void setup() {
   }
 
   //Servo Setup
-  servo_cw.attach(BALL_VALVE_1_PIN, 770, 2250);
+  servo_cw.attach(BALL_VALVE_1_PIN, 770, 2250); //TODO: MAKE SURE TO CHANGE PINS
   servo_ccw.attach(BALL_VALVE_2_PIN, 770, 2250);
 
   Serial.println("Starting ChibiOS");
