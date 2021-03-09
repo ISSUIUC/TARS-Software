@@ -39,8 +39,6 @@ ZOEM8Q0 gps = ZOEM8Q0();
 PWMServo servo_cw; //Servo that controlls roll in the clockwise direction
 PWMServo servo_ccw; //Servo that controlls roll in the counter clockwise direction
 
-int servo_cw_angle; //The current angle of the clockwise roll controlled servo.
-int servo_ccw_angle; //The current angle of the counter clockwise roll controlled servo.
 float flap_drag;
 float native_drag;
 
@@ -331,9 +329,10 @@ static THD_FUNCTION(servo_THD, arg){
   (void)arg;
   while(true){
 
-    #ifdef SERVO_DEBUG
+    #ifdef THREAD_DEBUG
       Serial.println("### Servo thread entrance");
     #endif
+    
     int ccw_angle = 90;
     int cw_angle = 90;
     bool active_control = false;
@@ -367,6 +366,7 @@ static THD_FUNCTION(servo_THD, arg){
     if (active_control) {
       cw_angle = sensorData.gz;
       ccw_angle = sensorData.gz;
+
     } else {
       //Turns active control off if not in coast state.
       cw_angle = 0;
@@ -375,11 +375,14 @@ static THD_FUNCTION(servo_THD, arg){
     round_off_angle(cw_angle);
     round_off_angle(ccw_angle);
     servo_cw.write(cw_angle);
-    servo_ccw.write(ccw_angle);  
-    servo_cw_angle = cw_angle;
-    servo_ccw_angle = ccw_angle;
-
+    servo_ccw.write(ccw_angle); 
     
+    #ifdef SERVO_DEBUG
+      Serial.print("\nclockwise: ");
+      Serial.print(cw_angle);
+      Serial.print(" counterclockwise: ");
+      Serial.print(ccw_angle);
+    #endif
 
     chMtxUnlock(&dataMutex);
     chThdSleepMilliseconds(6); // FSM runs at 100 Hz
@@ -400,7 +403,7 @@ void chSetup(){
 
 
 void setup() {
-  #if defined(THREAD_DEBUG) || defined(LOWGIMU_DEBUG) || defined(HIGHGIMU_DEBUG) || defined(GPS_DEBUG)
+  #if defined(THREAD_DEBUG) || defined(LOWGIMU_DEBUG) || defined(HIGHGIMU_DEBUG) || defined(GPS_DEBUG) || defined(SERVO_DEBUG)
     Serial.begin(115200);
     while (!Serial) {}
   #endif
@@ -440,8 +443,8 @@ void setup() {
   }
 
   //Servo Setup
-  servo_cw.attach(1);
-  servo_ccw.attach(2);
+  servo_cw.attach(BALL_VALVE_1_PIN, 770, 2250);
+  servo_ccw.attach(BALL_VALVE_2_PIN, 770, 2250);
 
   Serial.println("Starting ChibiOS");
   chBegin(chSetup);
