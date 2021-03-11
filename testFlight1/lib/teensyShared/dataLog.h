@@ -47,7 +47,7 @@ struct gps_dataStruct_t {
 };
 
 
-char* name_dataLog(char* inputName);
+char* sd_file_namer(char* inputName, char* fileExtensionParam);
 
 void logData(File* dataFile, lowg_dataStruct_t* data, FSM_State rocketState);
 void logData(File* dataFile, highg_dataStruct_t* data, FSM_State rocketState);

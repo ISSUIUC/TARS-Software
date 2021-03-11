@@ -39,7 +39,8 @@ void test_dataName_noFoundFile(void){
     #endif
 
     char test_data_name[32] = "testdatanoexist";
-    TEST_ASSERT_EQUAL_STRING_LEN("testdatanoexist.csv", name_dataLog(test_data_name), 15);
+    char test_data_extension[6] = ".csv";
+    TEST_ASSERT_EQUAL_STRING("testdatanoexist.csv", sd_file_namer(test_data_name, test_data_extension));
 }
 
 /**
@@ -63,7 +64,8 @@ void test_dataName_testcsvFound(void){
     }
 
     char newFilename[16] = "testdata";
-    TEST_ASSERT_EQUAL_STRING_LEN("testdata1.csv", name_dataLog(newFilename), 13);
+    char test_data_extension[6] = ".csv";
+    TEST_ASSERT_EQUAL_STRING("testdata1.csv", sd_file_namer(newFilename, test_data_extension));
 
     SD.remove(preexistFilePath);
 }

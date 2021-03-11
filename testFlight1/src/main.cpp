@@ -42,7 +42,7 @@ uint16_t gps_fifoHead = 0;
 uint16_t gps_fifoTail = 0;
 uint16_t gps_bufferErrors = 0;
 
-#define THREAD_DEBUG
+//#define THREAD_DEBUG
 //#define LOWGIMU_DEBUG
 //#define HIGHGIMU_DEBUG
 //#define GPS_DEBUG
@@ -502,16 +502,18 @@ void setup() {
   //SD Card Setup
   if(SD.begin(BUILTIN_SDCARD)){
 
+    char file_extension[6] = ".csv";
+
     char lwG_data_name[16] = "lwG_data";
-    lowg_dataFile = SD.open(name_dataLog(lwG_data_name),O_CREAT | O_WRITE | O_TRUNC);
+    lowg_dataFile = SD.open(sd_file_namer(lwG_data_name, file_extension),O_CREAT | O_WRITE | O_TRUNC);
     lowg_dataFile.println("ax, ay, az, gx, gy, gz, mx, my, mz, rocketState, timeStamp");
 
     char highg_data_name[16] = "hgG_data";
-    highg_dataFile = SD.open(name_dataLog(highg_data_name),O_CREAT | O_WRITE | O_TRUNC);
+    highg_dataFile = SD.open(sd_file_namer(highg_data_name, file_extension),O_CREAT | O_WRITE | O_TRUNC);
     highg_dataFile.println("hg_ax, hg_ay, hg_az, rocketState, timeStamp");
 
     char gps_data_name[16] = "gps_data";
-    gps_dataFile = SD.open(name_dataLog(gps_data_name),O_CREAT | O_WRITE | O_TRUNC);
+    gps_dataFile = SD.open(sd_file_namer(gps_data_name, file_extension),O_CREAT | O_WRITE | O_TRUNC);
     gps_dataFile.println("latitude, longitude, altitude, rocketState, GPS Lock, timeStamp");
     
   }

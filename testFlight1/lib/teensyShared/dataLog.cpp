@@ -5,16 +5,19 @@
 /**
  * @brief Creates the name for a file to be written to SD card.
  * 
- * @param fileName Pointer to char[] containing intended name of file. Do not include number or file extension at end of name.
+ * @param fileName Pointer to char[] containing intended name of file. Do not include number or file extension at end of name. Make sure this is longer than it needs to be.
+ * @param fileExtension Pointer to char[] containing the file extension for the file.
  * @return char* Pointer to inputted char[]. It now contains number (if duplicate file existed) and .csv file extension.
  */
-char* name_dataLog(char* fileName) {
-
-    char inputName[strlen(fileName)];
-
+char* sd_file_namer(char* fileName, char* fileExtensionParam) {
+    
+    char fileExtension[strlen(fileExtensionParam)+1];
+    strcpy(fileExtension, fileExtensionParam);
+    
+    char inputName[strlen(fileName)+1];
     strcpy(inputName,fileName);
-
-    strcat(fileName,".csv");
+    
+    strcat(fileName,fileExtension);    
 
     //checks to see if file already exists and adds 1 to filename if it does.
     if (SD.exists(fileName)){
@@ -23,8 +26,9 @@ char* name_dataLog(char* fileName) {
         while(fileExists==false){
             if(i > 999){
                 //max number of files reached. Don't want to overflow fileName[]. Will write new data to already existing data999.csv
-                strcat(fileName, inputName);
-                strcat(fileName, "999.csv");
+                strcpy(fileName, inputName);
+                strcat(fileName, "999");
+                strcat(fileName, fileExtension);
                 break;
             }
 
@@ -34,9 +38,9 @@ char* name_dataLog(char* fileName) {
 
             //writes "(sensor)_data(number).csv to fileNameTemp"
             char fileNameTemp[strlen(inputName)+strlen(iStr)+6];
-            strcat(fileNameTemp, inputName);
+            strcpy(fileNameTemp, inputName);
             strcat(fileNameTemp,iStr);
-            strcat(fileNameTemp,".csv");
+            strcat(fileNameTemp, fileExtension);
 
             if(!SD.exists(fileNameTemp)){
                 strcpy(fileName, fileNameTemp);
