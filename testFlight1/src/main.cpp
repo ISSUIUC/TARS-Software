@@ -237,6 +237,8 @@ static THD_FUNCTION(lowgIMU_THD, arg) {
     lowGimu.readMag();
     chSysUnlock();
 
+    lowgSensorData.timeStamp = chVTGetSystemTime();
+
     //acceleration in Gs
     lowgSensorData.ax = lowGimu.calcAccel(lowGimu.ax);
     lowgSensorData.ay = lowGimu.calcAccel(lowGimu.ay);
@@ -306,6 +308,8 @@ static THD_FUNCTION(highgIMU_THD, arg){
     chSysLock();
     highGimu.update_data();
     chSysUnlock();
+
+    highgSensorData.timeStamp = chVTGetSystemTime();
 
     //addition for highG IMU
     highgSensorData.hg_ax = highGimu.get_x_gforce();
