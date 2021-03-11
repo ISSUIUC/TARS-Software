@@ -21,7 +21,7 @@
 
 //------------------------------------CHECK-TESTS-----------------------------------------
 /**
- * @brief Check test. Will always pass
+ * @brief Sanity check. Will always pass
  * 
  */
 void test_alwaysPasses(void){
