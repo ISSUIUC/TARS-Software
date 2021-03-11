@@ -2,6 +2,11 @@
 
 #include "dataLog.h"
 
+#include <stdio.h>
+
+#include <string>
+#include <cstring>
+
 /**
  * @brief Creates the name for a file to be written to SD card.
  * 
@@ -91,8 +96,15 @@ void logData(File* dataFile, lowg_dataStruct_t* data, FSM_State rocketState) {
     dataFile->print(data->timeStamp);
     dataFile->print("\n");
 
+    // For more efficient printing to file (WIP)
+    /* char *buffer_string = formatString(data,rocketState);
+
+    dataFile->print(buffer_string);
+
+    free(buffer_string); */
+
     //Writing line of data to SD card
-    dataFile->flush();
+    //dataFile->flush();
 }
 
 // logData overload for highg_dataStruct_t
@@ -122,7 +134,7 @@ void logData(File* dataFile, highg_dataStruct_t* data, FSM_State rocketState) {
     dataFile->print("\n");
 
     //Writing line of data to SD card
-    dataFile->flush();
+    //dataFile->flush();
 }
 
 // logData overload for gps_dataStruct_t
@@ -152,5 +164,38 @@ void logData(File* dataFile, gps_dataStruct_t* data, FSM_State rocketState) {
     dataFile->print("\n");
 
     //Writing line of data to SD card
-    dataFile->flush();
+    //dataFile->flush();
+}
+
+
+
+char* formatString(lowg_dataStruct_t* data, FSM_State rocketState) {
+    std::string buffer_string = std::to_string(data->ax);
+    buffer_string.append(", ");
+    buffer_string.append(str(data->ay));
+    buffer_string.append(", ");
+    buffer_string.append(str(data->az));
+    buffer_string.append(", ");
+    buffer_string.append(str(data->gx));
+    buffer_string.append(", ");
+    buffer_string.append(str(data->gy));
+    buffer_string.append(", ");
+    buffer_string.append(str(data->gz));
+    buffer_string.append(", ");
+    buffer_string.append(str(data->mx));
+    buffer_string.append(", ");
+    buffer_string.append(str(data->my));
+    buffer_string.append(", ");
+    buffer_string.append(str(data->mz));
+    buffer_string.append(", ");
+    buffer_string.append(str(rocketState));
+    buffer_string.append(", ");
+    buffer_string.append(str(data->timeStamp));
+    
+    return buffer_string.c_str();
+
+
+    // char *buffer_string;
+    // asprintf(&buffer_string,"%4f, %4f, %4f, %4f, %4f, %4f, %4f, %4f, %4f, %4f, %4f\n",data->ax,data->ay,data->az,data->gx,data->gy,data->gz,data->mx,data->my,data->mz,rocketState,data->timeStamp);
+    // return buffer_string;
 }
