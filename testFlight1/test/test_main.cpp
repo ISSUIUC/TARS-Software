@@ -19,9 +19,9 @@
 
 //test_[function]_[test being done]
 
-//------------------------------------CONTROL-TESTS---------------------------------------
+//------------------------------------CHECK-TESTS-----------------------------------------
 /**
- * @brief Control test. Will always pass
+ * @brief Sanity check. Will always pass
  * 
  */
 void test_alwaysPasses(void){
