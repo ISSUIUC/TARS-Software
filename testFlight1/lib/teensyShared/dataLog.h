@@ -7,6 +7,8 @@
 
 #include "acShared.h"
 
+
+
 struct lowg_dataStruct_t {
     float ax;
     float ay;
@@ -46,10 +48,31 @@ struct gps_dataStruct_t {
 
 };
 
+#define FIFO_SIZE 3000
+struct datalogger_THD {
+    //semaphore_t fifoData;
+    SEMAPHORE_DECL(fifoData, 0);
+    SEMAPHORE_DECL(fifoSpace, FIFO_SIZE);
+
+    uint16_t fifoHead = 0;
+    uint16_t fifoTail = 0;
+
+    uint16_t bufferErrors = 0;
+
+    MUTEX_DECL(dataMutex);
+
+    lowg_dataStruct_t fifoArray[FIFO_SIZE];
+
+    lowg_dataStruct_t current_data;
+
+    File dataFile;
+};
+
+// static THD_FUNCTION(dataLogger_THD,datalogger_THD arg);
 
 char* sd_file_namer(char* inputName, char* fileExtensionParam);
 
-void logData(File* dataFile, lowg_dataStruct_t* data, FSM_State rocketState);
+void logData(File* dataFile, lowg_dataStruct_t* data);
 void logData(File* dataFile, highg_dataStruct_t* data, FSM_State rocketState);
 void logData(File* dataFile, gps_dataStruct_t* data, FSM_State rocketState);
 

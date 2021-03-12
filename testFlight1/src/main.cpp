@@ -11,23 +11,27 @@
 #include "hybridShared.h"
 #include "acShared.h"
 #include "dataLog.h"
+#include "dataLog.cpp"
 #include "thresholds.h"
 #include "pins.h"
 
 //!Creating mutex to prevent overlapping reads from play_THD and THD_FUNCTION
 //!for reading sensorData struct
-static MUTEX_DECL(lowg_dataMutex);
+// static MUTEX_DECL(lowg_dataMutex);
 static MUTEX_DECL(highg_dataMutex);
 static MUTEX_DECL(gps_dataMutex);
 
 //Variables for creating a ring buffer of dataStruct_t's:
-#define FIFO_SIZE 3000
+/* #define FIFO_SIZE 3000
 SEMAPHORE_DECL(lowg_fifoData, 0);
 SEMAPHORE_DECL(lowg_fifoSpace, FIFO_SIZE);
 static lowg_dataStruct_t lowg_fifoArray[FIFO_SIZE];
 uint16_t lowg_fifoHead = 0;
 uint16_t lowg_fifoTail = 0;
-uint16_t lowg_bufferErrors = 0;
+uint16_t lowg_bufferErrors = 0; */
+datalogger_THD lowg_datalogger_THD_vars;
+
+#define FIFO_SIZE 3000
 
 SEMAPHORE_DECL(highg_fifoData, 0);
 SEMAPHORE_DECL(highg_fifoSpace, FIFO_SIZE);
@@ -57,7 +61,7 @@ highg_dataStruct_t highgSensorData;
 FSM_State rocketState = STATE_INIT;
 fsm_struct rocketTimers;
 
-File lowg_dataFile;
+// File lowg_dataFile;
 File highg_dataFile;
 File gps_dataFile;
 
@@ -294,19 +298,19 @@ static THD_FUNCTION(lowgIMU_THD, arg) {
 
     // logData(&dataFile, &sensorData, rocketState);
     // add the data to the buffer here!
-    if (chSemWaitTimeout(&lowg_fifoSpace, TIME_IMMEDIATE) != MSG_OK) {
-        lowg_bufferErrors++;
+    if (chSemWaitTimeout(&lowg_datalogger_THD_vars.fifoSpace, TIME_IMMEDIATE) != MSG_OK) {
+        lowg_datalogger_THD_vars.bufferErrors++;
         digitalWrite(LED_BUILTIN, HIGH);
         continue;
     }
-    chMtxLock(&lowg_dataMutex);
-    lowg_fifoArray[lowg_fifoHead] = lowgSensorData;
-    lowg_bufferErrors = 0;
-    lowg_fifoHead = lowg_fifoHead < (FIFO_SIZE - 1) ? lowg_fifoHead + 1 : 0;
-    chSemSignal(&lowg_fifoData);
+    chMtxLock(&lowg_datalogger_THD_vars.dataMutex);
+    lowg_datalogger_THD_vars.fifoArray[lowg_datalogger_THD_vars.fifoHead] = lowgSensorData;
+    lowg_datalogger_THD_vars.bufferErrors = 0;
+    lowg_datalogger_THD_vars.fifoHead = lowg_datalogger_THD_vars.fifoHead < (FIFO_SIZE - 1) ? lowg_datalogger_THD_vars.fifoHead + 1 : 0;
+    chSemSignal(&lowg_datalogger_THD_vars.fifoData);
 
     //!Unlocking &dataMutex
-    chMtxUnlock(&lowg_dataMutex);
+    chMtxUnlock(&lowg_datalogger_THD_vars.dataMutex);
 
     chThdSleepMilliseconds(6);
   }
@@ -374,7 +378,7 @@ static THD_FUNCTION(rocket_FSM, arg){
 
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         // TODO - Acquire lock on data struct!
-      chMtxLock(&lowg_dataMutex);
+      chMtxLock(&lowg_datalogger_THD_vars.dataMutex);
       switch (rocketState) {
             case STATE_INIT:
                 // TODO
@@ -468,7 +472,7 @@ static THD_FUNCTION(rocket_FSM, arg){
             break;
 
         }
-        chMtxUnlock(&lowg_dataMutex);
+        chMtxUnlock(&lowg_datalogger_THD_vars.dataMutex);
 
         
 
@@ -488,7 +492,7 @@ static THD_FUNCTION(servo_THD, arg){
     int cw_angle = 90;
     bool active_control = false;
 
-    chMtxLock(&lowg_dataMutex);
+    chMtxLock(&lowg_datalogger_THD_vars.dataMutex);
 
     switch(rocketState) {
       case STATE_INIT :
@@ -535,7 +539,7 @@ static THD_FUNCTION(servo_THD, arg){
       Serial.print(ccw_angle);
     #endif
 
-    chMtxUnlock(&lowg_dataMutex);
+    chMtxUnlock(&lowg_datalogger_THD_vars.dataMutex);
     chThdSleepMilliseconds(6); // FSM runs at 100 Hz
   }
 
@@ -548,7 +552,7 @@ void chSetup(){
   chThdCreateStatic(lowgIMU_WA, sizeof(lowgIMU_WA), NORMALPRIO, lowgIMU_THD, NULL);
   chThdCreateStatic(highgIMU_WA, sizeof(highgIMU_WA), NORMALPRIO, highgIMU_THD, NULL);
   chThdCreateStatic(servo_WA, sizeof(servo_WA), NORMALPRIO, servo_THD, NULL);
-  chThdCreateStatic(lowg_dataLogger_WA, sizeof(lowg_dataLogger_WA), NORMALPRIO, lowg_dataLogger_THD, NULL);
+  chThdCreateStatic(lowg_dataLogger_WA, sizeof(lowg_dataLogger_WA), NORMALPRIO, dataLogger_THD, &lowg_datalogger_THD_vars);
   chThdCreateStatic(highg_dataLogger_WA, sizeof(highg_dataLogger_WA), NORMALPRIO, highg_dataLogger_THD, NULL);
   chThdCreateStatic(gps_dataLogger_WA, sizeof(gps_dataLogger_WA), NORMALPRIO, gps_dataLogger_THD, NULL);
   while(true);
@@ -591,8 +595,8 @@ void setup() {
     char file_extension[6] = ".csv";
 
     char lwG_data_name[16] = "lwG_data";
-    lowg_dataFile = SD.open(sd_file_namer(lwG_data_name, file_extension),O_CREAT | O_WRITE | O_TRUNC);
-    lowg_dataFile.println("ax, ay, az, gx, gy, gz, mx, my, mz, rocketState, timeStamp");
+    lowg_datalogger_THD_vars.dataFile = SD.open(sd_file_namer(lwG_data_name, file_extension),O_CREAT | O_WRITE | O_TRUNC);
+    lowg_datalogger_THD_vars.dataFile.println("ax, ay, az, gx, gy, gz, mx, my, mz, timeStamp");
 
     char highg_data_name[16] = "hgG_data";
     highg_dataFile = SD.open(sd_file_namer(highg_data_name, file_extension),O_CREAT | O_WRITE | O_TRUNC);

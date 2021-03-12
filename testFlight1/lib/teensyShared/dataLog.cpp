@@ -7,27 +7,9 @@
 #include <string>
 #include <cstring>
 
-#define FIFO_SIZE 3000
-struct datalogger_THD {
-    //semaphore_t fifoData;
-    SEMAPHORE_DECL(fifoData, 0);
-    SEMAPHORE_DECL(fifoSpace, FIFO_SIZE);
 
-    uint16_t fifoHead = 0;
-    uint16_t fifoTail = 0;
 
-    uint16_t bufferErrors = 0;
-
-    static mutex_t dataMutex;
-
-    static lowg_dataStruct_t fifoArray[FIFO_SIZE];
-
-    lowg_dataStruct_t current_data;
-
-    File dataFile;
-};
-
-static THD_FUNCTION(lowg_dataLogger_THD, arg){
+static THD_FUNCTION(dataLogger_THD, arg){
   struct datalogger_THD *datalogger_struct = (struct datalogger_THD *)arg;
   while(true){
     #ifdef THREAD_DEBUG
@@ -42,7 +24,7 @@ static THD_FUNCTION(lowg_dataLogger_THD, arg){
     chSemSignal(&datalogger_struct->fifoSpace);
     chMtxUnlock(&datalogger_struct->dataMutex);
     
-    logData(&datalogger_struct->dataFile, &datalogger_struct->current_data, rocketState);
+    logData(&datalogger_struct->dataFile, &datalogger_struct->current_data);
 
     chThdSleepMilliseconds(6);
   }
@@ -111,7 +93,7 @@ char* sd_file_namer(char* fileName, char* fileExtensionParam) {
  * @param data Low-G IMU data structure to be logged.
  * @param rocketState Enum containing rocket state to be logged.
  */
-void logData(File* dataFile, lowg_dataStruct_t* data, FSM_State rocketState) {
+void logData(File* dataFile, lowg_dataStruct_t* data) {
 
     //TODO: make this just use one print
     dataFile->print(data->ax, 4);
@@ -131,9 +113,6 @@ void logData(File* dataFile, lowg_dataStruct_t* data, FSM_State rocketState) {
     dataFile->print(data->my, 4);
     dataFile->print(",");
     dataFile->print(data->mz, 4);
-    dataFile->print(",");
-
-    dataFile->print(rocketState);
     dataFile->print(",");
     
     dataFile->print(data->timeStamp);
@@ -212,7 +191,7 @@ void logData(File* dataFile, gps_dataStruct_t* data, FSM_State rocketState) {
 
 
 
-char* formatString(lowg_dataStruct_t* data, FSM_State rocketState) {
+/* char* formatString(lowg_dataStruct_t* data, FSM_State rocketState) {
     std::string buffer_string = std::to_string(data->ax);
     buffer_string.append(", ");
     buffer_string.append(str(data->ay));
@@ -241,4 +220,4 @@ char* formatString(lowg_dataStruct_t* data, FSM_State rocketState) {
     // char *buffer_string;
     // asprintf(&buffer_string,"%4f, %4f, %4f, %4f, %4f, %4f, %4f, %4f, %4f, %4f, %4f\n",data->ax,data->ay,data->az,data->gx,data->gy,data->gz,data->mx,data->my,data->mz,rocketState,data->timeStamp);
     // return buffer_string;
-}
+} */
