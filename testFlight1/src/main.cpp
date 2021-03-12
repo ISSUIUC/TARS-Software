@@ -3,6 +3,7 @@
 #include <Wire.h>
 #include <SPI.h>
 #include <SD.h>
+#include <PWMServo.h>
 
 #include "SparkFunLSM9DS1.h" //Low-G IMU Library
 #include "KX134-1211.h" //High-G IMU Library
@@ -46,6 +47,7 @@ uint16_t gps_bufferErrors = 0;
 //#define LOWGIMU_DEBUG
 //#define HIGHGIMU_DEBUG
 //#define GPS_DEBUG
+#define SERVO_DEBUG
 
 //changed name to account for both high & lowG (logGData)
 gps_dataStruct_t gpsSensorData;
@@ -63,11 +65,27 @@ KX134 highGimu;
 LSM9DS1 lowGimu;
 ZOEM8Q0 gps = ZOEM8Q0();
 
+PWMServo servo_cw; //Servo that controlls roll in the clockwise direction
+PWMServo servo_ccw; //Servo that controlls roll in the counter clockwise direction
+
+float flap_drag;
+float native_drag;
+
+void round_off_angle(int &value) {
+  if (value > 180) {
+    value = 180;
+  }
+  if (value < 0) {
+    value = 0;
+  }
+}
+
 
 static THD_WORKING_AREA(gps_WA, 512);
 static THD_WORKING_AREA(rocket_FSM_WA, 512);
 static THD_WORKING_AREA(lowgIMU_WA, 512);
 static THD_WORKING_AREA(highgIMU_WA, 512);
+static THD_WORKING_AREA(servo_WA, 512);
 static THD_WORKING_AREA(lowg_dataLogger_WA, 512);
 static THD_WORKING_AREA(highg_dataLogger_WA, 512);
 static THD_WORKING_AREA(gps_dataLogger_WA, 512);
@@ -345,7 +363,7 @@ static THD_FUNCTION(highgIMU_THD, arg){
   }
 }
 
-
+//
 static THD_FUNCTION(rocket_FSM, arg){
   (void)arg;
   while(true){
@@ -458,7 +476,70 @@ static THD_FUNCTION(rocket_FSM, arg){
   }
 }
 
+static THD_FUNCTION(servo_THD, arg){
+  (void)arg;
+  while(true){
 
+    #ifdef THREAD_DEBUG
+      Serial.println("### Servo thread entrance");
+    #endif
+    
+    int ccw_angle = 90;
+    int cw_angle = 90;
+    bool active_control = false;
+
+    chMtxLock(&lowg_dataMutex);
+
+    switch(rocketState) {
+      case STATE_INIT :
+        active_control = true;
+        break;
+      case STATE_IDLE:
+        active_control = true;
+        break;
+      case STATE_LAUNCH_DETECT :
+        active_control = true;
+        break;
+      case STATE_BOOST :
+        active_control = false;
+        break;
+      case STATE_COAST :
+        active_control = true;
+        break;
+      case STATE_APOGEE_DETECT :
+        active_control = false;
+        break;
+      default :
+        active_control = false;
+      break;
+    }
+    // turns active control off if not in takeoff/coast sequence
+    if (active_control) {
+      cw_angle = lowgSensorData.gz;
+      ccw_angle = lowgSensorData.gz;
+
+    } else {
+      //Turns active control off if not in coast state.
+      cw_angle = 0;
+      ccw_angle = 0;
+    }
+    round_off_angle(cw_angle);
+    round_off_angle(ccw_angle);
+    servo_cw.write(cw_angle);
+    servo_ccw.write(ccw_angle); 
+    
+    #ifdef SERVO_DEBUG
+      Serial.print("\nclockwise: ");
+      Serial.print(cw_angle);
+      Serial.print(" counterclockwise: ");
+      Serial.print(ccw_angle);
+    #endif
+
+    chMtxUnlock(&lowg_dataMutex);
+    chThdSleepMilliseconds(6); // FSM runs at 100 Hz
+  }
+
+}
 void chSetup(){
   //added play_THD for creation
 
@@ -466,6 +547,7 @@ void chSetup(){
   chThdCreateStatic(gps_WA, sizeof(gps_WA), NORMALPRIO, gps_THD, NULL);
   chThdCreateStatic(lowgIMU_WA, sizeof(lowgIMU_WA), NORMALPRIO, lowgIMU_THD, NULL);
   chThdCreateStatic(highgIMU_WA, sizeof(highgIMU_WA), NORMALPRIO, highgIMU_THD, NULL);
+  chThdCreateStatic(servo_WA, sizeof(servo_WA), NORMALPRIO, servo_THD, NULL);
   chThdCreateStatic(lowg_dataLogger_WA, sizeof(lowg_dataLogger_WA), NORMALPRIO, lowg_dataLogger_THD, NULL);
   chThdCreateStatic(highg_dataLogger_WA, sizeof(highg_dataLogger_WA), NORMALPRIO, highg_dataLogger_THD, NULL);
   chThdCreateStatic(gps_dataLogger_WA, sizeof(gps_dataLogger_WA), NORMALPRIO, gps_dataLogger_THD, NULL);
@@ -474,7 +556,7 @@ void chSetup(){
 
 
 void setup() {
-  #if defined(THREAD_DEBUG) || defined(LOWGIMU_DEBUG) || defined(HIGHGIMU_DEBUG) || defined(GPS_DEBUG)
+  #if defined(THREAD_DEBUG) || defined(LOWGIMU_DEBUG) || defined(HIGHGIMU_DEBUG) || defined(GPS_DEBUG) || defined(SERVO_DEBUG)
     Serial.begin(115200);
     while (!Serial) {}
   #endif
@@ -526,6 +608,10 @@ void setup() {
     Serial.println("SD Begin Failed. Stalling Program");
     while(true);
   }
+
+  //Servo Setup
+  servo_cw.attach(BALL_VALVE_1_PIN, 770, 2250); //TODO: MAKE SURE TO CHANGE PINS
+  servo_ccw.attach(BALL_VALVE_2_PIN, 770, 2250);
 
   Serial.println("Starting ChibiOS");
   chBegin(chSetup);
