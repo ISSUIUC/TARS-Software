@@ -214,7 +214,7 @@ static THD_FUNCTION(highgIMU_THD, arg){
   }
 }
 
-
+//
 static THD_FUNCTION(rocket_FSM, arg){
   (void)arg;
   while(true){
