@@ -92,7 +92,7 @@ static THD_FUNCTION(dataLogger_THD, arg){
 }
 */
 
-static THD_FUNCTION(lowg_dataLogger_THD, arg){
+/* static THD_FUNCTION(lowg_dataLogger_THD, arg){
   (void)arg;
   while(true){
     #ifdef THREAD_DEBUG
@@ -110,7 +110,7 @@ static THD_FUNCTION(lowg_dataLogger_THD, arg){
 
     chThdSleepMilliseconds(6);
   }
-}
+} */
 
 static THD_FUNCTION(highg_dataLogger_THD, arg){
   (void)arg;

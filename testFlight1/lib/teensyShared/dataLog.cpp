@@ -7,6 +7,49 @@
 #include <string>
 #include <cstring>
 
+#define FIFO_SIZE 3000
+struct datalogger_THD {
+    //semaphore_t fifoData;
+    SEMAPHORE_DECL(fifoData, 0);
+    SEMAPHORE_DECL(fifoSpace, FIFO_SIZE);
+
+    uint16_t fifoHead = 0;
+    uint16_t fifoTail = 0;
+
+    uint16_t bufferErrors = 0;
+
+    static mutex_t dataMutex;
+
+    static lowg_dataStruct_t fifoArray[FIFO_SIZE];
+
+    lowg_dataStruct_t current_data;
+
+    File dataFile;
+};
+
+static THD_FUNCTION(lowg_dataLogger_THD, arg){
+  struct datalogger_THD *datalogger_struct = (struct datalogger_THD *)arg;
+  while(true){
+    #ifdef THREAD_DEBUG
+      Serial.println("### Low g Data Logging thread entrance");
+    #endif
+    chSemWait(&datalogger_struct->fifoData);
+    chMtxLock(&datalogger_struct->dataMutex);
+
+    datalogger_struct->current_data = datalogger_struct->fifoArray[datalogger_struct->fifoTail];
+
+    datalogger_struct->fifoTail = datalogger_struct->fifoTail < (FIFO_SIZE - 1) ? datalogger_struct->fifoTail + 1 : 0;
+    chSemSignal(&datalogger_struct->fifoSpace);
+    chMtxUnlock(&datalogger_struct->dataMutex);
+    
+    logData(&datalogger_struct->dataFile, &datalogger_struct->current_data, rocketState);
+
+    chThdSleepMilliseconds(6);
+  }
+}
+
+
+
 /**
  * @brief Creates the name for a file to be written to SD card.
  * 
