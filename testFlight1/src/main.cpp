@@ -15,39 +15,11 @@
 #include "thresholds.h"
 #include "pins.h"
 
-//!Creating mutex to prevent overlapping reads from play_THD and THD_FUNCTION
-//!for reading sensorData struct
-// static MUTEX_DECL(lowg_dataMutex);
-// static MUTEX_DECL(highg_dataMutex);
-// static MUTEX_DECL(gps_dataMutex);
 
-//Variables for creating a ring buffer of dataStruct_t's:
-/* #define FIFO_SIZE 3000
-SEMAPHORE_DECL(lowg_fifoData, 0);
-SEMAPHORE_DECL(lowg_fifoSpace, FIFO_SIZE);
-static lowg_dataStruct_t lowg_fifoArray[FIFO_SIZE];
-uint16_t lowg_fifoHead = 0;
-uint16_t lowg_fifoTail = 0;
-uint16_t lowg_bufferErrors = 0; */
 datalogger_THD lowg_datalogger_THD_vars;
 datalogger_THD highg_datalogger_THD_vars;
 datalogger_THD gps_datalogger_THD_vars;
 
-/* #define FIFO_SIZE 3000
-
-SEMAPHORE_DECL(highg_fifoData, 0);
-SEMAPHORE_DECL(highg_fifoSpace, FIFO_SIZE);
-static highg_dataStruct_t highg_fifoArray[FIFO_SIZE];
-uint16_t highg_fifoHead = 0;
-uint16_t highg_fifoTail = 0;
-uint16_t highg_bufferErrors = 0;
-
-SEMAPHORE_DECL(gps_fifoData, 0);
-SEMAPHORE_DECL(gps_fifoSpace, FIFO_SIZE);
-static gps_dataStruct_t gps_fifoArray[FIFO_SIZE];
-uint16_t gps_fifoHead = 0;
-uint16_t gps_fifoTail = 0;
-uint16_t gps_bufferErrors = 0; */
 
 #define THREAD_DEBUG
 //#define LOWGIMU_DEBUG
@@ -63,9 +35,6 @@ sensorDataStruct_t highgSensorData;
 FSM_State rocketState = STATE_INIT;
 fsm_struct rocketTimers;
 
-// File lowg_dataFile;
-// File highg_dataFile;
-// File gps_dataFile;
 
 KX134 highGimu;
 LSM9DS1 lowGimu;
@@ -476,8 +445,8 @@ void chSetup(){
   chThdCreateStatic(highgIMU_WA, sizeof(highgIMU_WA), NORMALPRIO, highgIMU_THD, NULL);
   chThdCreateStatic(servo_WA, sizeof(servo_WA), NORMALPRIO, servo_THD, NULL);
   chThdCreateStatic(lowg_dataLogger_WA, sizeof(lowg_dataLogger_WA), NORMALPRIO, dataLogger_THD, &lowg_datalogger_THD_vars);
-  chThdCreateStatic(highg_dataLogger_WA, sizeof(highg_dataLogger_WA), NORMALPRIO, dataLogger_THD, NULL);
-  chThdCreateStatic(gps_dataLogger_WA, sizeof(gps_dataLogger_WA), NORMALPRIO, dataLogger_THD, NULL);
+  chThdCreateStatic(highg_dataLogger_WA, sizeof(highg_dataLogger_WA), NORMALPRIO, dataLogger_THD, &highg_datalogger_THD_vars);
+  chThdCreateStatic(gps_dataLogger_WA, sizeof(gps_dataLogger_WA), NORMALPRIO, dataLogger_THD, &gps_datalogger_THD_vars);
   while(true);
 }
 
@@ -529,12 +498,12 @@ void setup() {
 
     char highg_data_name[16] = "hgGData";
     highg_datalogger_THD_vars.dataFile = SD.open(sd_file_namer(highg_data_name, file_extension),O_CREAT | O_WRITE | O_TRUNC);
-    highg_datalogger_THD_vars.dataFile.println("hg_ax, hg_ay, hg_az, rocketState, timeStamp");
+    highg_datalogger_THD_vars.dataFile.println("hg_ax, hg_ay, hg_az, timeStamp");
     // Serial.println(highg_dataFile.name());
 
     char gps_data_name[16] = "gpsData";
     gps_datalogger_THD_vars.dataFile = SD.open(sd_file_namer(gps_data_name, file_extension),O_CREAT | O_WRITE | O_TRUNC);
-    gps_datalogger_THD_vars.dataFile.println("latitude, longitude, altitude, rocketState, GPS Lock, timeStamp");
+    gps_datalogger_THD_vars.dataFile.println("latitude, longitude, altitude, GPS Lock, timeStamp");
     // Serial.println(gps_dataFile.name());
     
   }
