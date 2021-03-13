@@ -47,7 +47,7 @@ enum sensors {
 };
 
 
-#define FIFO_SIZE 500
+#define FIFO_SIZE 1000
 struct datalogger_THD {
     //semaphore_t fifoData;
     SEMAPHORE_DECL(fifoData, 0);

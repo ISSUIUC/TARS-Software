@@ -7,13 +7,14 @@
 #include <string>
 #include <cstring>
 
-
+#define THREAD_DEBUG
 
 static THD_FUNCTION(dataLogger_THD, arg){
   struct datalogger_THD *datalogger_struct = (struct datalogger_THD *)arg;
   while(true){
     #ifdef THREAD_DEBUG
-      Serial.println("### Low g Data Logging thread entrance");
+      Serial.println("Data Logging thread entrance");
+      Serial.println(datalogger_struct->sensor_type);
     #endif
     chSemWait(&datalogger_struct->fifoData);
     chMtxLock(&datalogger_struct->dataMutex);
