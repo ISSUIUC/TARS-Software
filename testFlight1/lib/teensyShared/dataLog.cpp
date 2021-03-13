@@ -81,7 +81,7 @@ char* sd_file_namer(char* fileName, char* fileExtensionParam) {
         }
     }
 
-    //Serial.println(fileName);
+    Serial.println(fileName);
     return fileName;
 }
 
@@ -126,7 +126,7 @@ void logData(File* dataFile, lowg_dataStruct_t* data) {
     free(buffer_string); */
 
     //Writing line of data to SD card
-    //dataFile->flush();
+    dataFile->flush();
 }
 
 // logData overload for highg_dataStruct_t
@@ -156,7 +156,7 @@ void logData(File* dataFile, highg_dataStruct_t* data, FSM_State rocketState) {
     dataFile->print("\n");
 
     //Writing line of data to SD card
-    //dataFile->flush();
+    dataFile->flush();
 }
 
 // logData overload for gps_dataStruct_t
@@ -186,7 +186,7 @@ void logData(File* dataFile, gps_dataStruct_t* data, FSM_State rocketState) {
     dataFile->print("\n");
 
     //Writing line of data to SD card
-    //dataFile->flush();
+    dataFile->flush();
 }
 
 

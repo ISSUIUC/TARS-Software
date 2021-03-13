@@ -47,11 +47,11 @@ uint16_t gps_fifoHead = 0;
 uint16_t gps_fifoTail = 0;
 uint16_t gps_bufferErrors = 0;
 
-//#define THREAD_DEBUG
+#define THREAD_DEBUG
 //#define LOWGIMU_DEBUG
 //#define HIGHGIMU_DEBUG
 //#define GPS_DEBUG
-#define SERVO_DEBUG
+// #define SERVO_DEBUG
 
 //changed name to account for both high & lowG (logGData)
 gps_dataStruct_t gpsSensorData;
@@ -597,14 +597,17 @@ void setup() {
     char lwG_data_name[16] = "lwG_data";
     lowg_datalogger_THD_vars.dataFile = SD.open(sd_file_namer(lwG_data_name, file_extension),O_CREAT | O_WRITE | O_TRUNC);
     lowg_datalogger_THD_vars.dataFile.println("ax, ay, az, gx, gy, gz, mx, my, mz, timeStamp");
+    Serial.println(lowg_datalogger_THD_vars.dataFile.name());
 
     char highg_data_name[16] = "hgG_data";
     highg_dataFile = SD.open(sd_file_namer(highg_data_name, file_extension),O_CREAT | O_WRITE | O_TRUNC);
     highg_dataFile.println("hg_ax, hg_ay, hg_az, rocketState, timeStamp");
+    Serial.println(highg_dataFile.name());
 
     char gps_data_name[16] = "gps_data";
     gps_dataFile = SD.open(sd_file_namer(gps_data_name, file_extension),O_CREAT | O_WRITE | O_TRUNC);
     gps_dataFile.println("latitude, longitude, altitude, rocketState, GPS Lock, timeStamp");
+    Serial.println(gps_dataFile.name());
     
   }
   else {
