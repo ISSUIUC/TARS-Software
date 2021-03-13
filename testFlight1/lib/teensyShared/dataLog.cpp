@@ -24,7 +24,7 @@ static THD_FUNCTION(dataLogger_THD, arg){
     chSemSignal(&datalogger_struct->fifoSpace);
     chMtxUnlock(&datalogger_struct->dataMutex);
     
-    logData(&datalogger_struct->dataFile, &datalogger_struct->current_data);
+    logData(&datalogger_struct->dataFile, &datalogger_struct->current_data, datalogger_struct->sensor_type);
 
     chThdSleepMilliseconds(6);
   }
@@ -81,42 +81,74 @@ char* sd_file_namer(char* fileName, char* fileExtensionParam) {
         }
     }
 
-    Serial.println(fileName);
+    // Serial.println(fileName);
     return fileName;
 }
 
-// logData overload for lowg_dataStruct_t
+
 /**
- * @brief Logs low-G IMU data to 1 line of a specified .csv file on SD card.
+ * @brief Logs data to 1 line of a specified .csv file on SD card.
  * 
  * @param dataFile File on SD card. Object from SD library.
- * @param data Low-G IMU data structure to be logged.
- * @param rocketState Enum containing rocket state to be logged.
+ * @param data Data structure to be logged.
+ * @param sensorType Enum containing the type of sensor. Controls which fields are logged.
  */
-void logData(File* dataFile, lowg_dataStruct_t* data) {
+void logData(File* dataFile, sensorDataStruct_t* data, sensors sensorType) {
 
     //TODO: make this just use one print
-    dataFile->print(data->ax, 4);
-    dataFile->print(",");
-    dataFile->print(data->ay, 4);
-    dataFile->print(",");
-    dataFile->print(data->az, 4);
-    dataFile->print(",");
-    dataFile->print(data->gx, 4);
-    dataFile->print(",");
-    dataFile->print(data->gy, 4);
-    dataFile->print(",");
-    dataFile->print(data->gz, 4);
-    dataFile->print(",");
-    dataFile->print(data->mx, 4);
-    dataFile->print(",");
-    dataFile->print(data->my, 4);
-    dataFile->print(",");
-    dataFile->print(data->mz, 4);
-    dataFile->print(",");
-    
-    dataFile->print(data->timeStamp);
-    dataFile->print("\n");
+    switch (sensorType) {
+        case LOWG_IMU:
+            dataFile->print(data->ax, 4);
+            dataFile->print(",");
+            dataFile->print(data->ay, 4);
+            dataFile->print(",");
+            dataFile->print(data->az, 4);
+            dataFile->print(",");
+            dataFile->print(data->gx, 4);
+            dataFile->print(",");
+            dataFile->print(data->gy, 4);
+            dataFile->print(",");
+            dataFile->print(data->gz, 4);
+            dataFile->print(",");
+            dataFile->print(data->mx, 4);
+            dataFile->print(",");
+            dataFile->print(data->my, 4);
+            dataFile->print(",");
+            dataFile->print(data->mz, 4);
+            dataFile->print(",");
+            
+            dataFile->print(data->timeStamp);
+            dataFile->print("\n");
+            break;
+        case HIGHG_IMU:
+            dataFile->print(data->hg_ax, 4);
+            dataFile->print(",");
+            dataFile->print(data->hg_ay, 4);
+            dataFile->print(",");
+            dataFile->print(data->hg_az, 4);
+            dataFile->print(",");
+
+            // dataFile->print(rocketState);
+            // dataFile->print(",");
+
+            dataFile->print(data->timeStamp);
+            dataFile->print("\n");
+            break;
+        case GPS:
+            dataFile->print(data->latitude, 6);
+            dataFile->print(",");
+            dataFile->print(data->longitude, 6);
+            dataFile->print(",");
+            dataFile->print(data->altitude, 6);
+            dataFile->print(",");
+            // dataFile->print(rocketState);
+            // dataFile->print(",");
+            dataFile->print(data->posLock);
+            dataFile->print(",");
+            dataFile->print(data->timeStamp);
+            dataFile->print("\n");
+            break;
+    }
 
     // For more efficient printing to file (WIP)
     /* char *buffer_string = formatString(data,rocketState);
@@ -128,67 +160,6 @@ void logData(File* dataFile, lowg_dataStruct_t* data) {
     //Writing line of data to SD card
     dataFile->flush();
 }
-
-// logData overload for highg_dataStruct_t
-/**
- * @brief Logs high-G IMU data to 1 line of a specified .csv file on SD card.
- * 
- * @param dataFile File on SD card. Object from SD library.
- * @param data High-G IMU data structure to be logged.
- * @param rocketState Enum containing rocket state to be logged.
- */
-void logData(File* dataFile, highg_dataStruct_t* data, FSM_State rocketState) {
-
-    //TODO: make this just use one print
-    
-    //!highG imu data
-    dataFile->print(data->hg_ax, 4);
-    dataFile->print(",");
-    dataFile->print(data->hg_ay, 4);
-    dataFile->print(",");
-    dataFile->print(data->hg_az, 4);
-    dataFile->print(",");
-
-    dataFile->print(rocketState);
-    dataFile->print(",");
-
-    dataFile->print(data->timeStamp);
-    dataFile->print("\n");
-
-    //Writing line of data to SD card
-    dataFile->flush();
-}
-
-// logData overload for gps_dataStruct_t
-/**
- * @brief Logs GPS data to 1 line of a specified .csv file on SD card.
- * 
- * @param dataFile File on SD card. Object from SD library.
- * @param data GPS data structure to be logged.
- * @param rocketState Enum containing rocket state to be logged.
- */
-void logData(File* dataFile, gps_dataStruct_t* data, FSM_State rocketState) {
-
-    //TODO: make this just use one print
-    //TODO: log GPS timestamps
-
-    dataFile->print(data->latitude, 6);
-    dataFile->print(",");
-    dataFile->print(data->longitude, 6);
-    dataFile->print(",");
-    dataFile->print(data->altitude, 6);
-    dataFile->print(",");
-    dataFile->print(rocketState);
-    dataFile->print(",");
-    dataFile->print(data->posLock);
-    dataFile->print(",");
-    dataFile->print(data->timeStamp);
-    dataFile->print("\n");
-
-    //Writing line of data to SD card
-    dataFile->flush();
-}
-
 
 
 /* char* formatString(lowg_dataStruct_t* data, FSM_State rocketState) {

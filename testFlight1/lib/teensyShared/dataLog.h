@@ -9,7 +9,9 @@
 
 
 
-struct lowg_dataStruct_t {
+
+
+struct sensorDataStruct_t {
     float ax;
     float ay;
     float az;
@@ -19,12 +21,7 @@ struct lowg_dataStruct_t {
     float mx;
     float my;
     float mz;
-    
-    int32_t timeStamp;
 
-};
-
-struct highg_dataStruct_t {
     //! data for highGimu accel data (hg_x, hg_y, hg_z) 
     float hg_ax;
     float hg_ay;
@@ -32,12 +29,7 @@ struct highg_dataStruct_t {
     // int16_t pt1;
     // int16_t pt2;
     // int16_t pt3;
-    
-    int32_t timeStamp;
 
-};
-
-struct gps_dataStruct_t {
     //GPS DATA
     float latitude;
     float longitude;
@@ -48,7 +40,14 @@ struct gps_dataStruct_t {
 
 };
 
-#define FIFO_SIZE 3000
+enum sensors {
+    LOWG_IMU,
+    HIGHG_IMU,
+    GPS
+};
+
+
+#define FIFO_SIZE 500
 struct datalogger_THD {
     //semaphore_t fifoData;
     SEMAPHORE_DECL(fifoData, 0);
@@ -61,21 +60,24 @@ struct datalogger_THD {
 
     MUTEX_DECL(dataMutex);
 
-    lowg_dataStruct_t fifoArray[FIFO_SIZE];
+    sensorDataStruct_t fifoArray[FIFO_SIZE];
 
-    lowg_dataStruct_t current_data;
+    sensorDataStruct_t current_data;
+
+    sensors sensor_type;
 
     File dataFile;
 };
 
-// static THD_FUNCTION(dataLogger_THD,datalogger_THD arg);
+
 
 char* sd_file_namer(char* inputName, char* fileExtensionParam);
 
-void logData(File* dataFile, lowg_dataStruct_t* data);
+/* void logData(File* dataFile, lowg_dataStruct_t* data);
 void logData(File* dataFile, highg_dataStruct_t* data, FSM_State rocketState);
-void logData(File* dataFile, gps_dataStruct_t* data, FSM_State rocketState);
+void logData(File* dataFile, gps_dataStruct_t* data, FSM_State rocketState); */
+void logData(File* dataFile, sensorDataStruct_t* data, sensors sensorType);
 
-char* formatString(lowg_dataStruct_t* data, FSM_State rocketState);
+// char* formatString(lowg_dataStruct_t* data, FSM_State rocketState);
 
 #endif
