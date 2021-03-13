@@ -1,4 +1,4 @@
-#include "ZOEM8Q0.h"
+#include "ZOEM8Q0.hpp"
 #include "Arduino.h"
 #include "SPI.h"
 
