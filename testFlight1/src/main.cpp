@@ -57,6 +57,13 @@ static THD_WORKING_AREA(rocket_FSM_WA, 512);
 static THD_WORKING_AREA(lowgIMU_WA, 512);
 static THD_WORKING_AREA(highgIMU_WA, 512);
 static THD_WORKING_AREA(servo_WA, 512);
+static THD_WORKING_AREA(mpuComm_WA, 512);
+
+static THD_FUNCTION(mpuComm_THD, arg){
+  //first 3 bytes of packet need to be iss
+
+  //TODO: Finish this
+}
 
 static THD_FUNCTION(gps_THD, arg){
   (void)arg;
