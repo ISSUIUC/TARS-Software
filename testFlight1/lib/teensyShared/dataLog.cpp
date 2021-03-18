@@ -6,6 +6,7 @@
 
 #include <string>
 #include <cstring>
+#include <sstream>
 
 #define THREAD_DEBUG
 
@@ -13,19 +14,25 @@ static THD_FUNCTION(dataLogger_THD, arg){
   struct datalogger_THD *datalogger_struct = (struct datalogger_THD *)arg;
   while(true){
     #ifdef THREAD_DEBUG
-      Serial.println("Data Logging thread entrance");
-      Serial.println(datalogger_struct->sensor_type);
+        Serial.println("Data Logging thread entrance");
+        Serial.println(datalogger_struct->sensor_type);
     #endif
     chSemWait(&datalogger_struct->fifoData);
     chMtxLock(&datalogger_struct->dataMutex);
 
-    datalogger_struct->current_data = datalogger_struct->fifoArray[datalogger_struct->fifoTail];
+    sensorDataStruct_t current_data = datalogger_struct->fifoArray[datalogger_struct->fifoTail];
+    sensors sensorType = datalogger_struct->sensor_type;
 
     datalogger_struct->fifoTail = datalogger_struct->fifoTail < (FIFO_SIZE - 1) ? datalogger_struct->fifoTail + 1 : 0;
     chSemSignal(&datalogger_struct->fifoSpace);
     chMtxUnlock(&datalogger_struct->dataMutex);
     
-    logData(&datalogger_struct->dataFile, &datalogger_struct->current_data, datalogger_struct->sensor_type);
+    logData(&datalogger_struct->dataFile, &current_data, sensorType);
+
+    #ifdef THREAD_DEBUG
+        Serial.println(datalogger_struct->sensor_type);
+        Serial.println("Data Logging thread exit");
+    #endif
 
     chThdSleepMilliseconds(6);
   }
@@ -97,7 +104,7 @@ char* sd_file_namer(char* fileName, char* fileExtensionParam) {
 void logData(File* dataFile, sensorDataStruct_t* data, sensors sensorType) {
 
     //TODO: make this just use one print
-    switch (sensorType) {
+    /* switch (sensorType) {
         case LOWG_IMU:
             dataFile->print(data->ax, 4);
             dataFile->print(",");
@@ -149,22 +156,21 @@ void logData(File* dataFile, sensorDataStruct_t* data, sensors sensorType) {
             dataFile->print(data->timeStamp);
             dataFile->print("\n");
             break;
-    }
+    } */
 
     // For more efficient printing to file (WIP)
-    /* char *buffer_string = formatString(data,rocketState);
 
-    dataFile->print(buffer_string);
+    dataFile->println(formatString(data,sensorType));
 
-    free(buffer_string); */
+    // free(buffer_string);
 
     //Writing line of data to SD card
     dataFile->flush();
 }
 
-
-/* char* formatString(lowg_dataStruct_t* data, FSM_State rocketState) {
-    std::string buffer_string = std::to_string(data->ax);
+char dataChar[100];
+char* formatString(sensorDataStruct_t* data, sensors sensorType) {
+    /* std::string buffer_string = std::string(1,data->ax);
     buffer_string.append(", ");
     buffer_string.append(str(data->ay));
     buffer_string.append(", ");
@@ -182,14 +188,95 @@ void logData(File* dataFile, sensorDataStruct_t* data, sensors sensorType) {
     buffer_string.append(", ");
     buffer_string.append(str(data->mz));
     buffer_string.append(", ");
-    buffer_string.append(str(rocketState));
-    buffer_string.append(", ");
     buffer_string.append(str(data->timeStamp));
     
-    return buffer_string.c_str();
+    return buffer_string.c_str(); */
+    /* Serial.println(5);
+    std::ostringstream ss;
+    switch (sensorType) {
+        case LOWG_IMU:
+            ss << data->ax;
+            ss << ',';
+            ss << data->ay;
+            ss << ',';
+            ss << data->az;
+            ss << ',';
+            ss << data->gx;
+            ss << ',';
+            ss << data->gy;
+            ss << ',';
+            ss << data->gz;
+            ss << ',';
+            ss << data->mx;
+            ss << ',';
+            ss << data->my;
+            ss << ',';
+            ss << data->mz;
+            ss << ',';
+            ss << data->rocketState;
+            ss << ',';
+            ss << data->timeStamp;
+            break;
+        case HIGHG_IMU:
+            ss << data->hg_ax;
+            ss << ',';
+            ss << data->hg_ay;
+            ss << ',';
+            ss << data->hg_az;
+            ss << ',';
+            ss << data->rocketState;
+            ss << ',';
+            ss << data->timeStamp;
+            break;
+        case GPS:
+            ss << data->latitude;
+            ss << ',';
+            ss << data->longitude;
+            ss << ',';
+            ss << data->altitude;
+            ss << ',';
+            ss << data->posLock;
+            ss << ',';
+            ss << data->rocketState;
+            ss << ',';
+            ss << data->timeStamp;
+            break;
+    }
+    Serial.println(6);
+    const std::string bufferString = ss.str();
+    Serial.println(7);
+    const char* bufferChar = bufferString.c_str();
+    Serial.println(bufferChar);
+    return bufferChar; */
+    strcpy(dataChar,"");
+    Serial.println(5);
+    switch (sensorType) {
+        case LOWG_IMU:
+            Serial.println(data->gx);
+            Serial.println(data->rocketState);
+            snprintf(dataChar,sizeof(dataChar),"%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%i,%ld",
+                            data->ax,data->ay,data->az,
+                            data->gx,data->gy,data->gz,
+                            data->mx,data->my,data->mz,
+                            data->rocketState,data->timeStamp);
+            Serial.println(dataChar);
+            break;
+        case HIGHG_IMU:
+            snprintf(dataChar,sizeof(dataChar),"%.4f,%.4f,%.4f,%i,%ld",
+                            data->hg_ax,data->hg_ay,data->hg_az,
+                            data->rocketState,data->timeStamp);
+            break;
+        case GPS:
+            snprintf(dataChar,sizeof(dataChar),"%.4f,%.4f,%.4f,%d,%i,%ld",
+                            data->latitude,data->longitude,data->altitude,
+                            data->posLock,data->rocketState,data->timeStamp);
+            break;
+    }
+    Serial.println(7);
+    return dataChar;
 
 
     // char *buffer_string;
     // asprintf(&buffer_string,"%4f, %4f, %4f, %4f, %4f, %4f, %4f, %4f, %4f, %4f, %4f\n",data->ax,data->ay,data->az,data->gx,data->gy,data->gz,data->mx,data->my,data->mz,rocketState,data->timeStamp);
     // return buffer_string;
-} */
+}

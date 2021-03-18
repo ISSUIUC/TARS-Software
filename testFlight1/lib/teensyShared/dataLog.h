@@ -12,6 +12,7 @@
 
 
 struct sensorDataStruct_t {
+    //! data for lowGimu
     float ax;
     float ay;
     float az;
@@ -36,6 +37,8 @@ struct sensorDataStruct_t {
     float altitude;
     bool posLock;
     
+    // Data for all
+    FSM_State rocketState;
     int32_t timeStamp;
 
 };
@@ -78,6 +81,6 @@ void logData(File* dataFile, highg_dataStruct_t* data, FSM_State rocketState);
 void logData(File* dataFile, gps_dataStruct_t* data, FSM_State rocketState); */
 void logData(File* dataFile, sensorDataStruct_t* data, sensors sensorType);
 
-// char* formatString(lowg_dataStruct_t* data, FSM_State rocketState);
+char* formatString(sensorDataStruct_t* data, sensors sensorType);
 
 #endif

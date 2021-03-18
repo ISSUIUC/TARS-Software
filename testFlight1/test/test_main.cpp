@@ -7,10 +7,11 @@
 
 #include "SparkFunLSM9DS1.h" //Low-G IMU Library
 #include "KX134-1211.h" //High-G IMU Library
-#include "ZOEM8Q0.h" //GPS Library
+#include "ZOEM8Q0.hpp" //GPS Library
 #include "hybridShared.h"
 #include "acShared.h"
 #include "dataLog.h"
+#include "dataLog.cpp"
 #include "thresholds.h"
 #include "pins.h"
 
@@ -70,6 +71,41 @@ void test_dataName_testcsvFound(void){
     SD.remove(preexistFilePath);
 }
 
+
+/**
+ * @brief tests reformatting the data as a character array that can be written to the SD card
+ * 
+ */
+void test_data_formatting(void){
+    #ifndef SDTESTING
+        TEST_IGNORE();
+    #endif
+
+
+
+    sensorDataStruct_t test_data;
+    test_data.ax = 0;
+    test_data.ay = 0;
+    test_data.az = 0.52;
+    test_data.gx = -0.432145;
+    test_data.gy = 5.6;
+    test_data.gz = 0.23568;
+    test_data.mx = -1;
+    test_data.my = 0;
+    test_data.mz = 0;
+    test_data.rocketState = STATE_COAST;
+    test_data.timeStamp = 1302;
+
+    test_THD_vars->current_data = test_data;
+    
+    
+
+    char correctFormatting[100] = "0.0000,0.0000,0.5200,-0.4321,5.6000,0.2357,-1.0000,0.0000,0.0000,5,1302";
+    TEST_ASSERT_EQUAL_STRING(correctFormatting, formatString(&test_data, LOWG_IMU));
+
+}
+
+
 //----------------------------------------------------------------------------------------
 void setup(){
 
@@ -95,6 +131,7 @@ void setup(){
     //SD TESTING:
     RUN_TEST(test_dataName_noFoundFile);
     RUN_TEST(test_dataName_testcsvFound);
+    RUN_TEST(test_data_formatting);
 
 
     UNITY_END();

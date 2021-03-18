@@ -85,6 +85,8 @@ static THD_FUNCTION(gps_THD, arg){
     gpsSensorData.longitude = gps.get_longitude();
     gpsSensorData.altitude = gps.get_altitude();
     gpsSensorData.posLock = gps.get_position_lock();
+
+    gpsSensorData.rocketState = rocketState;
     
 
     if(gpsSensorData.posLock == true){
@@ -166,6 +168,8 @@ static THD_FUNCTION(lowgIMU_THD, arg) {
     lowgSensorData.my = lowGimu.calcMag(lowGimu.my);
     lowgSensorData.mz = lowGimu.calcMag(lowGimu.mz);
 
+    lowgSensorData.rocketState = rocketState;
+
     #ifdef LOWGIMU_DEBUG
       Serial.println("------------- LOW-G THREAD ---------------");
       Serial.print(lowgSensorData.ax);
@@ -229,6 +233,8 @@ static THD_FUNCTION(highgIMU_THD, arg){
     highgSensorData.hg_ax = highGimu.get_x_gforce();
     highgSensorData.hg_ay = highGimu.get_y_gforce();
     highgSensorData.hg_az = highGimu.get_z_gforce();
+
+    highgSensorData.rocketState = rocketState;
 
     #ifdef HIGHGIMU_DEBUG
       Serial.println("------------- HIGH-G THREAD ---------------");
@@ -493,17 +499,17 @@ void setup() {
 
     char lwG_data_name[16] = "lwGData";
     lowg_datalogger_THD_vars.dataFile = SD.open(sd_file_namer(lwG_data_name, file_extension),O_CREAT | O_WRITE | O_TRUNC);
-    lowg_datalogger_THD_vars.dataFile.println("ax, ay, az, gx, gy, gz, mx, my, mz, timeStamp");
+    lowg_datalogger_THD_vars.dataFile.println("ax,ay,az,gx,gy,gz,mx,my,mz,rocketState,timeStamp");
     // Serial.println(lowg_datalogger_THD_vars.dataFile.name());
 
     char highg_data_name[16] = "hgGData";
     highg_datalogger_THD_vars.dataFile = SD.open(sd_file_namer(highg_data_name, file_extension),O_CREAT | O_WRITE | O_TRUNC);
-    highg_datalogger_THD_vars.dataFile.println("hg_ax, hg_ay, hg_az, timeStamp");
+    highg_datalogger_THD_vars.dataFile.println("hg_ax,hg_ay,hg_az,rocketState,timeStamp");
     // Serial.println(highg_dataFile.name());
 
     char gps_data_name[16] = "gpsData";
     gps_datalogger_THD_vars.dataFile = SD.open(sd_file_namer(gps_data_name, file_extension),O_CREAT | O_WRITE | O_TRUNC);
-    gps_datalogger_THD_vars.dataFile.println("latitude, longitude, altitude, GPS Lock, timeStamp");
+    gps_datalogger_THD_vars.dataFile.println("latitude,longitude,altitude,GPS Lock,rocketState,timeStamp");
     // Serial.println(gps_dataFile.name());
     
   }
