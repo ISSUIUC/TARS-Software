@@ -51,6 +51,7 @@ void round_off_angle(int &value) {
   }
 }
 
+uint8_t mpu_data[50] = {0x49, 0x53, 0x53}; // First three bytes to send to MPU "ISS"
 
 static THD_WORKING_AREA(gps_WA, 512);
 static THD_WORKING_AREA(rocket_FSM_WA, 512);
@@ -61,8 +62,43 @@ static THD_WORKING_AREA(mpuComm_WA, 512);
 
 static THD_FUNCTION(mpuComm_THD, arg){
   //first 3 bytes of packet need to be iss
+  (void)arg;
 
-  //TODO: Finish this
+  Serial1.begin(115200); // Serial interface between MPU and MCU
+
+  while (true) {
+
+    #ifdef THREAD_DEBUG
+      Serial.println("### mpuComm thread entrance");
+    #endif
+
+    //!locking data from sensorData struct
+    chMtxLock(&dataMutex);
+
+    digitalWrite(LED_WHITE, HIGH);
+
+    //write transmission code here
+    int i = 3; //because the first 3 indices are already set to be ISS 
+
+    uint8_t* data = (uint8_t*) &sensorData;
+
+
+    for (; i < 3 + sizeof(sensorData); i++) {
+      mpu_data[i] = *data; //de-references to match data types, not sure if correct, might send only the first byte
+      data++;
+    }
+
+    //TODO: Send rocket state too? Is there a mutex for rocket state?
+
+    Serial1.write(mpu_data, 50);
+
+    digitalWrite(LED_WHITE, LOW);
+  
+    //!Unlocking &dataMutex
+    chMtxUnlock(&dataMutex);
+
+    chThdSleepMilliseconds(6); //Set equal sleep time as the other threads, can change  
+  }
 }
 
 static THD_FUNCTION(gps_THD, arg){
