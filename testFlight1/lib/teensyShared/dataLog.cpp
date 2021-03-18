@@ -4,12 +4,15 @@
 
 #include <stdio.h>
 
-#include <string>
-#include <cstring>
-#include <sstream>
+#include <ChRt.h>
+
+// #include <string>
+// #include <cstring>
+// #include <sstream>
 
 #define THREAD_DEBUG
 
+MUTEX_DECL(SD_Card_Mutex);
 static THD_FUNCTION(dataLogger_THD, arg){
   struct datalogger_THD *datalogger_struct = (struct datalogger_THD *)arg;
   while(true){
@@ -27,7 +30,9 @@ static THD_FUNCTION(dataLogger_THD, arg){
     chSemSignal(&datalogger_struct->fifoSpace);
     chMtxUnlock(&datalogger_struct->dataMutex);
     
+    chMtxLock(&SD_Card_Mutex);
     logData(&datalogger_struct->dataFile, &current_data, sensorType);
+    chMtxUnlock(&SD_Card_Mutex);
 
     #ifdef THREAD_DEBUG
         Serial.println(datalogger_struct->sensor_type);
@@ -162,10 +167,14 @@ void logData(File* dataFile, sensorDataStruct_t* data, sensors sensorType) {
 
     dataFile->println(formatString(data,sensorType));
 
+    Serial.println("Data Logged.");
+
     // free(buffer_string);
 
     //Writing line of data to SD card
     dataFile->flush();
+
+    Serial.println("Data flushed.");
 }
 
 char dataChar[100];
@@ -248,13 +257,14 @@ char* formatString(sensorDataStruct_t* data, sensors sensorType) {
     const char* bufferChar = bufferString.c_str();
     Serial.println(bufferChar);
     return bufferChar; */
+
     strcpy(dataChar,"");
     Serial.println(5);
     switch (sensorType) {
         case LOWG_IMU:
             Serial.println(data->gx);
             Serial.println(data->rocketState);
-            snprintf(dataChar,sizeof(dataChar),"%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%i,%ld",
+            snprintf(dataChar,sizeof(dataChar),"%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,,,,,,,,%i,%ld",
                             data->ax,data->ay,data->az,
                             data->gx,data->gy,data->gz,
                             data->mx,data->my,data->mz,
@@ -262,12 +272,12 @@ char* formatString(sensorDataStruct_t* data, sensors sensorType) {
             Serial.println(dataChar);
             break;
         case HIGHG_IMU:
-            snprintf(dataChar,sizeof(dataChar),"%.4f,%.4f,%.4f,%i,%ld",
+            snprintf(dataChar,sizeof(dataChar),",,,,,,,,,%.4f,%.4f,%.4f,,,,,%i,%ld",
                             data->hg_ax,data->hg_ay,data->hg_az,
                             data->rocketState,data->timeStamp);
             break;
         case GPS:
-            snprintf(dataChar,sizeof(dataChar),"%.4f,%.4f,%.4f,%d,%i,%ld",
+            snprintf(dataChar,sizeof(dataChar),",,,,,,,,,,,,%.4f,%.4f,%.4f,%d,%i,%ld",
                             data->latitude,data->longitude,data->altitude,
                             data->posLock,data->rocketState,data->timeStamp);
             break;

@@ -76,9 +76,11 @@ static THD_FUNCTION(gps_THD, arg){
 
     gpsSensorData.timeStamp = chVTGetSystemTime();
 
+    Serial.println("Running sys lock.");
     chSysLock();
     gps.update_data();
     chSysUnlock();
+    Serial.println("Running sys unlock.");
 
     //Have the availability to wait until a lock is aquired with gps.get_position_lock();
     gpsSensorData.latitude = gps.get_latitude();
@@ -124,6 +126,7 @@ static THD_FUNCTION(gps_THD, arg){
         digitalWrite(LED_BUILTIN, HIGH);
         continue;
     }
+    Serial.println("Locking GPS Mutex.");
     chMtxLock(&gps_datalogger_THD_vars.dataMutex);
     gps_datalogger_THD_vars.fifoArray[gps_datalogger_THD_vars.fifoHead] = gpsSensorData;
     gps_datalogger_THD_vars.bufferErrors = 0;
@@ -132,7 +135,12 @@ static THD_FUNCTION(gps_THD, arg){
  
 
     //!Unlocking &dataMutex
-    chMtxUnlock(&gps_datalogger_THD_vars.dataMutex);  
+    chMtxUnlock(&gps_datalogger_THD_vars.dataMutex);
+    Serial.println("Unlocking GPS Mutex.");
+
+    #ifdef THREAD_DEBUG
+      Serial.println("### GPS thread exit");
+    #endif
 
     chThdSleepMilliseconds(6); // Sensor DAQ @ ~100 Hz
   }
@@ -152,6 +160,7 @@ static THD_FUNCTION(lowgIMU_THD, arg) {
     lowGimu.readGyro();
     lowGimu.readMag();
     chSysUnlock();
+    Serial.println("Sys unlocked.");
 
     lowgSensorData.timeStamp = chVTGetSystemTime();
 
@@ -497,20 +506,13 @@ void setup() {
 
     char file_extension[6] = ".csv";
 
-    char lwG_data_name[16] = "lwGData";
-    lowg_datalogger_THD_vars.dataFile = SD.open(sd_file_namer(lwG_data_name, file_extension),O_CREAT | O_WRITE | O_TRUNC);
-    lowg_datalogger_THD_vars.dataFile.println("ax,ay,az,gx,gy,gz,mx,my,mz,rocketState,timeStamp");
+    char data_name[16] = "data";
+    lowg_datalogger_THD_vars.dataFile = SD.open(sd_file_namer(data_name, file_extension),O_CREAT | O_WRITE | O_TRUNC);
+    highg_datalogger_THD_vars.dataFile = lowg_datalogger_THD_vars.dataFile;
+    gps_datalogger_THD_vars.dataFile = lowg_datalogger_THD_vars.dataFile;
+    lowg_datalogger_THD_vars.dataFile.println("ax,ay,az,gx,gy,gz,mx,my,mz,hg_ax,hg_ay,hg_az,latitude,longitude,altitude,GPS Lock,rocketState,timeStamp");
     // Serial.println(lowg_datalogger_THD_vars.dataFile.name());
 
-    char highg_data_name[16] = "hgGData";
-    highg_datalogger_THD_vars.dataFile = SD.open(sd_file_namer(highg_data_name, file_extension),O_CREAT | O_WRITE | O_TRUNC);
-    highg_datalogger_THD_vars.dataFile.println("hg_ax,hg_ay,hg_az,rocketState,timeStamp");
-    // Serial.println(highg_dataFile.name());
-
-    char gps_data_name[16] = "gpsData";
-    gps_datalogger_THD_vars.dataFile = SD.open(sd_file_namer(gps_data_name, file_extension),O_CREAT | O_WRITE | O_TRUNC);
-    gps_datalogger_THD_vars.dataFile.println("latitude,longitude,altitude,GPS Lock,rocketState,timeStamp");
-    // Serial.println(gps_dataFile.name());
     
   }
   else {
