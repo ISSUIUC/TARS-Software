@@ -504,7 +504,7 @@ void setup() {
   //SD Card Setup
   if(SD.begin(BUILTIN_SDCARD)){
 
-    char file_extension[6] = ".csv";
+    char file_extension[6] = ".dat";
 
     char data_name[16] = "data";
     lowg_datalogger_THD_vars.dataFile = SD.open(sd_file_namer(data_name, file_extension),O_CREAT | O_WRITE | O_TRUNC);

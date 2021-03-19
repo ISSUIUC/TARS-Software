@@ -6,6 +6,8 @@
 
 #include <ChRt.h>
 
+
+
 // #include <string>
 // #include <cstring>
 // #include <sstream>
@@ -165,7 +167,9 @@ void logData(File* dataFile, sensorDataStruct_t* data, sensors sensorType) {
 
     // For more efficient printing to file (WIP)
 
-    dataFile->println(formatString(data,sensorType));
+    // dataFile->println(formatString(data,sensorType));
+    dataFile->write((const uint8_t *)data,sizeof(*data));
+    // dataFile->print("\n");
 
     Serial.println("Data Logged.");
 
@@ -277,9 +281,12 @@ char* formatString(sensorDataStruct_t* data, sensors sensorType) {
                             data->rocketState,data->timeStamp);
             break;
         case GPS:
+            Serial.println(data->latitude);
+            Serial.println(data->rocketState);
             snprintf(dataChar,sizeof(dataChar),",,,,,,,,,,,,%.4f,%.4f,%.4f,%d,%i,%ld",
                             data->latitude,data->longitude,data->altitude,
                             data->posLock,data->rocketState,data->timeStamp);
+            Serial.println(dataChar);
             break;
     }
     Serial.println(7);
