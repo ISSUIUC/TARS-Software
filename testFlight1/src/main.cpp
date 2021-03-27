@@ -18,11 +18,11 @@
 //!for reading sensorData struct
 static MUTEX_DECL(dataMutex);
 
-//#define THREAD_DEBUG
+#define THREAD_DEBUG
 //#define LOWGIMU_DEBUG
 //#define HIGHGIMU_DEBUG
 //#define GPS_DEBUG
-#define SERVO_DEBUG
+//#define SERVO_DEBUG
 
 //changed name to account for both high & lowG (logGData)
 dataStruct_t sensorData;
@@ -51,7 +51,7 @@ void round_off_angle(int &value) {
   }
 }
 
-uint8_t mpu_data[50] = {0x49, 0x53, 0x53}; // First three bytes to send to MPU "ISS"
+uint8_t mpu_data[70];
 
 static THD_WORKING_AREA(gps_WA, 512);
 static THD_WORKING_AREA(rocket_FSM_WA, 512);
@@ -78,10 +78,12 @@ static THD_FUNCTION(mpuComm_THD, arg){
     digitalWrite(LED_WHITE, HIGH);
 
     //write transmission code here
-    int i = 3; //because the first 3 indices are already set to be ISS 
+    unsigned i = 3; //because the first 3 indices are already set to be ISS 
 
     uint8_t* data = (uint8_t*) &sensorData;
-
+    mpu_data[0] = 0x49;
+    mpu_data[1] = 0x53;
+    mpu_data[2] = 0x53;
 
     for (; i < 3 + sizeof(sensorData); i++) {
       mpu_data[i] = *data; //de-references to match data types, not sure if correct, might send only the first byte
@@ -90,7 +92,7 @@ static THD_FUNCTION(mpuComm_THD, arg){
 
     //TODO: Send rocket state too? Is there a mutex for rocket state?
 
-    Serial1.write(mpu_data, 50);
+    Serial1.write(mpu_data, sizeof(mpu_data));
 
     digitalWrite(LED_WHITE, LOW);
   
@@ -440,7 +442,7 @@ void chSetup(){
   chThdCreateStatic(lowgIMU_WA, sizeof(lowgIMU_WA), NORMALPRIO, lowgIMU_THD, NULL);
   chThdCreateStatic(highgIMU_WA, sizeof(highgIMU_WA), NORMALPRIO, highgIMU_THD, NULL);
   chThdCreateStatic(servo_WA, sizeof(servo_WA), NORMALPRIO, servo_THD, NULL);
-
+  chThdCreateStatic(mpuComm_WA, sizeof(mpuComm_WA), NORMALPRIO, mpuComm_THD, NULL);
   while(true);
 }
 
