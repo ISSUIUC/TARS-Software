@@ -16,9 +16,10 @@
 #include "dataLog.cpp"
 #include "thresholds.h"
 #include "pins.h"
+#include "lowG.h"
 
 static THD_FUNCTION(lowgIMU_THD, arg) {
-  (void)arg;
+  struct lowg_THD *pointer_struct = (struct lowg_THD *)arg;
   while(true){
 
     #ifdef THREAD_DEBUG
@@ -26,66 +27,65 @@ static THD_FUNCTION(lowgIMU_THD, arg) {
     #endif
 
     chSysLock();
-    lowGimu.readAccel();
-    lowGimu.readGyro();
-    lowGimu.readMag();
+    pointer_struct->lowGimuPointer->readAccel();
+    pointer_struct->lowGimuPointer->readGyro();
+    pointer_struct->lowGimuPointer->readMag();
     chSysUnlock();
-    Serial.println("Sys unlocked.");
 
-    lowgSensorData.timeStamp = chVTGetSystemTime();
+    pointer_struct->sensorDataPointer->timeStamp = chVTGetSystemTime();
 
     //acceleration in Gs
-    lowgSensorData.ax = lowGimu.calcAccel(lowGimu.ax);
-    lowgSensorData.ay = lowGimu.calcAccel(lowGimu.ay);
-    lowgSensorData.az = lowGimu.calcAccel(lowGimu.az); //There was a minus here. We don't know why that did that
+    pointer_struct->sensorDataPointer->ax = pointer_struct->lowGimuPointer->calcAccel(pointer_struct->lowGimuPointer->ax);
+    pointer_struct->sensorDataPointer->ay = pointer_struct->lowGimuPointer->calcAccel(pointer_struct->lowGimuPointer->ay);
+    pointer_struct->sensorDataPointer->az = pointer_struct->lowGimuPointer->calcAccel(pointer_struct->lowGimuPointer->az); //There was a minus here. We don't know why that did that
     //rotational speed in degrees per second
-    lowgSensorData.gx = lowGimu.calcGyro(lowGimu.gx);
-    lowgSensorData.gy = lowGimu.calcGyro(lowGimu.gy);
-    lowgSensorData.gz = lowGimu.calcGyro(lowGimu.gz);
+    pointer_struct->sensorDataPointer->gx = pointer_struct->lowGimuPointer->calcGyro(pointer_struct->lowGimuPointer->gx);
+    pointer_struct->sensorDataPointer->gy = pointer_struct->lowGimuPointer->calcGyro(pointer_struct->lowGimuPointer->gy);
+    pointer_struct->sensorDataPointer->gz = pointer_struct->lowGimuPointer->calcGyro(pointer_struct->lowGimuPointer->gz);
     //magnatometer data in gauss 
-    lowgSensorData.mx = lowGimu.calcMag(lowGimu.mx);
-    lowgSensorData.my = lowGimu.calcMag(lowGimu.my);
-    lowgSensorData.mz = lowGimu.calcMag(lowGimu.mz);
+    pointer_struct->sensorDataPointer->mx = pointer_struct->lowGimuPointer->calcMag(pointer_struct->lowGimuPointer->mx);
+    pointer_struct->sensorDataPointer->my = pointer_struct->lowGimuPointer->calcMag(pointer_struct->lowGimuPointer->my);
+    pointer_struct->sensorDataPointer->mz = pointer_struct->lowGimuPointer->calcMag(pointer_struct->lowGimuPointer->mz);
 
-    lowgSensorData.rocketState = rocketState;
+    pointer_struct->sensorDataPointer->rocketState = *pointer_struct->rocketStatePointer;
 
     #ifdef LOWGIMU_DEBUG
       Serial.println("------------- LOW-G THREAD ---------------");
-      Serial.print(lowgSensorData.ax);
+      Serial.print(pointer_struct->sensorDataPointer->ax);
       Serial.print(", ");
-      Serial.print(lowgSensorData.ay);
+      Serial.print(pointer_struct->sensorDataPointer->ay);
       Serial.print(", ");
-      Serial.print(lowgSensorData.az);
+      Serial.print(pointer_struct->sensorDataPointer->az);
       Serial.print(", ");
-      Serial.print(lowgSensorData.gx);
+      Serial.print(pointer_struct->sensorDataPointer->gx);
       Serial.print(", ");
-      Serial.print(lowgSensorData.gy);
+      Serial.print(pointer_struct->sensorDataPointer->gy);
       Serial.print(", ");
-      Serial.print(lowgSensorData.gz);
+      Serial.print(pointer_struct->sensorDataPointer->gz);
       Serial.print(", ");
-      Serial.print(lowgSensorData.mx);
+      Serial.print(pointer_struct->sensorDataPointer->mx);
       Serial.print(", ");
-      Serial.print(lowgSensorData.my);
+      Serial.print(pointer_struct->sensorDataPointer->my);
       Serial.print(", ");
-      Serial.print(lowgSensorData.mz);
+      Serial.print(pointer_struct->sensorDataPointer->mz);
       Serial.print(", ");
     #endif 
 
     // logData(&dataFile, &sensorData, rocketState);
     // add the data to the buffer here!
-    if (chSemWaitTimeout(&lowg_datalogger_THD_vars.fifoSpace, TIME_IMMEDIATE) != MSG_OK) {
-        lowg_datalogger_THD_vars.bufferErrors++;
+    if (chSemWaitTimeout(&pointer_struct->dataloggerTHDVarsPointer->fifoSpace, TIME_IMMEDIATE) != MSG_OK) {
+        pointer_struct->dataloggerTHDVarsPointer->bufferErrors++;
         digitalWrite(LED_BUILTIN, HIGH);
         continue;
     }
-    chMtxLock(&lowg_datalogger_THD_vars.dataMutex);
-    lowg_datalogger_THD_vars.fifoArray[lowg_datalogger_THD_vars.fifoHead] = lowgSensorData;
-    lowg_datalogger_THD_vars.bufferErrors = 0;
-    lowg_datalogger_THD_vars.fifoHead = lowg_datalogger_THD_vars.fifoHead < (FIFO_SIZE - 1) ? lowg_datalogger_THD_vars.fifoHead + 1 : 0;
-    chSemSignal(&lowg_datalogger_THD_vars.fifoData);
+    chMtxLock(&pointer_struct->dataloggerTHDVarsPointer->dataMutex);
+    pointer_struct->dataloggerTHDVarsPointer->fifoArray[pointer_struct->dataloggerTHDVarsPointer->fifoHead] = *pointer_struct->sensorDataPointer;
+    pointer_struct->dataloggerTHDVarsPointer->bufferErrors = 0;
+    pointer_struct->dataloggerTHDVarsPointer->fifoHead = pointer_struct->dataloggerTHDVarsPointer->fifoHead < (FIFO_SIZE - 1) ? pointer_struct->dataloggerTHDVarsPointer->fifoHead + 1 : 0;
+    chSemSignal(&pointer_struct->dataloggerTHDVarsPointer->fifoData);
 
     //!Unlocking &dataMutex
-    chMtxUnlock(&lowg_datalogger_THD_vars.dataMutex);
+    chMtxUnlock(&pointer_struct->dataloggerTHDVarsPointer->dataMutex);
 
     chThdSleepMilliseconds(6);
   }
