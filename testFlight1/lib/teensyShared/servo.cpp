@@ -17,6 +17,7 @@
 #include "dataLog.cpp"
 #include "thresholds.h"
 #include "pins.h"
+#include "servo.h"
 
 PWMServo servo_cw; //Servo that controlls roll in the clockwise direction
 PWMServo servo_ccw; //Servo that controlls roll in the counter clockwise direction
@@ -34,7 +35,8 @@ void round_off_angle(int &value) {
 }
 
 static THD_FUNCTION(servo_THD, arg){
-  (void)arg;
+  struct servo_PNTR *pointer_struct = (struct servo_PNTR *)arg;
+  bool active_control = false;
   while(true){
 
     #ifdef THREAD_DEBUG
@@ -43,9 +45,9 @@ static THD_FUNCTION(servo_THD, arg){
     
     int ccw_angle = 90;
     int cw_angle = 90;
-    bool active_control = false;
+    active_control = false;
 
-    switch(rocketState) {
+    switch(*pointer_struct->rocketStatePointer) {
       case STATE_INIT :
         active_control = true;
         break;
@@ -70,8 +72,10 @@ static THD_FUNCTION(servo_THD, arg){
     }
     // turns active control off if not in takeoff/coast sequence
     if (active_control) {
-      cw_angle = lowgSensorData.gz;
-      ccw_angle = lowgSensorData.gz;
+      chMtxLock(&pointer_struct->lowgDataloggerTHDVarsPointer->dataMutex);
+      cw_angle = pointer_struct->lowgSensorDataPointer->gz;
+      ccw_angle = pointer_struct->lowgSensorDataPointer->gz;
+      chMtxUnlock(&pointer_struct->lowgDataloggerTHDVarsPointer->dataMutex);
 
     } else {
       //Turns active control off if not in coast state.
@@ -90,7 +94,7 @@ static THD_FUNCTION(servo_THD, arg){
       Serial.print(ccw_angle);
     #endif
 
-    chMtxUnlock(&lowg_datalogger_THD_vars.dataMutex);
+    
     chThdSleepMilliseconds(6); // FSM runs at 100 Hz
   }
 
