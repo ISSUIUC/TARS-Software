@@ -1,3 +1,6 @@
+#ifndef MAIN_CPP
+#define MAIN_CPP
+
 #include <Arduino.h>
 #include <ChRt.h>
 #include <Wire.h>
@@ -14,6 +17,9 @@
 #include "dataLog.cpp"
 #include "thresholds.h"
 #include "pins.h"
+
+#include "lowG.cpp"
+#include "servo.cpp"
 
 
 datalogger_THD lowg_datalogger_THD_vars;
@@ -40,7 +46,10 @@ KX134 highGimu;
 LSM9DS1 lowGimu;
 ZOEM8Q0 gps = ZOEM8Q0();
 
-PWMServo servo_cw; //Servo that controlls roll in the clockwise direction
+lowg_PNTR lowg_pntr;
+servo_PNTR servo_pntr;
+
+/* PWMServo servo_cw; //Servo that controlls roll in the clockwise direction
 PWMServo servo_ccw; //Servo that controlls roll in the counter clockwise direction
 
 float flap_drag;
@@ -53,7 +62,7 @@ void round_off_angle(int &value) {
   if (value < 0) {
     value = 0;
   }
-}
+} */
 
 
 static THD_WORKING_AREA(gps_WA, 512);
@@ -147,7 +156,7 @@ static THD_FUNCTION(gps_THD, arg){
 }
 
 
-static THD_FUNCTION(lowgIMU_THD, arg) {
+/* static THD_FUNCTION(lowgIMU_THD, arg) {
   (void)arg;
   while(true){
 
@@ -219,7 +228,7 @@ static THD_FUNCTION(lowgIMU_THD, arg) {
 
     chThdSleepMilliseconds(6);
   }
-}
+} */
 
 
 static THD_FUNCTION(highgIMU_THD, arg){
@@ -387,7 +396,7 @@ static THD_FUNCTION(rocket_FSM, arg){
   }
 }
 
-static THD_FUNCTION(servo_THD, arg){
+/* static THD_FUNCTION(servo_THD, arg){
   (void)arg;
   while(true){
 
@@ -450,15 +459,15 @@ static THD_FUNCTION(servo_THD, arg){
     chThdSleepMilliseconds(6); // FSM runs at 100 Hz
   }
 
-}
+} */
 void chSetup(){
   //added play_THD for creation
 
   chThdCreateStatic(rocket_FSM_WA, sizeof(rocket_FSM_WA), NORMALPRIO, rocket_FSM, NULL);
   chThdCreateStatic(gps_WA, sizeof(gps_WA), NORMALPRIO, gps_THD, NULL);
-  chThdCreateStatic(lowgIMU_WA, sizeof(lowgIMU_WA), NORMALPRIO, lowgIMU_THD, NULL);
+  chThdCreateStatic(lowgIMU_WA, sizeof(lowgIMU_WA), NORMALPRIO, lowgIMU_THD, &lowg_pntr);
   chThdCreateStatic(highgIMU_WA, sizeof(highgIMU_WA), NORMALPRIO, highgIMU_THD, NULL);
-  chThdCreateStatic(servo_WA, sizeof(servo_WA), NORMALPRIO, servo_THD, NULL);
+  chThdCreateStatic(servo_WA, sizeof(servo_WA), NORMALPRIO, servo_THD, &servo_pntr);
   chThdCreateStatic(lowg_dataLogger_WA, sizeof(lowg_dataLogger_WA), NORMALPRIO, dataLogger_THD, &lowg_datalogger_THD_vars);
   chThdCreateStatic(highg_dataLogger_WA, sizeof(highg_dataLogger_WA), NORMALPRIO, dataLogger_THD, &highg_datalogger_THD_vars);
   chThdCreateStatic(gps_dataLogger_WA, sizeof(gps_dataLogger_WA), NORMALPRIO, dataLogger_THD, &gps_datalogger_THD_vars);
@@ -482,6 +491,15 @@ void setup() {
 
   //TODO: Don't forget this
   Serial.println("------------------------------------------------");
+
+  lowg_pntr.lowGimuPointer = &lowGimu;
+  lowg_pntr.sensorDataPointer = &lowgSensorData;
+  lowg_pntr.rocketStatePointer = &rocketState;
+  lowg_pntr.dataloggerTHDVarsPointer = &lowg_datalogger_THD_vars;
+
+  servo_pntr.rocketStatePointer = &rocketState;
+  servo_pntr.lowgSensorDataPointer = &lowgSensorData;
+  servo_pntr.lowgDataloggerTHDVarsPointer = &lowg_datalogger_THD_vars;
 
   //lowGimu setup
   if (lowGimu.beginSPI(LSM9DS1_AG_CS, LSM9DS1_M_CS) == false) // note, we need to sent this our CS pins (defined above)
@@ -535,3 +553,5 @@ void setup() {
 void loop() {
   // not used
 }
+
+#endif
