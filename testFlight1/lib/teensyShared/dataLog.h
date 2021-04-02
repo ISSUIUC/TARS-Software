@@ -76,11 +76,6 @@ struct datalogger_THD {
 
 char* sd_file_namer(char* inputName, char* fileExtensionParam);
 
-/* void logData(File* dataFile, lowg_dataStruct_t* data);
-void logData(File* dataFile, highg_dataStruct_t* data, FSM_State rocketState);
-void logData(File* dataFile, gps_dataStruct_t* data, FSM_State rocketState); */
 void logData(File* dataFile, sensorDataStruct_t* data, sensors sensorType);
-
-char* formatString(sensorDataStruct_t* data, sensors sensorType);
 
 #endif
