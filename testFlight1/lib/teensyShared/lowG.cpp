@@ -1,3 +1,6 @@
+#ifndef LOWG_CPP
+#define LOWG_CPP
+
 #include <Arduino.h>
 #include <ChRt.h>
 #include <Wire.h>
@@ -19,7 +22,7 @@
 #include "lowG.h"
 
 static THD_FUNCTION(lowgIMU_THD, arg) {
-  struct lowg_THD *pointer_struct = (struct lowg_THD *)arg;
+  struct lowg_PNTR *pointer_struct = (struct lowg_PNTR *)arg;
   while(true){
 
     #ifdef THREAD_DEBUG
@@ -90,3 +93,4 @@ static THD_FUNCTION(lowgIMU_THD, arg) {
     chThdSleepMilliseconds(6);
   }
 }
+#endif

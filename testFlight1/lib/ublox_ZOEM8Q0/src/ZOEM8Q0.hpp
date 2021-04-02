@@ -11,7 +11,8 @@
  * Matt Taylor and Ayberk Yaraneri
  *
  */
-
+#ifndef ZOEM8Q0_HPP
+#define ZOEM8Q0_HPP
 
 #include "Arduino.h"
 
@@ -144,3 +145,4 @@ private:
     bool decode_xxgga_sentence(uint8_t* buffer, uint16_t dataLength);
 
 };
+#endif

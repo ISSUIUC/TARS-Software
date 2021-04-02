@@ -1,4 +1,5 @@
-//TODO: Figure out header guard?
+#ifndef KX134_1211_H
+#define KX134_1211_H
 
 #include "Arduino.h"
 #include "SPI.h"
@@ -34,3 +35,5 @@ class KX134 {
 
         //classes
 };
+
+#endif

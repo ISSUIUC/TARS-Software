@@ -1,3 +1,5 @@
+#ifndef SERVO_CPP
+#define SERVO_CPP
 
 #include <Arduino.h>
 #include <ChRt.h>
@@ -99,3 +101,4 @@ static THD_FUNCTION(servo_THD, arg){
   }
 
 }
+#endif

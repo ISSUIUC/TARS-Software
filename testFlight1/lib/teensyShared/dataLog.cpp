@@ -1,3 +1,6 @@
+#ifndef DATALOG_CPP
+#define DATALOG_CPP
+
 #include <SD.h>
 
 #include "dataLog.h"
@@ -7,10 +10,6 @@
 #include <ChRt.h>
 
 
-
-// #include <string>
-// #include <cstring>
-// #include <sstream>
 
 #define THREAD_DEBUG
 
@@ -115,3 +114,5 @@ void logData(File* dataFile, sensorDataStruct_t* data, sensors sensorType) {
     // TODO: make it flush periodically as opposed to every time.
     dataFile->flush();
 }
+
+#endif

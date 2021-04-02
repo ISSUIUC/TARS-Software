@@ -1,4 +1,5 @@
-
+#ifndef SERVO_H
+#define SERVO_H
 
 #include "dataLog.h"
 #include "acShared.h"
@@ -13,3 +14,4 @@ struct servo_PNTR {
     datalogger_THD *lowgDataloggerTHDVarsPointer;
 };
 
+#endif
