@@ -7,14 +7,14 @@
 //TODO remove
 #include "main.cpp"
 
-#include "SparkFunLSM9DS1.h" //Low-G IMU Library
-#include "KX134-1211.h" //High-G IMU Library
-#include "ZOEM8Q0.hpp" //GPS Library
+// #include "SparkFunLSM9DS1.h" //Low-G IMU Library
+// #include "KX134-1211.h" //High-G IMU Library
+// #include "ZOEM8Q0.hpp" //GPS Library
 #include "hybridShared.h"
 #include "acShared.h"
-#include "dataLog.h"
-#include "dataLog.cpp"
-#include "thresholds.h"
+// #include "dataLog.h"
+// #include "dataLog.cpp"
+// #include "thresholds.h"
 #include "pins.h"
 #include "lowG.h"
 
