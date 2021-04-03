@@ -18,7 +18,7 @@
 #include "thresholds.h"
 #include "pins.h"
 
-#include "lowG.cpp"
+#include "sensors.cpp"
 #include "servo.cpp"
 
 
@@ -47,6 +47,8 @@ LSM9DS1 lowGimu;
 ZOEM8Q0 gps = ZOEM8Q0();
 
 lowg_PNTR lowg_pntr;
+highg_PNTR highg_pntr;
+gps_PNTR gps_pntr;
 servo_PNTR servo_pntr;
 
 /* PWMServo servo_cw; //Servo that controlls roll in the clockwise direction
@@ -75,7 +77,7 @@ static THD_WORKING_AREA(highg_dataLogger_WA, 512);
 static THD_WORKING_AREA(gps_dataLogger_WA, 512);
 
 
-static THD_FUNCTION(gps_THD, arg){
+/* static THD_FUNCTION(gps_THD, arg){
   (void)arg;
   while(true){
     
@@ -153,7 +155,7 @@ static THD_FUNCTION(gps_THD, arg){
 
     chThdSleepMilliseconds(6); // Sensor DAQ @ ~100 Hz
   }
-}
+} */
 
 
 /* static THD_FUNCTION(lowgIMU_THD, arg) {
@@ -231,7 +233,7 @@ static THD_FUNCTION(gps_THD, arg){
 } */
 
 
-static THD_FUNCTION(highgIMU_THD, arg){
+/* static THD_FUNCTION(highgIMU_THD, arg){
   (void)arg;
   while(true){
 
@@ -281,7 +283,7 @@ static THD_FUNCTION(highgIMU_THD, arg){
 
     chThdSleepMilliseconds(6);
   }
-}
+} */
 
 //
 static THD_FUNCTION(rocket_FSM, arg){
@@ -464,9 +466,9 @@ void chSetup(){
   //added play_THD for creation
 
   chThdCreateStatic(rocket_FSM_WA, sizeof(rocket_FSM_WA), NORMALPRIO, rocket_FSM, NULL);
-  chThdCreateStatic(gps_WA, sizeof(gps_WA), NORMALPRIO, gps_THD, NULL);
+  chThdCreateStatic(gps_WA, sizeof(gps_WA), NORMALPRIO, gps_THD, &gps_pntr);
   chThdCreateStatic(lowgIMU_WA, sizeof(lowgIMU_WA), NORMALPRIO, lowgIMU_THD, &lowg_pntr);
-  chThdCreateStatic(highgIMU_WA, sizeof(highgIMU_WA), NORMALPRIO, highgIMU_THD, NULL);
+  chThdCreateStatic(highgIMU_WA, sizeof(highgIMU_WA), NORMALPRIO, highgIMU_THD, &highg_pntr);
   chThdCreateStatic(servo_WA, sizeof(servo_WA), NORMALPRIO, servo_THD, &servo_pntr);
   chThdCreateStatic(lowg_dataLogger_WA, sizeof(lowg_dataLogger_WA), NORMALPRIO, dataLogger_THD, &lowg_datalogger_THD_vars);
   chThdCreateStatic(highg_dataLogger_WA, sizeof(highg_dataLogger_WA), NORMALPRIO, dataLogger_THD, &highg_datalogger_THD_vars);
@@ -496,6 +498,16 @@ void setup() {
   lowg_pntr.sensorDataPointer = &lowgSensorData;
   lowg_pntr.rocketStatePointer = &rocketState;
   lowg_pntr.dataloggerTHDVarsPointer = &lowg_datalogger_THD_vars;
+
+  highg_pntr.highGimuPointer = &highGimu;
+  highg_pntr.sensorDataPointer = &highgSensorData;
+  highg_pntr.rocketStatePointer = &rocketState;
+  highg_pntr.dataloggerTHDVarsPointer = &highg_datalogger_THD_vars;
+
+  gps_pntr.GPSimuPointer = &gps;
+  gps_pntr.sensorDataPointer = &gpsSensorData;
+  gps_pntr.rocketStatePointer = &rocketState;
+  gps_pntr.dataloggerTHDVarsPointer = &gps_datalogger_THD_vars;
 
   servo_pntr.rocketStatePointer = &rocketState;
   servo_pntr.lowgSensorDataPointer = &lowgSensorData;
