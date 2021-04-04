@@ -19,7 +19,6 @@ static THD_FUNCTION(dataLogger_THD, arg){
   while(true){
     #ifdef THREAD_DEBUG
         Serial.println("Data Logging thread entrance");
-        Serial.println(datalogger_struct->sensor_type);
     #endif
     chSemWait(&datalogger_struct->fifoData);
     chMtxLock(&datalogger_struct->dataMutex);
@@ -35,10 +34,10 @@ static THD_FUNCTION(dataLogger_THD, arg){
     logData(&datalogger_struct->dataFile, &current_data, sensorType);
     chMtxUnlock(&SD_Card_Mutex);
 
-    #ifdef THREAD_DEBUG
-        Serial.println(datalogger_struct->sensor_type);
-        Serial.println("Data Logging thread exit");
-    #endif
+    // #ifdef THREAD_DEBUG
+    //     Serial.println(datalogger_struct->sensor_type);
+    //     Serial.println("Data Logging thread exit");
+    // #endif
 
     chThdSleepMilliseconds(6);
   }
@@ -107,12 +106,20 @@ char* sd_file_namer(char* fileName, char* fileExtensionParam) {
  * @param data Data structure to be logged.
  * @param sensorType Enum containing the type of sensor. Controls which fields are logged.
  */
+int32_t flush_iterator = 0;
 void logData(File* dataFile, sensorDataStruct_t* data, sensors sensorType) {
     // Write raw bytes to SD card.
-    dataFile->write((const uint8_t *)data,sizeof(*data));
+    size_t bytes_written = dataFile->write((const uint8_t *)data,sizeof(*data));
+    Serial.println(bytes_written);
 
     // TODO: make it flush periodically as opposed to every time.
-    dataFile->flush();
+    if (flush_iterator == 1000) {
+        dataFile->flush();
+        flush_iterator = 0;
+    } else {
+        flush_iterator++;
+    }
+    
 }
 
 #endif
