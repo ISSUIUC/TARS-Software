@@ -36,6 +36,7 @@ static THD_FUNCTION(lowgIMU_THD, arg) {
     chSysUnlock();
 
     pointer_struct->sensorDataPointer->timeStamp = chVTGetSystemTime();
+    Serial.println(pointer_struct->sensorDataPointer->timeStamp);
 
     //acceleration in Gs
     pointer_struct->sensorDataPointer->ax = pointer_struct->lowGimuPointer->calcAccel(pointer_struct->lowGimuPointer->ax);
