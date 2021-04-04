@@ -21,6 +21,13 @@
 #include "pins.h"
 #include "sensors.h"
 
+
+/**
+ * @brief Construct a new thd function object to handle data collection from the low-g IMU.
+ * 
+ * @param arg Contains pointers to various objects needed by the low-g IMU.
+ * 
+ */
 static THD_FUNCTION(lowgIMU_THD, arg) {
   struct lowg_PNTR *pointer_struct = (struct lowg_PNTR *)arg;
   while(true){
@@ -95,6 +102,12 @@ static THD_FUNCTION(lowgIMU_THD, arg) {
   }
 }
 
+/**
+ * @brief Construct a new thd function object to handle data collection from the GPS.
+ * 
+ * @param arg Contains pointers to various objects needed by the GPS.
+ * 
+ */
 static THD_FUNCTION(gps_THD, arg){
   struct gps_PNTR *pointer_struct = (struct gps_PNTR *)arg;
   while(true){
@@ -175,6 +188,12 @@ static THD_FUNCTION(gps_THD, arg){
   }
 }
 
+/**
+ * @brief Construct a new thd function object to handle data collection from the high-g IMU.
+ * 
+ * @param arg Contains pointers to the various objects needed by the high-g IMU.
+ * 
+ */
 static THD_FUNCTION(highgIMU_THD, arg){
   struct highg_PNTR *pointer_struct = (struct highg_PNTR *)arg;
   while(true){

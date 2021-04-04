@@ -27,6 +27,11 @@ PWMServo servo_ccw; //Servo that controlls roll in the counter clockwise directi
 float flap_drag;
 float native_drag;
 
+/**
+ * @brief A function to keep the value sent to the servo between 0 and 180 degrees.
+ * 
+ * @param value The value determined by the control algorithm.
+ */
 void round_off_angle(int &value) {
   if (value > 180) {
     value = 180;
@@ -36,6 +41,12 @@ void round_off_angle(int &value) {
   }
 }
 
+/**
+ * @brief Construct a new thd function object to control the servo.
+ * 
+ * @param arg A struct containing pointers to objects needed to run the thread.
+ * 
+ */
 static THD_FUNCTION(servo_THD, arg){
   struct servo_PNTR *pointer_struct = (struct servo_PNTR *)arg;
   bool active_control = false;

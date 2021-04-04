@@ -8,6 +8,10 @@
 #include "dataLog.h"
 
 
+/**
+ * @brief A struct containing pointers needed by the lowgIMU_THD
+ * 
+ */
 struct lowg_PNTR {
     LSM9DS1 *lowGimuPointer;
 
@@ -18,6 +22,10 @@ struct lowg_PNTR {
     datalogger_THD *dataloggerTHDVarsPointer;
 };
 
+/**
+ * @brief A struct containing pointers needed by the highgIMU_THD
+ * 
+ */
 struct highg_PNTR {
     KX134 *highGimuPointer;
 
@@ -28,6 +36,10 @@ struct highg_PNTR {
     datalogger_THD *dataloggerTHDVarsPointer;
 };
 
+/**
+ * @brief A struct containing pointers needed by the gps_THD
+ * 
+ */
 struct gps_PNTR {
     ZOEM8Q0 *GPSimuPointer;
 

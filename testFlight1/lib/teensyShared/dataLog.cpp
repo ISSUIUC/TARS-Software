@@ -14,6 +14,13 @@
 #define THREAD_DEBUG
 
 MUTEX_DECL(SD_Card_Mutex);
+/**
+ * @brief Construct a new thd function object to log data to the SD card.
+ * 
+ * @param arg Contains info on the ring buffer containing the data and mutexes protecting it.
+ *            This allows the same function to be reused for all data types.
+ * 
+ */
 static THD_FUNCTION(dataLogger_THD, arg){
   struct datalogger_THD *datalogger_struct = (struct datalogger_THD *)arg;
   while(true){
@@ -109,10 +116,9 @@ char* sd_file_namer(char* fileName, char* fileExtensionParam) {
 int32_t flush_iterator = 0;
 void logData(File* dataFile, sensorDataStruct_t* data, sensors sensorType) {
     // Write raw bytes to SD card.
-    size_t bytes_written = dataFile->write((const uint8_t *)data,sizeof(*data));
-    Serial.println(bytes_written);
+    dataFile->write((const uint8_t *)data,sizeof(*data));
 
-    // TODO: make it flush periodically as opposed to every time.
+    // Flush data once for every 1000 writes (this keeps the ring buffer in sync with data collection)
     if (flush_iterator == 1000) {
         dataFile->flush();
         flush_iterator = 0;

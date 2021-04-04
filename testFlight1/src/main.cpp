@@ -225,6 +225,10 @@ static THD_FUNCTION(rocket_FSM, arg){
   }
 }
 
+/**
+ * @brief Starts all of the threads.
+ * 
+ */
 void chSetup(){
   //added play_THD for creation
 
@@ -241,7 +245,10 @@ void chSetup(){
   while(true);
 }
 
-
+/**
+ * @brief Handles all configuration necessary before the threads start.
+ * 
+ */
 void setup() {
   #if defined(THREAD_DEBUG) || defined(LOWGIMU_DEBUG) || defined(HIGHGIMU_DEBUG) || defined(GPS_DEBUG) || defined(SERVO_DEBUG)
     Serial.begin(115200);

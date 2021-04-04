@@ -11,7 +11,10 @@
 
 
 
-
+/**
+ * @brief A struct to hold all of the data that could come from any of the sensors
+ * 
+ */
 struct sensorDataStruct_t {
     //! data for lowGimu
     float ax;
@@ -44,6 +47,10 @@ struct sensorDataStruct_t {
 
 };
 
+/**
+ * @brief An enum to list all potential sensors.
+ * 
+ */
 enum sensors {
     LOWG_IMU,
     HIGHG_IMU,
@@ -52,6 +59,10 @@ enum sensors {
 
 
 #define FIFO_SIZE 1000
+/**
+ * @brief A struct to hold all info for ring buffers and mutexes used for data.
+ * 
+ */
 struct datalogger_THD {
     //semaphore_t fifoData;
     SEMAPHORE_DECL(fifoData, 0);
