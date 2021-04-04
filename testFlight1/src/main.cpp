@@ -78,19 +78,19 @@ static THD_FUNCTION(mpuComm_THD, arg){
     #endif
 
     //!locking data from sensorData struct
-    chMtxLock(&dataMutex);
+    chMtxLock(&lowg_datalogger_THD_vars.dataMutex);
 
     digitalWrite(LED_WHITE, HIGH);
 
     //write transmission code here
     unsigned i = 3; //because the first 3 indices are already set to be ISS 
 
-    uint8_t* data = (uint8_t*) &sensorData;
+    uint8_t* data = (uint8_t*) &lowgSensorData;
     mpu_data[0] = 0x49;
     mpu_data[1] = 0x53;
     mpu_data[2] = 0x53;
 
-    for (; i < 3 + sizeof(sensorData); i++) {
+    for (; i < 3 + sizeof(lowgSensorData); i++) {
       mpu_data[i] = *data; //de-references to match data types, not sure if correct, might send only the first byte
       data++;
     }
@@ -102,7 +102,7 @@ static THD_FUNCTION(mpuComm_THD, arg){
     digitalWrite(LED_WHITE, LOW);
   
     //!Unlocking &dataMutex
-    chMtxUnlock(&dataMutex);
+    chMtxUnlock(&lowg_datalogger_THD_vars.dataMutex);
 
     chThdSleepMilliseconds(6); //Set equal sleep time as the other threads, can change  
   }
