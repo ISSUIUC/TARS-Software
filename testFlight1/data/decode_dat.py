@@ -32,7 +32,8 @@ for dat_file in dats_to_convert:
 		write_to_file(csvwriter,data_split[0].decode('ascii').split(','))
 
 		packet_length = 68
-		sensor_datapackets = [data_split[1][i:i+packet_length] for i in range(0,len(data_split[1]),packet_length)]
+		data_rejoined = b'\r\n'.join(data_split[1:])
+		sensor_datapackets = [data_rejoined[i:i+packet_length] for i in range(0,len(data_rejoined),packet_length)]
 		# print(sensor_datapackets)
 		for datapacket in sensor_datapackets:
 			data_list = list(struct.unpack('f'*15,datapacket[:60]))
@@ -49,8 +50,12 @@ for dat_file in dats_to_convert:
 			# print(rocket_state_int)
 			data_list.append(rocket_state_int)
 
-			timestamp = struct.unpack('i',datapacket[64:])[0]
-			data_list.append(timestamp)
+			print(len(datapacket[64:]))
+			try:
+				timestamp = struct.unpack('i',datapacket[64:])[0]
+				data_list.append(timestamp)
+			except:
+				data_list.append('error')
 
 
 			write_to_file(csvwriter,data_list)
