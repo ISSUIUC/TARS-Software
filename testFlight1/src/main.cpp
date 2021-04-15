@@ -53,7 +53,7 @@ servo_PNTR servo_pntr;
 
 
 
-uint8_t mpu_data[70];
+uint8_t mpu_data[71];
 
 static THD_WORKING_AREA(gps_WA, 512);
 static THD_WORKING_AREA(rocket_FSM_WA, 512);
@@ -100,6 +100,11 @@ static THD_FUNCTION(mpuComm_THD, arg){
     Serial1.write(mpu_data, sizeof(mpu_data));
 
     digitalWrite(LED_WHITE, LOW);
+
+    /* for (uint8_t i = 0; i < sizeof(mpu_data); ++i) {
+		  Serial.printf("0x%.2X\t", mpu_data[i]);
+	  }
+	  Serial.printf("\n\n"); */
   
     //!Unlocking &dataMutex
     chMtxUnlock(&lowg_datalogger_THD_vars.dataMutex);
