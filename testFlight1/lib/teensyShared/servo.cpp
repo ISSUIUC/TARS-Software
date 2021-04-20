@@ -20,6 +20,7 @@
 #include "thresholds.h"
 #include "pins.h"
 #include "servo.h"
+#include "sensors.h"
 
 PWMServo servo_cw; //Servo that controlls roll in the clockwise direction
 PWMServo servo_ccw; //Servo that controlls roll in the counter clockwise direction
@@ -48,7 +49,7 @@ void round_off_angle(int &value) {
  * 
  */
 static THD_FUNCTION(servo_THD, arg){
-  struct servo_PNTR *pointer_struct = (struct servo_PNTR *)arg;
+  struct pointers *pointer_struct = (struct pointers *)arg;
   bool active_control = false;
   while(true){
 
@@ -60,8 +61,12 @@ static THD_FUNCTION(servo_THD, arg){
     int cw_angle = 90;
     active_control = false;
 
-    switch(*pointer_struct->rocketStatePointer) {
-      case STATE_INIT :
+    chMtxLock(&pointer_struct->dataloggerTHDVarsPointer->dataMutex_RS);
+    FSM_State currentRocketState = pointer_struct->sensorDataPointer->rocketState_data.rocketState;
+    chMtxUnlock(&pointer_struct->dataloggerTHDVarsPointer->dataMutex_RS);
+
+    switch(currentRocketState) {
+      case STATE_INIT:
         active_control = true;
         break;
       case STATE_IDLE:
@@ -85,10 +90,10 @@ static THD_FUNCTION(servo_THD, arg){
     }
     // turns active control off if not in takeoff/coast sequence
     if (active_control) {
-      chMtxLock(&pointer_struct->lowgDataloggerTHDVarsPointer->dataMutex);
-      cw_angle = pointer_struct->lowgSensorDataPointer->gz;
-      ccw_angle = pointer_struct->lowgSensorDataPointer->gz;
-      chMtxUnlock(&pointer_struct->lowgDataloggerTHDVarsPointer->dataMutex);
+      chMtxLock(&pointer_struct->dataloggerTHDVarsPointer->dataMutex_lowG);
+      cw_angle = pointer_struct->sensorDataPointer->lowG_data.gz;
+      ccw_angle = pointer_struct->sensorDataPointer->lowG_data.gz;
+      chMtxUnlock(&pointer_struct->dataloggerTHDVarsPointer->dataMutex_lowG);
 
     } else {
       //Turns active control off if not in coast state.
