@@ -32,7 +32,7 @@
 //#define SERVO_DEBUG
 
 //changed name to account for both high & lowG (logGData)
-// sensorDataStruct_t gpsSensorData;
+sensorDataStruct_t sensorData;
 // sensorDataStruct_t lowgSensorData;
 // sensorDataStruct_t highgSensorData;
 
@@ -76,7 +76,7 @@ static THD_FUNCTION(mpuComm_THD, arg){
     #endif
 
     //!locking data from sensorData struct
-    chMtxLock(&sensor_pointers.dataloggerTHDVarsPointer->dataMutex_lowG);
+    chMtxLock(&sensor_pointers.dataloggerTHDVarsPointer.dataMutex_lowG);
 
     digitalWrite(LED_WHITE, HIGH);
 
@@ -86,7 +86,7 @@ static THD_FUNCTION(mpuComm_THD, arg){
     uint8_t* data = (uint8_t*) &sensor_pointers.sensorDataPointer->lowG_data;
 
     //!Unlocking &dataMutex
-    chMtxUnlock(&sensor_pointers.dataloggerTHDVarsPointer->dataMutex_lowG);
+    chMtxUnlock(&sensor_pointers.dataloggerTHDVarsPointer.dataMutex_lowG);
 
     mpu_data[0] = 0x49;
     mpu_data[1] = 0x53;
@@ -129,7 +129,7 @@ static THD_FUNCTION(rocket_FSM, arg){
 
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         // TODO - Acquire lock on data struct!
-      chMtxLock(&sensor_pointers.dataloggerTHDVarsPointer->dataMutex_lowG);
+      chMtxLock(&sensor_pointers.dataloggerTHDVarsPointer.dataMutex_lowG);
       switch (rocketState) {
             case STATE_INIT:
                 // TODO
@@ -223,7 +223,7 @@ static THD_FUNCTION(rocket_FSM, arg){
             break;
 
         }
-        chMtxUnlock(&sensor_pointers.dataloggerTHDVarsPointer->dataMutex_lowG);
+        chMtxUnlock(&sensor_pointers.dataloggerTHDVarsPointer.dataMutex_lowG);
 
         
 
@@ -290,11 +290,12 @@ void setup() {
   sensor_pointers.lowGimuPointer = &lowGimu;
   sensor_pointers.highGimuPointer = &highGimu;
   sensor_pointers.GPSPointer = &gps;
+  sensor_pointers.sensorDataPointer = &sensorData;
 
   // TODO: fix servo stuff to conform with new organizational structure used with sensors.
-  servo_pntr.rocketStatePointer = &rocketState;
-  servo_pntr.lowgSensorDataPointer = sensor_pointers.sensorDataPointer;
-  servo_pntr.lowgDataloggerTHDVarsPointer = sensor_pointers.dataloggerTHDVarsPointer;
+  // servo_pntr.rocketStatePointer = &rocketState;
+  // servo_pntr.lowgSensorDataPointer = sensor_pointers.sensorDataPointer;
+  // servo_pntr.lowgDataloggerTHDVarsPointer = sensor_pointers.dataloggerTHDVarsPointer;
 
   //lowGimu setup
   if (lowGimu.beginSPI(LSM9DS1_AG_CS, LSM9DS1_M_CS) == false) // note, we need to sent this our CS pins (defined above)
@@ -317,13 +318,14 @@ void setup() {
     char file_extension[6] = ".dat";
 
     char data_name[16] = "data";
-    sensor_pointers.dataloggerTHDVarsPointer->dataFile = SD.open(sd_file_namer(data_name, file_extension),O_CREAT | O_WRITE | O_TRUNC);
-    sensor_pointers.dataloggerTHDVarsPointer->dataFile.println("ax,ay,az,gx,gy,gz,mx,my,mz,ts_lowg,"
+    sensor_pointers.dataloggerTHDVarsPointer.dataFile = SD.open(sd_file_namer(data_name, file_extension),O_CREAT | O_WRITE | O_TRUNC);
+    sensor_pointers.dataloggerTHDVarsPointer.dataFile.println("ax,ay,az,gx,gy,gz,mx,my,mz,ts_lowg,"
                                                                "hg_ax,hg_ay,hg_az,ts_highg,"
                                                                "latitude,longitude,altitude,GPS Lock,ts_gps,"
                                                                "state_q0,state_q1,state_q2,state_q3,state_x,state_y,state_z,state_vx,state_vy,state_vz,"
                                                                "state_ax,state_ay,state_az,state_omegax,state_omegay,state_omegaz,state_latitude,state_longitude,ts_state,"
                                                                "rocketState,ts_RS");
+    sensor_pointers.dataloggerTHDVarsPointer.dataFile.flush();
     // Serial.println(lowg_datalogger_THD_vars.dataFile.name());
 
     

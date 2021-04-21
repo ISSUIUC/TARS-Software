@@ -14,7 +14,7 @@ struct pointers {
 
     sensorDataStruct_t *sensorDataPointer;
 
-    datalogger_THD *dataloggerTHDVarsPointer;
+    datalogger_THD dataloggerTHDVarsPointer;
 };
 
 /**

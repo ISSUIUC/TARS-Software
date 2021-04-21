@@ -61,9 +61,9 @@ static THD_FUNCTION(servo_THD, arg){
     int cw_angle = 90;
     active_control = false;
 
-    chMtxLock(&pointer_struct->dataloggerTHDVarsPointer->dataMutex_RS);
+    chMtxLock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_RS);
     FSM_State currentRocketState = pointer_struct->sensorDataPointer->rocketState_data.rocketState;
-    chMtxUnlock(&pointer_struct->dataloggerTHDVarsPointer->dataMutex_RS);
+    chMtxUnlock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_RS);
 
     switch(currentRocketState) {
       case STATE_INIT:
@@ -90,10 +90,10 @@ static THD_FUNCTION(servo_THD, arg){
     }
     // turns active control off if not in takeoff/coast sequence
     if (active_control) {
-      chMtxLock(&pointer_struct->dataloggerTHDVarsPointer->dataMutex_lowG);
+      chMtxLock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_lowG);
       cw_angle = pointer_struct->sensorDataPointer->lowG_data.gz;
       ccw_angle = pointer_struct->sensorDataPointer->lowG_data.gz;
-      chMtxUnlock(&pointer_struct->dataloggerTHDVarsPointer->dataMutex_lowG);
+      chMtxUnlock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_lowG);
 
     } else {
       //Turns active control off if not in coast state.
