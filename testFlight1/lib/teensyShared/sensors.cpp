@@ -33,7 +33,7 @@ static THD_FUNCTION(lowgIMU_THD, arg) {
   while(true){
 
     #ifdef THREAD_DEBUG
-      Serial.println("### Low G IMU thread entrance");
+      // Serial.println("### Low G IMU thread entrance");
     #endif
 
     chSysLock();
@@ -113,7 +113,7 @@ static THD_FUNCTION(gps_THD, arg){
   while(true){
     
     #ifdef THREAD_DEBUG
-      Serial.println("### GPS thread entrance");
+      // Serial.println("### GPS thread entrance");
     #endif
 
     chSysLock();
@@ -180,7 +180,7 @@ static THD_FUNCTION(gps_THD, arg){
     chMtxUnlock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_GPS);
 
     #ifdef THREAD_DEBUG
-      Serial.println("### GPS thread exit");
+      // Serial.println("### GPS thread exit");
     #endif
 
     chThdSleepMilliseconds(6); // Sensor DAQ @ ~100 Hz
@@ -198,7 +198,7 @@ static THD_FUNCTION(highgIMU_THD, arg){
   while(true){
 
     #ifdef THREAD_DEBUG
-      Serial.println("### High G IMU thread entrance");
+      // Serial.println("### High G IMU thread entrance");
     #endif
 
     
