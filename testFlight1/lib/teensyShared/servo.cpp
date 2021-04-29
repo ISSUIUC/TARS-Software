@@ -54,7 +54,7 @@ static THD_FUNCTION(servo_THD, arg){
   while(true){
 
     #ifdef THREAD_DEBUG
-      // Serial.println("### Servo thread entrance");
+      Serial.println("### Servo thread entrance");
     #endif
     
     int ccw_angle = 90;
