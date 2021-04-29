@@ -8,8 +8,10 @@
 .clang_complete
 .gcc-flags.json
 .pio
+tmp_pio_test_transport.cpp
 
 ### vscode ###
+.vscode
 .vscode/*
 .vscode/settings.json
 .vscode/tasks.json
