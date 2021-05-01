@@ -1,4 +1,5 @@
 import sys, time, serial, matplotlib, random, select
+# sudo apt-get install python3-matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from collections import deque
@@ -7,12 +8,7 @@ from PIL import Image, ImageTk
 import os
 import numpy as np
 
-#sys.path.insert(1, 'Common\\')
-
-try:
-    import tkinter as tk
-except ImportError:
-    import Tkinter as tk
+import Tkinter as tk
 
 matplotlib.style.use("seaborn")
 
@@ -313,7 +309,7 @@ def init_gui():
     #----------------------------------------------------------------------------------------
     # ISS logo
 
-    load = Image.open("iss.png")
+    load = Image.open("groundPi/iss.png")
     load = load.resize((144,128))
     render = ImageTk.PhotoImage(load)
 
