@@ -137,8 +137,8 @@ static THD_FUNCTION(rocket_FSM, arg){
 
                 // If high acceleration is observed in z direction...
                 //!locking mutex to get data from sensorData struct
-                if(pointer_struct->sensorDataPointer->lowG_data.az > launch_az_thresh) {
-                    rocketTimers.launch_time = chVTGetSystemTime();
+                if(pointer_struct->sensorDataPointer->state_data.state_az > launch_az_thresh) {
+                    rocketTimers.launch_time = chTimeI2MS(chVTGetSystemTime());
                     pointer_struct->sensorDataPointer->rocketState_data.rocketState = STATE_LAUNCH_DETECT;
                 }
                 //!unlocking &dataMutex mutex
@@ -149,7 +149,7 @@ static THD_FUNCTION(rocket_FSM, arg){
 
                 //If the acceleration was too brief, go back to IDLE
                 //!locking mutex to get data from sensorData struct
-                if (pointer_struct->sensorDataPointer->lowG_data.az < launch_az_thresh) {
+                if (pointer_struct->sensorDataPointer->state_data.state_az < launch_az_thresh) {
                     pointer_struct->sensorDataPointer->rocketState_data.rocketState = STATE_IDLE;
                     break;
                 }
@@ -157,7 +157,7 @@ static THD_FUNCTION(rocket_FSM, arg){
 
                 // measure the length of the burn time (for hysteresis)
                 rocketTimers.burn_timer =
-                    chVTGetSystemTime() - rocketTimers.launch_time;
+                    chTimeI2MS(chVTGetSystemTime()) - rocketTimers.launch_time;
 
                 // If the acceleration lasts long enough, boost is detected
                 if (rocketTimers.burn_timer > launch_time_thresh) {
@@ -171,8 +171,8 @@ static THD_FUNCTION(rocket_FSM, arg){
 
             // If low acceleration in the Z direction...
             //!locking mutex to get data from sensorData struct
-            if (pointer_struct->sensorDataPointer->lowG_data.az < coast_thresh) {
-                rocketTimers.burnout_time = chVTGetSystemTime();
+            if (pointer_struct->sensorDataPointer->state_data.state_az < coast_thresh) {
+                rocketTimers.burnout_time = chTimeI2MS(chVTGetSystemTime());
                 pointer_struct->sensorDataPointer->rocketState_data.rocketState = STATE_BURNOUT_DETECT;
             }
             //!unlocking &dataMutex mutex
@@ -183,33 +183,55 @@ static THD_FUNCTION(rocket_FSM, arg){
 
                 //If the low acceleration was too brief, go back to BOOST
                 //!locking mutex to get data from sensorData struct
-                if (pointer_struct->sensorDataPointer->lowG_data.az > coast_thresh) {
+                if (pointer_struct->sensorDataPointer->state_data.state_az > coast_thresh) {
                     pointer_struct->sensorDataPointer->rocketState_data.rocketState = STATE_BOOST;
                     break;
                 }
-                //!unlocking &dataMutex mutex
 
                 // measure the length of the coast time (for hysteresis)
                 rocketTimers.coast_timer =
-                    chVTGetSystemTime() - rocketTimers.burnout_time;
+                        chTimeI2MS(chVTGetSystemTime()) - rocketTimers.burnout_time;
 
                 // If the low acceleration lasts long enough, coast is detected
                 if (rocketTimers.coast_timer > coast_time_thresh) {
-                    pointer_struct->sensorDataPointer->rocketState_data.rocketState = STATE_BOOST;
+                  rocketTimers.burnout_time = chTimeI2MS(chVTGetSystemTime());
+                  pointer_struct->sensorDataPointer->rocketState_data.rocketState = STATE_COAST;
                 }
 
             break;
 
             case STATE_COAST:
-                // TODO
+                // if velocity is low enough, switch to APOGEE_DETECT
+                if (pointer_struct->sensorDataPointer->state_data.state_vz <= apogee_thresh) {
+                  apogee_timer = chTimeI2MS(chVTGetSystemTime());
+                  pointer_struct->sensorDataPointer->rocketState_data.rocketState = STATE_APOGEE_DETECT;
+                  break;
+                }
+
+                
             break;
 
             case STATE_APOGEE_DETECT:
-                // TODO
+                // if low velocity was too brief, go back to COAST
+                if (pointer_struct->sensorDataPointer->state_data.state_vz > apogee_thresh) {
+                    pointer_struct->sensorDataPointer->rocketState_data.rocketState = STATE_COAST;
+                    break;
+                }
+
+                // if enough time passed, switch to APOGEE
+                if (chTimeI2MS(chVTGetSystemTime()) - apogee_timer > apogee_time_thresh) {
+                  rocketTimers.apogee_time = chTimeI2MS(chVTGetSystemTime());
+                  pointer_struct->sensorDataPointer->rocketState_data.rocketState = STATE_APOGEE;
+                }
+
             break;
 
             case STATE_APOGEE:
-                // TODO
+                // if enough time passed, switch to DROGUE
+                if (chTimeI2MS(chVTGetSystemTime()) - rocketTimers.apogee_time > ejection_delay) {
+                  pointer_struct->sensorDataPointer->rocketState_data.rocketState = STATE_DROGUE;
+                }
+
             break;
 
             case STATE_DROGUE:
