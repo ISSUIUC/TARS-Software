@@ -103,6 +103,7 @@ CH_FAST_IRQ_HANDLER(custom_uart0_irqhandler) {
 
 // Declare a stack with 64 bytes beyond task switch and interrupt needs.
 static THD_WORKING_AREA(adc_thread_wa, 64);
+static THD_WORKING_AREA(load_cell_wa, 64);
 
 static THD_FUNCTION(adc_thread, arg) {
 
@@ -160,6 +161,13 @@ static THD_FUNCTION(adc_thread, arg) {
     }
 }
 
+/* -------------------------  load cell THREAD  ----------------------------- */
+/* -------------------------------------------------------------------------- */
+
+static THD_FUNCTION(load_cell, arg) {
+    //load cell code
+}
+
 /* ----------------------------  MAIN THREAD  ------------------------------- */
 /* -------------------------------------------------------------------------- */
 
@@ -171,6 +179,9 @@ void mainThread() {
     // Create ADC producer thread
     chThdCreateStatic(adc_thread_wa, sizeof(adc_thread_wa), NORMALPRIO+1,
                       adc_thread, NULL);
+    // Create Load Cell producer thread
+    chThdCreateStatic(load_cell, sizeof(load_cell), NORMALPRIO+1,
+                      load_cell, NULL);
 
     while (true) {
 
