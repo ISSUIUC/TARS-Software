@@ -1,6 +1,7 @@
 #include "HX711.h"
 #include <SPI.h>
 #include <SD.h>
+#include "ChRt.h"
 
 //File myFile;
 HX711 loadcell;
@@ -22,27 +23,29 @@ float base;
 void setup() {
   SPI.begin();
   Serial.begin(9600);
-  while (!Serial) {
-    ; // wait for serial port to connect. Needed for native USB port only
-  }
-  
-  Serial.print("Initializing SD card...");
-  if (!SD.begin(BUILTIN_SDCARD)) {
-    Serial.println("initialization failed!");
-    while (1);
-  }
-  strcpy(fileName, "loadCell.csv");
+  while (!Serial) {}
 
-  Serial.println("initialization done.");
-  myFile = SD.open(fileName, FILE_WRITE);
+  //SD Card Setup
+  Serial.print("Initializing SD card...");
+  if(!SD.begin(BUILTIN_SDCARD)){
+    Serial.println("SD Begin Failed");
+  }
+
+  strcpy(fileName, "loadcell.csv");
+
+  // myFile = SD.open(fileName, O_CREAT | O_WRITE | O_TRUNC);
+  // Serial.println("SD card opened");
   
+
+
+  //!Loadcell stuff
   loadcell.begin(LOADCELL_DOUT_PIN, LOADCELL_SCK_PIN);
   loadcell.set_scale();
 
   //setting the base for the loadcell. Differences in readings will determine weight calculations
   float x = 0;
   float i = 0;
-  float intervals = 250;
+  float intervals = 50;
   while (i < intervals) {
     Serial.print((i/intervals) * 100);
     Serial.println(" %");
@@ -56,21 +59,18 @@ void setup() {
 
 
 void loop() {
+  myFile = SD.open("loadcell.csv", FILE_WRITE);
+
   // Serial.print("Weight: ");
   Serial.print("Weight: ");
   float reading = ((loadcell.get_units() - base) * 11/34) / 1000;
 
-
-
   Serial.println(reading);
 
-  if (myFile) {
-    myFile.print(reading);
-    myFile.print(",");
+  myFile.println(reading);
+  myFile.print(",");
 
-    Serial.println("got here");
+  Serial.println("got here");
 
-    myFile.println("doot");
-    myFile.flush();
-  }
+  myFile.flush();
 }
