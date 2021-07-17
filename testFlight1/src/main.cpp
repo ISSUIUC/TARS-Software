@@ -132,21 +132,21 @@ static THD_FUNCTION(rocket_FSM, arg){
             case STATE_INIT:
                 // TODO
             break;
-
+ 
             case STATE_IDLE:
-
+ 
                 // If high acceleration is observed in z direction...
                 //!locking mutex to get data from sensorData struct
                 if(pointer_struct->sensorDataPointer->state_data.state_az > launch_az_thresh) {
-                    rocketTimers.launch_time = chTimeI2MS(chVTGetSystemTime());
+                    rocketTimers.launch_time = chVTGetSystemTime();
                     pointer_struct->sensorDataPointer->rocketState_data.rocketState = STATE_LAUNCH_DETECT;
                 }
                 //!unlocking &dataMutex mutex
-
+ 
             break;
-
+ 
             case STATE_LAUNCH_DETECT:
-
+ 
                 //If the acceleration was too brief, go back to IDLE
                 //!locking mutex to get data from sensorData struct
                 if (pointer_struct->sensorDataPointer->state_data.state_az < launch_az_thresh) {
@@ -154,91 +154,166 @@ static THD_FUNCTION(rocket_FSM, arg){
                     break;
                 }
                 //!unlocking &dataMutex mutex
-
+ 
                 // measure the length of the burn time (for hysteresis)
                 rocketTimers.burn_timer =
-                    chTimeI2MS(chVTGetSystemTime()) - rocketTimers.launch_time;
-
+                    chVTGetSystemTime() - rocketTimers.launch_time;
+ 
                 // If the acceleration lasts long enough, boost is detected
                 if (rocketTimers.burn_timer > launch_time_thresh) {
                     pointer_struct->sensorDataPointer->rocketState_data.rocketState = STATE_BOOST;
                     digitalWrite(LED_RED, HIGH);
                 }
-
+ 
             break;
-
+ 
             case STATE_BOOST:
-
+ 
             // If low acceleration in the Z direction...
             //!locking mutex to get data from sensorData struct
             if (pointer_struct->sensorDataPointer->state_data.state_az < coast_thresh) {
-                rocketTimers.burnout_time = chTimeI2MS(chVTGetSystemTime());
+                rocketTimers.burnout_time = chVTGetSystemTime();
                 pointer_struct->sensorDataPointer->rocketState_data.rocketState = STATE_BURNOUT_DETECT;
             }
             //!unlocking &dataMutex mutex
-
+ 
             break;
-
+ 
             case STATE_BURNOUT_DETECT:
-
+ 
                 //If the low acceleration was too brief, go back to BOOST
                 //!locking mutex to get data from sensorData struct
                 if (pointer_struct->sensorDataPointer->state_data.state_az > coast_thresh) {
                     pointer_struct->sensorDataPointer->rocketState_data.rocketState = STATE_BOOST;
                     break;
                 }
-
+                //!unlocking &dataMutex mutex
+ 
                 // measure the length of the coast time (for hysteresis)
                 rocketTimers.coast_timer =
-                        chTimeI2MS(chVTGetSystemTime()) - rocketTimers.burnout_time;
-
+                    chVTGetSystemTime() - rocketTimers.burnout_time;
+ 
                 // If the low acceleration lasts long enough, coast is detected
                 if (rocketTimers.coast_timer > coast_time_thresh) {
-                  rocketTimers.burnout_time = chTimeI2MS(chVTGetSystemTime());
-                  pointer_struct->sensorDataPointer->rocketState_data.rocketState = STATE_COAST;
+                    pointer_struct->sensorDataPointer->rocketState_data.rocketState = STATE_COAST;
                 }
-
+ 
             break;
-
+ 
             case STATE_COAST:
-                // if velocity is low enough, switch to APOGEE_DETECT
-                if (pointer_struct->sensorDataPointer->state_data.state_vz <= apogee_thresh) {
-                  apogee_timer = chTimeI2MS(chVTGetSystemTime());
-                  pointer_struct->sensorDataPointer->rocketState_data.rocketState = STATE_APOGEE_DETECT;
-                  break;
+                //if velocity < 0
+                //!locking mutex to get data from sensorData struct
+                if (pointer_struct->sensorDataPointer->state_data.state_vz < apogee_thresh) {
+                    rocketTimers.apogee_time = chVTGetSystemTime();
+                    pointer_struct->sensorDataPointer->rocketState_data.rocketState = STATE_APOGEE_DETECT;
                 }
-
-                
+ 
             break;
-
+ 
             case STATE_APOGEE_DETECT:
-                // if low velocity was too brief, go back to COAST
+                //If the negative velocity was too brief, go back to coast
+                //!locking mutex to get data from sensorData struct
                 if (pointer_struct->sensorDataPointer->state_data.state_vz > apogee_thresh) {
                     pointer_struct->sensorDataPointer->rocketState_data.rocketState = STATE_COAST;
                     break;
                 }
-
-                // if enough time passed, switch to APOGEE
-                if (chTimeI2MS(chVTGetSystemTime()) - apogee_timer > apogee_time_thresh) {
-                  rocketTimers.apogee_time = chTimeI2MS(chVTGetSystemTime());
-                  pointer_struct->sensorDataPointer->rocketState_data.rocketState = STATE_APOGEE;
+                //!unlocking &dataMutex mutex
+ 
+                // measure the length of the apogee time
+                rocketTimers.apogee_timer =
+                    chVTGetSystemTime() - rocketTimers.apogee_time;
+ 
+                // If the < 0 velocity lasts long enough, apogee is detected
+                if (rocketTimers.coast_timer > apogee_time_thresh) {
+                    pointer_struct->sensorDataPointer->rocketState_data.rocketState = STATE_APOGEE;
                 }
-
             break;
-
+ 
             case STATE_APOGEE:
-                // if enough time passed, switch to DROGUE
-                if (chTimeI2MS(chVTGetSystemTime()) - rocketTimers.apogee_time > ejection_delay) {
-                  pointer_struct->sensorDataPointer->rocketState_data.rocketState = STATE_DROGUE;
+                //If the rocket has higher acceleration
+                //!locking mutex to get data from sensorData struct
+                if (pointer_struct->sensorDataPointer->state_data.state_az > drogue_thresh) {
+                    rocketTimers.drogue_time = chVTGetSystemTime();
+                    pointer_struct->sensorDataPointer->rocketState_data.rocketState = STATE_DROGUE_DETECT;
                 }
-
             break;
-
+ 
+            case STATE_DROGUE_DETECT:
+                //If the acceleration was too brief, go back to apogee
+                //!locking mutex to get data from sensorData struct
+                if (pointer_struct->sensorDataPointer->state_data.state_az < drogue_thresh) {
+                    pointer_struct->sensorDataPointer->rocketState_data.rocketState = STATE_APOGEE;
+                    break;
+                }
+                //!unlocking &dataMutex mutex
+ 
+                // measure the length of drogue time
+                rocketTimers.apogee_timer =
+                    chVTGetSystemTime() - rocketTimers.drogue_time;
+ 
+                // If the acceleration lasts long enough, drogue is detected
+                if (rocketTimers.drogue_timer > drogue_time_thresh) {
+                    pointer_struct->sensorDataPointer->rocketState_data.rocketState = STATE_DROGUE;
+                }
+            break;
+ 
             case STATE_DROGUE:
-                // TODO
+                //If the rocket has higher acceleration
+                //!locking mutex to get data from sensorData struct
+                if (pointer_struct->sensorDataPointer->state_data.state_az > main_thresh) {
+                    rocketTimers.main_time = chVTGetSystemTime();
+                    pointer_struct->sensorDataPointer->rocketState_data.rocketState = STATE_MAIN_DETECT;
+                }
             break;
-
+ 
+            case STATE_MAIN_DETECT:
+                //If the acceleration was too brief, go back to drogue
+                //!locking mutex to get data from sensorData struct
+                if (pointer_struct->sensorDataPointer->state_data.state_az < drogue_thresh) {
+                    pointer_struct->sensorDataPointer->rocketState_data.rocketState = STATE_DROGUE;
+                    break;
+                }
+                //!unlocking &dataMutex mutex
+ 
+                // measure the length of the main time
+                rocketTimers.main_timer =
+                    chVTGetSystemTime() - rocketTimers.main_time;
+ 
+                // If the low velocity lasts long enough, main is detected
+                if (rocketTimers.main_timer > main_time_thresh) {
+                    pointer_struct->sensorDataPointer->rocketState_data.rocketState = STATE_MAIN;
+                }
+            break;
+ 
             case STATE_MAIN:
+                //If the rocket has 0 velocity
+                //!locking mutex to get data from sensorData struct
+                if (pointer_struct->sensorDataPointer->state_data.state_vz > landed_thresh) {
+                    rocketTimers.landing_time = chVTGetSystemTime();
+                    pointer_struct->sensorDataPointer->rocketState_data.rocketState = STATE_LANDED_DETECT;
+                }
+            break;
+ 
+            case STATE_LANDED_DETECT:
+                //If the 0 velocity was too brief, go back to main
+                //!locking mutex to get data from sensorData struct
+                if (pointer_struct->sensorDataPointer->state_data.state_az < landed_thresh) {
+                    pointer_struct->sensorDataPointer->rocketState_data.rocketState = STATE_MAIN;
+                    break;
+                }
+                //!unlocking &dataMutex mutex
+ 
+                // measure the length of the landing
+                rocketTimers.landing_timer =
+                    chVTGetSystemTime() - rocketTimers.landing_time;
+ 
+                // If the 0 velocity lasts long enough, landed is detected
+                if (rocketTimers.landing_timer > landing_time_thresh) {
+                    pointer_struct->sensorDataPointer->rocketState_data.rocketState = STATE_LANDED;
+                }
+            break;
+ 
+            case STATE_LANDED:
                 // TODO
             break;
 
