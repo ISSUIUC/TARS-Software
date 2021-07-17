@@ -128,9 +128,12 @@ static THD_FUNCTION(rocket_FSM, arg){
       // Lock mutexes for data used in switch
       chMtxLock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_lowG);
       chMtxLock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_RS);
+      chMtxLock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_GPS); //TODO, used for state init?
       switch (pointer_struct->sensorDataPointer->rocketState_data.rocketState) {
             case STATE_INIT:
-                // TODO
+                if(pointer_struct->GPSPointer->get_position_lock()) { //if GPS lock detected, go to state Idle
+                    pointer_struct->sensorDataPointer->rocketState_data.rocketState = STATE_IDLE;
+                }
             break;
  
             case STATE_IDLE:
@@ -297,7 +300,7 @@ static THD_FUNCTION(rocket_FSM, arg){
             case STATE_LANDED_DETECT:
                 //If the 0 velocity was too brief, go back to main
                 //!locking mutex to get data from sensorData struct
-                if (pointer_struct->sensorDataPointer->state_data.state_az < landed_thresh) {
+                if (pointer_struct->sensorDataPointer->state_data.state_vz < landed_thresh) {
                     pointer_struct->sensorDataPointer->rocketState_data.rocketState = STATE_MAIN;
                     break;
                 }
@@ -324,6 +327,7 @@ static THD_FUNCTION(rocket_FSM, arg){
         // Unlock mutexes used during the switch statement
         chMtxUnlock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_RS);
         chMtxUnlock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_lowG);
+        chMtxUnlock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_GPS); //?
         
 
         // check that data can be writen to the rocket state buffer
