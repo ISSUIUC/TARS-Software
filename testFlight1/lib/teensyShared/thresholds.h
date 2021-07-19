@@ -5,9 +5,10 @@
 float coast_time_thresh = 300;
 float coast_thresh = 0;
 float apogee_thresh = 0;
-float drogue_thresh = 1; //still not determined
+float drogue_thresh_min = 1; //still not determined
+float drogue_thresh_max = 2; //still not determined
 float main_thresh = 2; //still not determined
-float landed_thresh = -.01;
+float landed_thresh = -.1;
 float coast_timer;
 float descent_timer;
 float burn_timer; //Measuring how long the burn happens
