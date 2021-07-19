@@ -95,8 +95,8 @@ static THD_FUNCTION(rocket_FSM, arg){
             break;
  
             case STATE_COAST:
-                //if velocity < 0
-                if (pointer_struct->sensorDataPointer->state_data.state_vz < apogee_thresh) {
+                //if velocity <= 0
+                if (pointer_struct->sensorDataPointer->state_data.state_vz <= apogee_thresh) {
                     rocketTimers.apogee_time = chVTGetSystemTime();
                     pointer_struct->sensorDataPointer->rocketState_data.rocketState = STATE_APOGEE_DETECT;
                 }
@@ -120,17 +120,17 @@ static THD_FUNCTION(rocket_FSM, arg){
                 }
             break;
  
-            case STATE_APOGEE:
-                //If rocket has velocity in drogue range
-                if (pointer_struct->sensorDataPointer->state_data.state_vz < drogue_thresh_min
-                        && pointer_struct->sensorDataPointer->state_data.state_vz > drogue_thresh_max) {
-                    rocketTimers.drogue_time = chVTGetSystemTime();
-                    pointer_struct->sensorDataPointer->rocketState_data.rocketState = STATE_DROGUE_DETECT;
-                }
-                //If rocket has volocity in main range
-                if (pointer_struct->sensorDataPointer->state_data.state_vz < main_thresh) {
+            case STATE_APOGEE: //*assumes velocity is <= 0
+                //If rocket has velocity in main range
+                if (pointer_struct->sensorDataPointer->state_data.state_vz < main_thresh_max
+                        && pointer_struct->sensorDataPointer->state_data.state_vz > main_thresh_min) {
                     rocketTimers.main_time = chVTGetSystemTime();
                     pointer_struct->sensorDataPointer->rocketState_data.rocketState = STATE_MAIN_DETECT;
+                }
+                //If rocket has volocity in drogue range
+                if (pointer_struct->sensorDataPointer->state_data.state_vz < drogue_thresh) {
+                    rocketTimers.drogue_time = chVTGetSystemTime();
+                    pointer_struct->sensorDataPointer->rocketState_data.rocketState = STATE_DROGUE_DETECT;
                 }
                 //If rocket has 0ish velocity
                 if (pointer_struct->sensorDataPointer->state_data.state_vz > landed_thresh) {
@@ -141,7 +141,7 @@ static THD_FUNCTION(rocket_FSM, arg){
  
             case STATE_DROGUE_DETECT:
                 //If the acceleration was too brief, go back to apogee
-                if (pointer_struct->sensorDataPointer->state_data.state_vz < drogue_thresh_min) {
+                if (pointer_struct->sensorDataPointer->state_data.state_vz > drogue_thresh) {
                     pointer_struct->sensorDataPointer->rocketState_data.rocketState = STATE_APOGEE;
                     break;
                 }
@@ -159,7 +159,7 @@ static THD_FUNCTION(rocket_FSM, arg){
             case STATE_DROGUE:
                 //If the rocket has higher acceleration
                 //!locking mutex to get data from sensorData struct
-                if (pointer_struct->sensorDataPointer->state_data.state_vz > main_thresh) {
+                if (pointer_struct->sensorDataPointer->state_data.state_vz > main_thresh_min) {
                     rocketTimers.main_time = chVTGetSystemTime();
                     pointer_struct->sensorDataPointer->rocketState_data.rocketState = STATE_MAIN_DETECT;
                 }
@@ -167,7 +167,8 @@ static THD_FUNCTION(rocket_FSM, arg){
  
             case STATE_MAIN_DETECT:
                 //If the acceleration was too brief, go back to drogue
-                if (pointer_struct->sensorDataPointer->state_data.state_vz < main_thresh) {
+                if (pointer_struct->sensorDataPointer->state_data.state_vz < main_thresh_min
+                        || pointer_struct->sensorDataPointer->state_data.state_vz > main_thresh_max) {
                     pointer_struct->sensorDataPointer->rocketState_data.rocketState = STATE_APOGEE;
                     break;
                 }
