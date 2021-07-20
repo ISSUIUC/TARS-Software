@@ -38,3 +38,7 @@
 # Platformio Temporaries
 *.pio
 **/.pio
+
+# Vim Crap
+*.swp
+**/*.swp
