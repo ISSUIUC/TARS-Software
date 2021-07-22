@@ -22,6 +22,7 @@ enum FSM_State {
     STATE_LANDED
 };
  
+// stores time the rocket state is reached as well as timers used to confirm measurements
 struct fsm_struct{
     uint32_t launch_time; //First time acceleration above threshold is detected
     uint32_t burn_timer;
