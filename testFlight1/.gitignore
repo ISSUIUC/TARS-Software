@@ -7,7 +7,7 @@
 .piolibdeps
 .clang_complete
 .gcc-flags.json
-.pio
+.pio/*
 tmp_pio_test_transport.cpp
 
 ### vscode ###

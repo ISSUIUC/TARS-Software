@@ -20,6 +20,7 @@
 
 #include "sensors.cpp"
 #include "servo.cpp"
+#include "rocket.cpp"
 
 
 // datalogger_THD datalogger_THD_vars;
@@ -36,7 +37,6 @@ sensorDataStruct_t sensorData;
 
 
 FSM_State rocketState = STATE_INIT;
-fsm_struct rocketTimers;
 
 
 KX134 highGimu;
@@ -108,167 +108,6 @@ static THD_FUNCTION(mpuComm_THD, arg){
     
 
     chThdSleepMilliseconds(6); //Set equal sleep time as the other threads, can change  
-  }
-}
-
-
-
-
-
-//
-static THD_FUNCTION(rocket_FSM, arg){
-  struct pointers *pointer_struct = (struct pointers *)arg;
-  while(true){
-
-    #ifdef THREAD_DEBUG
-      Serial.println("### Rocket FSM thread entrance");
-    #endif
-
-    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-      // Lock mutexes for data used in switch
-      chMtxLock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_lowG);
-      chMtxLock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_RS);
-      switch (pointer_struct->sensorDataPointer->rocketState_data.rocketState) {
-            case STATE_INIT:
-                // TODO
-            break;
-
-            case STATE_IDLE:
-
-                // If high acceleration is observed in z direction...
-                //!locking mutex to get data from sensorData struct
-                if(pointer_struct->sensorDataPointer->state_data.state_az > launch_az_thresh) {
-                    rocketTimers.launch_time = chTimeI2MS(chVTGetSystemTime());
-                    pointer_struct->sensorDataPointer->rocketState_data.rocketState = STATE_LAUNCH_DETECT;
-                }
-                //!unlocking &dataMutex mutex
-
-            break;
-
-            case STATE_LAUNCH_DETECT:
-
-                //If the acceleration was too brief, go back to IDLE
-                //!locking mutex to get data from sensorData struct
-                if (pointer_struct->sensorDataPointer->state_data.state_az < launch_az_thresh) {
-                    pointer_struct->sensorDataPointer->rocketState_data.rocketState = STATE_IDLE;
-                    break;
-                }
-                //!unlocking &dataMutex mutex
-
-                // measure the length of the burn time (for hysteresis)
-                rocketTimers.burn_timer =
-                    chTimeI2MS(chVTGetSystemTime()) - rocketTimers.launch_time;
-
-                // If the acceleration lasts long enough, boost is detected
-                if (rocketTimers.burn_timer > launch_time_thresh) {
-                    pointer_struct->sensorDataPointer->rocketState_data.rocketState = STATE_BOOST;
-                    digitalWrite(LED_RED, HIGH);
-                }
-
-            break;
-
-            case STATE_BOOST:
-
-            // If low acceleration in the Z direction...
-            //!locking mutex to get data from sensorData struct
-            if (pointer_struct->sensorDataPointer->state_data.state_az < coast_thresh) {
-                rocketTimers.burnout_time = chTimeI2MS(chVTGetSystemTime());
-                pointer_struct->sensorDataPointer->rocketState_data.rocketState = STATE_BURNOUT_DETECT;
-            }
-            //!unlocking &dataMutex mutex
-
-            break;
-
-            case STATE_BURNOUT_DETECT:
-
-                //If the low acceleration was too brief, go back to BOOST
-                //!locking mutex to get data from sensorData struct
-                if (pointer_struct->sensorDataPointer->state_data.state_az > coast_thresh) {
-                    pointer_struct->sensorDataPointer->rocketState_data.rocketState = STATE_BOOST;
-                    break;
-                }
-
-                // measure the length of the coast time (for hysteresis)
-                rocketTimers.coast_timer =
-                        chTimeI2MS(chVTGetSystemTime()) - rocketTimers.burnout_time;
-
-                // If the low acceleration lasts long enough, coast is detected
-                if (rocketTimers.coast_timer > coast_time_thresh) {
-                  rocketTimers.burnout_time = chTimeI2MS(chVTGetSystemTime());
-                  pointer_struct->sensorDataPointer->rocketState_data.rocketState = STATE_COAST;
-                }
-
-            break;
-
-            case STATE_COAST:
-                // if velocity is low enough, switch to APOGEE_DETECT
-                if (pointer_struct->sensorDataPointer->state_data.state_vz <= apogee_thresh) {
-                  apogee_timer = chTimeI2MS(chVTGetSystemTime());
-                  pointer_struct->sensorDataPointer->rocketState_data.rocketState = STATE_APOGEE_DETECT;
-                  break;
-                }
-
-                
-            break;
-
-            case STATE_APOGEE_DETECT:
-                // if low velocity was too brief, go back to COAST
-                if (pointer_struct->sensorDataPointer->state_data.state_vz > apogee_thresh) {
-                    pointer_struct->sensorDataPointer->rocketState_data.rocketState = STATE_COAST;
-                    break;
-                }
-
-                // if enough time passed, switch to APOGEE
-                if (chTimeI2MS(chVTGetSystemTime()) - apogee_timer > apogee_time_thresh) {
-                  rocketTimers.apogee_time = chTimeI2MS(chVTGetSystemTime());
-                  pointer_struct->sensorDataPointer->rocketState_data.rocketState = STATE_APOGEE;
-                }
-
-            break;
-
-            case STATE_APOGEE:
-                // if enough time passed, switch to DROGUE
-                if (chTimeI2MS(chVTGetSystemTime()) - rocketTimers.apogee_time > ejection_delay) {
-                  pointer_struct->sensorDataPointer->rocketState_data.rocketState = STATE_DROGUE;
-                }
-
-            break;
-
-            case STATE_DROGUE:
-                // TODO
-            break;
-
-            case STATE_MAIN:
-                // TODO
-            break;
-
-        }
-        // Update timestamp for when rocket state was polled
-        pointer_struct->sensorDataPointer->rocketState_data.timeStamp_RS = chVTGetSystemTime();
-
-        // Unlock mutexes used during the switch statement
-        chMtxUnlock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_RS);
-        chMtxUnlock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_lowG);
-        
-
-        // check that data can be writen to the rocket state buffer
-        if (chSemWaitTimeout(&pointer_struct->dataloggerTHDVarsPointer.fifoSpace_RS, TIME_IMMEDIATE) != MSG_OK) {
-            pointer_struct->dataloggerTHDVarsPointer.bufferErrors_RS++;
-            digitalWrite(LED_BUILTIN, HIGH);
-            continue;
-        }
-        // Write rocket state data to the buffer
-        chMtxLock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_RS);
-        pointer_struct->dataloggerTHDVarsPointer.fifoArray[pointer_struct->dataloggerTHDVarsPointer.fifoHead_GPS].rocketState_data = pointer_struct->sensorDataPointer->rocketState_data;
-        pointer_struct->dataloggerTHDVarsPointer.bufferErrors_RS = 0;
-        pointer_struct->dataloggerTHDVarsPointer.fifoHead_RS = pointer_struct->dataloggerTHDVarsPointer.fifoHead_RS < (FIFO_SIZE - 1) ? pointer_struct->dataloggerTHDVarsPointer.fifoHead_RS + 1 : 0;
-        chSemSignal(&pointer_struct->dataloggerTHDVarsPointer.fifoData_RS);
-        //!Unlocking &dataMutex for rocket state
-        chMtxUnlock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_RS);
-
-        
-
-        chThdSleepMilliseconds(6); // FSM runs at 100 Hz
   }
 }
 
