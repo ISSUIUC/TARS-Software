@@ -3,16 +3,15 @@
 #include <SD.h>
 #include "ChRt.h"
 
-//File myFile;
 HX711 loadcell;
 
 // 1. HX711 circuit wiring
-const int LOADCELL_DOUT_PIN = 0;
-const int LOADCELL_SCK_PIN = 1;
+const int LOADCELL_DOUT_PIN = 26;
+const int LOADCELL_SCK_PIN = 27;
 const int buzzer = 2;
 
 // 2. Adjustment settings
-const long LOADCELL_OFFSET = 50682624;
+const long LOADCELL_OFFSET = 0;
 const long LOADCELL_DIVIDER = 5895655;
 
 //create file for SD card
@@ -24,6 +23,7 @@ void setup() {
   SPI.begin();
   Serial.begin(9600);
   while (!Serial) {}
+  Serial.println("Got here");
 
   //SD Card Setup
   Serial.print("Initializing SD card...");
@@ -54,7 +54,7 @@ void setup() {
   }
   base = x / intervals;
 
-  // loadcell.set_offset(LOADCELL_OFFSET);
+  loadcell.set_offset(LOADCELL_OFFSET);
 }
 
 
@@ -70,7 +70,7 @@ void loop() {
   myFile.println(reading);
   myFile.print(",");
 
-  Serial.println("got here");
+  // Serial.println("got here");
 
   myFile.flush();
 }
