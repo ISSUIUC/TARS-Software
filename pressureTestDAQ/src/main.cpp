@@ -11,11 +11,27 @@
 #include <SD.h>
 #include <ChRt.h>
 #include <Servo.h>
+#include <SPI.h>
 
 #include "HX711.h"
 
 #include "pins.h"
 #include "dataLog.h"
+
+/* LOADCEL VARIABLES */
+HX711 loadcell;
+float x = 0;
+float i = 0;
+float intervals = 50;
+float base;
+
+// 1. HX711 circuit wiring
+#define buzzer 2
+
+// 2. Adjustment settings
+#define LOADCELL_OFFSET 50682624
+#define LOADCELL_DIVIDER 5895655
+
 
 #define PRINT_USB 1
 #define PRINT_TLM 0
@@ -108,6 +124,8 @@ static THD_WORKING_AREA(adc_thread_wa, 64);
 static THD_WORKING_AREA(load_cell_wa, 64);
 
 static THD_FUNCTION(adc_thread, arg) {
+    Serial.println("ADC Thread Started");
+    Serial1.println("ADC Thread Started");
 
     uint16_t fifoHead = 0;  // Index of head data point
     uint16_t errors = 0;    // Number of missed data points
@@ -120,6 +138,7 @@ static THD_FUNCTION(adc_thread, arg) {
 
     while (true) {
 
+        //! CHANGE PINS (actual pins in pins.h file)
         data.usec = micros();
         data.value1 = analogRead(HYBRID_PT_1_PIN);
         data.value2 = analogRead(HYBRID_PT_2_PIN);
@@ -167,13 +186,27 @@ static THD_FUNCTION(adc_thread, arg) {
 /* -------------------------------------------------------------------------- */
 
 static THD_FUNCTION(load_cell, arg) {
-    //load cell code
+    // dataFile = SD.open("loadcell.csv", FILE_WRITE);
+
+    Serial.print("Weight: ");
+    float reading = ((loadcell.get_units() - base) * 11/34) / 1000;
+
+    Serial.println(reading);
+
+    dataFile.println(reading);
+    // dataFile.print(",");
+
+    Serial.println("got here");
+
+    // dataFile.flush();
 }
 
 /* ----------------------------  MAIN THREAD  ------------------------------- */
 /* -------------------------------------------------------------------------- */
 
 void mainThread() {
+    Serial.println("Main Thread Started");
+    Serial1.println("Main Thread Started");
 
     uint16_t fifoTail = 0;
     uint16_t last = 0;
@@ -182,7 +215,7 @@ void mainThread() {
     chThdCreateStatic(adc_thread_wa, sizeof(adc_thread_wa), NORMALPRIO+1,
                       adc_thread, NULL);
     // Create Load Cell producer thread
-    chThdCreateStatic(load_cell, sizeof(load_cell), NORMALPRIO+1,
+    chThdCreateStatic(load_cell_wa, sizeof(load_cell_wa), NORMALPRIO+1,
                       load_cell, NULL);
 
     while (true) {
@@ -220,6 +253,7 @@ void mainThread() {
      pinMode(HYBRID_PT_2_PIN, INPUT);
      pinMode(HYBRID_PT_3_PIN, INPUT);
      analogReadResolution(ADC_RESOLUTION);
+     Serial.println("After pinMode");
 
      BV_Servo1.attach(BALL_VALVE_1_PIN);
      BV_Servo2.attach(BALL_VALVE_2_PIN);
@@ -228,6 +262,8 @@ void mainThread() {
 
      Serial.begin(9600);
      Serial1.begin(57600);
+     Serial.println("got here");
+     Serial1.println("got here");
 
      // while (!Serial) {}
      while (!Serial1) {}
@@ -262,6 +298,20 @@ void mainThread() {
      _VectorsRam[IRQ_UART0_STATUS+16] = custom_uart0_irqhandler;
 
      chBegin(mainThread);
+
+    // Loadcell setup
+    loadcell.begin(LOADCELL_DOUT_PIN, LOADCELL_SCK_PIN);
+    loadcell.set_scale();
+
+    // setting the base for the loadcell. Differences in readings will determine weight calculations
+    while (i < intervals) {
+        Serial.print((i/intervals) * 100);
+        Serial.println(" %");
+        x += loadcell.get_units();
+        i++;
+    }
+    base = x / intervals;
+
 
  }
 
