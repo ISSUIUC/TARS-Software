@@ -26,8 +26,8 @@ jobs:
     - name: Install PlatformIO
       run: |
         python -m pip install --upgrade pip
-        pip install --upgrade platformio
+        pip install --upgrade platformioons as a single GitHub action · Issue ...
     - name: Run PlatformIO
       run: |
-        cd flgiht/mcu/
+        cd flight/mcu/
         pio test -e desktop
