@@ -26,7 +26,7 @@ jobs:
     - name: Install PlatformIO
       run: |
         python -m pip install --upgrade pip
-        pip install --upgrade platformioons as a single GitHub action · Issue ...
+        pip install --upgrade platformio
     - name: Run PlatformIO
       run: |
         cd flight/mcu/
