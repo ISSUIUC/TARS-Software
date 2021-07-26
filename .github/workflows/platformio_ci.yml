@@ -1,6 +1,6 @@
 name: PlatformIO CI
 
-on: [pull_request]
+on: [push, pull_request]
 
 jobs:
   build:
@@ -29,5 +29,5 @@ jobs:
         pip install --upgrade platformio
     - name: Run PlatformIO
       run: |
-        cd flight/mcu/
+        cd flgiht/mcu/
         pio test -e desktop
