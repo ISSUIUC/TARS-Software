@@ -30,4 +30,5 @@ jobs:
     - name: Run PlatformIO
       run: |
         cd flight/mcu/
+        pio platform install native
         pio test -e desktop
