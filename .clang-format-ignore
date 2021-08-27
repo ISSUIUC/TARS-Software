@@ -1,0 +1,5 @@
+./flight/mcu/lib/ChRt/*
+
+./flight/mcu/lib/SparkFunLSM9DS1/*
+
+./misc/*
