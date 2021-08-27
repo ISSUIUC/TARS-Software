@@ -8,16 +8,15 @@
  *
  */
 
-#include <stdio.h>
-
 #include "rfm95.h"
+
+#include <stdio.h>
 
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
 
-static void pabort(const char *s)
-{
-	perror(s);
-	abort();
+static void pabort(const char* s) {
+    perror(s);
+    abort();
 }
 
 /** RFM95::RFM95 Constructor
@@ -25,11 +24,7 @@ static void pabort(const char *s)
  * INPUTS:      none
  * RETURNS:     none
  */
-RFM95::RFM95() {
-
-    _spi_open();
-
-}
+RFM95::RFM95() { _spi_open(); }
 
 /** RFM95::RFM_init_TX
  * DESCRIPTION: Writes necessary settings to registers for transmit mode
@@ -37,7 +32,6 @@ RFM95::RFM95() {
  * RETURNS:     none
  */
 void RFM95::RFM_init_TX() {
-
     /* Set to LoRa mode */
     RFM_write(REG_OP_MODE, LORA_MODE);
 
@@ -52,7 +46,6 @@ void RFM95::RFM_init_TX() {
 
     /* Set internal state to show TX mode */
     _rfm_mode = MODE_TX;
-
 }
 
 /** RFM95::RFM_init_RX
@@ -61,7 +54,6 @@ void RFM95::RFM_init_TX() {
  * RETURNS:     none
  */
 void RFM95::RFM_init_RX() {
-
     /* Set to LoRa mode */
     RFM_write(REG_OP_MODE, LORA_MODE);
 
@@ -73,7 +65,6 @@ void RFM95::RFM_init_RX() {
 
     /* Set internal state to show TX mode */
     _rfm_mode = MODE_RXCONTINUOUS;
-
 }
 
 /** RFM95::RFM_write
@@ -83,10 +74,9 @@ void RFM95::RFM_init_RX() {
  * RETURNS:     false on failure
  */
 bool RFM95::RFM_write(uint8_t RegAddr, uint8_t data) {
-
 #ifdef DEBUG
     printf("##### Write to RFM95 ADDRESS: 0x%.2X\tDATA: 0x%.2X #####\n",
-            RegAddr, data);
+           RegAddr, data);
 #endif
 
     int ret;
@@ -110,7 +100,6 @@ bool RFM95::RFM_write(uint8_t RegAddr, uint8_t data) {
  * RETURNS:     byte that was read, 0x00 on failure
  */
 uint8_t RFM95::RFM_read(uint8_t RegAddr) {
-
 #ifdef DEBUG
     printf("##### Read from RFM95 ADDRESS: 0x%.2X ", RegAddr);
 #endif
@@ -143,7 +132,6 @@ uint8_t RFM95::RFM_read(uint8_t RegAddr) {
  * RETURNS:     false on failure
  */
 bool RFM95::RFM_transmit(uint8_t* txBuf, uint8_t length) {
-
     if (txBuf == NULL) return false;
     if (length == 0 || length > 64) return false;
 
@@ -153,9 +141,9 @@ bool RFM95::RFM_transmit(uint8_t* txBuf, uint8_t length) {
 
     uint8_t i;
 
-    RFM_write(REG_OP_MODE, MODE_STDBY);     /* Switch to standby mode */
-    RFM_write(REG_PAYLOAD_LENGTH, length);  /* Set payload length */
-    RFM_write(REG_FIFO_ADDR_PTR, 0x80);     /* Set FIFO pointer location */
+    RFM_write(REG_OP_MODE, MODE_STDBY);    /* Switch to standby mode */
+    RFM_write(REG_PAYLOAD_LENGTH, length); /* Set payload length */
+    RFM_write(REG_FIFO_ADDR_PTR, 0x80);    /* Set FIFO pointer location */
 
     /* Copy <length> bytes from txBuf into RFM95 FIFO */
     for (i = 0; i < length; ++i) {
@@ -163,11 +151,12 @@ bool RFM95::RFM_transmit(uint8_t* txBuf, uint8_t length) {
         ++txBuf;
     }
 
-    RFM_write(REG_OP_MODE, MODE_TX);    /* Trigger a transmission */
+    RFM_write(REG_OP_MODE, MODE_TX); /* Trigger a transmission */
 
     /* Block by spinning (interrupt support would be MUCH better here) */
     while ((RFM_read(REG_OP_MODE) & 0x7F) != MODE_STDBY) {
-        for (volatile int q = 0; q < 10000; ++q) {}
+        for (volatile int q = 0; q < 10000; ++q) {
+        }
     }
 
     return true;
@@ -182,7 +171,6 @@ bool RFM95::RFM_transmit(uint8_t* txBuf, uint8_t length) {
  * RETURNS:     number of bytes read, 0 on failure
  */
 uint8_t RFM95::RFM_receive(uint8_t* rxBuf, uint16_t maxLen) {
-
     if (rxBuf == NULL) return 0;
     if (maxLen == 0) return 0;
 
@@ -192,27 +180,28 @@ uint8_t RFM95::RFM_receive(uint8_t* rxBuf, uint16_t maxLen) {
 
     uint32_t count = 0;
 
-    uint8_t irq_flags = RFM_read(REG_IRQ_FLAGS);    // read IRQ flags
+    uint8_t irq_flags = RFM_read(REG_IRQ_FLAGS);  // read IRQ flags
 
     while ((~irq_flags & IRQ_RXDONE)) {
-        for (volatile int q = 0; q < 1000; ++q) {}  // spin
-        irq_flags = RFM_read(REG_IRQ_FLAGS);        // read again
+        for (volatile int q = 0; q < 1000; ++q) {
+        }                                     // spin
+        irq_flags = RFM_read(REG_IRQ_FLAGS);  // read again
 
-        if (count == 1000) return 0;    // timeout, return false
+        if (count == 1000) return 0;  // timeout, return false
         ++count;
     }
 
-    uint8_t numBytes = RFM_read(REG_RX_NB_BYTES);           // get packet size
-    uint8_t packetStart = RFM_read(FIFO_RX_CURRENT_ADDR);   // packet start addr
-    RFM_write(REG_FIFO_ADDR_PTR, packetStart);      // read form packet start
+    uint8_t numBytes = RFM_read(REG_RX_NB_BYTES);          // get packet size
+    uint8_t packetStart = RFM_read(FIFO_RX_CURRENT_ADDR);  // packet start addr
+    RFM_write(REG_FIFO_ADDR_PTR, packetStart);  // read form packet start
 
     /* Copy <numBytes> bytes from RFM95 FIFO to rxBuf */
-    for (uint8_t i = 0 ; (i < numBytes) && (i < maxLen) ; ++i) {
+    for (uint8_t i = 0; (i < numBytes) && (i < maxLen); ++i) {
         *rxBuf = RFM_read(REG_FIFO);
         ++rxBuf;
     }
 
-    RFM_write(REG_IRQ_FLAGS, IRQ_RXDONE);   // Clear RxDone IRQ
+    RFM_write(REG_IRQ_FLAGS, IRQ_RXDONE);  // Clear RxDone IRQ
 
     return numBytes;
 }
@@ -224,7 +213,6 @@ uint8_t RFM95::RFM_receive(uint8_t* rxBuf, uint16_t maxLen) {
  * RETURNS:     false on any failure, true if all tests pass
  */
 bool RFM95::RFM_test() {
-
     printf("##### Performing RFM95 Checks #####\n");
 
     if (_rfm_mode == MODE_TX) {
@@ -251,7 +239,6 @@ bool RFM95::RFM_test() {
     // TODO - Add more tests?
 
     return true;
-
 }
 
 /** RFM95::RFM_reset
@@ -260,8 +247,7 @@ bool RFM95::RFM_test() {
  * RETURNS: none
  */
 void RFM95::RFM_reset() {
-
-    FILE *fp;
+    FILE* fp;
 
     fp = fopen("/sys/class/gpio/gpio48/direction", "w");
     fputs("out", fp);
@@ -271,7 +257,8 @@ void RFM95::RFM_reset() {
     fputs("0", fp);
     fclose(fp);
 
-    for (volatile int i = 0; i < 1000000 ; ++i) {}
+    for (volatile int i = 0; i < 1000000; ++i) {
+    }
 
     fp = fopen("/sys/class/gpio/gpio48/value", "w");
     fputs("1", fp);
@@ -285,48 +272,39 @@ void RFM95::RFM_reset() {
  * RETURNS:     none
  */
 void RFM95::_spi_open() {
-
     int ret;
 
     _fd = open(_device, O_RDWR);
-	if (_fd < 0)
-		pabort("can't open device");
+    if (_fd < 0) pabort("can't open device");
 
-	/*
-	 * spi mode
-	 */
-	ret = ioctl(_fd, SPI_IOC_WR_MODE, &_mode);
-	if (ret == -1)
-		pabort("can't set spi mode");
+    /*
+     * spi mode
+     */
+    ret = ioctl(_fd, SPI_IOC_WR_MODE, &_mode);
+    if (ret == -1) pabort("can't set spi mode");
 
-	ret = ioctl(_fd, SPI_IOC_RD_MODE, &_mode);
-	if (ret == -1)
-		pabort("can't get spi mode");
+    ret = ioctl(_fd, SPI_IOC_RD_MODE, &_mode);
+    if (ret == -1) pabort("can't get spi mode");
 
-	/*
-	 * bits per word
-	 */
-	ret = ioctl(_fd, SPI_IOC_WR_BITS_PER_WORD, &_bits);
-	if (ret == -1)
-		pabort("can't set bits per word");
+    /*
+     * bits per word
+     */
+    ret = ioctl(_fd, SPI_IOC_WR_BITS_PER_WORD, &_bits);
+    if (ret == -1) pabort("can't set bits per word");
 
-	ret = ioctl(_fd, SPI_IOC_RD_BITS_PER_WORD, &_bits);
-	if (ret == -1)
-		pabort("can't get bits per word");
+    ret = ioctl(_fd, SPI_IOC_RD_BITS_PER_WORD, &_bits);
+    if (ret == -1) pabort("can't get bits per word");
 
-	/*
-	 * max speed hz
-	 */
-	ret = ioctl(_fd, SPI_IOC_WR_MAX_SPEED_HZ, &_speed);
-	if (ret == -1)
-		pabort("can't set max speed hz");
+    /*
+     * max speed hz
+     */
+    ret = ioctl(_fd, SPI_IOC_WR_MAX_SPEED_HZ, &_speed);
+    if (ret == -1) pabort("can't set max speed hz");
 
-	ret = ioctl(_fd, SPI_IOC_RD_MAX_SPEED_HZ, &_speed);
-	if (ret == -1)
-		pabort("can't get max speed hz");
+    ret = ioctl(_fd, SPI_IOC_RD_MAX_SPEED_HZ, &_speed);
+    if (ret == -1) pabort("can't get max speed hz");
 
 #ifdef DEBUG
     printf("\n##### RFM95 file opened with fd = %d #####\n", _fd);
 #endif
-
 }

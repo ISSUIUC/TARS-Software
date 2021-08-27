@@ -8,22 +8,19 @@
  *
  */
 
-
+#include <fcntl.h>
+#include <getopt.h>
+#include <linux/spi/spidev.h>
+#include <linux/types.h>
 #include <stdint.h>
-#include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <getopt.h>
-#include <fcntl.h>
 #include <sys/ioctl.h>
-#include <linux/types.h>
-#include <linux/spi/spidev.h>
+#include <unistd.h>
 
 #include "../lib/rfm95/rfm95.h"
 
-int main(void)
-{
-
+int main(void) {
     RFM95 rfm95;
 
     rfm95.RFM_init_RX();
@@ -44,10 +41,11 @@ int main(void)
             printf("\n");
         }
 
-        for (volatile int i = 0; i < 1000000; ++i) {}
+        for (volatile int i = 0; i < 1000000; ++i) {
+        }
 
         // printf("##### hmmm: %d\n", rfm95.RFM_read(REG_RX_NB_BYTES));
     }
 
-	return 0;
+    return 0;
 }
