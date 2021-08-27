@@ -1,10 +1,9 @@
 #ifndef SENSORS_H
 #define SENSORS_H
 
-#include "SparkFunLSM9DS1.h" //Low-G IMU Library
-#include "KX134-1211.h" //High-G IMU Library
-#include "ZOEM8Q0.hpp" //GPS Library
-
+#include "KX134-1211.h"       //High-G IMU Library
+#include "SparkFunLSM9DS1.h"  //Low-G IMU Library
+#include "ZOEM8Q0.hpp"        //GPS Library
 #include "dataLog.h"
 
 struct pointers {
@@ -19,7 +18,7 @@ struct pointers {
 
 /**
  * @brief A struct containing pointers needed by the lowgIMU_THD
- * 
+ *
  */
 struct lowg_PNTR {
     LSM9DS1 *lowGimuPointer;
@@ -33,7 +32,7 @@ struct lowg_PNTR {
 
 /**
  * @brief A struct containing pointers needed by the highgIMU_THD
- * 
+ *
  */
 struct highg_PNTR {
     KX134 *highGimuPointer;
@@ -47,7 +46,7 @@ struct highg_PNTR {
 
 /**
  * @brief A struct containing pointers needed by the gps_THD
- * 
+ *
  */
 struct gps_PNTR {
     ZOEM8Q0 *GPSimuPointer;

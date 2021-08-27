@@ -1,13 +1,12 @@
 #ifndef SERVO_H
 #define SERVO_H
 
-#include "dataLog.h"
 #include "acShared.h"
-
+#include "dataLog.h"
 
 /**
  * @brief A struct containing pointers to objects needed for the servo_THD.
- * 
+ *
  */
 struct servo_PNTR {
     FSM_State *rocketStatePointer;

@@ -6,16 +6,12 @@
 #define __LIB_TESTCLASS_H__
 
 class DummyTestClass {
-  public:
-	int getValue();
+   public:
+    int getValue();
     void setValue(int val);
 
-
-
-  private:
-	int value;
-
+   private:
+    int value;
 };
-
 
 #endif

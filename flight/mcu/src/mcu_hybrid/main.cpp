@@ -1,8 +1,8 @@
 /* main.cpp
  *   ______  ___     ___    ____
  *  /_  __/ / _ |   / _ \  / __/
- *   / /   / __ |  / , _/ _\ \  
- *  /_/   /_/ |_| /_/|_| /___/  
+ *   / /   / __ |  / , _/ _\ \
+ *  /_/   /_/ |_| /_/|_| /___/
  *
  * Hybrid Engine Control Program
  *
@@ -23,18 +23,13 @@
 
 //------------------------------------------------------------------------------
 // chSetup - let there be threads
-void chSetup() {
-
-}
+void chSetup() {}
 
 void setup() {
-
     chBegin(chSetup);
 
-    while(true) {}
-
+    while (true) {
+    }
 }
 
-void loop() {
-
-}
+void loop() {}

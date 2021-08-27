@@ -10,12 +10,11 @@
 
 #include <stdint.h>
 
+#define SENTINEL_1 0x49  // ascii I
+#define SENTINEL_2 0x53  // ascii S
+#define SENTINEL_3 0x53  // ascii S
 
-#define SENTINEL_1 0x49     // ascii I
-#define SENTINEL_2 0x53     // ascii S
-#define SENTINEL_3 0x53     // ascii S
-
-#define INPUT_BUF_SIZE  128
+#define INPUT_BUF_SIZE 128
 #define OUTPUT_BUF_SIZE 128
 
 enum FSM_State {
@@ -30,7 +29,6 @@ enum FSM_State {
     STATE_DROGUE,
     STATE_MAIN
 };
-
 
 typedef struct dataPacket_t {
     float ax;
@@ -51,7 +49,7 @@ typedef struct dataPacket_t {
     // int16_t pt2;
     // int16_t pt3;
 
-    //GPS DATA
+    // GPS DATA
     float latitude;
     float longitude;
     float altitude;
@@ -59,36 +57,33 @@ typedef struct dataPacket_t {
 
     // FSM_State rocketState;
     int32_t timeStamp;
-
 };
 
-#define PACKET_SIZE		sizeof(dataPacket_t)
+#define PACKET_SIZE sizeof(dataPacket_t)
 
 class UART {
-    public:
+   public:
+    int uart_init(char* port);
 
-	    int uart_init(char* port);
+    int32_t uart_read(uint8_t* buf, uint32_t numBytes);
+    int32_t uart_write(uint8_t* buf, uint32_t numBytes);
 
-		int32_t uart_read(uint8_t* buf, uint32_t numBytes);
-		int32_t uart_write(uint8_t* buf, uint32_t numBytes);
+    dataPacket_t* uart_readPacket();
+    int32_t sentinel_detect();
 
-		dataPacket_t* uart_readPacket();
-		int32_t sentinel_detect();
+   private:
+    /* UART interface */
+    // int uart_init(char* port);
 
-    private:
+    int _fd;  // Linux file descriptor
 
-        /* UART interface */
-        //int uart_init(char* port);
+    uint8_t input_buf[INPUT_BUF_SIZE];
+    uint8_t output_buf[OUTPUT_BUF_SIZE];
 
-        int _fd;    // Linux file descriptor
+    /* Packet detection and assembly */
+    uint8_t packetBuf[PACKET_SIZE];
+    uint32_t packet_bytes_received;
 
-        uint8_t input_buf[INPUT_BUF_SIZE];
-        uint8_t output_buf[OUTPUT_BUF_SIZE];
-
-        /* Packet detection and assembly */
-		uint8_t	packetBuf[PACKET_SIZE];
-		uint32_t packet_bytes_received;
-
-		bool sentinel_detected;
-		uint8_t fsm_state;
+    bool sentinel_detected;
+    uint8_t fsm_state;
 };

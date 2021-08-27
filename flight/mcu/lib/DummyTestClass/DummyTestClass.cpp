@@ -4,10 +4,6 @@
 
 #include "DummyTestClass.h"
 
-int DummyTestClass::getValue() {
-		return value;
-}
+int DummyTestClass::getValue() { return value; }
 
-void DummyTestClass::setValue(int val) {
-		value = val;
-}
+void DummyTestClass::setValue(int val) { value = val; }

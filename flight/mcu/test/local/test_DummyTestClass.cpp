@@ -1,24 +1,21 @@
 
+#include <DummyTestClass.h>
 #include <gtest/gtest.h>
 
-#include <DummyTestClass.h>
-
 TEST(DummyTestClassTest, DummyTestThatPasses) {
+    DummyTestClass obj;
 
-  DummyTestClass obj;
+    obj.setValue(5);
 
-  obj.setValue(5);
-
-  ASSERT_EQ(obj.getValue(), 5);
+    ASSERT_EQ(obj.getValue(), 5);
 }
 
 TEST(DummyTestClassTest, DummyTestThatAlsoPasses) {
+    DummyTestClass obj;
 
-  DummyTestClass obj;
+    obj.setValue(5);
 
-  obj.setValue(5);
-
-  ASSERT_EQ(obj.getValue(), 5);
+    ASSERT_EQ(obj.getValue(), 5);
 }
 
 /*
@@ -33,6 +30,6 @@ TEST(DummyTestClassTest, DummyTestThatFails) {
 */
 
 int main(int argc, char **argv) {
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
+    ::testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
 }
