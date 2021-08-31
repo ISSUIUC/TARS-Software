@@ -1,5 +1,5 @@
 ###############################################################################
-# Illinois Space Society - IREC 2021 Avionics Team
+# Illinois Space Society - Avionics Team
 #
 # Kalman Filter derivation for full state estimation (now in python!)
 # Created 07/31/2021

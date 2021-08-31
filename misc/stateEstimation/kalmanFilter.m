@@ -1,5 +1,5 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Illinois Space Society - IREC 2021 Avionics Team
+% Illinois Space Society - Avionics Team
 %
 % Kalman Filter derivation for full state estimation
 % Created 05/02/2021
