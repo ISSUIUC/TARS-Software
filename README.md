@@ -1,5 +1,5 @@
-# IREC-2020_21
-Illinois Space Society's rocket code for IREC 2020-21
+# TARS Flight Software Repository
+Illinois Space Society's flight software codebase for the TARS system.
 
 ### Directory Structure:
 - `flight/`: Mission critical flight software running on TARS
