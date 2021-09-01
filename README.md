@@ -6,6 +6,30 @@ Illinois Space Society's flight software codebase for the TARS system.
 - `ground/`: Telemetry and monitoring software running on ground station 
 - `misc/`: Miscellaneous one-off projects for particular tests or R&D
 
+### Branch Naming Convention
+Please use the following naming conventions when creating branches while developing:
+
+- `user/<github-username>/<branch-name>` for individual tasks or contributions, or as a sandbox for yourself
+- `feature/<branch-name>` for **new** functionality that didn't exist before
+- `bug/<branch-name>` for bug fixes
+- `general/<branch-name>` for overall repository organization or development pipeline tweaks
+- `misc/<branch-name>` or `junk/<branch-name>` for just messing around :)
+
+Some fictional examples:\
+`user/AyberkY/improve-lsm9ds1-spi-latency`\
+`feature/create-mcu-state-estimation-thread`\
+`bug/gps-thread-deadlock-fix`\
+`general/create-new-directory-for-gnc`\
+`misc/testing-sd-card-bandwidth`
+
+### Archiving Code Base Revisions
+We should try to keep an archive of the version of code that ran on each rocket launch, so that we can associate the data we collected with the code that was running on TARS.
+
+After every launch or major milestone, create branch with the following convention:\
+`archive/<month.day.year>-<milestone-or-launch-description>`
+
+For example: `archive/09.01.21-start-of-2022-school-year`
+
 ### Code Style Guide
 The repository now has a GitHub Actions instance that will automatically check for code style violations!
 
