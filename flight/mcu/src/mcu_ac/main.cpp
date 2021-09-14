@@ -32,7 +32,7 @@
 #include "dataLog.h"
 #include "hybridShared.h"
 #include "pins.h"
-#include "rocket.h"
+#include "rocketFSM.h"
 #include "sensors.h"
 #include "servo.h"
 
