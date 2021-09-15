@@ -18,9 +18,6 @@
  * Grace Robbins
  */
 
-#ifndef MAIN_CPP
-#define MAIN_CPP
-
 #include <Arduino.h>
 #include <ChRt.h>
 #include <PWMServo.h>
@@ -32,14 +29,12 @@
 #include "SparkFunLSM9DS1.h"  //Low-G IMU Library
 #include "ZOEM8Q0.hpp"        //GPS Library
 #include "acShared.h"
-#include "dataLog.cpp"
 #include "dataLog.h"
 #include "hybridShared.h"
 #include "pins.h"
-#include "rocket.cpp"
-#include "sensors.cpp"
-#include "servo.cpp"
-#include "thresholds.h"
+#include "rocketFSM.h"
+#include "sensors.h"
+#include "servoControl.h"
 
 // datalogger_THD datalogger_THD_vars;
 
@@ -58,6 +53,9 @@ KX134 highGimu;
 LSM9DS1 lowGimu;
 ZOEM8Q0 gps = ZOEM8Q0();
 
+PWMServo servo_cw;   // Servo that induces clockwise roll moment
+PWMServo servo_ccw;  // Servo that counterclockwisei roll moment
+
 // Create a struct that holds pointers to all the important objects needed by
 // the threads
 pointers sensor_pointers;
@@ -73,6 +71,104 @@ static THD_WORKING_AREA(lowg_dataLogger_WA, 512);
 static THD_WORKING_AREA(highg_dataLogger_WA, 512);
 static THD_WORKING_AREA(gps_dataLogger_WA, 512);
 static THD_WORKING_AREA(mpuComm_WA, 512);
+
+/******************************************************************************/
+/* ROCKET FINITE STATE MACHINE THREAD                                         */
+
+static THD_FUNCTION(rocket_FSM, arg) {
+    struct pointers *pointer_struct = (struct pointers *)arg;
+
+    static rocketFSM stateMachine(pointer_struct);
+
+    while (true) {
+#ifdef THREAD_DEBUG
+        Serial.println("### Rocket FSM thread entrance");
+#endif
+
+        stateMachine.tickFSM();
+
+        chThdSleepMilliseconds(6);  // FSM runs at 100 Hz
+    }
+}
+
+/******************************************************************************/
+/* LOW G IMU THREAD                                                           */
+
+static THD_FUNCTION(lowgIMU_THD, arg) {
+    // Load outside variables into the function
+    struct pointers *pointer_struct = (struct pointers *)arg;
+
+    while (true) {
+#ifdef THREAD_DEBUG
+        Serial.println("### Low G IMU thread entrance");
+#endif
+
+        lowGimuTickFunction(pointer_struct);
+
+        chThdSleepMilliseconds(6);
+    }
+}
+
+/******************************************************************************/
+/* HIGH G IMU THREAD                                                          */
+
+static THD_FUNCTION(highgIMU_THD, arg) {
+    // Load outside variables into the function
+    struct pointers *pointer_struct = (struct pointers *)arg;
+
+    while (true) {
+#ifdef THREAD_DEBUG
+        Serial.println("### High G IMU thread entrance");
+#endif
+
+        highGimuTickFunction(pointer_struct);
+
+        chThdSleepMilliseconds(6);
+    }
+}
+
+/******************************************************************************/
+/* GPS THREAD                                                                 */
+
+static THD_FUNCTION(gps_THD, arg) {
+    // Load outside variables into the function
+    struct pointers *pointer_struct = (struct pointers *)arg;
+
+    while (true) {
+#ifdef THREAD_DEBUG
+        Serial.println("### GPS thread entrance");
+#endif
+
+        gpsTickFunction(pointer_struct);
+
+#ifdef THREAD_DEBUG
+        Serial.println("### GPS thread exit");
+#endif
+
+        chThdSleepMilliseconds(6);  // Sensor DAQ @ ~100 Hz
+    }
+}
+
+/******************************************************************************/
+/* SERVO CONTROL THREAD                                                       */
+
+static THD_FUNCTION(servo_THD, arg) {
+    struct pointers *pointer_struct = (struct pointers *)arg;
+    bool active_control = false;
+
+    while (true) {
+#ifdef THREAD_DEBUG
+        Serial.println("### Servo thread entrance");
+#endif
+
+        servoTickFunction(pointer_struct, &servo_cw, &servo_ccw);
+
+        chThdSleepMilliseconds(6);  // FSM runs at 100 Hz
+    }
+}
+
+/******************************************************************************/
+/* MPU COMMUNICATION THREAD                                                   */
 
 static THD_FUNCTION(mpuComm_THD, arg) {
     // first 3 bytes of packet need to be iss
@@ -94,7 +190,8 @@ static THD_FUNCTION(mpuComm_THD, arg) {
         unsigned i = 3;  // because the first 3 indices are already set to be
                          // ISS
 
-        uint8_t* data = (uint8_t*)&sensor_pointers.sensorDataPointer->lowG_data;
+        uint8_t *data =
+            (uint8_t *)&sensor_pointers.sensorDataPointer->lowG_data;
 
         //! Unlocking &dataMutex
         chMtxUnlock(&sensor_pointers.dataloggerTHDVarsPointer.dataMutex_lowG);
@@ -122,6 +219,23 @@ static THD_FUNCTION(mpuComm_THD, arg) {
 
         chThdSleepMilliseconds(
             6);  // Set equal sleep time as the other threads, can change
+    }
+}
+
+/******************************************************************************/
+/* DATA LOGGER THREAD                                                   */
+
+static THD_FUNCTION(dataLogger_THD, arg) {
+    struct pointers *pointer_struct = (struct pointers *)arg;
+
+    while (true) {
+#ifdef THREAD_DEBUG
+        Serial.println("Data Logging thread entrance");
+#endif
+
+        dataLoggerTickFunction(pointer_struct);
+
+        chThdSleepMilliseconds(6);
     }
 }
 
@@ -238,5 +352,3 @@ void setup() {
 void loop() {
     // not used
 }
-
-#endif

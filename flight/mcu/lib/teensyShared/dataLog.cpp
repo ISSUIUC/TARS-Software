@@ -12,6 +12,7 @@
 #define THREAD_DEBUG
 
 MUTEX_DECL(SD_Card_Mutex);
+
 /**
  * @brief Construct a new thd function object to log data to the SD card.
  *
@@ -20,87 +21,73 @@ MUTEX_DECL(SD_Card_Mutex);
  * file.
  *
  */
-static THD_FUNCTION(dataLogger_THD, arg) {
-    struct pointers* pointer_struct = (struct pointers*)arg;
-    while (true) {
-#ifdef THREAD_DEBUG
-        Serial.println("Data Logging thread entrance");
-#endif
-        // Initialize a new data struct object to hold the data that will be
-        // logged
-        sensorDataStruct_t current_data;
+void dataLoggerTickFunction(pointers* pointer_struct) {
+    // Initialize a new data struct object to hold the data that will be
+    // logged
+    sensorDataStruct_t current_data;
 
-        // Copy low G data
-        chSemWait(&pointer_struct->dataloggerTHDVarsPointer.fifoData_lowG);
-        chMtxLock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_lowG);
-        current_data.lowG_data =
-            pointer_struct->dataloggerTHDVarsPointer
-                .fifoArray[pointer_struct->dataloggerTHDVarsPointer
-                               .fifoTail_all]
-                .lowG_data;
-        chSemSignal(&pointer_struct->dataloggerTHDVarsPointer.fifoSpace_lowG);
-        chMtxUnlock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_lowG);
+    // Copy low G data
+    chSemWait(&pointer_struct->dataloggerTHDVarsPointer.fifoData_lowG);
+    chMtxLock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_lowG);
+    current_data.lowG_data =
+        pointer_struct->dataloggerTHDVarsPointer
+            .fifoArray[pointer_struct->dataloggerTHDVarsPointer.fifoTail_all]
+            .lowG_data;
+    chSemSignal(&pointer_struct->dataloggerTHDVarsPointer.fifoSpace_lowG);
+    chMtxUnlock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_lowG);
 
-        // Copy high G data
-        chSemWait(&pointer_struct->dataloggerTHDVarsPointer.fifoData_highG);
-        chMtxLock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_highG);
-        current_data.highG_data =
-            pointer_struct->dataloggerTHDVarsPointer
-                .fifoArray[pointer_struct->dataloggerTHDVarsPointer
-                               .fifoTail_all]
-                .highG_data;
-        chSemSignal(&pointer_struct->dataloggerTHDVarsPointer.fifoSpace_highG);
-        chMtxUnlock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_highG);
+    // Copy high G data
+    chSemWait(&pointer_struct->dataloggerTHDVarsPointer.fifoData_highG);
+    chMtxLock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_highG);
+    current_data.highG_data =
+        pointer_struct->dataloggerTHDVarsPointer
+            .fifoArray[pointer_struct->dataloggerTHDVarsPointer.fifoTail_all]
+            .highG_data;
+    chSemSignal(&pointer_struct->dataloggerTHDVarsPointer.fifoSpace_highG);
+    chMtxUnlock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_highG);
 
-        // Copy gps data
-        chSemWait(&pointer_struct->dataloggerTHDVarsPointer.fifoData_GPS);
-        chMtxLock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_GPS);
-        current_data.gps_data =
-            pointer_struct->dataloggerTHDVarsPointer
-                .fifoArray[pointer_struct->dataloggerTHDVarsPointer
-                               .fifoTail_all]
-                .gps_data;
-        chSemSignal(&pointer_struct->dataloggerTHDVarsPointer.fifoSpace_GPS);
-        chMtxUnlock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_GPS);
+    // Copy gps data
+    chSemWait(&pointer_struct->dataloggerTHDVarsPointer.fifoData_GPS);
+    chMtxLock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_GPS);
+    current_data.gps_data =
+        pointer_struct->dataloggerTHDVarsPointer
+            .fifoArray[pointer_struct->dataloggerTHDVarsPointer.fifoTail_all]
+            .gps_data;
+    chSemSignal(&pointer_struct->dataloggerTHDVarsPointer.fifoSpace_GPS);
+    chMtxUnlock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_GPS);
 
-        // Copy state data
-        // chSemWait(&pointer_struct->dataloggerTHDVarsPointer.fifoData_state);
-        // chMtxLock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_state);
-        // current_data.state_data =
-        // pointer_struct->dataloggerTHDVarsPointer.fifoArray[pointer_struct->dataloggerTHDVarsPointer.fifoTail_all].state_data;
-        // chSemSignal(&pointer_struct->dataloggerTHDVarsPointer.fifoSpace_state);
-        // chMtxUnlock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_state);
+    // Copy state data
+    // chSemWait(&pointer_struct->dataloggerTHDVarsPointer.fifoData_state);
+    // chMtxLock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_state);
+    // current_data.state_data =
+    // pointer_struct->dataloggerTHDVarsPointer.fifoArray[pointer_struct->dataloggerTHDVarsPointer.fifoTail_all].state_data;
+    // chSemSignal(&pointer_struct->dataloggerTHDVarsPointer.fifoSpace_state);
+    // chMtxUnlock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_state);
 
-        // Copy rocketState data
-        chSemWait(&pointer_struct->dataloggerTHDVarsPointer.fifoData_RS);
-        chMtxLock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_RS);
-        current_data.rocketState_data =
-            pointer_struct->dataloggerTHDVarsPointer
-                .fifoArray[pointer_struct->dataloggerTHDVarsPointer
-                               .fifoTail_all]
-                .rocketState_data;
-        chSemSignal(&pointer_struct->dataloggerTHDVarsPointer.fifoSpace_RS);
-        chMtxUnlock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_RS);
+    // Copy rocketState data
+    chSemWait(&pointer_struct->dataloggerTHDVarsPointer.fifoData_RS);
+    chMtxLock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_RS);
+    current_data.rocketState_data =
+        pointer_struct->dataloggerTHDVarsPointer
+            .fifoArray[pointer_struct->dataloggerTHDVarsPointer.fifoTail_all]
+            .rocketState_data;
+    chSemSignal(&pointer_struct->dataloggerTHDVarsPointer.fifoSpace_RS);
+    chMtxUnlock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_RS);
 
-        // Increment fifoTail after all data has been transfered to current_data
-        pointer_struct->dataloggerTHDVarsPointer.fifoTail_all =
-            pointer_struct->dataloggerTHDVarsPointer.fifoTail_all <
-                    (FIFO_SIZE - 1)
-                ? pointer_struct->dataloggerTHDVarsPointer.fifoTail_all + 1
-                : 0;
+    // Increment fifoTail after all data has been transfered to current_data
+    pointer_struct->dataloggerTHDVarsPointer.fifoTail_all =
+        pointer_struct->dataloggerTHDVarsPointer.fifoTail_all < (FIFO_SIZE - 1)
+            ? pointer_struct->dataloggerTHDVarsPointer.fifoTail_all + 1
+            : 0;
 
-        // Log all data that was copied from the buffer onto the sd card
-        chMtxLock(&SD_Card_Mutex);
-        logData(&pointer_struct->dataloggerTHDVarsPointer.dataFile,
-                &current_data);
-        chMtxUnlock(&SD_Card_Mutex);
+    // Log all data that was copied from the buffer onto the sd card
+    chMtxLock(&SD_Card_Mutex);
+    logData(&pointer_struct->dataloggerTHDVarsPointer.dataFile, &current_data);
+    chMtxUnlock(&SD_Card_Mutex);
 
 #ifdef THREAD_DEBUG
-        Serial.println("Data Logging thread exit");
+    Serial.println("Data Logging thread exit");
 #endif
-
-        chThdSleepMilliseconds(6);
-    }
 }
 
 /**

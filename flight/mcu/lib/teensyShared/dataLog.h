@@ -5,6 +5,9 @@
 #include <SD.h>
 #include <stdint.h>
 
+#include "KX134-1211.h"       //High-G IMU Library
+#include "SparkFunLSM9DS1.h"  //Low-G IMU Library
+#include "ZOEM8Q0.hpp"        //GPS Library
 #include "acShared.h"
 #include "dataStructs.h"
 
@@ -165,6 +168,19 @@ struct datalogger_THD {
 
     File dataFile;
 };
+
+// TODO: Re-think this struct
+struct pointers {
+    LSM9DS1* lowGimuPointer;
+    KX134* highGimuPointer;
+    ZOEM8Q0* GPSPointer;
+
+    sensorDataStruct_t* sensorDataPointer;
+
+    datalogger_THD dataloggerTHDVarsPointer;
+};
+
+void dataLoggerTickFunction(pointers*);
 
 char* sd_file_namer(char* inputName, char* fileExtensionParam);
 
