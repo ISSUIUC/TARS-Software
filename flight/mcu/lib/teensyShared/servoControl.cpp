@@ -16,7 +16,7 @@
 #include "hybridShared.h"
 #include "pins.h"
 #include "sensors.h"
-#include "servo.h"
+#include "servoControl.h"
 #include "thresholds.h"
 
 float flap_drag;
