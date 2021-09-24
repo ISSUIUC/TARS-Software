@@ -5,6 +5,7 @@ Illinois Space Society's flight software codebase for the TARS system.
 - `flight/`: Mission critical flight software running on TARS
 - `ground/`: Telemetry and monitoring software running on ground station 
 - `misc/`: Miscellaneous one-off projects for particular tests or R&D
+- `utils/`: Tools and utilities that make life easier
 
 ### Branch Naming Convention
 Please use the following naming conventions when creating branches while developing:
