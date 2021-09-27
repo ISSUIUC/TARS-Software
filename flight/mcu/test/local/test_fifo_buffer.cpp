@@ -2,8 +2,9 @@
 // Created by 16182 on 9/27/2021.
 //
 
-#include "fifo.h"
 #include <gtest/gtest.h>
+
+#include "fifo.h"
 
 TEST(fifo_buffer_test, push_success_test) {
     // int arr[10];
