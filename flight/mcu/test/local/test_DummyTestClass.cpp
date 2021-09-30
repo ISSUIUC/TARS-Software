@@ -28,4 +28,3 @@ TEST(DummyTestClassTest, DummyTestThatFails) {
   ASSERT_EQ(obj.getValue(), 5);
 }
 */
-
