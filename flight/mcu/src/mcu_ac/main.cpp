@@ -156,11 +156,13 @@ static THD_FUNCTION(servo_THD, arg) {
     struct pointers *pointer_struct = (struct pointers *)arg;
     bool active_control = false;
 
+    ServoControl control(pointer_struct);
+
     while (true) {
 #ifdef THREAD_DEBUG
         Serial.println("### Servo thread entrance");
 #endif
-        ServoControl control = ServoControl(pointer_struct);
+        
         control.servoTickFunction(pointer_struct, &servo_cw, &servo_ccw);
 
         chThdSleepMilliseconds(6);  // FSM runs at 100 Hz
