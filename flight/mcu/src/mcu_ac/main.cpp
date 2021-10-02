@@ -160,8 +160,8 @@ static THD_FUNCTION(servo_THD, arg) {
 #ifdef THREAD_DEBUG
         Serial.println("### Servo thread entrance");
 #endif
-
-        servoTickFunction(pointer_struct, &servo_cw, &servo_ccw);
+        ServoControl control = ServoControl(pointer_struct);
+        control.servoTickFunction(pointer_struct, &servo_cw, &servo_ccw);
 
         chThdSleepMilliseconds(6);  // FSM runs at 100 Hz
     }
@@ -181,7 +181,7 @@ static THD_FUNCTION(mpuComm_THD, arg) {
         Serial.println("### mpuComm thread entrance");
 #endif
 
-        //! locking data from sensorData struct
+        //! locking data f5m sensorData struct
         chMtxLock(&sensor_pointers.dataloggerTHDVarsPointer.dataMutex_lowG);
 
         digitalWrite(LED_WHITE, HIGH);

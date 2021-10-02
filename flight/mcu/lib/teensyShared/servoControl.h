@@ -19,8 +19,18 @@ struct servo_PNTR {
     datalogger_THD *lowgDataloggerTHDVarsPointer;
 };
 
-void servoTickFunction(pointers *, PWMServo *, PWMServo *);
+class ServoControl {
+    public:
+        ServoControl(struct pointers* pointer_struct) {
+            currState = pointer_struct->sensorDataPointer->rocketState_data.rocketState;
+        }
 
-void round_off_angle(int &value);
+        void servoTickFunction(pointers *, PWMServo *, PWMServo *);
+
+    private:
+        FSM_State currState;
+
+        void roundOffAngle(int &value);
+}
 
 #endif

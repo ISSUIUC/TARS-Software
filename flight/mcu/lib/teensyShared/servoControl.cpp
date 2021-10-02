@@ -28,7 +28,7 @@ float native_drag;
  *
  * @param value The value determined by the control algorithm.
  */
-void round_off_angle(int& value) {
+void ServoControl::roundOffAngle(int& value) {
     if (value > 180) {
         value = 180;
     }
@@ -43,7 +43,7 @@ void round_off_angle(int& value) {
  * @param arg A struct containing pointers to objects needed to run the thread.
  *
  */
-void servoTickFunction(pointers* pointer_struct, PWMServo* servo_cw,
+void ServoControl::servoTickFunction(pointers* pointer_struct, PWMServo* servo_cw,
                        PWMServo* servo_ccw) {
     int ccw_angle = 90;
     int cw_angle = 90;
@@ -51,8 +51,7 @@ void servoTickFunction(pointers* pointer_struct, PWMServo* servo_cw,
     static bool active_control = false;
 
     chMtxLock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_RS);
-    FSM_State currentRocketState =
-        pointer_struct->sensorDataPointer->rocketState_data.rocketState;
+    FSM_State currentRocketState = currState;
     chMtxUnlock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_RS);
 
     switch (currentRocketState) {
@@ -90,8 +89,8 @@ void servoTickFunction(pointers* pointer_struct, PWMServo* servo_cw,
         cw_angle = 0;
         ccw_angle = 0;
     }
-    round_off_angle(cw_angle);
-    round_off_angle(ccw_angle);
+    roundOffAngle(cw_angle);
+    roundOffAngle(ccw_angle);
 
     servo_cw->write(cw_angle);
     servo_ccw->write(ccw_angle);
