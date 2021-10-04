@@ -21,16 +21,16 @@ struct servo_PNTR {
 
 class ServoControl {
     public:
-        ServoControl(struct pointers* pointer_struct) {
-            currState = pointer_struct->sensorDataPointer->rocketState_data.rocketState;
-        }
+        ServoControl(struct pointers* pointer_struct);
 
         void servoTickFunction(pointers *, PWMServo *, PWMServo *);
 
     private:
-        FSM_State currState;
-
-        void roundOffAngle(int &value);
-}
+        FSM_State* currState;
+        mutex_t* mutex_RS;
+        mutex_t* mutex_lowG;
+        float* gz; 
+        void roundOffAngle(float& value);
+};
 
 #endif

@@ -28,7 +28,13 @@ float native_drag;
  *
  * @param value The value determined by the control algorithm.
  */
-void ServoControl::roundOffAngle(int& value) {
+ServoControl::ServoControl (struct pointers* pointer_struct) {
+    currState = &pointer_struct->sensorDataPointer->rocketState_data.rocketState;
+    mutex_RS = &pointer_struct->dataloggerTHDVarsPointer.dataMutex_RS;
+    mutex_lowG = &pointer_struct->dataloggerTHDVarsPointer.dataMutex_lowG;
+    gz = &pointer_struct->sensorDataPointer->lowG_data.gz;
+}
+void ServoControl::roundOffAngle(float& value) {
     if (value > 180) {
         value = 180;
     }
@@ -45,24 +51,24 @@ void ServoControl::roundOffAngle(int& value) {
  */
 void ServoControl::servoTickFunction(pointers* pointer_struct, PWMServo* servo_cw,
                        PWMServo* servo_ccw) {
-    int ccw_angle = 90;
-    int cw_angle = 90;
+    float ccw_angle = 90;
+    float cw_angle = 90;
 
     static bool active_control = false;
 
-    chMtxLock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_RS);
-    FSM_State currentRocketState = currState;
-    chMtxUnlock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_RS);
+    chMtxLock(mutex_RS);
+    FSM_State currentRocketState = *currState;
+    chMtxUnlock(mutex_RS);
 
     switch (currentRocketState) {
         case STATE_INIT:
-            active_control = true;
+            active_control = false;
             break;
         case STATE_IDLE:
-            active_control = true;
+            active_control = false;
             break;
         case STATE_LAUNCH_DETECT:
-            active_control = true;
+            active_control = false;
             break;
         case STATE_BOOST:
             active_control = false;
@@ -79,10 +85,10 @@ void ServoControl::servoTickFunction(pointers* pointer_struct, PWMServo* servo_c
     }
     // turns active control off if not in takeoff/coast sequence
     if (active_control) {
-        chMtxLock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_lowG);
-        cw_angle = pointer_struct->sensorDataPointer->lowG_data.gz;
-        ccw_angle = pointer_struct->sensorDataPointer->lowG_data.gz;
-        chMtxUnlock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_lowG);
+        chMtxLock(mutex_lowG);
+        cw_angle = *gz;  //stand-in "implementation"
+        ccw_angle = *gz;
+        chMtxUnlock(mutex_lowG);
 
     } else {
         // Turns active control off if not in coast state.
