@@ -1,3 +1,14 @@
+/**
+ * @file        sensors.h
+ * @authors     Ayberk Yaraneri
+ *
+ * @brief       
+ *
+ * 
+ *
+ *
+ */
+
 #ifndef SENSORS_H
 #define SENSORS_H
 

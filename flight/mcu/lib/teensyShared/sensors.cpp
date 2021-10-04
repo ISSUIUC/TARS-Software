@@ -1,3 +1,12 @@
+/**
+ * @file        sensors.cpp
+ * @authors     Ayberk Yaraneri
+ *
+ * @brief       
+ *
+ *
+ */
+
 #ifndef SENSORS_CPP
 #define SENSORS_CPP
 
