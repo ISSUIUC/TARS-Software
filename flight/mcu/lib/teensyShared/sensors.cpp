@@ -1,9 +1,11 @@
 /**
  * @file        sensors.cpp
- * @authors     Ayberk Yaraneri
+ * @authors     
  *
- * @brief       
+ * @brief       Sensor (Low-G, High-G and GPS) function implementations
  *
+ * Here contains the pointer structs for three types of sensors (Low-g, High-g and GPS)
+ * and the functions to acquire data from the sensors to the pointer structs.              
  *
  */
 
@@ -70,7 +72,7 @@ void lowGimuTickFunction(pointers *pointer_struct) {
     pointer_struct->sensorDataPointer->lowG_data.gz =
         pointer_struct->lowGimuPointer->calcGyro(
             pointer_struct->lowGimuPointer->gz);
-    // Log magnatometer data in gauss
+    // Log magnetometer data in gauss
     pointer_struct->sensorDataPointer->lowG_data.mx =
         pointer_struct->lowGimuPointer->calcMag(
             pointer_struct->lowGimuPointer->mx);
