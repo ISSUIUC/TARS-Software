@@ -1,3 +1,15 @@
+/**
+ * @file        rocketFSM.h
+ * @authors     Ayberk Yaraneri
+ *
+ * @brief       temp
+ *
+ * temp
+ * 
+ * 
+ * 
+ *
+ */
 
 #ifndef ROCKET_FSM_H
 #define ROCKET_FSM_H
