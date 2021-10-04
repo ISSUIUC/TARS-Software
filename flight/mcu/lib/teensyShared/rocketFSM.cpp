@@ -1,3 +1,16 @@
+/**
+ * @file        rocketFSM.cpp
+ * @authors     
+ *
+ * @brief      
+ *
+ * The implementation of the finite state machine class that governs state transitions.
+ * 
+ * 
+ * 
+ *
+ */
+
 #include "rocketFSM.h"
 
 #include <Arduino.h>
