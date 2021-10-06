@@ -28,11 +28,13 @@ float native_drag;
  *
  * @param value The value determined by the control algorithm.
  */
-ServoControl::ServoControl (struct pointers* pointer_struct) {
-    currState = &pointer_struct->sensorDataPointer->rocketState_data.rocketState;
-    mutex_RS = &pointer_struct->dataloggerTHDVarsPointer.dataMutex_RS;
-    mutex_lowG = &pointer_struct->dataloggerTHDVarsPointer.dataMutex_lowG;
-    gz = &pointer_struct->sensorDataPointer->lowG_data.gz;
+ServoControl::ServoControl (struct pointers* pointer_struct, PMWServo* servo_cw, PMWServo* servo_ccw) {
+    currState_ = &pointer_struct->sensorDataPointer->rocketState_data.rocketState;
+    servo_cw_ = servo_cw;
+    servo_ccw_ = &servo_ccw;
+    mutex_RS_ = &pointer_struct->dataloggerTHDVarsPointer.dataMutex_RS;
+    mutex_lowG_ = &pointer_struct->dataloggerTHDVarsPointer.dataMutex_lowG;
+    gz_ = &pointer_struct->sensorDataPointer->lowG_data.gz;
 }
 void ServoControl::roundOffAngle(float& value) {
     if (value > 180) {
@@ -56,9 +58,9 @@ void ServoControl::servoTickFunction(pointers* pointer_struct, PWMServo* servo_c
 
     static bool active_control = false;
 
-    chMtxLock(mutex_RS);
-    FSM_State currentRocketState = *currState;
-    chMtxUnlock(mutex_RS);
+    chMtxLock(mutex_RS_);
+    FSM_State currentRocketState = *currState_;
+    chMtxUnlock(mutex_RS_);
 
     switch (currentRocketState) {
         case STATE_INIT:
@@ -85,10 +87,10 @@ void ServoControl::servoTickFunction(pointers* pointer_struct, PWMServo* servo_c
     }
     // turns active control off if not in takeoff/coast sequence
     if (active_control) {
-        chMtxLock(mutex_lowG);
-        cw_angle = *gz;  //stand-in "implementation"
-        ccw_angle = *gz;
-        chMtxUnlock(mutex_lowG);
+        chMtxLock(mutex_lowG_);
+        cw_angle = *gz_;  //stand-in "implementation"
+        ccw_angle = *gz_;
+        chMtxUnlock(mutex_lowG_);
 
     } else {
         // Turns active control off if not in coast state.

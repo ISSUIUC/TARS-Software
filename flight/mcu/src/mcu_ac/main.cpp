@@ -156,7 +156,7 @@ static THD_FUNCTION(servo_THD, arg) {
     struct pointers *pointer_struct = (struct pointers *)arg;
     bool active_control = false;
 
-    ServoControl control(pointer_struct);
+    ServoControl servo_control(pointer_struct, &servo_cw, &servo_ccw);
 
     while (true) {
 #ifdef THREAD_DEBUG
