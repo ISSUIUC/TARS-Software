@@ -12,27 +12,28 @@
  *
  */
 struct servo_PNTR {
-    FSM_State *rocketStatePointer;
+    FSM_State* rocketStatePointer;
 
-    sensorDataStruct_t *lowgSensorDataPointer;
+    sensorDataStruct_t* lowgSensorDataPointer;
 
-    datalogger_THD *lowgDataloggerTHDVarsPointer;
+    datalogger_THD* lowgDataloggerTHDVarsPointer;
 };
 
 class ServoControl {
-    public:
-        ServoControl(struct pointers* pointer_struct, PWMServo* servo_cw, PWMServo* servo_ccw);
+   public:
+    ServoControl(struct pointers* pointer_struct, PWMServo* servo_cw,
+                 PWMServo* servo_ccw);
 
-        void servoTickFunction();
+    void servoTickFunction();
 
-    private:
-        FSM_State* currState_;
-        PWMServo* servo_cw_;
-        PWMServo* servo_ccw_;
-        mutex_t* mutex_RS_;
-        mutex_t* mutex_lowG_;
-        float* gz_; 
-        void roundOffAngle(float& value);
+   private:
+    FSM_State* currState_;
+    PWMServo* servo_cw_;
+    PWMServo* servo_ccw_;
+    mutex_t* mutex_RS_;
+    mutex_t* mutex_lowG_;
+    float* gz_;
+    void roundOffAngle(float& value);
 };
 
 #endif

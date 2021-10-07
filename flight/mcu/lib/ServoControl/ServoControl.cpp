@@ -8,7 +8,8 @@
 #include <SPI.h>
 #include <Wire.h>
 // TODO remove
-#include "KX134-1211.h"       //High-G IMU Library
+#include "KX134-1211.h"  //High-G IMU Library
+#include "ServoControl.h"
 #include "SparkFunLSM9DS1.h"  //Low-G IMU Library
 #include "ZOEM8Q0.hpp"        //GPS Library
 #include "acShared.h"
@@ -16,7 +17,6 @@
 #include "hybridShared.h"
 #include "pins.h"
 #include "sensors.h"
-#include "ServoControl.h"
 #include "thresholds.h"
 
 float flap_drag;
@@ -28,8 +28,10 @@ float native_drag;
  *
  * @param value The value determined by the control algorithm.
  */
-ServoControl::ServoControl (struct pointers* pointer_struct, PWMServo* servo_cw, PWMServo* servo_ccw) {
-    currState_ = &pointer_struct->sensorDataPointer->rocketState_data.rocketState;
+ServoControl::ServoControl(struct pointers* pointer_struct, PWMServo* servo_cw,
+                           PWMServo* servo_ccw) {
+    currState_ =
+        &pointer_struct->sensorDataPointer->rocketState_data.rocketState;
     servo_cw_ = servo_cw;
     servo_ccw_ = servo_ccw;
     mutex_RS_ = &pointer_struct->dataloggerTHDVarsPointer.dataMutex_RS;
@@ -87,7 +89,7 @@ void ServoControl::servoTickFunction() {
     // turns active control off if not in takeoff/coast sequence
     if (active_control) {
         chMtxLock(mutex_lowG_);
-        cw_angle = *gz_;  //stand-in "implementation"
+        cw_angle = *gz_;  // stand-in "implementation"
         ccw_angle = *gz_;
         chMtxUnlock(mutex_lowG_);
 

@@ -25,7 +25,8 @@
 #include <SPI.h>
 #include <Wire.h>
 
-#include "KX134-1211.h"       //High-G IMU Library
+#include "KX134-1211.h"  //High-G IMU Library
+#include "ServoControl.h"
 #include "SparkFunLSM9DS1.h"  //Low-G IMU Library
 #include "ZOEM8Q0.hpp"        //GPS Library
 #include "acShared.h"
@@ -34,7 +35,6 @@
 #include "pins.h"
 #include "rocketFSM.h"
 #include "sensors.h"
-#include "ServoControl.h"
 
 // datalogger_THD datalogger_THD_vars;
 
@@ -162,7 +162,7 @@ static THD_FUNCTION(servo_THD, arg) {
 #ifdef THREAD_DEBUG
         Serial.println("### Servo thread entrance");
 #endif
-        
+
         servo_control.servoTickFunction();
 
         chThdSleepMilliseconds(6);  // FSM runs at 100 Hz
