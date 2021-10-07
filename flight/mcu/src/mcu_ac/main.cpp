@@ -34,7 +34,7 @@
 #include "pins.h"
 #include "rocketFSM.h"
 #include "sensors.h"
-#include "servoControl.h"
+#include "ServoControl.h"
 
 // datalogger_THD datalogger_THD_vars;
 
