@@ -16,7 +16,7 @@
 #include "hybridShared.h"
 #include "pins.h"
 #include "sensors.h"
-#include "servoControl.h"
+#include "ServoControl.h"
 #include "thresholds.h"
 
 float flap_drag;
@@ -28,10 +28,10 @@ float native_drag;
  *
  * @param value The value determined by the control algorithm.
  */
-ServoControl::ServoControl (struct pointers* pointer_struct, PMWServo* servo_cw, PMWServo* servo_ccw) {
+ServoControl::ServoControl (struct pointers* pointer_struct, PWMServo* servo_cw, PWMServo* servo_ccw) {
     currState_ = &pointer_struct->sensorDataPointer->rocketState_data.rocketState;
     servo_cw_ = servo_cw;
-    servo_ccw_ = &servo_ccw;
+    servo_ccw_ = servo_ccw;
     mutex_RS_ = &pointer_struct->dataloggerTHDVarsPointer.dataMutex_RS;
     mutex_lowG_ = &pointer_struct->dataloggerTHDVarsPointer.dataMutex_lowG;
     gz_ = &pointer_struct->sensorDataPointer->lowG_data.gz;
@@ -51,8 +51,7 @@ void ServoControl::roundOffAngle(float& value) {
  * @param arg A struct containing pointers to objects needed to run the thread.
  *
  */
-void ServoControl::servoTickFunction(pointers* pointer_struct, PWMServo* servo_cw,
-                       PWMServo* servo_ccw) {
+void ServoControl::servoTickFunction() {
     float ccw_angle = 90;
     float cw_angle = 90;
 
@@ -100,8 +99,8 @@ void ServoControl::servoTickFunction(pointers* pointer_struct, PWMServo* servo_c
     roundOffAngle(cw_angle);
     roundOffAngle(ccw_angle);
 
-    servo_cw->write(cw_angle);
-    servo_ccw->write(ccw_angle);
+    servo_cw_->write(cw_angle);
+    servo_ccw_->write(ccw_angle);
 
 #ifdef SERVO_DEBUG
     Serial.print("\nclockwise: ");

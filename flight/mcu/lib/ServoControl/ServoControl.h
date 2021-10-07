@@ -21,10 +21,9 @@ struct servo_PNTR {
 
 class ServoControl {
     public:
-        ServoControl(struct pointers* pointer_struct, PMWServo* servo_cw, PMWServo* servo_ccw);
+        ServoControl(struct pointers* pointer_struct, PWMServo* servo_cw, PWMServo* servo_ccw);
 
-        void servoTickFunction(pointers* pointer_struct, PWMServo* servo_cw,
-                       PWMServo* servo_ccw);
+        void servoTickFunction();
 
     private:
         FSM_State* currState_;
