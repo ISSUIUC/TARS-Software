@@ -8,7 +8,8 @@
 #include <SPI.h>
 #include <Wire.h>
 // TODO remove
-#include "KX134-1211.h"       //High-G IMU Library
+#include "KX134-1211.h"  //High-G IMU Library
+#include "ServoControl.h"
 #include "SparkFunLSM9DS1.h"  //Low-G IMU Library
 #include "ZOEM8Q0.hpp"        //GPS Library
 #include "acShared.h"
@@ -16,7 +17,6 @@
 #include "hybridShared.h"
 #include "pins.h"
 #include "sensors.h"
-#include "servoControl.h"
 #include "thresholds.h"
 
 float flap_drag;
@@ -28,7 +28,17 @@ float native_drag;
  *
  * @param value The value determined by the control algorithm.
  */
-void round_off_angle(int& value) {
+ServoControl::ServoControl(struct pointers* pointer_struct, PWMServo* servo_cw,
+                           PWMServo* servo_ccw) {
+    currState_ =
+        &pointer_struct->sensorDataPointer->rocketState_data.rocketState;
+    servo_cw_ = servo_cw;
+    servo_ccw_ = servo_ccw;
+    mutex_RS_ = &pointer_struct->dataloggerTHDVarsPointer.dataMutex_RS;
+    mutex_lowG_ = &pointer_struct->dataloggerTHDVarsPointer.dataMutex_lowG;
+    gz_ = &pointer_struct->sensorDataPointer->lowG_data.gz;
+}
+void ServoControl::roundOffAngle(float& value) {
     if (value > 180) {
         value = 180;
     }
@@ -43,27 +53,25 @@ void round_off_angle(int& value) {
  * @param arg A struct containing pointers to objects needed to run the thread.
  *
  */
-void servoTickFunction(pointers* pointer_struct, PWMServo* servo_cw,
-                       PWMServo* servo_ccw) {
-    int ccw_angle = 90;
-    int cw_angle = 90;
+void ServoControl::servoTickFunction() {
+    float ccw_angle = 90;
+    float cw_angle = 90;
 
     static bool active_control = false;
 
-    chMtxLock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_RS);
-    FSM_State currentRocketState =
-        pointer_struct->sensorDataPointer->rocketState_data.rocketState;
-    chMtxUnlock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_RS);
+    chMtxLock(mutex_RS_);
+    FSM_State currentRocketState = *currState_;
+    chMtxUnlock(mutex_RS_);
 
     switch (currentRocketState) {
         case STATE_INIT:
-            active_control = true;
+            active_control = false;
             break;
         case STATE_IDLE:
-            active_control = true;
+            active_control = false;
             break;
         case STATE_LAUNCH_DETECT:
-            active_control = true;
+            active_control = false;
             break;
         case STATE_BOOST:
             active_control = false;
@@ -80,21 +88,21 @@ void servoTickFunction(pointers* pointer_struct, PWMServo* servo_cw,
     }
     // turns active control off if not in takeoff/coast sequence
     if (active_control) {
-        chMtxLock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_lowG);
-        cw_angle = pointer_struct->sensorDataPointer->lowG_data.gz;
-        ccw_angle = pointer_struct->sensorDataPointer->lowG_data.gz;
-        chMtxUnlock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_lowG);
+        chMtxLock(mutex_lowG_);
+        cw_angle = *gz_;  // stand-in "implementation"
+        ccw_angle = *gz_;
+        chMtxUnlock(mutex_lowG_);
 
     } else {
         // Turns active control off if not in coast state.
         cw_angle = 0;
         ccw_angle = 0;
     }
-    round_off_angle(cw_angle);
-    round_off_angle(ccw_angle);
+    roundOffAngle(cw_angle);
+    roundOffAngle(ccw_angle);
 
-    servo_cw->write(cw_angle);
-    servo_ccw->write(ccw_angle);
+    servo_cw_->write(cw_angle);
+    servo_ccw_->write(ccw_angle);
 
 #ifdef SERVO_DEBUG
     Serial.print("\nclockwise: ");
