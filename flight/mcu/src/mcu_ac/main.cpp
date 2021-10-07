@@ -183,7 +183,7 @@ static THD_FUNCTION(mpuComm_THD, arg) {
         Serial.println("### mpuComm thread entrance");
 #endif
 
-        //! locking data f5m sensorData struct
+        //! locking data from sensorData struct
         chMtxLock(&sensor_pointers.dataloggerTHDVarsPointer.dataMutex_lowG);
 
         digitalWrite(LED_WHITE, HIGH);

@@ -9,7 +9,7 @@
 
 /**
  * @brief A struct containing pointers to objects needed for the servo_THD.
- *
+ * 
  */
 struct servo_PNTR {
     FSM_State* rocketStatePointer;
@@ -23,7 +23,10 @@ class ServoControl {
    public:
     ServoControl(struct pointers* pointer_struct, PWMServo* servo_cw,
                  PWMServo* servo_ccw);
-
+    /**
+     * @brief actuats servos based on State Estimation. 
+     * runs during servo thread
+     */
     void servoTickFunction();
 
    private:
@@ -33,6 +36,12 @@ class ServoControl {
     mutex_t* mutex_RS_;
     mutex_t* mutex_lowG_;
     float* gz_;
+
+    /**
+     * @brief ensures angle written to servo is between 0 and 180
+     *  
+     * @param takes an angle as a float
+     */
     void roundOffAngle(float& value);
 };
 
