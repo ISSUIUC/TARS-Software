@@ -1,5 +1,5 @@
-#include <../eigen-3.4.0/Eigen/Core>
+#include "ActiveControl.h"
 
-class ActiveControl {
-
-};
+void ActiveControl::acTickFunction(float AV_X) {
+    Matrix<float, 2, 3> lengths = k_oct * AV_X;
+}
