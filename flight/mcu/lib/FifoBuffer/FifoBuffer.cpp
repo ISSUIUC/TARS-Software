@@ -10,12 +10,26 @@
 
 #include <cstdint>
 #include <cstring>
-#include <mutex>
+
+#ifdef COMPILE_LOCAL
+	#include <mutex>
+#endif
+
+#ifdef COMPILE_TARGET
+	#include <ChRt.h>
+#endif
 
 // only works with types that can be copied with memcpy
-// switch to whatever mutex works on the platform
 bool GenericFifoBuffer::push(void* element) {
-    std::lock_guard<std::mutex> l(lock);
+
+#ifdef COMPILE_LOCAL
+    std::lock_guard<std::mutex> l(lock_);
+#endif
+
+#ifdef COMPILE_TARGET
+	chMtxLock(lock_);
+#endif
+
     if (capacity_ == cur_length_) {
         return false;
     }
@@ -29,12 +43,28 @@ bool GenericFifoBuffer::push(void* element) {
     tail_idx_ %= capacity_;
     cur_length_ += 1;
 
+#ifdef COMPILE_LOCAL
+	// what
+#endif
+
+#ifdef COMPILE_TARGET
+	chMtxUnlock(lock_);
+#endif
+
     return true;
 }
 
 // returns false on failure
 bool GenericFifoBuffer::pop(void* out) {
-    std::lock_guard<std::mutex> l(lock);
+
+#ifdef COMPILE_LOCAL
+    std::lock_guard<std::mutex> l(lock_);
+#endif
+
+#ifdef COMPILE_TARGET
+	chMtxLock(lock_);
+#endif
+
     if (cur_length_ == 0) {
         return false;
     }
@@ -46,6 +76,14 @@ bool GenericFifoBuffer::pop(void* out) {
     head_idx_ += 1;
     head_idx_ %= capacity_;
     cur_length_ -= 1;
+
+#ifdef COMPILE_LOCAL
+	// what
+#endif
+
+#ifdef COMPILE_TARGET
+	chMtxUnlock(lock_);
+#endif
 
     return true;
 }

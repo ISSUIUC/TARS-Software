@@ -7,11 +7,16 @@
 
 #include <cstdint>
 #include <cstring>
-#include <optional>
-#include <mutex>
 
+#ifdef COMPILE_LOCAL
+    #include <mutex>
+#endif
+
+#ifdef COMPILE_TARGET
+    #include <ChRt.h>
+#endif
+	
 // only works with types that can be copied with memcpy
-// switch to whatever mutex works on the platform
 class GenericFifoBuffer {
    public:
     // buff_size = size of array in elements
@@ -33,12 +38,20 @@ class GenericFifoBuffer {
    private:
     uint16_t capacity_, cur_length_, head_idx_, tail_idx_, data_size_;
     void* arr_;
-    std::mutex lock;
+
+#ifdef COMPILE_LOCAL
+    std::mutex lock_;
+#endif
+
+#ifdef COMPILE_TARGET
+	mutex_t lock_;
+#endif
+
 };
 
 template<typename T, size_t max_size>
 class FifoBuffer{
-    static_assert(std::is_trivially_copyable<T>::value, "Only trivially copyable types are allowed");
+    // static_assert(std::is_trivially_copyable<T>::value, "Only trivially copyable types are allowed");
 public:
     FifoBuffer(): buffer(arr, max_size, sizeof(T)){
 
@@ -48,14 +61,8 @@ public:
         return buffer.push(&element);
     }
 
-    std::optional<T> pop(){
-        T ele;
-        bool popped = buffer.pop(&ele);
-        if(popped){
-            return ele;
-        } else {
-            return std::nullopt;
-        }
+    bool pop(T* out){
+        return buffer.pop(out);
     }
 
 private:

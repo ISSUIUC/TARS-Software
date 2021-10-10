@@ -1,5 +1,8 @@
-#include "FifoBuffer.h"
 #include <gtest/gtest.h>
+
+#define COMPILE_LOCAL
+
+#include "FifoBuffer.h"
 
 TEST(untyped_fifo_buffer, push_success){
     int data[10];
@@ -105,9 +108,9 @@ TEST(fifo_buffer, pop_one_success){
 
     ASSERT_TRUE(buffer.push(100));
 
-    auto v = buffer.pop();
-    ASSERT_TRUE(v.has_value());
-    ASSERT_EQ(v.value(), 100);
+    int v = 0;
+    ASSERT_TRUE(buffer.pop(&v));
+    ASSERT_EQ(v, 100);
 }
 
 TEST(fifo_buffer, pop_many_success){
@@ -117,17 +120,28 @@ TEST(fifo_buffer, pop_many_success){
     ASSERT_TRUE(buffer.push(101));
     ASSERT_TRUE(buffer.push(102));
 
-    ASSERT_EQ(buffer.pop().value(), 100);
-    ASSERT_EQ(buffer.pop().value(), 101);
-    ASSERT_EQ(buffer.pop().value(), 102);
+	int v = 0;
+
+	buffer.pop(&v);
+    ASSERT_EQ(v, 100);
+
+	buffer.pop(&v);
+    ASSERT_EQ(v, 101);
+
+	buffer.pop(&v);
+    ASSERT_EQ(v, 102);
 }
 
 TEST(fifo_buffer, wrap_success){
     FifoBuffer<int, 10> buffer{};
 
+	int v = 0;
+
     for(int i = 0; i < 100; i++){
         ASSERT_TRUE(buffer.push(i));
-        ASSERT_EQ(buffer.pop().value(), i);
+
+		buffer.pop(&v);
+        ASSERT_EQ(v, i);
     }
 }
 
@@ -140,6 +154,9 @@ TEST(fifo_buffer, full_buffer_recovery){
 
     ASSERT_FALSE(buffer.push(0));
 
-    ASSERT_EQ(buffer.pop().value(), 0);
+	int v = 0;
+
+	buffer.pop(&v);
+    ASSERT_EQ(v, 0);
     ASSERT_TRUE(buffer.push(0));
 }
