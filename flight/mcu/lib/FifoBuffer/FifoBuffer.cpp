@@ -30,6 +30,13 @@ bool GenericFifoBuffer::push(void* element) {
 #endif
 
     if (capacity_ == cur_length_) {
+        #ifdef COMPILE_LOCAL
+            std::lock_guard<std::mutex> l(lock_);
+        #endif
+
+        #ifdef COMPILE_TARGET
+            chMtxLock(lock_);
+        #endif
         return false;
     }
 
@@ -64,6 +71,13 @@ bool GenericFifoBuffer::pop(void* out) {
 #endif
 
     if (cur_length_ == 0) {
+        #ifdef COMPILE_LOCAL
+            std::lock_guard<std::mutex> l(lock_);
+        #endif
+
+        #ifdef COMPILE_TARGET
+            chMtxLock(lock_);
+        #endif
         return false;
     }
 

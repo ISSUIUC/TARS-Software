@@ -1,5 +1,6 @@
 
 #include <Arduino.h>
+// #include <Threads.h>
 #include <unity.h>
 
 #define COMPILE_TARGET
@@ -15,6 +16,15 @@ void test_push_success(void) {
     }
 }
 
-void setup() {}
+void test_trivial(void) {
+    TEST_ASSERT_TRUE(1 == 1);
+}
+
+void setup() {
+    delay(2000);
+    UNITY_BEGIN();
+    RUN_TEST(test_trivial);
+    UNITY_END();
+}
 
 void loop() {}
