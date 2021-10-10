@@ -4,20 +4,20 @@
 
 #include "FifoBuffer.h"
 
-TEST(untyped_fifo_buffer, push_success){
+TEST(untyped_fifo_buffer, push_success) {
     int data[10];
     GenericFifoBuffer buffer(data, 10, sizeof(int));
 
-    for(int i = 0; i < 10; i++){
+    for (int i = 0; i < 10; i++) {
         ASSERT_TRUE(buffer.push(&i));
     }
 }
 
-TEST(untyped_fifo_buffer, push_failure){
+TEST(untyped_fifo_buffer, push_failure) {
     int data[10];
     GenericFifoBuffer buffer(data, 10, sizeof(int));
 
-    for(int i = 0; i < 10; i++){
+    for (int i = 0; i < 10; i++) {
         (void)buffer.push(&i);
     }
 
@@ -25,7 +25,7 @@ TEST(untyped_fifo_buffer, push_failure){
     ASSERT_FALSE(buffer.push(&a));
 }
 
-TEST(untyped_fifo_buffer, pop_one_success){
+TEST(untyped_fifo_buffer, pop_one_success) {
     int data[10];
     GenericFifoBuffer buffer(data, 10, sizeof(int));
 
@@ -37,7 +37,7 @@ TEST(untyped_fifo_buffer, pop_one_success){
     ASSERT_EQ(v, 100);
 }
 
-TEST(untyped_fifo_buffer, pop_many_success){
+TEST(untyped_fifo_buffer, pop_many_success) {
     int data[10];
     GenericFifoBuffer buffer(data, 10, sizeof(int));
 
@@ -57,11 +57,11 @@ TEST(untyped_fifo_buffer, pop_many_success){
     ASSERT_EQ(v, 102);
 }
 
-TEST(untyped_fifo_buffer, wrap_success){
+TEST(untyped_fifo_buffer, wrap_success) {
     int data[10];
     GenericFifoBuffer buffer(data, 10, sizeof(int));
 
-    for(int i = 0; i < 100; i++){
+    for (int i = 0; i < 100; i++) {
         ASSERT_TRUE(buffer.push(&i));
         int v = 0;
         ASSERT_TRUE(buffer.pop(&v));
@@ -69,11 +69,11 @@ TEST(untyped_fifo_buffer, wrap_success){
     }
 }
 
-TEST(untyped_fifo_buffer, full_buffer_recovery){
+TEST(untyped_fifo_buffer, full_buffer_recovery) {
     int data[10];
     GenericFifoBuffer buffer(data, 10, sizeof(int));
 
-    for(int i = 0; i < 10; i++){
+    for (int i = 0; i < 10; i++) {
         (void)buffer.push(&i);
     }
 
@@ -86,24 +86,24 @@ TEST(untyped_fifo_buffer, full_buffer_recovery){
     ASSERT_TRUE(buffer.push(&a));
 }
 
-TEST(fifo_buffer, push_success){
+TEST(fifo_buffer, push_success) {
     FifoBuffer<int, 10> buffer{};
-    for(int i = 0; i < 10; i++){
+    for (int i = 0; i < 10; i++) {
         ASSERT_TRUE(buffer.push(i));
     }
 }
 
-TEST(fifo_buffer, push_failure){
+TEST(fifo_buffer, push_failure) {
     FifoBuffer<int, 10> buffer{};
 
-    for(int i = 0; i < 10; i++){
+    for (int i = 0; i < 10; i++) {
         (void)buffer.push(i);
     }
 
     ASSERT_FALSE(buffer.push(0));
 }
 
-TEST(fifo_buffer, pop_one_success){
+TEST(fifo_buffer, pop_one_success) {
     FifoBuffer<int, 10> buffer{};
 
     ASSERT_TRUE(buffer.push(100));
@@ -113,50 +113,50 @@ TEST(fifo_buffer, pop_one_success){
     ASSERT_EQ(v, 100);
 }
 
-TEST(fifo_buffer, pop_many_success){
+TEST(fifo_buffer, pop_many_success) {
     FifoBuffer<int, 10> buffer{};
 
     ASSERT_TRUE(buffer.push(100));
     ASSERT_TRUE(buffer.push(101));
     ASSERT_TRUE(buffer.push(102));
 
-	int v = 0;
+    int v = 0;
 
-	buffer.pop(&v);
+    buffer.pop(&v);
     ASSERT_EQ(v, 100);
 
-	buffer.pop(&v);
+    buffer.pop(&v);
     ASSERT_EQ(v, 101);
 
-	buffer.pop(&v);
+    buffer.pop(&v);
     ASSERT_EQ(v, 102);
 }
 
-TEST(fifo_buffer, wrap_success){
+TEST(fifo_buffer, wrap_success) {
     FifoBuffer<int, 10> buffer{};
 
-	int v = 0;
+    int v = 0;
 
-    for(int i = 0; i < 100; i++){
+    for (int i = 0; i < 100; i++) {
         ASSERT_TRUE(buffer.push(i));
 
-		buffer.pop(&v);
+        buffer.pop(&v);
         ASSERT_EQ(v, i);
     }
 }
 
-TEST(fifo_buffer, full_buffer_recovery){
+TEST(fifo_buffer, full_buffer_recovery) {
     FifoBuffer<int, 10> buffer{};
 
-    for(int i = 0; i < 10; i++){
+    for (int i = 0; i < 10; i++) {
         (void)buffer.push(i);
     }
 
     ASSERT_FALSE(buffer.push(0));
 
-	int v = 0;
+    int v = 0;
 
-	buffer.pop(&v);
+    buffer.pop(&v);
     ASSERT_EQ(v, 0);
     ASSERT_TRUE(buffer.push(0));
 }

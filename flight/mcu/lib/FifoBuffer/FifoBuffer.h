@@ -9,13 +9,13 @@
 #include <cstring>
 
 #ifdef COMPILE_LOCAL
-    #include <mutex>
+#include <mutex>
 #endif
 
 #ifdef COMPILE_TARGET
-    #include <ChRt.h>
+#include <ChRt.h>
 #endif
-	
+
 // only works with types that can be copied with memcpy
 class GenericFifoBuffer {
    public:
@@ -44,28 +44,22 @@ class GenericFifoBuffer {
 #endif
 
 #ifdef COMPILE_TARGET
-	mutex_t lock_;
+    mutex_t lock_;
 #endif
-
 };
 
-template<typename T, size_t max_size>
-class FifoBuffer{
-    // static_assert(std::is_trivially_copyable<T>::value, "Only trivially copyable types are allowed");
-public:
-    FifoBuffer(): buffer(arr, max_size, sizeof(T)){
+template <typename T, size_t max_size>
+class FifoBuffer {
+    // static_assert(std::is_trivially_copyable<T>::value, "Only trivially
+    // copyable types are allowed");
+   public:
+    FifoBuffer() : buffer(arr, max_size, sizeof(T)) {}
 
-    }
+    bool push(T element) { return buffer.push(&element); }
 
-    bool push(T element){
-        return buffer.push(&element);
-    }
+    bool pop(T* out) { return buffer.pop(out); }
 
-    bool pop(T* out){
-        return buffer.pop(out);
-    }
-
-private:
+   private:
     GenericFifoBuffer buffer;
     T arr[max_size]{};
 };

@@ -12,22 +12,21 @@
 #include <cstring>
 
 #ifdef COMPILE_LOCAL
-	#include <mutex>
+#include <mutex>
 #endif
 
 #ifdef COMPILE_TARGET
-	#include <ChRt.h>
+#include <ChRt.h>
 #endif
 
 // only works with types that can be copied with memcpy
 bool GenericFifoBuffer::push(void* element) {
-
 #ifdef COMPILE_LOCAL
     std::lock_guard<std::mutex> l(lock_);
 #endif
 
 #ifdef COMPILE_TARGET
-	chMtxLock(lock_);
+    chMtxLock(lock_);
 #endif
 
     if (capacity_ == cur_length_) {
@@ -44,11 +43,11 @@ bool GenericFifoBuffer::push(void* element) {
     cur_length_ += 1;
 
 #ifdef COMPILE_LOCAL
-	// what
+    // what
 #endif
 
 #ifdef COMPILE_TARGET
-	chMtxUnlock(lock_);
+    chMtxUnlock(lock_);
 #endif
 
     return true;
@@ -56,13 +55,12 @@ bool GenericFifoBuffer::push(void* element) {
 
 // returns false on failure
 bool GenericFifoBuffer::pop(void* out) {
-
 #ifdef COMPILE_LOCAL
     std::lock_guard<std::mutex> l(lock_);
 #endif
 
 #ifdef COMPILE_TARGET
-	chMtxLock(lock_);
+    chMtxLock(lock_);
 #endif
 
     if (cur_length_ == 0) {
@@ -78,11 +76,11 @@ bool GenericFifoBuffer::pop(void* out) {
     cur_length_ -= 1;
 
 #ifdef COMPILE_LOCAL
-	// what
+    // what
 #endif
 
 #ifdef COMPILE_TARGET
-	chMtxUnlock(lock_);
+    chMtxUnlock(lock_);
 #endif
 
     return true;
