@@ -23,6 +23,13 @@ Some fictional examples:\
 `general/create-new-directory-for-gnc`\
 `misc/testing-sd-card-bandwidth`
 
+Please include the Trello ticket ID when relevant! i.e. for a ticket [AV-69] your branch might look like:
+
+`user/AyberkY/AV-69-graceful-failure-for-fifo-buffer`
+or
+`feature/AV-69-create-data-logger-class`
+
+
 ### Archiving Code Base Revisions
 We should try to keep an archive of the version of code that ran on each rocket launch, so that we can associate the data we collected with the code that was running on TARS.
 
