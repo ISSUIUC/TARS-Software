@@ -1,6 +1,8 @@
 /**
  * @file        sensors.cpp
- * @authors     
+ * @authors     Jake Hawkins
+ *              Anshuk Chigullapalli
+ *              Ayberk Yaraneri
  *
  * @brief       Sensor (Low-G, High-G and GPS) function implementations
  *
