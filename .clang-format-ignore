@@ -2,6 +2,6 @@
 
 ./flight/mcu/lib/SparkFunLSM9DS1/*
 
-./flight/mcu/lib/eigen-3.4.0
+./flight/mcu/lib/eigen-3.4.0/*
 
 ./misc/*
