@@ -38,7 +38,7 @@ ServoControl::ServoControl(struct pointers* pointer_struct, PWMServo* servo_cw,
     mutex_lowG_ = &pointer_struct->dataloggerTHDVarsPointer.dataMutex_lowG;
     gz_ = &pointer_struct->sensorDataPointer->lowG_data.gz;
 }
-//TODO check values for max
+// TODO check values for max
 void ServoControl::roundOffAngle(float& value) {
     if (value > 104.98) {
         value = 104.98;
