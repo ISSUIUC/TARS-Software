@@ -2,4 +2,6 @@
 
 ./flight/mcu/lib/SparkFunLSM9DS1/*
 
+./flight/mcu/lib/EigenArduino-Eigen30/*
+
 ./misc/*

@@ -1,4 +1,4 @@
-#include "Eigen/Core"
+#include "Eigen30.h"
 
 #include "acShared.h"
 #include "dataLog.h"

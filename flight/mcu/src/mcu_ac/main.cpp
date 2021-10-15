@@ -18,7 +18,6 @@
  * Grace Robbins
  */
 
-#include "ActiveControl.h"
 #include <Arduino.h>
 #include <ChRt.h>
 #include <PWMServo.h>
@@ -36,6 +35,8 @@
 #include "pins.h"
 #include "rocketFSM.h"
 #include "sensors.h"
+#include "ActiveControl.h"
+
 
 // datalogger_THD datalogger_THD_vars;
 
@@ -158,7 +159,7 @@ static THD_FUNCTION(servo_THD, arg) {
     bool active_control = false;
 
     ServoControl servo_control(pointer_struct, &servo_cw, &servo_ccw);
-
+    ActiveControl ac(pointer_struct);
     while (true) {
 #ifdef THREAD_DEBUG
         Serial.println("### Servo thread entrance");
