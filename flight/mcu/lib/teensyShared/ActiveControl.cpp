@@ -14,12 +14,9 @@ void ActiveControl::acTickFunction() {
         e_sum += e *.006;
     }
     float dedt = e - e_prev;
-    Matrix<float, 2, 1> u;
-    u = (k_p * e) + (k_i * e_sum) + (k_d * dedt);
+    Eigen::Matrix<float, 2, 1> u = (k_p * e) + (k_i * e_sum) + (k_d * dedt);
     float l1 = u(0,0);
     float l2 = u(0,1);
-    active_control_data_.l1_ = l1;
-    active_control_data_.l2_ = l2;
     e_prev = e;
 }
 

@@ -18,6 +18,7 @@
  * Grace Robbins
  */
 
+#include "ActiveControl.h"
 #include <Arduino.h>
 #include <ChRt.h>
 #include <PWMServo.h>
