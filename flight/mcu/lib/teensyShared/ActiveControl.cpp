@@ -18,6 +18,8 @@ void ActiveControl::acTickFunction() {
     u = (k_p * e) + (k_i * e_sum) + (k_d * dedt);
     float l1 = u(0,0);
     float l2 = u(0,1);
+    active_control_data_.l1_ = l1;
+    active_control_data_.l2_ = l2;
     e_prev = e;
 }
 

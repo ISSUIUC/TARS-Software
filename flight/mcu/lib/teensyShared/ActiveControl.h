@@ -7,6 +7,13 @@
 
 using namespace Eigen;
 
+typedef struct active_control_data {
+    float l1_ = 0;
+    float l2_ = 0;
+} active_control_data;
+
+struct active_control_data active_control_data_;
+
 class ActiveControl {
     public:
         ActiveControl(struct pointers* pointer_struct);
@@ -36,11 +43,6 @@ class ActiveControl {
         float omega_goal = 0;
         float e_sum = 0;
         float e_prev = 0;
-
         
 };
 
-struct active_control_data {
-    float l1 = 0;
-    float l2 = 0;
-};
