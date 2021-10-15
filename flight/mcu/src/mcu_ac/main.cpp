@@ -163,7 +163,7 @@ static THD_FUNCTION(servo_THD, arg) {
         Serial.println("### Servo thread entrance");
 #endif
 
-        servo_control.servoTickFunction();
+        servo_control.servoActuation(.5, .5);
 
         chThdSleepMilliseconds(6);  // FSM runs at 100 Hz
     }
@@ -343,7 +343,7 @@ void setup() {
     // Servo Setup
     servo_cw.attach(BALL_VALVE_1_PIN, 770,
                     2250);  // TODO: MAKE SURE TO CHANGE PINS
-    servo_ccw.attach(BALL_VALVE_2_PIN, 770, 2250);
+    servo_ccw.attach(6, 770, 2250);
 
     Serial.println("Starting ChibiOS");
     chBegin(chSetup);

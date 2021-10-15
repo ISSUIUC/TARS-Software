@@ -38,10 +38,9 @@ ServoControl::ServoControl(struct pointers* pointer_struct, PWMServo* servo_cw,
     mutex_lowG_ = &pointer_struct->dataloggerTHDVarsPointer.dataMutex_lowG;
     gz_ = &pointer_struct->sensorDataPointer->lowG_data.gz;
 }
-//TODO check values for max
 void ServoControl::roundOffAngle(float& value) {
-    if (value > 104.98) {
-        value = 104.98;
+    if (value > 180) {
+        value = 180;
     }
     if (value < 0) {
         value = 0;
@@ -49,56 +48,25 @@ void ServoControl::roundOffAngle(float& value) {
 }
 
 /**
- * @brief Construct a new thd function object to control the servo.
+ * @brief Takes the length of the flap extension and converts to angles for the servo.
  *
- * @param arg A struct containing pointers to objects needed to run the thread.
+ * @param length_one The length of the flap extension for the counterclockwise flaps.
+ * @param length_two The length of the flap extension for the clockwise flaps.
  *
  */
-void ServoControl::servoTickFunction() {
-    float ccw_angle = 90;
-    float cw_angle = 90;
+void ServoControl::servoActuation(float length_one, float length_two) {
 
-    static bool active_control = false;
+    //These are correcting factors for finding the angle. We still need to calculate what
+    //these values are. These are placeholders for now. m and offset should include the radian to 
+    //degree conversion.
+    int m = 1;
+    int offset = 0;
 
-    chMtxLock(mutex_RS_);
-    FSM_State currentRocketState = *currState_;
-    chMtxUnlock(mutex_RS_);
+    //This is the actual conversion from the inputted length to the angles desired for the servos.
+    float ccw_angle = (length_one * m  + offset);
+    float cw_angle = (length_two * m + offset);
 
-    switch (currentRocketState) {
-        case STATE_INIT:
-            active_control = false;
-            break;
-        case STATE_IDLE:
-            active_control = false;
-            break;
-        case STATE_LAUNCH_DETECT:
-            active_control = false;
-            break;
-        case STATE_BOOST:
-            active_control = false;
-            break;
-        case STATE_COAST:
-            active_control = true;
-            break;
-        case STATE_APOGEE_DETECT:
-            active_control = false;
-            break;
-        default:
-            active_control = false;
-            break;
-    }
-    // turns active control off if not in takeoff/coast sequence
-    if (active_control) {
-        chMtxLock(mutex_lowG_);
-        cw_angle = *gz_;  // stand-in "implementation"
-        ccw_angle = *gz_;
-        chMtxUnlock(mutex_lowG_);
-
-    } else {
-        // Turns active control off if not in coast state.
-        cw_angle = 0;
-        ccw_angle = 0;
-    }
+    
     roundOffAngle(cw_angle);
     roundOffAngle(ccw_angle);
 

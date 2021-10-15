@@ -27,7 +27,7 @@ class ServoControl {
      * @brief actuats servos based on State Estimation. 
      * runs during servo thread
      */
-    void servoTickFunction();
+    void servoActuation(float length_one, float length_two);
 
    private:
     FSM_State* currState_;
