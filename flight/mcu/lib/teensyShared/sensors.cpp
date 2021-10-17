@@ -6,8 +6,9 @@
  *
  * @brief       Sensor (Low-G, High-G and GPS) function implementations
  *
- * Here contains the pointer structs for three types of sensors (Low-g, High-g and GPS)
- * and the functions to acquire data from the sensors to the pointer structs.              
+ * Here contains the pointer structs for three types of sensors (Low-g, High-g
+ * and GPS) and the functions to acquire data from the sensors to the pointer
+ * structs.
  *
  */
 
