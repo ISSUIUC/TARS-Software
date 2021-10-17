@@ -22,8 +22,7 @@
 // only works with types that can be copied with memcpy
 bool GenericFifoBuffer::push(void* element) {
 #ifdef COMPILE_LOCAL
-    // std::lock_guard locks the mutex when it is created and unlocks it is
-    // destructed
+//std::lock_guard locks the mutex when it is created and unlocks it is destructed
     std::lock_guard<std::mutex> l(lock_);
 #endif
 
@@ -32,10 +31,6 @@ bool GenericFifoBuffer::push(void* element) {
 #endif
 
     if (capacity_ == cur_length_) {
-        #ifdef COMPILE_LOCAL
-            std::lock_guard<std::mutex> l(lock_);
-        #endif
-
         #ifdef COMPILE_TARGET
             chMtxLock(lock_);
         #endif
@@ -69,10 +64,6 @@ bool GenericFifoBuffer::pop(void* out) {
 #endif
 
     if (cur_length_ == 0) {
-        #ifdef COMPILE_LOCAL
-            std::lock_guard<std::mutex> l(lock_);
-        #endif
-
         #ifdef COMPILE_TARGET
             chMtxLock(lock_);
         #endif
