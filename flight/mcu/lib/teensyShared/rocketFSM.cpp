@@ -4,13 +4,16 @@
  * 		Ayberk Yaraneri
  * 		Colin Kinsey
  *
- * @brief      The implementation of the finite state machine class that governs state transitions.
+ * @brief      The implementation of the finite state machine class that governs
+ * state transitions.
  *
- * The rocketFSM class encapsulates the finite state machine that dictates which state the rocket is in throughout the mission.
- * The class implements the logic necessary to reliably transition between states along with hysteresis to avoid premature state
- * transitions.
- * 
- * This is a highly critical software module and should be tested throughly in simulation and on hardware targets.:
+ * The rocketFSM class encapsulates the finite state machine that dictates which
+ * state the rocket is in throughout the mission. The class implements the logic
+ * necessary to reliably transition between states along with hysteresis to
+ * avoid premature state transitions.
+ *
+ * This is a highly critical software module and should be tested throughly in
+ * simulation and on hardware targets.:
  *
  */
 
