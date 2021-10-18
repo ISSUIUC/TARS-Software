@@ -1,11 +1,10 @@
-# Simple script to add delay between upload and start of unit tests
-# Necessary on some hosts to allow the target Serial port to catch-up
-
 Import("env")
-import time
 
 def after_upload(source, target, env):
-    print ("Delay while uploading...")
+    print("Delay while uploading...")
+    import time
+
     time.sleep(1)
+    print("Done!")
 
 env.AddPostAction("upload", after_upload)
