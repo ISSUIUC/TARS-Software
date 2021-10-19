@@ -164,7 +164,7 @@ static THD_FUNCTION(servo_THD, arg) {
 #ifdef THREAD_DEBUG
         Serial.println("### Servo thread entrance");
 #endif
-
+        Serial.println("write tp servos");
         servo_control.servoActuation(.5, .5);
 
         chThdSleepMilliseconds(6);  // FSM runs at 100 Hz
@@ -250,20 +250,20 @@ static THD_FUNCTION(dataLogger_THD, arg) {
 void chSetup() {
     // added play_THD for creation
 
-    chThdCreateStatic(rocket_FSM_WA, sizeof(rocket_FSM_WA), NORMALPRIO,
-                      rocket_FSM, &sensor_pointers);
-    chThdCreateStatic(gps_WA, sizeof(gps_WA), NORMALPRIO, gps_THD,
-                      &sensor_pointers);
-    chThdCreateStatic(lowgIMU_WA, sizeof(lowgIMU_WA), NORMALPRIO, lowgIMU_THD,
-                      &sensor_pointers);
-    chThdCreateStatic(highgIMU_WA, sizeof(highgIMU_WA), NORMALPRIO,
-                      highgIMU_THD, &sensor_pointers);
+    // chThdCreateStatic(rocket_FSM_WA, sizeof(rocket_FSM_WA), NORMALPRIO,
+    //                   rocket_FSM, &sensor_pointers);
+    // chThdCreateStatic(gps_WA, sizeof(gps_WA), NORMALPRIO, gps_THD,
+    //                   &sensor_pointers);
+    // chThdCreateStatic(lowgIMU_WA, sizeof(lowgIMU_WA), NORMALPRIO, lowgIMU_THD,
+    //                   &sensor_pointers);
+    // chThdCreateStatic(highgIMU_WA, sizeof(highgIMU_WA), NORMALPRIO,
+    //                   highgIMU_THD, &sensor_pointers);
     chThdCreateStatic(servo_WA, sizeof(servo_WA), NORMALPRIO, servo_THD,
                       &sensor_pointers);
-    chThdCreateStatic(lowg_dataLogger_WA, sizeof(lowg_dataLogger_WA),
-                      NORMALPRIO, dataLogger_THD, &sensor_pointers);
-    chThdCreateStatic(mpuComm_WA, sizeof(mpuComm_WA), NORMALPRIO, mpuComm_THD,
-                      NULL);
+    // chThdCreateStatic(lowg_dataLogger_WA, sizeof(lowg_dataLogger_WA),
+    //                   NORMALPRIO, dataLogger_THD, &sensor_pointers);
+    // chThdCreateStatic(mpuComm_WA, sizeof(mpuComm_WA), NORMALPRIO, mpuComm_THD,
+    //                   NULL);
 
     while (true)
         ;
@@ -280,6 +280,7 @@ void setup() {
     while (!Serial) {
     }
 #endif
+    Serial.println("sup");
 
     pinMode(LED_BLUE, OUTPUT);
     pinMode(LED_RED, OUTPUT);

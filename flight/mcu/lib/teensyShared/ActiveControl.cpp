@@ -6,6 +6,7 @@
 
 ActiveControl::ActiveControl(struct pointers* pointer_struct) {
     gx = &pointer_struct->sensorDataPointer->lowG_data.gx;
+    current_state = &pointer_struct->sensorDataPointer->rocketState_data.rocketState;
 }
 
 void ActiveControl::acTickFunction() {
@@ -20,29 +21,30 @@ void ActiveControl::acTickFunction() {
     e_prev = e;
 }
 
-// bool ActiveControl::ActiveControl_ON() {
-//     switch (currentRocketState) {
-//         case STATE_INIT:
-//             active_control = false;
-//             break;
-//         case STATE_IDLE:
-//             active_control = false;
-//             break;
-//         case STATE_LAUNCH_DETECT:
-//             active_control = false;
-//             break;
-//         case STATE_BOOST:
-//             active_control = false;
-//             break;
-//         case STATE_COAST:
-//             active_control = true;
-//             break;
-//         case STATE_APOGEE_DETECT:
-//             active_control = false;
-//             break;
-//         default:
-//             active_control = false;
-//             break;
-//     }
-//     return active_control;
-// }
+bool ActiveControl::ActiveControl_ON() {
+    bool active_control_on = false;
+    switch (*current_state) {
+        case STATE_INIT:
+            active_control_on = false;
+            break;
+        case STATE_IDLE:
+            active_control_on = false;
+            break;
+        case STATE_LAUNCH_DETECT:
+            active_control_on = false;
+            break;
+        case STATE_BOOST:
+            active_control_on = false;
+            break;
+        case STATE_COAST:
+            active_control_on = true;
+            break;
+        case STATE_APOGEE_DETECT:
+            active_control_on = false;
+            break;
+        default:
+            active_control_on = false;
+            break;
+    }
+    return active_control_on;
+}

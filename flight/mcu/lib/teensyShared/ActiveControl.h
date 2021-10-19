@@ -8,6 +8,8 @@ class ActiveControl {
     public:
         ActiveControl(struct pointers* pointer_struct);
 
+        bool ActiveControl_ON();
+
         //Frequency should match output of sensor ready (angular velocity)
         // AV_X is x angular acceleration (roll) from LOWG IMU
         void acTickFunction();
@@ -34,6 +36,7 @@ class ActiveControl {
         float omega_goal = 0;
         float e_sum = 0;
         float e_prev = 0;
+        FSM_State* current_state;
         
 };
 
