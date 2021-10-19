@@ -16,9 +16,7 @@ void test_push_success(void) {
     }
 }
 
-void test_trivial(void) {
-    TEST_ASSERT_TRUE(1 == 1);
-}
+void test_trivial(void) { TEST_ASSERT_TRUE(1 == 1); }
 
 void setup() {
     delay(2000);
