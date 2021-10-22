@@ -9,7 +9,8 @@ LSM9DS1 imu;
 #define LSM9_CS_AG	36    // LSM9DS1 Accel/Gyro
 #define LSM9_CS_M   37    // LSM9DS1 Magnetometer
 #define KX134_CS    10    // KX132
-#define ZOEm8_CS    34    // ZOE-M8Q
+#define MS5611_CS   30    // MS5611 Barometer
+#define ZOEM8_CS    34    // ZOE-M8Q
 
 #define LSM9_WHOAMI_REG 0x0F
 
@@ -22,8 +23,10 @@ void setup()
   pinMode(LSM9_CS_M, OUTPUT);
 
   digitalWrite(LSM9_CS_AG, HIGH);
-  digitalWrite(LSM9_CS_AG, HIGH);
-  digitalWrite(LSM9_CS_AG, HIGH);
+  digitalWrite(LSM9_CS_M, HIGH);
+  digitalWrite(KX134_CS, HIGH);
+  digitalWrite(ZOEM8_CS, HIGH);
+  digitalWrite(MS5611_CS, HIGH);
 
   Serial.begin(115200);
 
