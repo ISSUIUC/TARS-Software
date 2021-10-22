@@ -6,29 +6,30 @@
 
 LSM9DS1 imu;
 
-#define CS_PIN	36    // LSM9DS1
-// #define CS_PIN   10     // KX132
-// #define CS_PIN   34     // ZOE-M8Q
+#define LSM9_CS_AG	36    // LSM9DS1 Accel/Gyro
+#define LSM9_CS_M   37    // LSM9DS1 Magnetometer
+#define KX134_CS    10    // KX132
+#define ZOEm8_CS    34    // ZOE-M8Q
 
-// #define WHOAMI_REG 0x0F
-#define WHOAMI_REG 0x12
+#define LSM9_WHOAMI_REG 0x0F
+
+#define KX134_WHOAMI_REG 0x12
 
 void setup()
 {
   // pinMode(LED_BUILTIN, OUTPUT);
-  pinMode(CS_PIN, OUTPUT);
-  digitalWrite(CS_PIN, HIGH);
+  pinMode(LSM9_CS_AG, OUTPUT);
+  pinMode(LSM9_CS_M, OUTPUT);
+
+  digitalWrite(LSM9_CS_AG, HIGH);
+  digitalWrite(LSM9_CS_AG, HIGH);
+  digitalWrite(LSM9_CS_AG, HIGH);
 
   Serial.begin(115200);
 
   while(!Serial){}
 
-  // digitalWrite(LED_BUILTIN, HIGH);
-  // delay(500);
-  // digitalWrite(LED_BUILTIN, LOW);
-  Serial.println("Henlo");
-
-  int val[100];
+  uint8_t val[100];
 
   Serial.println("Beginning SPI");
   SPI.begin();
@@ -36,28 +37,54 @@ void setup()
   SPI.setBitOrder(MSBFIRST);
   SPI.setDataMode(SPI_MODE0);
 
-  Serial.println("Getting WHOAMI");
 
-  digitalWrite(CS_PIN, LOW);
+  /***************************************************************************/
+  /* LSM9DS1 WHOAMI                                                          */
+
+  Serial.println("Getting LSM9DS1 WHOAMI");
+
+  digitalWrite(LSM9_CS_AG, LOW);
   delayMicroseconds(1);
 
-  SPI.transfer(0x80 | WHOAMI_REG);
+  val[0] = SPI.transfer(0x80 | LSM9_WHOAMI_REG);
 
-  for (int i = 0; i < 10 ; ++i) {
+  for (int i = 1; i < 11 ; ++i) {
 
       val[i] = SPI.transfer(0x00);
 
   }
 
   delayMicroseconds(1);
-  digitalWrite(CS_PIN, HIGH);
+  digitalWrite(LSM9_CS_AG, HIGH);
 
-  for (int i = 0; i < 10; ++i) {
+  for (int i = 0; i < 11; ++i) {
       Serial.print("Received: 0x");
       Serial.println(val[i], HEX);
   }
 
-  // digitalWrite(LED_BUILTIN, HIGH);
+  /***************************************************************************/
+  /* KX134 WHOAMI                                                          */
+
+  Serial.println("Getting KX134 WHOAMI");
+
+  digitalWrite(KX134_CS, LOW);
+  delayMicroseconds(1);
+
+  val[0] = SPI.transfer(0x80 | KX134_WHOAMI_REG);
+
+  for (int i = 0; i < 11 ; ++i) {
+
+      val[i] = SPI.transfer(0x00);
+
+  }
+
+  delayMicroseconds(1);
+  digitalWrite(KX134_CS, HIGH);
+
+  for (int i = 0; i < 11; ++i) {
+      Serial.print("Received: 0x");
+      Serial.println(val[i], HEX);
+  }
 
 }
 
