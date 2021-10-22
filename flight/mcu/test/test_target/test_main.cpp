@@ -171,8 +171,9 @@ void fifo_buffer_full_buffer_recovery() {
     TEST_ASSERT_TRUE(buffer.push(0));
 }
 
-
+// Define working area
 static THD_WORKING_AREA(myThreadWorkingArea, 128);
+static THD_WORKING_AREA(myThreadWorkingArea2, 128);
 
 void test_size_0(){
 
@@ -206,6 +207,46 @@ void test_threads(){
     TEST_ASSERT_EQUAL(i, 5);
 }
 
+SEMAPHORE_DECL(start_thread2, 0);
+SEMAPHORE_DECL(thread_done2, 0);
+int thead_data2[10];
+GenericFifoBuffer thread_fifo2(thead_data2, 10, sizeof(int));
+
+static THD_FUNCTION(myThread2, arg) {
+    Serial.println("Waiting to start...");
+    chSemWait(&start_thread2);
+    Serial.println("After starting...");
+    int i = 0;
+
+    for(i=0;i<=100;i++){
+        Serial.println("Pushing");
+        while (!thread_fifo2.push(&i));
+        
+    }
+    
+
+    chSemSignal(&thread_done2);
+}
+
+void test_threads2(){
+    chSemSignal(&start_thread2);
+
+    int i,j;
+
+    for(j=0;j<=100;j++){
+
+        Serial.println("Poping");
+
+        while(!thread_fifo2.pop(&i)){
+            chThdSleepMilliseconds(1);
+        }
+        
+        TEST_ASSERT_EQUAL(i, j);
+    }
+    
+    chSemWait(&thread_done2);
+}
+
 void setup(){
     delay(2000);
       chSysInit();
@@ -214,6 +255,12 @@ void setup(){
                                    NORMALPRIO,  /* Initial priority.    */
                                    myThread,    /* Thread function.     */
                                    NULL);       /* Thread parameter.    */
+    chThdCreateStatic(myThreadWorkingArea2,
+                sizeof(myThreadWorkingArea2),
+                NORMALPRIO,  /* Initial priority.    */
+                myThread2,    /* Thread function.     */
+                NULL);       /* Thread parameter.    */
+
     UNITY_BEGIN();
 
     // A simple test
@@ -237,6 +284,8 @@ void setup(){
     RUN_TEST(test_threads);
     RUN_TEST(test_size_0);
 
+
+    RUN_TEST(test_threads2);
 
     delay(500);
     UNITY_END();
