@@ -28,7 +28,8 @@
 #include "KX134-1211.h"  //High-G IMU Library
 #include "ServoControl.h"
 #include "SparkFunLSM9DS1.h"  //Low-G IMU Library
-#include "ZOEM8Q0.hpp"        //GPS Library
+// #include "ZOEM8Q0.hpp"        //GPS Library
+#include "SparkFun_u-blox_GNSS_Arduino_Library.h"
 #include "acShared.h"
 #include "dataLog.h"
 #include "hybridShared.h"
@@ -51,7 +52,7 @@ FSM_State rocketState = STATE_INIT;
 
 KX134 highGimu;
 LSM9DS1 lowGimu;
-ZOEM8Q0 gps = ZOEM8Q0();
+SFE_UBLOX_GNSS gps;
 
 PWMServo servo_cw;   // Servo that induces clockwise roll moment
 PWMServo servo_ccw;  // Servo that counterclockwisei roll moment
@@ -308,37 +309,42 @@ void setup() {
     lowGimu.setAccelScale(16);
 
     // GPS Setup
-    gps.beginSPI(ZOEM8Q0_CS);
-
-    // SD Card Setup
-    if (SD.begin(BUILTIN_SDCARD)) {
-        char file_extension[6] = ".dat";
-
-        char data_name[16] = "data";
-        // Initialize SD card
-        sensor_pointers.dataloggerTHDVarsPointer.dataFile =
-            SD.open(sd_file_namer(data_name, file_extension),
-                    O_CREAT | O_WRITE | O_TRUNC);
-        // print header to file on sd card that lists each variable that is
-        // logged
-        sensor_pointers.dataloggerTHDVarsPointer.dataFile.println(
-            "ax,ay,az,gx,gy,gz,mx,my,mz,ts_lowg,"
-            "hg_ax,hg_ay,hg_az,ts_highg,"
-            "latitude,longitude,altitude,GPS Lock,ts_gps,"
-            "state_q0,state_q1,state_q2,state_q3,state_x,state_y,state_z,state_"
-            "vx,state_vy,state_vz,"
-            "state_ax,state_ay,state_az,state_omegax,state_omegay,state_omegaz,"
-            "state_latitude,state_longitude,ts_state,"
-            "rocketState,ts_RS");
-        sensor_pointers.dataloggerTHDVarsPointer.dataFile.flush();
-        // Serial.println(lowg_datalogger_THD_vars.dataFile.name());
-
-    } else {
+    if(!gps.begin(SPI, ZOEM8Q0_CS, 4000000)){
         digitalWrite(LED_RED, HIGH);
-        Serial.println("SD Begin Failed. Stalling Program");
+        Serial.println("Failed to communicate with ZOEM8Q0 gps. Stalling Program");
         while (true)
             ;
     }
+
+    // SD Card Setup
+    // if (SD.begin(BUILTIN_SDCARD)) {
+    //     char file_extension[6] = ".dat";
+
+    //     char data_name[16] = "data";
+    //     // Initialize SD card
+    //     sensor_pointers.dataloggerTHDVarsPointer.dataFile =
+    //         SD.open(sd_file_namer(data_name, file_extension),
+    //                 O_CREAT | O_WRITE | O_TRUNC);
+    //     // print header to file on sd card that lists each variable that is
+    //     // logged
+    //     sensor_pointers.dataloggerTHDVarsPointer.dataFile.println(
+    //         "ax,ay,az,gx,gy,gz,mx,my,mz,ts_lowg,"
+    //         "hg_ax,hg_ay,hg_az,ts_highg,"
+    //         "latitude,longitude,altitude,GPS Lock,ts_gps,"
+    //         "state_q0,state_q1,state_q2,state_q3,state_x,state_y,state_z,state_"
+    //         "vx,state_vy,state_vz,"
+    //         "state_ax,state_ay,state_az,state_omegax,state_omegay,state_omegaz,"
+    //         "state_latitude,state_longitude,ts_state,"
+    //         "rocketState,ts_RS");
+    //     sensor_pointers.dataloggerTHDVarsPointer.dataFile.flush();
+    //     // Serial.println(lowg_datalogger_THD_vars.dataFile.name());
+
+    // } else {
+    //     digitalWrite(LED_RED, HIGH);
+    //     Serial.println("SD Begin Failed. Stalling Program");
+    //     while (true)
+    //         ;
+    // }
 
     // Servo Setup
     servo_cw.attach(BALL_VALVE_1_PIN, 770,

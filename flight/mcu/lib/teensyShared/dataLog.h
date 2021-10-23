@@ -7,7 +7,8 @@
 
 #include "KX134-1211.h"       //High-G IMU Library
 #include "SparkFunLSM9DS1.h"  //Low-G IMU Library
-#include "ZOEM8Q0.hpp"        //GPS Library
+// #include "ZOEM8Q0.hpp"        //GPS Library
+#include "SparkFun_u-blox_GNSS_Arduino_Library.h"
 #include "acShared.h"
 #include "dataStructs.h"
 
@@ -173,7 +174,7 @@ struct datalogger_THD {
 struct pointers {
     LSM9DS1* lowGimuPointer;
     KX134* highGimuPointer;
-    ZOEM8Q0* GPSPointer;
+    SFE_UBLOX_GNSS* GPSPointer;
 
     sensorDataStruct_t* sensorDataPointer;
 
