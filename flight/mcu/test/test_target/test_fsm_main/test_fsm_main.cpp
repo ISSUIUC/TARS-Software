@@ -176,9 +176,7 @@ void apogee_detect(){
 }
 
 
-void run_tests() {
-    UNITY_BEGIN();
-    // sensor_pointers.sensorDataPointer = &sensorData;
+void run_fsm_tests() {
     RUN_TEST(initial_state);
     RUN_TEST(gps_lock_detect);
     RUN_TEST(launch_detect);
@@ -187,14 +185,4 @@ void run_tests() {
     RUN_TEST(coast_detect);
     RUN_TEST(apogee_detect);
     RUN_TEST(bad_data_boost_detect);
-
-
-    UNITY_END();
 }
-
-void setup() {
-    delay(2000);
-    chBegin(run_tests);
-}
-
-void loop() {}
