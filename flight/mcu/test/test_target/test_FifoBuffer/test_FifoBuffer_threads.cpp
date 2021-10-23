@@ -11,11 +11,15 @@
 
 // Define working area
 static THD_WORKING_AREA(myThreadWorkingArea, 128);
+
 static THD_WORKING_AREA(producerThreadWorkingArea1, 128);
 static THD_WORKING_AREA(consumerThreadWorkingArea1, 128);
+
 static THD_WORKING_AREA(popThreadWorkingArea1, 128);
 static THD_WORKING_AREA(pushThreadWorkingArea1, 128);
 
+static THD_WORKING_AREA(popThreadWorkingArea2, 128);
+static THD_WORKING_AREA(pushThreadWorkingArea2, 128);
 
 /******************************************************************************/
 /* SIMPLE PUSHING IN THREAD TEST                                              */
@@ -72,7 +76,6 @@ static THD_FUNCTION(producerThread1, arg) {
     chSemSignal(&done_producerThread1);
 }
 
-
 static THD_FUNCTION(consumerThread1, arg) {
 
     chSemWait(&start_consumerThread1);
@@ -120,7 +123,6 @@ static THD_FUNCTION(pushThread1, arg) {
     chSemSignal(&done_pushThread1);
 }
 
-
 static THD_FUNCTION(popThread1, arg) {
 
     chSemWait(&start_popThread1);
@@ -147,8 +149,31 @@ void test_thread_pop_fail(){
 
 }
 
+/******************************************************************************/
+/* THREAD PUSH FAILING TEST                                              */
 
+SEMAPHORE_DECL(start_pushThread2,0);
+SEMAPHORE_DECL(done_pushThread2,0);
 
+SEMAPHORE_DECL(start_pushThread3,0);
+SEMAPHORE_DECL(done_pushThread3,0);
+
+int thread_data4[1];
+GenericFifoBuffer thread_fifo4(thread_data4, 1, sizeof(int));
+
+static THD_FUNCTION(pushThread2, arg){
+    chSemWait(start_pushThread2);
+
+    int i = 1;
+    TEST_ASSERT_TRUE(thread_fifo4.push(&i));
+
+    chSemSignal(done_pushThread2);
+}
+
+static THD_FUNCTION(popThread2, arg){
+    chSemWait(start_);
+
+}
 
 
 
