@@ -74,10 +74,14 @@ void test_producer_performance_perf() {
 
     chSemWait(&done_producer_perf_thread);
     chSemWait(&done_consumer_perf_thread);
+    //measure the time the test took to run
     auto end = chVTGetSystemTime();
     auto tick_time = 1.f / CH_CFG_ST_FREQUENCY;
-    Serial.printf("PERF: 10000 pushes in %f s\n", (end - begin) * tick_time);
-    TEST_ASSERT_LESS_THAN(100, (end - begin) * tick_time * 1000);
+    auto elapsed_time_ms = (end - begin) * tick_time * 1000;
+    Serial.printf("PERF: 10000 pushes in %f ms\n", elapsed_time_ms);
+
+    //test that the throughput was higher than 10000 ints in 100 ms
+    TEST_ASSERT_LESS_THAN(100, elapsed_time_ms);
 }
 
 /******************************************************************************/
@@ -136,10 +140,15 @@ void typed_test_producer_performance_perf() {
 
     chSemWait(&done_producer_perf_thread);
     chSemWait(&done_consumer_perf_thread);
+
+    //measure the time the test took to run
     auto end = chVTGetSystemTime();
     auto tick_time = 1.f / CH_CFG_ST_FREQUENCY;
-    Serial.printf("PERF: 10000 pushes in %f s\n", (end - begin) * tick_time);
-    TEST_ASSERT_LESS_THAN(100, (end - begin) * tick_time * 1000);
+    auto elapsed_time_ms = (end - begin) * tick_time * 1000;
+    Serial.printf("PERF: 10000 pushes in %f ms\n", elapsed_time_ms);
+
+    //test that the throughput was higher than 10000 ints in 100 ms
+    TEST_ASSERT_LESS_THAN(100, elapsed_time_ms);
 }
 
 /******************************************************************************/
@@ -258,10 +267,15 @@ void test_many_producer_perf() {
     chSemWait(&producer_end);
     chSemWait(&producer_end);
     chSemWait(&main_consumer_end);
+    
+    //measure the time the test took to run
     auto end = chVTGetSystemTime();
     auto tick_time = 1.f / CH_CFG_ST_FREQUENCY;
-    Serial.printf("PERF: 10000 pushes in %f s\n", (end - begin) * tick_time);
-    TEST_ASSERT_LESS_THAN(100, (end - begin) * tick_time * 1000);
+    auto elapsed_time_ms = (end - begin) * tick_time * 1000;
+    Serial.printf("PERF: 10000 pushes in %f ms\n", elapsed_time_ms);
+
+    //test that the throughput was higher than 50000 ints over 5 buffers in 100 ms
+    TEST_ASSERT_LESS_THAN(100, elapsed_time_ms);
 }
 
 /******************************************************************************/
@@ -361,10 +375,14 @@ void typed_test_many_producer_perf() {
     chSemWait(&producer_end);
     chSemWait(&producer_end);
     chSemWait(&main_consumer_end);
+    //measure the time the test took to run
     auto end = chVTGetSystemTime();
     auto tick_time = 1.f / CH_CFG_ST_FREQUENCY;
-    Serial.printf("PERF: 10000 pushes in %f s\n", (end - begin) * tick_time);
-    TEST_ASSERT_LESS_THAN(100, (end - begin) * tick_time * 1000);
+    auto elapsed_time_ms = (end - begin) * tick_time * 1000;
+    Serial.printf("PERF: 10000 pushes in %f ms\n", elapsed_time_ms);
+
+    //test that the throughput was higher than 50000 ints over 5 buffers in 100 ms
+    TEST_ASSERT_LESS_THAN(100, elapsed_time_ms);
 }
 
 /******************************************************************************/
