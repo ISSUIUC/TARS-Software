@@ -2,6 +2,9 @@
 #include <ChRt.h>
 #include <ch.h>
 #include <unity.h>
+
+//we need to access private members of the gps to mock the tests
+//once the new gps library has been integrated this can be changed
 #define class struct
 #include "ZOEM8Q0.hpp"
 #undef class
@@ -66,6 +69,27 @@ void boost_detect(){
     }
    
     TEST_ASSERT_EQUAL(sensor_pointers.sensorDataPointer->rocketState_data.rocketState, STATE_BOOST);
+}
+
+
+void bad_data_boost_detect(){
+    sensorDataStruct_t sensorData{};
+    pointers sensor_pointers{};
+    sensor_pointers.sensorDataPointer = &sensorData;
+    ZOEM8Q0 gps;
+    sensor_pointers.GPSPointer = &gps;
+    gps.position_lock = true;
+
+    rocketFSM fsm{&sensor_pointers};
+    fsm.tickFSM();
+    sensor_pointers.sensorDataPointer->state_data.state_az = 60;
+    
+    fsm.tickFSM();
+    chThdSleep(10);
+    sensor_pointers.sensorDataPointer->state_data.state_az = 0;
+    fsm.tickFSM();
+   
+    TEST_ASSERT_EQUAL(sensor_pointers.sensorDataPointer->rocketState_data.rocketState, STATE_IDLE);
 }
 
 
@@ -162,6 +186,7 @@ void run_tests() {
     RUN_TEST(burnout_detect);
     RUN_TEST(coast_detect);
     RUN_TEST(apogee_detect);
+    RUN_TEST(bad_data_boost_detect);
 
 
     UNITY_END();
