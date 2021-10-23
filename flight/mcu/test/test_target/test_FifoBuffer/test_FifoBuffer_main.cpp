@@ -8,16 +8,28 @@
 
 void run_static_test_cases();
 void run_threaded_test_cases();
+void run_performance_test_cases();
 
-void setup(){
-    delay(2000);
+void run_tests(){
 
-
+	UNITY_BEGIN();
 	// Run tests that do not use threading
 	run_static_test_cases();
 
 	// Run tests using threads!
-    chBegin(run_threaded_test_cases);
+    run_threaded_test_cases();
+
+	// Run performance testing
+	run_performance_test_cases();
+
+    UNITY_END();
+}
+
+void setup(){
+    delay(2000);
+	chBegin(run_tests);
+
+
 
 }
 

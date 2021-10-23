@@ -62,6 +62,7 @@ static THD_FUNCTION(producerThread1, arg) {
     int i = 0;
 
     for(i=0;i<=100;i++){
+        Serial.println("here2");
         while (!thread_fifo2.push(&i));
     }
     
@@ -77,7 +78,7 @@ static THD_FUNCTION(consumerThread1, arg) {
     int i,j;
 
     for(j=0;j<=100;j++){
-
+        Serial.println("here1");
         while(!thread_fifo2.pop(&i));
         
         TEST_ASSERT_EQUAL(i, j);
@@ -123,15 +124,10 @@ void run_threaded_test_cases(){
                 consumerThread1,    /* Thread function.     */
                 NULL);       /* Thread parameter.    */
 
-    UNITY_BEGIN();
-
     // New tests
     RUN_TEST(test_thread_push);
 
 
     RUN_TEST(test_producer_consumer);
-
-    delay(500);
-    UNITY_END();
 }
 
