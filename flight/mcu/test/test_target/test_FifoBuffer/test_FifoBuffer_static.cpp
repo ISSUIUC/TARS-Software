@@ -1,23 +1,22 @@
-#include<Arduino.h>
-#include<unity.h>
-#include<ch.h>
-#include<ChRt.h>
-
+#include <Arduino.h>
+#include <ChRt.h>
+#include <ch.h>
+#include <unity.h>
 
 #define COMPILE_TARGET
 
 #include "FifoBuffer.h"
 
-void int_create(){
-    int a=5;
-    TEST_ASSERT_EQUAL(5,a);
-    TEST_ASSERT_NOT_EQUAL(1,a);
+void int_create() {
+    int a = 5;
+    TEST_ASSERT_EQUAL(5, a);
+    TEST_ASSERT_NOT_EQUAL(1, a);
 }
 
-void test_size_0(){
+void test_size_0() {
     int data[10];
     int i1 = 100;
-    GenericFifoBuffer buffer(data, 0, sizeof(int));    
+    GenericFifoBuffer buffer(data, 0, sizeof(int));
     TEST_ASSERT_FALSE(buffer.push(&i1));
 }
 
@@ -179,10 +178,9 @@ void fifo_buffer_full_buffer_recovery() {
 }
 
 void run_static_test_cases() {
-
-	// Very simple tests
+    // Very simple tests
     RUN_TEST(int_create);
-	RUN_TEST(test_size_0);
+    RUN_TEST(test_size_0);
 
     // Tests from test_local_FifoBuffer.cpp
     RUN_TEST(untyped_fifo_buffer_wrap_success);
