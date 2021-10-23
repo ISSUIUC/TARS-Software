@@ -68,8 +68,10 @@ static THD_FUNCTION(producerThread1, arg) {
     int i = 0;
 
     for(i=0;i<=100;i++){
-        Serial.println("here2");
-        while (!thread_fifo2.push(&i));
+        while (!thread_fifo2.push(&i)){
+            //let the other thread get the lock if the buffer is full
+            chThdSleep(1);
+        }
     }
     
 
@@ -77,14 +79,15 @@ static THD_FUNCTION(producerThread1, arg) {
 }
 
 static THD_FUNCTION(consumerThread1, arg) {
-
     chSemWait(&start_consumerThread1);
 
     int i,j;
 
     for(j=0;j<=100;j++){
-        Serial.println("here1");
-        while(!thread_fifo2.pop(&i));
+        while(!thread_fifo2.pop(&i)){
+            //let the other thread get the lock if the buffer is empty
+            chThdSleep(1);
+        }
         
         TEST_ASSERT_EQUAL(i, j);
     }
@@ -93,8 +96,8 @@ static THD_FUNCTION(consumerThread1, arg) {
 }
 
 void test_producer_consumer(){
-    chSemSignal(&start_producerThread1);
     chSemSignal(&start_consumerThread1);
+    chSemSignal(&start_producerThread1);
 
     chSemWait(&done_producerThread1);
     chSemWait(&done_consumerThread1);
