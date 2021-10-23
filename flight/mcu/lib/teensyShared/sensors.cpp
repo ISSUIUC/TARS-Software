@@ -155,8 +155,8 @@ void gpsTickFunction(pointers *pointer_struct) {
     longitude /= 10000000;
     //altitude input is in mm
     float altitude = pointer_struct->GPSPointer->getAltitude();
-    //we need 3 satellite connections for a good lock
-    bool posLock = pointer_struct->GPSPointer->getSIV() >= 3;
+    //fixtype 3 means that we have a 3d position fix
+    bool posLock = (pointer_struct->GPSPointer->getFixType() == 3);
 
     // Lock gps mutex
     chMtxLock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_GPS);

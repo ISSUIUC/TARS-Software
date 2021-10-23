@@ -28,8 +28,7 @@
 #include "KX134-1211.h"  //High-G IMU Library
 #include "ServoControl.h"
 #include "SparkFunLSM9DS1.h"  //Low-G IMU Library
-// #include "ZOEM8Q0.hpp"        //GPS Library
-#include "SparkFun_u-blox_GNSS_Arduino_Library.h"
+#include "SparkFun_u-blox_GNSS_Arduino_Library.h" //GPS Library
 #include "acShared.h"
 #include "dataLog.h"
 #include "hybridShared.h"
@@ -315,6 +314,10 @@ void setup() {
         while (true)
             ;
     }
+    gps.setPortOutput(COM_PORT_SPI, COM_TYPE_UBX); //Set the SPI port to output UBX only (turn off NMEA noise)
+    gps.saveConfigSelective(VAL_CFG_SUBSEC_IOPORT); //Save (only) the communications port settings to flash and BBR
+    gps.setNavigationFrequency(10); //set sampling rate to 10hz
+
 
     // SD Card Setup
     // if (SD.begin(BUILTIN_SDCARD)) {
