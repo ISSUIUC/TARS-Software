@@ -23,6 +23,7 @@ class ServoControl {
    public:
     ServoControl(struct pointers* pointer_struct, PWMServo* servo_cw,
                  PWMServo* servo_ccw);
+    // ServoControl& operator==(const ServoControl&) = default;
     /**
      * @brief actuats servos based on State Estimation. 
      * runs during servo thread

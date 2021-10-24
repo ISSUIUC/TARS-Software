@@ -158,14 +158,14 @@ static THD_FUNCTION(servo_THD, arg) {
     struct pointers *pointer_struct = (struct pointers *)arg;
     bool active_control = false;
 
-    ServoControl servo_control(pointer_struct, &servo_cw, &servo_ccw);
-    ActiveControl ac(pointer_struct);
+    // ServoControl servo_control(pointer_struct, &servo_cw, &servo_ccw);
+    ActiveControl ac(pointer_struct, &servo_ccw, &servo_cw);
     while (true) {
 #ifdef THREAD_DEBUG
         Serial.println("### Servo thread entrance");
 #endif
         Serial.println("write tp servos");
-        servo_control.servoActuation(.5, .5);
+        ac.acTickFunction();
 
         chThdSleepMilliseconds(6);  // FSM runs at 100 Hz
     }
@@ -297,7 +297,16 @@ void setup() {
     sensor_pointers.highGimuPointer = &highGimu;
     sensor_pointers.GPSPointer = &gps;
     sensor_pointers.sensorDataPointer = &sensorData;
-
+    pinMode(LSM9DS1_AG_CS, OUTPUT);
+    while(true){
+        digitalWrite(LSM9DS1_AG_CS, HIGH);
+        delay(10);
+        digitalWrite(LSM9DS1_AG_CS, LOW);
+        delay(10);
+    }
+    // while(true){
+    //     lowGimu.beginSPI(LSM9DS1_AG_CS, LSM9DS1_M_CS);
+    // }
     // lowGimu setup
     if (lowGimu.beginSPI(LSM9DS1_AG_CS, LSM9DS1_M_CS) ==
         false)  // note, we need to sent this our CS pins (defined above)

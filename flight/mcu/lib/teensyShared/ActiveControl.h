@@ -3,10 +3,11 @@
 #include "acShared.h"
 #include "dataLog.h"
 #include "sensors.h"
+#include "ServoControl.h"
 
 class ActiveControl {
     public:
-        ActiveControl(struct pointers* pointer_struct);
+        ActiveControl(struct pointers* pointer_struct, PWMServo* ccw, PWMServo* cw);
 
         bool ActiveControl_ON();
 
@@ -31,12 +32,18 @@ class ActiveControl {
             -.0000007
         };
 
+        float l1_prev = 0;
+        float l2_prev = 0;
         float* gx;
+        float du_max = .0001; //TODO test value
+        float dt = .006; //seconds
+
         //goals
         float omega_goal = 0;
         float e_sum = 0;
         float e_prev = 0;
         FSM_State* current_state;
+        ServoControl activeControlServos;
         
 };
 
