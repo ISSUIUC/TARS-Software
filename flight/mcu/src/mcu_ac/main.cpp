@@ -75,6 +75,8 @@ static THD_WORKING_AREA(mpuComm_WA, 512);
 /******************************************************************************/
 /* ROCKET FINITE STATE MACHINE THREAD                                         */
 
+#define FSM_THD_TICK_PERIOD_MS 10  // 100 Hz Tick Rate
+
 static THD_FUNCTION(rocket_FSM, arg) {
     struct pointers *pointer_struct = (struct pointers *)arg;
 
@@ -85,14 +87,20 @@ static THD_FUNCTION(rocket_FSM, arg) {
         Serial.println("### Rocket FSM thread entrance");
 #endif
 
+        systime_t curr_wakeup_time = chVTGetSystemTime();
+        systime_t next_wakeup_time =
+            chTimeAddX(curr_wakeup_time, TIME_MS2I(FSM_THD_TICK_PERIOD_MS));
+
         stateMachine.tickFSM();
 
-        chThdSleepMilliseconds(6);  // FSM runs at 100 Hz
+        chThdSleepUntil(next_wakeup_time);
     }
 }
 
 /******************************************************************************/
 /* LOW G IMU THREAD                                                           */
+
+#define LOWG_THD_TICK_PERIOD_MS 10  // 100 Hz Tick Rate
 
 static THD_FUNCTION(lowgIMU_THD, arg) {
     // Load outside variables into the function
@@ -103,14 +111,20 @@ static THD_FUNCTION(lowgIMU_THD, arg) {
         Serial.println("### Low G IMU thread entrance");
 #endif
 
+        systime_t curr_wakeup_time = chVTGetSystemTime();
+        systime_t next_wakeup_time =
+            chTimeAddX(curr_wakeup_time, TIME_MS2I(LOWG_THD_TICK_PERIOD_MS));
+
         lowGimuTickFunction(pointer_struct);
 
-        chThdSleepMilliseconds(6);
+        chThdSleepUntil(next_wakeup_time);
     }
 }
 
 /******************************************************************************/
 /* HIGH G IMU THREAD                                                          */
+
+#define HIGHG_THD_TICK_PERIOD_MS 10  // 100 Hz Tick Rate
 
 static THD_FUNCTION(highgIMU_THD, arg) {
     // Load outside variables into the function
@@ -121,14 +135,20 @@ static THD_FUNCTION(highgIMU_THD, arg) {
         Serial.println("### High G IMU thread entrance");
 #endif
 
+        systime_t curr_wakeup_time = chVTGetSystemTime();
+        systime_t next_wakeup_time =
+            chTimeAddX(curr_wakeup_time, TIME_MS2I(HIGHG_THD_TICK_PERIOD_MS));
+
         highGimuTickFunction(pointer_struct);
 
-        chThdSleepMilliseconds(6);
+        chThdSleepUntil(next_wakeup_time);
     }
 }
 
 /******************************************************************************/
 /* GPS THREAD                                                                 */
+
+#define GPS_THD_TICK_PERIOD_MS 100  // 10 Hz Tick Rate
 
 static THD_FUNCTION(gps_THD, arg) {
     // Load outside variables into the function
@@ -139,18 +159,24 @@ static THD_FUNCTION(gps_THD, arg) {
         Serial.println("### GPS thread entrance");
 #endif
 
+        systime_t curr_wakeup_time = chVTGetSystemTime();
+        systime_t next_wakeup_time =
+            chTimeAddX(curr_wakeup_time, TIME_MS2I(GPS_THD_TICK_PERIOD_MS));
+
         gpsTickFunction(pointer_struct);
 
 #ifdef THREAD_DEBUG
         Serial.println("### GPS thread exit");
 #endif
 
-        chThdSleepMilliseconds(6);  // Sensor DAQ @ ~100 Hz
+        chThdSleepUntil(next_wakeup_time);
     }
 }
 
 /******************************************************************************/
 /* SERVO CONTROL THREAD                                                       */
+
+#define SERVOCTRL_THD_TICK_PERIOD_MS 10  // 100 Hz Tick Rate
 
 static THD_FUNCTION(servo_THD, arg) {
     struct pointers *pointer_struct = (struct pointers *)arg;
@@ -163,14 +189,20 @@ static THD_FUNCTION(servo_THD, arg) {
         Serial.println("### Servo thread entrance");
 #endif
 
+        systime_t curr_wakeup_time = chVTGetSystemTime();
+        systime_t next_wakeup_time = chTimeAddX(
+            curr_wakeup_time, TIME_MS2I(SERVOCTRL_THD_TICK_PERIOD_MS));
+
         servo_control.servoTickFunction();
 
-        chThdSleepMilliseconds(6);  // FSM runs at 100 Hz
+        chThdSleepUntil(next_wakeup_time);
     }
 }
 
 /******************************************************************************/
 /* MPU COMMUNICATION THREAD                                                   */
+
+#define MPUCOMM_THD_TICK_PERIOD_MS 100  // 10 Hz Tick Rate
 
 static THD_FUNCTION(mpuComm_THD, arg) {
     // first 3 bytes of packet need to be iss
@@ -182,6 +214,10 @@ static THD_FUNCTION(mpuComm_THD, arg) {
 #ifdef THREAD_DEBUG
         Serial.println("### mpuComm thread entrance");
 #endif
+
+        systime_t curr_wakeup_time = chVTGetSystemTime();
+        systime_t next_wakeup_time =
+            chTimeAddX(curr_wakeup_time, TIME_MS2I(MPUCOMM_THD_TICK_PERIOD_MS));
 
         //! locking data from sensorData struct
         chMtxLock(&sensor_pointers.dataloggerTHDVarsPointer.dataMutex_lowG);
@@ -219,13 +255,14 @@ static THD_FUNCTION(mpuComm_THD, arg) {
               }
               Serial.printf("\n\n"); */
 
-        chThdSleepMilliseconds(
-            6);  // Set equal sleep time as the other threads, can change
+        chThdSleepUntil(next_wakeup_time);
     }
 }
 
 /******************************************************************************/
-/* DATA LOGGER THREAD                                                   */
+/* DATA LOGGER THREAD                                                         */
+
+#define DATALOG_THD_TICK_PERIOD_MS 10  // 100 Hz Tick Rate
 
 static THD_FUNCTION(dataLogger_THD, arg) {
     struct pointers *pointer_struct = (struct pointers *)arg;
@@ -235,9 +272,13 @@ static THD_FUNCTION(dataLogger_THD, arg) {
         Serial.println("Data Logging thread entrance");
 #endif
 
+        systime_t curr_wakeup_time = chVTGetSystemTime();
+        systime_t next_wakeup_time =
+            chTimeAddX(curr_wakeup_time, TIME_MS2I(DATALOG_THD_TICK_PERIOD_MS));
+
         dataLoggerTickFunction(pointer_struct);
 
-        chThdSleepMilliseconds(6);
+        chThdSleepUntil(next_wakeup_time);
     }
 }
 
