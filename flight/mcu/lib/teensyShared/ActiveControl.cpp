@@ -31,7 +31,16 @@ void ActiveControl::acTickFunction() {
         int sign = ((l2 - l2_prev)/dt)/abs((l2 - l2_prev)/dt);
         l2_cmd = l2 + sign*min(abs((l2 - l2_prev)/dt), du_max);
     }
+    Serial.println("l1: ");
+    Serial.print(l1);
+    Serial.print(" l1_cmd: ");
+    Serial.print(l1_cmd);
 
+    Serial.println("l2: ");
+    Serial.print(l2);
+    Serial.print(" l2_cmd: ");
+    Serial.print(l2_cmd);
+    
     activeControlServos.servoActuation(l1_cmd, l2_cmd);
     e_prev = e;
     l1_prev = l1_cmd;
