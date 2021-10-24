@@ -169,7 +169,10 @@ static THD_FUNCTION(gps_THD, arg) {
         Serial.println("### GPS thread exit");
 #endif
 
-        chThdSleepUntil(next_wakeup_time);
+        // If system time is not inside the window between curr_wakeup_time and
+        // next_wakeup_time, then no sleep is performed. Prevents thread from
+        // locking when next_wakeup_time is overshot.
+        chThdSleepUntilWindowed(curr_wakeup_time, next_wakeup_time);
     }
 }
 
@@ -278,7 +281,10 @@ static THD_FUNCTION(dataLogger_THD, arg) {
 
         dataLoggerTickFunction(pointer_struct);
 
-        chThdSleepUntil(next_wakeup_time);
+        // If system time is not inside the window between curr_wakeup_time and
+        // next_wakeup_time, then no sleep is performed. Prevents thread from
+        // locking when next_wakeup_time is overshot.
+        chThdSleepUntilWindowed(curr_wakeup_time, next_wakeup_time);
     }
 }
 
