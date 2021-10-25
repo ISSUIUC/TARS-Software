@@ -270,29 +270,10 @@ void rocketFSM::tickFSM() {
     pointer_struct->sensorDataPointer->rocketState_data.timeStamp_RS =
         chVTGetSystemTime();
 
+    pointer_struct->dataloggerTHDVarsPointer.rocketStateFifo.push(pointer_struct->sensorDataPointer->rocketState_data);
+
     // Unlock mutexes used during the switch statement
     chMtxUnlock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_RS);
     chMtxUnlock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_lowG);
     chMtxUnlock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_GPS);  //?
-
-    // check that data can be writen to the rocket state buffer
-    if (chSemWaitTimeout(&pointer_struct->dataloggerTHDVarsPointer.fifoSpace_RS,
-                         TIME_IMMEDIATE) != MSG_OK) {
-        pointer_struct->dataloggerTHDVarsPointer.bufferErrors_RS++;
-        digitalWrite(LED_BUILTIN, HIGH);
-        return;
-    }
-    // Write rocket state data to the buffer
-    chMtxLock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_RS);
-    pointer_struct->dataloggerTHDVarsPointer
-        .fifoArray[pointer_struct->dataloggerTHDVarsPointer.fifoHead_GPS]
-        .rocketState_data = pointer_struct->sensorDataPointer->rocketState_data;
-    pointer_struct->dataloggerTHDVarsPointer.bufferErrors_RS = 0;
-    pointer_struct->dataloggerTHDVarsPointer.fifoHead_RS =
-        pointer_struct->dataloggerTHDVarsPointer.fifoHead_RS < (FIFO_SIZE - 1)
-            ? pointer_struct->dataloggerTHDVarsPointer.fifoHead_RS + 1
-            : 0;
-    chSemSignal(&pointer_struct->dataloggerTHDVarsPointer.fifoData_RS);
-    //! Unlocking &dataMutex for rocket state
-    chMtxUnlock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_RS);
 }
