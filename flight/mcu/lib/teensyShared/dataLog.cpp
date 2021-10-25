@@ -9,8 +9,6 @@
 
 #include "sensors.h"
 
-#define THREAD_DEBUG
-
 MUTEX_DECL(SD_Card_Mutex);
 
 /**
@@ -28,20 +26,27 @@ void dataLoggerTickFunction(pointers* pointer_struct) {
 
     datalogger_THD & buffers = pointer_struct->dataloggerTHDVarsPointer;
 
+    //read each fifo once checking if they have data
     current_data.has_lowG_data = buffers.lowGFifo.pop(&current_data.lowG_data);
     current_data.has_highG_data = buffers.highGFifo.pop(&current_data.highG_data);
     current_data.has_gps_data = buffers.gpsFifo.pop(&current_data.gps_data);
     current_data.has_state_data = buffers.stateFifo.pop(&current_data.state_data);
     current_data.has_rocketState_data = buffers.rocketStateFifo.pop(&current_data.rocketState_data);
 
+    //read each fifo until they are empty, this way we always log the most recent data
+    while(buffers.lowGFifo.pop(&current_data.lowG_data));
+    while(buffers.highGFifo.pop(&current_data.highG_data));
+    while(buffers.gpsFifo.pop(&current_data.gps_data));
+    while(buffers.stateFifo.pop(&current_data.state_data));
+    while(buffers.rocketStateFifo.pop(&current_data.rocketState_data));
+
+    
+
+
     // Log all data that was copied from the buffer onto the sd card
     chMtxLock(&SD_Card_Mutex);
     logData(&pointer_struct->dataloggerTHDVarsPointer.dataFile, &current_data);
     chMtxUnlock(&SD_Card_Mutex);
-
-#ifdef THREAD_DEBUG
-    Serial.println("Data Logging thread exit");
-#endif
 }
 
 /**
@@ -111,7 +116,18 @@ char* sd_file_namer(char* fileName, char* fileExtensionParam) {
 int32_t flush_iterator = 0;
 void logData(File* dataFile, sensorDataStruct_t* data) {
     // Write raw bytes to SD card.
-    dataFile->write((const uint8_t*)data, sizeof(*data));
+    // dataFile->write((const uint8_t*)data, sizeof(*data));
+    dataFile->print("lowg: ");
+    dataFile->print(data->has_lowG_data);
+    dataFile->print(" ");
+    dataFile->print(data->lowG_data.ax);
+
+    dataFile->print(" gps: ");
+    dataFile->print(data->has_gps_data);
+    dataFile->print(" ");
+    dataFile->print(data->gps_data.altitude);
+
+    dataFile->println();
 
     // Flush data once for every 1000 writes (this keeps the ring buffer in sync
     // with data collection)
