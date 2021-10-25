@@ -5,12 +5,12 @@
 #include <SD.h>
 #include <stdint.h>
 
+#include "FifoBuffer.h"
 #include "KX134-1211.h"       //High-G IMU Library
 #include "SparkFunLSM9DS1.h"  //Low-G IMU Library
 #include "ZOEM8Q0.hpp"        //GPS Library
 #include "acShared.h"
 #include "dataStructs.h"
-#include "FifoBuffer.h"
 
 /**
  * @brief Structure for all values collected from the low g sensor
@@ -99,7 +99,6 @@ struct rocketStateData {
  *
  */
 struct sensorDataStruct_t {
-
     // data for lowGimu
     bool has_lowG_data;
     lowGData lowG_data;
@@ -144,7 +143,7 @@ struct datalogger_THD {
     MUTEX_DECL(dataMutex_GPS);
     MUTEX_DECL(dataMutex_state);
     MUTEX_DECL(dataMutex_RS);
-    
+
     sensorDataStruct_t current_data;
 
     File dataFile;

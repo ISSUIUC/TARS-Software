@@ -270,7 +270,8 @@ void rocketFSM::tickFSM() {
     pointer_struct->sensorDataPointer->rocketState_data.timeStamp_RS =
         chVTGetSystemTime();
 
-    pointer_struct->dataloggerTHDVarsPointer.rocketStateFifo.push(pointer_struct->sensorDataPointer->rocketState_data);
+    pointer_struct->dataloggerTHDVarsPointer.rocketStateFifo.push(
+        pointer_struct->sensorDataPointer->rocketState_data);
 
     // Unlock mutexes used during the switch statement
     chMtxUnlock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_RS);

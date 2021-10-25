@@ -87,8 +87,8 @@ void lowGimuTickFunction(pointers *pointer_struct) {
             pointer_struct->lowGimuPointer->mz);
     //! Unlocking &dataMutex for low g
 
-
-    pointer_struct->dataloggerTHDVarsPointer.lowGFifo.push(pointer_struct->sensorDataPointer->lowG_data);
+    pointer_struct->dataloggerTHDVarsPointer.lowGFifo.push(
+        pointer_struct->sensorDataPointer->lowG_data);
     chMtxUnlock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_lowG);
 
 #ifdef LOWGIMU_DEBUG
@@ -148,7 +148,7 @@ void gpsTickFunction(pointers *pointer_struct) {
         pointer_struct->GPSPointer->get_position_lock();
 
     //! Unlocking &dataMutex
-    
+
     // Toggle the LED to show if the gps has position lock
     if (pointer_struct->sensorDataPointer->gps_data.posLock == true) {
         digitalWrite(LED_ORANGE, HIGH);
@@ -156,9 +156,9 @@ void gpsTickFunction(pointers *pointer_struct) {
         digitalWrite(LED_ORANGE, LOW);
     }
 
-    pointer_struct->dataloggerTHDVarsPointer.gpsFifo.push(pointer_struct->sensorDataPointer->gps_data);
+    pointer_struct->dataloggerTHDVarsPointer.gpsFifo.push(
+        pointer_struct->sensorDataPointer->gps_data);
     chMtxUnlock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_GPS);
-
 
 #ifdef GPS_DEBUG
     bool position_lock = pointer_struct->GPSPointer->get_position_lock();
@@ -214,7 +214,8 @@ void highGimuTickFunction(pointers *pointer_struct) {
 
     // Unlock high g mutex
 
-    pointer_struct->dataloggerTHDVarsPointer.highGFifo.push(pointer_struct->sensorDataPointer->highG_data);
+    pointer_struct->dataloggerTHDVarsPointer.highGFifo.push(
+        pointer_struct->sensorDataPointer->highG_data);
     chMtxUnlock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_highG);
 
 #ifdef HIGHGIMU_DEBUG
