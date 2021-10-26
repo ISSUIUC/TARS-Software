@@ -6,13 +6,17 @@
 #include "PWMServo.h"
 #include "ServoControl.h"
 
-ActiveControl::ActiveControl(struct pointers* pointer_struct, PWMServo* ccw, PWMServo* cw): activeControlServos(pointer_struct, ccw, cw) {
+ActiveControl::ActiveControl(struct pointers* pointer_struct, PWMServo* ccw, PWMServo* cw): activeControlServos(ccw, cw) {
     gx = &pointer_struct->sensorDataPointer->lowG_data.gx;
     current_state = &pointer_struct->sensorDataPointer->rocketState_data.rocketState;
+    mutex_lowG_ = &pointer_struct->dataloggerTHDVarsPointer.dataMutex_lowG;
 }
 
 void ActiveControl::acTickFunction() {
+    chMtxLock(mutex_lowG_); // Locking only for gx because we use local variables for everything else
     float e = omega_goal - *gx;
+    chMtxUnlock(mutex_lowG_);
+
     if (true) {
         e_sum += e *.006;
     }
@@ -41,7 +45,10 @@ void ActiveControl::acTickFunction() {
     Serial.print(" l2_cmd: ");
     Serial.print(l2_cmd);
     
-    activeControlServos.servoActuation(l1_cmd, l2_cmd);
+    // If statement only for testing, can change to if(activeControlOn) in future
+    if(true) {
+        activeControlServos.servoActuation(l1_cmd, l2_cmd);
+    }
     e_prev = e;
     l1_prev = l1_cmd;
     l2_prev = l2_cmd;

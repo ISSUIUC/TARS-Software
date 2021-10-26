@@ -7,6 +7,8 @@
 #include "dataLog.h"
 #include "sensors.h"
 
+const float radius = 0.0127; //pitch radius of gear
+
 /**
  * @brief A struct containing pointers to objects needed for the servo_THD.
  * 
@@ -21,7 +23,7 @@ struct servo_PNTR {
 
 class ServoControl {
    public:
-    ServoControl(struct pointers* pointer_struct, PWMServo* servo_cw,
+    ServoControl(PWMServo* servo_cw,
                  PWMServo* servo_ccw);
     // ServoControl& operator==(const ServoControl&) = default;
     /**
@@ -31,12 +33,8 @@ class ServoControl {
     void servoActuation(float length_one, float length_two);
 
    private:
-    FSM_State* currState_;
     PWMServo* servo_cw_;
     PWMServo* servo_ccw_;
-    mutex_t* mutex_RS_;
-    mutex_t* mutex_lowG_;
-    float* gz_;
 
     /**
      * @brief ensures angle written to servo is between 0 and 180
