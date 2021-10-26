@@ -251,18 +251,19 @@ void chSetup() {
                       rocket_FSM, &sensor_pointers);
     chThdCreateStatic(gps_WA, sizeof(gps_WA), NORMALPRIO + 1, gps_THD,
                       &sensor_pointers);
-    chThdCreateStatic(lowgIMU_WA, sizeof(lowgIMU_WA), NORMALPRIO + 1, lowgIMU_THD,
-                      &sensor_pointers);
+    chThdCreateStatic(lowgIMU_WA, sizeof(lowgIMU_WA), NORMALPRIO + 1,
+                      lowgIMU_THD, &sensor_pointers);
     chThdCreateStatic(highgIMU_WA, sizeof(highgIMU_WA), NORMALPRIO + 1,
                       highgIMU_THD, &sensor_pointers);
     chThdCreateStatic(servo_WA, sizeof(servo_WA), NORMALPRIO + 1, servo_THD,
                       &sensor_pointers);
     chThdCreateStatic(lowg_dataLogger_WA, sizeof(lowg_dataLogger_WA),
                       NORMALPRIO + 1, dataLogger_THD, &sensor_pointers);
-    chThdCreateStatic(mpuComm_WA, sizeof(mpuComm_WA), NORMALPRIO + 1, mpuComm_THD,
-                      NULL);
+    chThdCreateStatic(mpuComm_WA, sizeof(mpuComm_WA), NORMALPRIO + 1,
+                      mpuComm_THD, NULL);
 
-    while (true);
+    while (true)
+        ;
 }
 
 /**
@@ -328,7 +329,8 @@ void setup() {
             "state_latitude,state_longitude,ts_state,"
             "rocketState,ts_RS");
         sensor_pointers.dataloggerTHDVarsPointer.dataFile.flush();
-        Serial.println(sensor_pointers.dataloggerTHDVarsPointer.dataFile.name());
+        Serial.println(
+            sensor_pointers.dataloggerTHDVarsPointer.dataFile.name());
 
     } else {
         digitalWrite(LED_RED, HIGH);
