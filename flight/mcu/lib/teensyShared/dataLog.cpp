@@ -22,37 +22,41 @@ MUTEX_DECL(SD_Card_Mutex);
 void dataLoggerTickFunction(pointers* pointer_struct) {
     // Initialize a new data struct object to hold the data that will be
     // logged
-    sensorDataStruct_t current_data{};
 
-    datalogger_THD& buffers = pointer_struct->dataloggerTHDVarsPointer;
+    //write to the sd card while any buffers have data
+    while(true){
+        sensorDataStruct_t current_data{};
 
-    // read each fifo once checking if they have data
-    current_data.has_lowG_data = buffers.lowGFifo.pop(&current_data.lowG_data);
-    current_data.has_highG_data =
-        buffers.highGFifo.pop(&current_data.highG_data);
-    current_data.has_gps_data = buffers.gpsFifo.pop(&current_data.gps_data);
-    current_data.has_state_data =
-        buffers.stateFifo.pop(&current_data.state_data);
-    current_data.has_rocketState_data =
-        buffers.rocketStateFifo.pop(&current_data.rocketState_data);
+        datalogger_THD& buffers = pointer_struct->dataloggerTHDVarsPointer;
 
-    // read each fifo until they are empty, this way we always log the most
-    // recent data
-    while (buffers.lowGFifo.pop(&current_data.lowG_data))
-        ;
-    while (buffers.highGFifo.pop(&current_data.highG_data))
-        ;
-    while (buffers.gpsFifo.pop(&current_data.gps_data))
-        ;
-    while (buffers.stateFifo.pop(&current_data.state_data))
-        ;
-    while (buffers.rocketStateFifo.pop(&current_data.rocketState_data))
-        ;
+        // read each fifo once checking if they have data
+        current_data.has_lowG_data = 
+            buffers.lowGFifo.pop(&current_data.lowG_data);
 
-    // Log all data that was copied from the buffer onto the sd card
-    chMtxLock(&SD_Card_Mutex);
-    logData(&pointer_struct->dataloggerTHDVarsPointer.dataFile, &current_data);
-    chMtxUnlock(&SD_Card_Mutex);
+        current_data.has_highG_data =
+            buffers.highGFifo.pop(&current_data.highG_data);
+
+        current_data.has_gps_data = 
+            buffers.gpsFifo.pop(&current_data.gps_data);
+
+        current_data.has_state_data =
+            buffers.stateFifo.pop(&current_data.state_data);
+            
+        current_data.has_rocketState_data =
+            buffers.rocketStateFifo.pop(&current_data.rocketState_data);
+
+        //check if any buffers have data
+        bool any_have_data = current_data.has_gps_data || current_data.has_highG_data || current_data.has_lowG_data || current_data.has_rocketState_data || current_data.has_state_data;
+        
+        if(!any_have_data){
+            return;
+        }
+       
+        // Log all data that was copied from the buffer onto the sd card
+        chMtxLock(&SD_Card_Mutex);
+        logData(&pointer_struct->dataloggerTHDVarsPointer.dataFile, &current_data);
+        chMtxUnlock(&SD_Card_Mutex);
+    }
 }
 
 /**

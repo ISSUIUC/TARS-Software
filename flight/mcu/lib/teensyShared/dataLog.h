@@ -26,7 +26,7 @@ struct lowGData {
     float mx;
     float my;
     float mz;
-    int32_t timeStamp_lowG;
+    systime_t timeStamp_lowG;
 };
 
 /**
@@ -37,7 +37,7 @@ struct highGData {
     float hg_ax;
     float hg_ay;
     float hg_az;
-    int32_t timeStamp_highG;
+    systime_t timeStamp_highG;
 };
 
 /**
@@ -49,7 +49,7 @@ struct gpsData {
     float longitude;
     float altitude;
     bool posLock;
-    int32_t timeStamp_GPS;
+    systime_t timeStamp_GPS;
 };
 
 /**
@@ -81,7 +81,7 @@ struct stateData {
     float state_latitude = 0;
     float state_longitude = 0;
 
-    int32_t timeStamp_state = 0;
+    systime_t timeStamp_state = 0;
 };
 
 /**
@@ -90,7 +90,7 @@ struct stateData {
  */
 struct rocketStateData {
     FSM_State rocketState = STATE_INIT;
-    int32_t timeStamp_RS = 0;
+    systime_t timeStamp_RS = 0;
 };
 
 /**
