@@ -275,7 +275,7 @@ void chSetup() {
                       rocket_FSM, &sensor_pointers);
     chThdCreateStatic(gps_WA, sizeof(gps_WA), NORMALPRIO + 1, gps_THD,
                       &sensor_pointers);
-    chThdCreateStatic(barometer_WA, sizeof(barometer_WA), NORMALPRIO,
+    chThdCreateStatic(barometer_WA, sizeof(barometer_WA), NORMALPRIO + 1,
                       barometer_THD, &sensor_pointers);
     chThdCreateStatic(lowgIMU_WA, sizeof(lowgIMU_WA), NORMALPRIO + 1,
                       lowgIMU_THD, &sensor_pointers);
