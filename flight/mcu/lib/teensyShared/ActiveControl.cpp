@@ -16,7 +16,7 @@ ActiveControl::ActiveControl(struct pointers* pointer_struct, PWMServo* ccw,
 }
 
 void ActiveControl::acTickFunction() {
-    chMtxLock(mutex_lowG_);  // Locking only for gx because we use local
+    chMtxLock(mutex_lowG_);  // Locking only for gy because we use local
                              // variables for everything else
     float e = omega_goal + *gy;
     chMtxUnlock(mutex_lowG_);
