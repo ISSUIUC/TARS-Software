@@ -268,8 +268,9 @@ void barometerTickFunction(pointers *pointer_struct) {
 
     // A version with no divide operation to enable faster computation, probably
     pointer_struct->sensorDataPointer->barometer_data.altitude = 
-        -log(pointer_struct->sensorDataPointer->barometer_data.pressure*0.000987)*8.314*
-        (pointer_struct->sensorDataPointer->barometer_data.temperature+273.15)*3.51865;
+        -log(pointer_struct->sensorDataPointer->barometer_data.pressure*0.000987)*
+        (pointer_struct->sensorDataPointer->barometer_data.temperature+273.15)
+        *29.254;
 
     pointer_struct->dataloggerTHDVarsPointer.barometerFifo.push(
         pointer_struct->sensorDataPointer->barometer_data);
