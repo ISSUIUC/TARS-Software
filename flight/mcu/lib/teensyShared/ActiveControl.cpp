@@ -1,51 +1,46 @@
 #include "ActiveControl.h"
 
+#include "PWMServo.h"
+#include "ServoControl.h"
 #include "acShared.h"
 #include "dataLog.h"
 #include "sensors.h"
-#include "PWMServo.h"
-#include "ServoControl.h"
 
-ActiveControl::ActiveControl(struct pointers* pointer_struct, PWMServo* ccw, PWMServo* cw): activeControlServos(ccw, cw) {
-    m_pointers = pointer_struct;
+ActiveControl::ActiveControl(struct pointers* pointer_struct, PWMServo* ccw,
+                             PWMServo* cw)
+    : activeControlServos(ccw, cw) {
     gy = &pointer_struct->sensorDataPointer->lowG_data.gy;
-    current_state = &pointer_struct->sensorDataPointer->rocketState_data.rocketState;
+    current_state =
+        &pointer_struct->sensorDataPointer->rocketState_data.rocketState;
     mutex_lowG_ = &pointer_struct->dataloggerTHDVarsPointer.dataMutex_lowG;
 }
 
 void ActiveControl::acTickFunction() {
-    chMtxLock(mutex_lowG_); // Locking only for gx because we use local variables for everything else
+    chMtxLock(mutex_lowG_);  // Locking only for gx because we use local
+                             // variables for everything else
     float e = omega_goal + *gy;
     chMtxUnlock(mutex_lowG_);
 
     if (true) {
-        e_sum += e *.006;
+        e_sum += e * .006;
     }
     float dedt = e - e_prev;
     Eigen::Matrix<float, 2, 1> u = (k_p * e) + (k_i * e_sum) + (k_d * dedt);
-    float l1 = u(0,0);
-    float l2 = u(1,0);
+    float l1 = u(0, 0);
+    float l2 = u(1, 0);
     float l1_cmd = 0;
     float l2_cmd = 0;
 
     if (l1 != 0) {
-        int sign = ((l1 - l1_prev)/dt)/abs((l1 - l1_prev)/dt);
-        l1_cmd = l1 + sign*min(abs((l1 - l1_prev)/dt), du_max);
+        int sign = ((l1 - l1_prev) / dt) / abs((l1 - l1_prev) / dt);
+        l1_cmd = l1 + sign * min(abs((l1 - l1_prev) / dt), du_max);
     }
     if (l2 != 0) {
-        int sign = ((l2 - l2_prev)/dt)/abs((l2 - l2_prev)/dt);
-        l2_cmd = l2 + sign*min(abs((l2 - l2_prev)/dt), du_max);
+        int sign = ((l2 - l2_prev) / dt) / abs((l2 - l2_prev) / dt);
+        l2_cmd = l2 + sign * min(abs((l2 - l2_prev) / dt), du_max);
     }
-    Serial.println("l1: ");
-    Serial.print(l1);
-    Serial.print(" l1_cmd: ");
-    Serial.print(l1_cmd);
 
-    Serial.println("l2: ");
-    Serial.print(l2);
-    Serial.print(" l2_cmd: ");
-    Serial.print(l2_cmd);
-
+    // low pass filter
     if (l1_cmd < 0.002794) {
         l1_cmd = 0;
     }
@@ -53,15 +48,13 @@ void ActiveControl::acTickFunction() {
         l2_cmd = 0;
     }
 
-    // If statement only for testing, can change to if(activeControlOn) in future
-    if(true) {
+    if (ActiveControl_ON()) {
         activeControlServos.servoActuation(l1_cmd, l2_cmd);
     }
+
     e_prev = e;
     l1_prev = l1_cmd;
     l2_prev = l2_cmd;
-    m_pointers->sensorDataPointer->flaps.l1 = l1_cmd;
-    m_pointers->sensorDataPointer->flaps.l2 = l2_cmd;
 }
 
 bool ActiveControl::ActiveControl_ON() {
