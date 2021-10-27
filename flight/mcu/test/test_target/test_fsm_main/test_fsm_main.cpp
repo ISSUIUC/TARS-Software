@@ -65,6 +65,36 @@ void boost_detect() {
         STATE_BOOST);
 }
 
+// Testing whether rocket remains in STATE_BOOST if burn_timer hasn't passed 5000 ms
+void boost_failsafe() {
+    sensorDataStruct_t sensorData{};
+    pointers sensor_pointers{};
+    sensor_pointers.sensorDataPointer = &sensorData;
+    sensorData.gps_data.posLock = true;
+
+    rocketFSM fsm{&sensor_pointers};
+    sensor_pointers.sensorDataPointer->state_data.state_ay = -1;
+    for (int i = 0; i < 200; i++) {
+        fsm.tickFSM();
+        chThdSleepMilliseconds(10);
+    }
+    TEST_ASSERT_EQUAL(sensor_pointers.sensorDataPointer->rocketState_data.rocketState, STATE_IDLE);
+    
+    sensor_pointers.sensorDataPointer->state_data.state_ay(-2);
+    for (int i = 0; i < 200; i++) {
+        fsm.tickFSM();
+        chThdSleepMilliseconds(10);
+    }
+    TEST_ASSERT_EQUAL(sensor_pointers.sensorDataPointer->rocketState_data.rocketState, STATE_BOOST);
+
+    sensor_pointers.sensorDataPointer->state_data.state_ay(0);
+    for (int i = 0; i < 100; i++) {
+        fsm.tickFSM();
+        chThdSleepMilliseconds(10);
+    }
+    TEST_ASSERT_EQUAL(sensor_pointers.sensorDataPointer->rocketState_data.rocketState, STATE_BOOST);
+}
+
 void bad_data_boost_detect() {
     sensorDataStruct_t sensorData{};
     pointers sensor_pointers{};
