@@ -48,8 +48,8 @@ void rocketFSM::tickFSM() {
         case STATE_INIT:
             // if (pointer_struct->sensorDataPointer->gps_data
             //         .posLock) {  // if GPS lock detected, go to state Idle
-                pointer_struct->sensorDataPointer->rocketState_data
-                    .rocketState = STATE_IDLE;
+            pointer_struct->sensorDataPointer->rocketState_data.rocketState =
+                STATE_IDLE;
             // }
             break;
 
