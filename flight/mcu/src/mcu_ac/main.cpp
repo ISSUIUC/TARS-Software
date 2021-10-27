@@ -26,12 +26,10 @@
 #include <Wire.h>
 
 #include "KX134-1211.h"  //High-G IMU Library
+#include "MS5611.h"      //Barometer library
 #include "ServoControl.h"
 #include "SparkFunLSM9DS1.h"  //Low-G IMU Library
 #include "ZOEM8Q0.hpp"        //GPS Library
-
-#include "MS5611.h" //Barometer library
-
 #include "acShared.h"
 #include "dataLog.h"
 #include "hybridShared.h"
@@ -277,8 +275,8 @@ void chSetup() {
                       rocket_FSM, &sensor_pointers);
     chThdCreateStatic(gps_WA, sizeof(gps_WA), NORMALPRIO + 1, gps_THD,
                       &sensor_pointers);
-    chThdCreateStatic(barometer_WA, sizeof(barometer_WA), NORMALPRIO, barometer_THD,
-                      &sensor_pointers);
+    chThdCreateStatic(barometer_WA, sizeof(barometer_WA), NORMALPRIO,
+                      barometer_THD, &sensor_pointers);
     chThdCreateStatic(lowgIMU_WA, sizeof(lowgIMU_WA), NORMALPRIO + 1,
                       lowgIMU_THD, &sensor_pointers);
     chThdCreateStatic(highgIMU_WA, sizeof(highgIMU_WA), NORMALPRIO + 1,
@@ -300,11 +298,11 @@ void chSetup() {
  */
 
 void setup() {
-
     int32_t temperature;
 
-#if defined(THREAD_DEBUG) || defined(LOWGIMU_DEBUG) || defined(BAROMETER_DEBUG) ||\
-    defined(HIGHGIMU_DEBUG) || defined(GPS_DEBUG) || defined(SERVO_DEBUG) 
+#if defined(THREAD_DEBUG) || defined(LOWGIMU_DEBUG) ||     \
+    defined(BAROMETER_DEBUG) || defined(HIGHGIMU_DEBUG) || \
+    defined(GPS_DEBUG) || defined(SERVO_DEBUG)
     Serial.begin(115200);
     while (!Serial) {
     }
@@ -326,10 +324,10 @@ void setup() {
     sensor_pointers.GPSPointer = &gps;
     sensor_pointers.sensorDataPointer = &sensorData;
 
-    SPI.begin(); 
+    SPI.begin();
 
     // Initialize barometer
-    barometer.init(); 
+    barometer.init();
 
     // lowGimu setup
     if (lowGimu.beginSPI(LSM9DS1_AG_CS, LSM9DS1_M_CS) ==

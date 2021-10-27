@@ -44,8 +44,8 @@ void dataLoggerTickFunction(pointers* pointer_struct) {
         current_data.has_rocketState_data =
             buffers.rocketStateFifo.pop(&current_data.rocketState_data);
 
-        current_data.has_barometer_data = buffers.barometerFifo.pop(&current_data.barometer_data);
-
+        current_data.has_barometer_data =
+            buffers.barometerFifo.pop(&current_data.barometer_data);
 
         // check if any buffers have data
         bool any_have_data =

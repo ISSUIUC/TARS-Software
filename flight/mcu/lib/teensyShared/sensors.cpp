@@ -249,13 +249,16 @@ void barometerTickFunction(pointers *pointer_struct) {
     pointer_struct->sensorDataPointer->barometer_data.timeStamp_barometer =
         chVTGetSystemTime();
 
-    // Log pressure and temperature 
+    // Log pressure and temperature
     pointer_struct->sensorDataPointer->barometer_data.pressure =
-        pointer_struct->barometerPointer->getPressure()*0.01; // Converting both of them into correct unit (Probably millibars)
+        pointer_struct->barometerPointer->getPressure() *
+        0.01;  // Converting both of them into correct unit (Probably millibars)
     pointer_struct->sensorDataPointer->barometer_data.temperature =
-        pointer_struct->barometerPointer->getTemperature()*0.01; // Converting both of them into correct unit (Probably degreeC)
+        pointer_struct->barometerPointer->getTemperature() *
+        0.01;  // Converting both of them into correct unit (Probably degreeC)
 
-    pointer_struct->dataloggerTHDVarsPointer.barometerFifo.push(pointer_struct->sensorDataPointer->barometer_data);
+    pointer_struct->dataloggerTHDVarsPointer.barometerFifo.push(
+        pointer_struct->sensorDataPointer->barometer_data);
     //! Unlocking &dataMutex for barometer
     chMtxUnlock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_barometer);
 
@@ -266,6 +269,5 @@ void barometerTickFunction(pointers *pointer_struct) {
     Serial.print(pointer_struct->sensorDataPointer->barometer_data.temperature);
 #endif
 }
-
 
 #endif

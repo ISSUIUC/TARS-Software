@@ -7,9 +7,9 @@
 
 #include "FifoBuffer.h"
 #include "KX134-1211.h"       //High-G IMU Library
+#include "MS5611.h"           //Barometer Library
 #include "SparkFunLSM9DS1.h"  //Low-G IMU Library
 #include "ZOEM8Q0.hpp"
-#include "MS5611.h"           //Barometer Library
 #include "acShared.h"
 #include "dataStructs.h"
 
@@ -58,7 +58,7 @@ struct gpsData {
  *
  */
 struct barometerData {
-    float temperature; // Float or int is better?
+    float temperature;  // Float or int is better?
     float pressure;
     int32_t timeStamp_barometer;
 };
