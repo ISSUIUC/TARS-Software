@@ -37,7 +37,7 @@ class ActiveControl {
 
         float l1_prev = 0;
         float l2_prev = 0;
-        float* gx;
+        float* gy;
         float du_max = .0001; //TODO test value
         float dt = .006; //seconds
 

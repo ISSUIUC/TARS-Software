@@ -110,29 +110,29 @@ void lowGimuTickFunction(pointers *pointer_struct) {
     Serial.print(", ");
 #endif
 
-    // check that data can be added to the buffer
-    if (chSemWaitTimeout(
-            &pointer_struct->dataloggerTHDVarsPointer.fifoSpace_lowG,
-            TIME_IMMEDIATE) != MSG_OK) {
-        pointer_struct->dataloggerTHDVarsPointer.bufferErrors_lowG++;
-        digitalWrite(LED_BUILTIN, HIGH);
-        return;
-    }
+    // // check that data can be added to the buffer
+    // if (chSemWaitTimeout(
+    //         &pointer_struct->dataloggerTHDVarsPointer.fifoSpace_lowG,
+    //         TIME_IMMEDIATE) != MSG_OK) {
+    //     pointer_struct->dataloggerTHDVarsPointer.bufferErrors_lowG++;
+    //     digitalWrite(LED_BUILTIN, HIGH);
+    //     return;
+    // }
 
-    // Lock mutex and write low g data to the buffer
-    chMtxLock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_lowG);
-    pointer_struct->dataloggerTHDVarsPointer
-        .fifoArray[pointer_struct->dataloggerTHDVarsPointer.fifoHead_lowG]
-        .lowG_data = pointer_struct->sensorDataPointer->lowG_data;
-    pointer_struct->dataloggerTHDVarsPointer.bufferErrors_lowG = 0;
-    pointer_struct->dataloggerTHDVarsPointer.fifoHead_lowG =
-        pointer_struct->dataloggerTHDVarsPointer.fifoHead_lowG < (FIFO_SIZE - 1)
-            ? pointer_struct->dataloggerTHDVarsPointer.fifoHead_lowG + 1
-            : 0;
-    chSemSignal(&pointer_struct->dataloggerTHDVarsPointer.fifoData_lowG);
+    // // Lock mutex and write low g data to the buffer
+    // chMtxLock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_lowG);
+    // pointer_struct->dataloggerTHDVarsPointer
+    //     .fifoArray[pointer_struct->dataloggerTHDVarsPointer.fifoHead_lowG]
+    //     .lowG_data = pointer_struct->sensorDataPointer->lowG_data;
+    // pointer_struct->dataloggerTHDVarsPointer.bufferErrors_lowG = 0;
+    // pointer_struct->dataloggerTHDVarsPointer.fifoHead_lowG =
+    //     pointer_struct->dataloggerTHDVarsPointer.fifoHead_lowG < (FIFO_SIZE - 1)
+    //         ? pointer_struct->dataloggerTHDVarsPointer.fifoHead_lowG + 1
+    //         : 0;
+    // chSemSignal(&pointer_struct->dataloggerTHDVarsPointer.fifoData_lowG);
 
-    //! Unlocking &dataMutex for low g
-    chMtxUnlock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_lowG);
+    // //! Unlocking &dataMutex for low g
+    // chMtxUnlock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_lowG);
 }
 
 /**

@@ -2,7 +2,7 @@
 #define PINS_H
 
 #define SERVO1_PIN 3
-#define SERVO2_PIN 5
+#define SERVO2_PIN 4
 #define SERVO3_PIN 6
 #define SERVO4_PIN 9
 

@@ -8,14 +8,14 @@
 
 ActiveControl::ActiveControl(struct pointers* pointer_struct, PWMServo* ccw, PWMServo* cw): activeControlServos(ccw, cw) {
     m_pointers = pointer_struct;
-    gx = &pointer_struct->sensorDataPointer->lowG_data.gx;
+    gy = &pointer_struct->sensorDataPointer->lowG_data.gy;
     current_state = &pointer_struct->sensorDataPointer->rocketState_data.rocketState;
     mutex_lowG_ = &pointer_struct->dataloggerTHDVarsPointer.dataMutex_lowG;
 }
 
 void ActiveControl::acTickFunction() {
     chMtxLock(mutex_lowG_); // Locking only for gx because we use local variables for everything else
-    float e = omega_goal - *gx;
+    float e = omega_goal + *gy;
     chMtxUnlock(mutex_lowG_);
 
     if (true) {
@@ -24,7 +24,7 @@ void ActiveControl::acTickFunction() {
     float dedt = e - e_prev;
     Eigen::Matrix<float, 2, 1> u = (k_p * e) + (k_i * e_sum) + (k_d * dedt);
     float l1 = u(0,0);
-    float l2 = u(0,1);
+    float l2 = u(1,0);
     float l1_cmd = 0;
     float l2_cmd = 0;
 

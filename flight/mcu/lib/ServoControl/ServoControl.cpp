@@ -64,8 +64,9 @@ void ServoControl::servoActuation(float length_one, float length_two) {
     
     roundOffAngle(cw_angle);
     roundOffAngle(ccw_angle);
-
-    servo_cw_->write(cw_angle);
+    // cw_angle = 0;
+    // ccw_angle = 0;
+    servo_cw_->write(126 - cw_angle);
     servo_ccw_->write(ccw_angle);
 
 #ifdef SERVO_DEBUG

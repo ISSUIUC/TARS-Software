@@ -40,7 +40,7 @@
 
 // datalogger_THD datalogger_THD_vars;
 
-#define THREAD_DEBUG
+// #define THREAD_DEBUG
 //#define LOWGIMU_DEBUG
 //#define HIGHGIMU_DEBUG
 //#define GPS_DEBUG
@@ -254,14 +254,14 @@ void chSetup() {
     //                   rocket_FSM, &sensor_pointers);
     // chThdCreateStatic(gps_WA, sizeof(gps_WA), NORMALPRIO, gps_THD,
     //                   &sensor_pointers);
-    chThdCreateStatic(lowgIMU_WA, sizeof(lowgIMU_WA), NORMALPRIO, lowgIMU_THD,
+    chThdCreateStatic(lowgIMU_WA, sizeof(lowgIMU_WA), NORMALPRIO + 1, lowgIMU_THD,
                       &sensor_pointers);
     // chThdCreateStatic(highgIMU_WA, sizeof(highgIMU_WA), NORMALPRIO,
     //                   highgIMU_THD, &sensor_pointers);
-    chThdCreateStatic(servo_WA, sizeof(servo_WA), NORMALPRIO, servo_THD,
+    chThdCreateStatic(servo_WA, sizeof(servo_WA), NORMALPRIO + 1, servo_THD,
                       &sensor_pointers);
     chThdCreateStatic(lowg_dataLogger_WA, sizeof(lowg_dataLogger_WA),
-                      NORMALPRIO, dataLogger_THD, &sensor_pointers);
+                      NORMALPRIO + 1, dataLogger_THD, &sensor_pointers);
     // chThdCreateStatic(mpuComm_WA, sizeof(mpuComm_WA), NORMALPRIO, mpuComm_THD,
     //                   NULL);
 
@@ -276,7 +276,7 @@ void chSetup() {
 void setup() {
 #if defined(THREAD_DEBUG) || defined(LOWGIMU_DEBUG) || \
     defined(HIGHGIMU_DEBUG) || defined(GPS_DEBUG) || defined(SERVO_DEBUG)
-    Serial.begin(115200);
+    // Serial.begin(115200);
     while (!Serial) {
     }
 #endif
@@ -298,12 +298,12 @@ void setup() {
     sensor_pointers.GPSPointer = &gps;
     sensor_pointers.sensorDataPointer = &sensorData;
     pinMode(LSM9DS1_AG_CS, OUTPUT);
-    while(true){
-        digitalWrite(LSM9DS1_AG_CS, HIGH);
-        delay(10);
-        digitalWrite(LSM9DS1_AG_CS, LOW);
-        delay(10);
-    }
+    // while(true){
+    //     digitalWrite(LSM9DS1_AG_CS, HIGH);
+    //     delay(10);
+    //     digitalWrite(LSM9DS1_AG_CS, LOW);
+    //     delay(10);
+    // }
     // while(true){
     //     lowGimu.beginSPI(LSM9DS1_AG_CS, LSM9DS1_M_CS);
     // }
@@ -353,9 +353,21 @@ void setup() {
     }
 
     // Servo Setup
-    servo_cw.attach(BALL_VALVE_1_PIN, 770,
-                    2250);  // TODO: MAKE SURE TO CHANGE PINS
-    servo_ccw.attach(6, 770, 2250);
+    servo_cw.attach(4, 770,2250);
+    servo_ccw.attach(5, 770, 2250);
+    // while(!Serial);
+    // for (int i = 0; i < 32; i++) {
+//    pinMode(i, OUTPUT);
+//         digitalWrite(i, LOW);
+//         digitalWrite(i, HIGH);
+//     }
+
+//     while(true);
+//     for (int i = 0; i < 32; i++) {
+//         Serial.println(i);
+//         digitalWrite(i, HIGH);
+//         delay(2000);
+//     }
 
     Serial.println("Starting ChibiOS");
     chBegin(chSetup);

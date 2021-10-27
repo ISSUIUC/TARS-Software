@@ -159,13 +159,13 @@ int32_t flush_iterator = 0;
 void logData(File* dataFile, sensorDataStruct_t* data) {
     // Write raw bytes to SD card.
     // dataFile->write((const uint8_t*)data, sizeof(*data));
-    dataFile->print(data->lowG_data.gx);
+    dataFile->print(data->lowG_data.gy);
     dataFile->print(",");
     dataFile->print(data->flaps.l1);
     dataFile->print(",");
     dataFile->print(data->flaps.l2);
     dataFile->println();
-    Serial.print(data->lowG_data.gx);
+    Serial.print(data->lowG_data.gy);
     Serial.print(",");
     Serial.print(data->flaps.l1);
     Serial.print(",");
