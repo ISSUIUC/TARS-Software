@@ -1,11 +1,11 @@
-#include<unity.h>
-#include<Arduino.h>
-#include<ChRt.h>
+#include <Arduino.h>
+#include <ChRt.h>
+#include <unity.h>
 
 void run_fsm_tests();
 void run_fifo_tests();
 
-void run_tests(){
+void run_tests() {
     UNITY_BEGIN();
 
     run_fsm_tests();
@@ -14,11 +14,10 @@ void run_tests(){
     UNITY_END();
 }
 
-void setup(){
-    while(!Serial);
+void setup() {
+    while (!Serial)
+        ;
     chBegin(run_tests);
 }
 
-void loop(){
-
-}
+void loop() {}
