@@ -46,15 +46,16 @@ void rocketFSM::tickFSM() {
                    .dataMutex_GPS);  // TODO, used for state init?
 
     // get the linear accelration from the lowgimu
-    float linear_acceleration = pointer_struct->sensorDataPointer->lowG_data.ay;
+    float linear_acceleration = -pointer_struct->sensorDataPointer->lowG_data.ay;
 
     switch (pointer_struct->sensorDataPointer->rocketState_data.rocketState) {
         case STATE_INIT:
-            if (pointer_struct->sensorDataPointer->gps_data
-                    .posLock) {  // if GPS lock detected, go to state Idle
+            // if (pointer_struct->sensorDataPointer->gps_data
+            //         .posLock) {  // if GPS lock detected, go to state Idle
                 pointer_struct->sensorDataPointer->rocketState_data
                     .rocketState = STATE_IDLE;
-            }
+            // }
+
             break;
 
         case STATE_IDLE:
@@ -131,6 +132,13 @@ void rocketFSM::tickFSM() {
 
         case STATE_COAST:
 
+            rocketTimers.coast_timer =
+                chVTGetSystemTime() - rocketTimers.burnout_time;
+
+            if(TIME_I2MS(rocketTimers.coast_timer) > coast_to_apogee_time_threash){
+                pointer_struct->sensorDataPointer->rocketState_data
+                    .rocketState = STATE_APOGEE;
+            }
             // we don't have a measure of velocity, so to ensure that active
             // control works for the whole launch this state will be the final
             // state

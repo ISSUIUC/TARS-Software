@@ -85,6 +85,56 @@ static THD_FUNCTION(rocket_FSM, arg) {
 
         stateMachine.tickFSM();
 
+        int state = (int)pointer_struct->sensorDataPointer->rocketState_data.rocketState;
+
+        Serial.print(pointer_struct->sensorDataPointer->lowG_data.ay);
+        Serial.print(" ");
+
+        switch(state){
+            case STATE_INIT:
+                Serial.println("STATE_INIT");
+                break;
+            case STATE_IDLE:
+                Serial.println("STATE_IDLE");
+                break;
+            case STATE_LAUNCH_DETECT:
+                Serial.println("STATE_LAUNCH_DETECT");
+                break;
+            case STATE_BOOST:
+                Serial.println("STATE_BOOST");
+                break;
+            case STATE_BURNOUT_DETECT:
+                Serial.println("STATE_BURNOUT_DETECT");
+                break;
+            case STATE_COAST:
+                Serial.println("STATE_COAST");
+                break;
+            case STATE_APOGEE_DETECT:
+                Serial.println("STATE_APOGEE_DETECT");
+                break;
+            case STATE_APOGEE:
+                Serial.println("STATE_APOGEE");
+                break;
+            case STATE_DROGUE_DETECT:
+                Serial.println("STATE_DROGUE_DETECT");
+                break;
+            case STATE_DROGUE:
+                Serial.println("STATE_DROGUE");
+                break;
+            case STATE_MAIN_DETECT:
+                Serial.println("STATE_MAIN_DETECT");
+                break;
+            case STATE_MAIN:
+                Serial.println("STATE_MAIN");
+                break;
+            case STATE_LANDED_DETECT:
+                Serial.println("STATE_LANDED_DETECT");
+                break;
+            case STATE_LANDED:
+                Serial.println("STATE_LANDED");
+                break;        
+        }
+
         chThdSleepMilliseconds(6);  // FSM runs at 100 Hz
     }
 }
@@ -247,18 +297,18 @@ void chSetup() {
     // added play_THD for creation
     chThdCreateStatic(rocket_FSM_WA, sizeof(rocket_FSM_WA), NORMALPRIO + 1,
                       rocket_FSM, &sensor_pointers);
-    chThdCreateStatic(gps_WA, sizeof(gps_WA), NORMALPRIO + 1, gps_THD,
-                      &sensor_pointers);
+    // chThdCreateStatic(gps_WA, sizeof(gps_WA), NORMALPRIO + 1, gps_THD,
+    //                   &sensor_pointers);
     chThdCreateStatic(lowgIMU_WA, sizeof(lowgIMU_WA), NORMALPRIO + 1,
                       lowgIMU_THD, &sensor_pointers);
-    chThdCreateStatic(highgIMU_WA, sizeof(highgIMU_WA), NORMALPRIO + 1,
-                      highgIMU_THD, &sensor_pointers);
-    chThdCreateStatic(servo_WA, sizeof(servo_WA), NORMALPRIO + 1, servo_THD,
-                      &sensor_pointers);
-    chThdCreateStatic(dataLogger_WA, sizeof(dataLogger_WA), NORMALPRIO + 1,
-                      dataLogger_THD, &sensor_pointers);
-    chThdCreateStatic(mpuComm_WA, sizeof(mpuComm_WA), NORMALPRIO + 1,
-                      mpuComm_THD, NULL);
+    // chThdCreateStatic(highgIMU_WA, sizeof(highgIMU_WA), NORMALPRIO + 1,
+    //                   highgIMU_THD, &sensor_pointers);
+    // chThdCreateStatic(servo_WA, sizeof(servo_WA), NORMALPRIO + 1, servo_THD,
+    //                   &sensor_pointers);
+    // chThdCreateStatic(dataLogger_WA, sizeof(dataLogger_WA), NORMALPRIO + 1,
+    //                   dataLogger_THD, &sensor_pointers);
+    // chThdCreateStatic(mpuComm_WA, sizeof(mpuComm_WA), NORMALPRIO + 1,
+    //                   mpuComm_THD, NULL);
 
     while (true)
         ;
@@ -275,6 +325,7 @@ void setup() {
     while (!Serial) {
     }
 #endif
+    while (!Serial);
     pinMode(LED_BLUE, OUTPUT);
     pinMode(LED_RED, OUTPUT);
     pinMode(LED_ORANGE, OUTPUT);
@@ -304,20 +355,20 @@ void setup() {
     lowGimu.setAccelScale(16);
 
     // GPS Setup
-    if (!gps.begin(SPI, ZOEM8Q0_CS, 4000000)) {
-        digitalWrite(LED_RED, HIGH);
-        Serial.println(
-            "Failed to communicate with ZOEM8Q0 gps. Stalling Program");
-        while (true)
-            ;
-    }
-    gps.setPortOutput(COM_PORT_SPI,
-                      COM_TYPE_UBX);  // Set the SPI port to output UBX only
-                                      // (turn off NMEA noise)
-    gps.saveConfigSelective(
-        VAL_CFG_SUBSEC_IOPORT);  // Save (only) the communications port settings
-                                 // to flash and BBR
-    gps.setNavigationFrequency(10);  // set sampling rate to 10hz
+    // if (!gps.begin(SPI, ZOEM8Q0_CS, 4000000)) {
+    //     digitalWrite(LED_RED, HIGH);
+    //     Serial.println(
+    //         "Failed to communicate with ZOEM8Q0 gps. Stalling Program");
+    //     while (true)
+    //         ;
+    // }
+    // gps.setPortOutput(COM_PORT_SPI,
+    //                   COM_TYPE_UBX);  // Set the SPI port to output UBX only
+    //                                   // (turn off NMEA noise)
+    // gps.saveConfigSelective(
+    //     VAL_CFG_SUBSEC_IOPORT);  // Save (only) the communications port settings
+    //                              // to flash and BBR
+    // gps.setNavigationFrequency(10);  // set sampling rate to 10hz
 
     // SD Card Setup
     if (SD.begin(BUILTIN_SDCARD)) {

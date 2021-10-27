@@ -55,9 +55,9 @@ void boost_detect() {
     rocketFSM fsm{&sensor_pointers};
     fsm.tickFSM();
     sensor_pointers.sensorDataPointer->lowG_data.ay = 6;
-    for (int i = 0; i < 100; i++) {
+    for (int i = 0; i < 600; i++) {
         fsm.tickFSM();
-        chThdSleep(10);
+        chThdSleepMilliseconds(10);
     }
 
     TEST_ASSERT_EQUAL(
@@ -74,10 +74,10 @@ void bad_data_boost_detect() {
 
     rocketFSM fsm{&sensor_pointers};
     fsm.tickFSM();
-    sensor_pointers.sensorDataPointer->lowG_data.ay = 60;
+    sensor_pointers.sensorDataPointer->lowG_data.ay = 6;
 
     fsm.tickFSM();
-    chThdSleep(10);
+    chThdSleepMilliseconds(10);
     sensor_pointers.sensorDataPointer->lowG_data.ay = 0;
     fsm.tickFSM();
 
@@ -95,10 +95,10 @@ void burnout_detect() {
 
     rocketFSM fsm{&sensor_pointers};
     fsm.tickFSM();
-    sensor_pointers.sensorDataPointer->lowG_data.ay = 60;
-    for (int i = 0; i < 100; i++) {
+    sensor_pointers.sensorDataPointer->lowG_data.ay = 6;
+    for (int i = 0; i < 600; i++) {
         fsm.tickFSM();
-        chThdSleep(10);
+        chThdSleepMilliseconds(10);
     }
 
     sensor_pointers.sensorDataPointer->lowG_data.ay = -0.1;
@@ -118,17 +118,17 @@ void coast_detect() {
 
     rocketFSM fsm{&sensor_pointers};
     fsm.tickFSM();
-    sensor_pointers.sensorDataPointer->lowG_data.ay = 60;
-    for (int i = 0; i < 100; i++) {
+    sensor_pointers.sensorDataPointer->lowG_data.ay = 6;
+    for (int i = 0; i < 600; i++) {
         fsm.tickFSM();
-        chThdSleep(10);
+        chThdSleepMilliseconds(10);
     }
 
     sensor_pointers.sensorDataPointer->lowG_data.ay = -0.1;
 
     for (int i = 0; i < 100; i++) {
         fsm.tickFSM();
-        chThdSleep(10);
+        chThdSleepMilliseconds(10);
     }
 
     TEST_ASSERT_EQUAL(
@@ -144,17 +144,17 @@ void apogee_detect() {
 
     rocketFSM fsm{&sensor_pointers};
     fsm.tickFSM();
-    sensor_pointers.sensorDataPointer->lowG_data.ay = 60;
-    for (int i = 0; i < 100; i++) {
+    sensor_pointers.sensorDataPointer->lowG_data.ay = 6;
+    for (int i = 0; i < 600; i++) {
         fsm.tickFSM();
-        chThdSleep(10);
+        chThdSleepMilliseconds(10);
     }
 
     sensor_pointers.sensorDataPointer->lowG_data.ay = -0.1;
 
     for (int i = 0; i < 100; i++) {
         fsm.tickFSM();
-        chThdSleep(10);
+        chThdSleepMilliseconds(10);
     }
 
     fsm.tickFSM();
