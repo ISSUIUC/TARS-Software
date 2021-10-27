@@ -332,8 +332,10 @@ void setup() {
     sensor_pointers.GPSPointer = &gps;
     sensor_pointers.sensorDataPointer = &sensorData;
 
-    SPI.begin(); // Added while integrating barometer
-    barometer.init(); // Initialize barometer
+    SPI.begin(); 
+
+    // Initialize barometer
+    barometer.init(); 
 
     // lowGimu setup
     if (lowGimu.beginSPI(LSM9DS1_AG_CS, LSM9DS1_M_CS) ==
@@ -346,8 +348,6 @@ void setup() {
     }
 
     lowGimu.setAccelScale(16);
-
-
 
     // GPS Setup
     gps.beginSPI(ZOEM8Q0_CS);
