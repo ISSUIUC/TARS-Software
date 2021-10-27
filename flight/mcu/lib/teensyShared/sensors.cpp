@@ -86,6 +86,9 @@ void lowGimuTickFunction(pointers *pointer_struct) {
         pointer_struct->lowGimuPointer->calcMag(
             pointer_struct->lowGimuPointer->mz);
     //! Unlocking &dataMutex for low g
+
+    pointer_struct->dataloggerTHDVarsPointer.lowGFifo.push(
+        pointer_struct->sensorDataPointer->lowG_data);
     chMtxUnlock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_lowG);
 
 #ifdef LOWGIMU_DEBUG
@@ -109,30 +112,6 @@ void lowGimuTickFunction(pointers *pointer_struct) {
     Serial.print(pointer_struct->sensorDataPointer->lowG_data.mz);
     Serial.print(", ");
 #endif
-
-    // check that data can be added to the buffer
-    if (chSemWaitTimeout(
-            &pointer_struct->dataloggerTHDVarsPointer.fifoSpace_lowG,
-            TIME_IMMEDIATE) != MSG_OK) {
-        pointer_struct->dataloggerTHDVarsPointer.bufferErrors_lowG++;
-        digitalWrite(LED_BUILTIN, HIGH);
-        return;
-    }
-
-    // Lock mutex and write low g data to the buffer
-    chMtxLock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_lowG);
-    pointer_struct->dataloggerTHDVarsPointer
-        .fifoArray[pointer_struct->dataloggerTHDVarsPointer.fifoHead_lowG]
-        .lowG_data = pointer_struct->sensorDataPointer->lowG_data;
-    pointer_struct->dataloggerTHDVarsPointer.bufferErrors_lowG = 0;
-    pointer_struct->dataloggerTHDVarsPointer.fifoHead_lowG =
-        pointer_struct->dataloggerTHDVarsPointer.fifoHead_lowG < (FIFO_SIZE - 1)
-            ? pointer_struct->dataloggerTHDVarsPointer.fifoHead_lowG + 1
-            : 0;
-    chSemSignal(&pointer_struct->dataloggerTHDVarsPointer.fifoData_lowG);
-
-    //! Unlocking &dataMutex for low g
-    chMtxUnlock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_lowG);
 }
 
 /**
@@ -169,7 +148,6 @@ void gpsTickFunction(pointers *pointer_struct) {
         pointer_struct->GPSPointer->get_position_lock();
 
     //! Unlocking &dataMutex
-    chMtxUnlock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_GPS);
 
     // Toggle the LED to show if the gps has position lock
     if (pointer_struct->sensorDataPointer->gps_data.posLock == true) {
@@ -177,6 +155,10 @@ void gpsTickFunction(pointers *pointer_struct) {
     } else {
         digitalWrite(LED_ORANGE, LOW);
     }
+
+    pointer_struct->dataloggerTHDVarsPointer.gpsFifo.push(
+        pointer_struct->sensorDataPointer->gps_data);
+    chMtxUnlock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_GPS);
 
 #ifdef GPS_DEBUG
     bool position_lock = pointer_struct->GPSPointer->get_position_lock();
@@ -200,29 +182,6 @@ void gpsTickFunction(pointers *pointer_struct) {
         Serial.println("");
     }
 #endif
-
-    // check if data can be written to the gps buffer
-    if (chSemWaitTimeout(
-            &pointer_struct->dataloggerTHDVarsPointer.fifoSpace_GPS,
-            TIME_IMMEDIATE) != MSG_OK) {
-        pointer_struct->dataloggerTHDVarsPointer.bufferErrors_GPS++;
-        digitalWrite(LED_BUILTIN, HIGH);
-        return;
-    }
-    // Lock gps mutex and write gps data to gps buffer
-    chMtxLock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_GPS);
-    pointer_struct->dataloggerTHDVarsPointer
-        .fifoArray[pointer_struct->dataloggerTHDVarsPointer.fifoHead_GPS]
-        .gps_data = pointer_struct->sensorDataPointer->gps_data;
-    pointer_struct->dataloggerTHDVarsPointer.bufferErrors_GPS = 0;
-    pointer_struct->dataloggerTHDVarsPointer.fifoHead_GPS =
-        pointer_struct->dataloggerTHDVarsPointer.fifoHead_GPS < (FIFO_SIZE - 1)
-            ? pointer_struct->dataloggerTHDVarsPointer.fifoHead_GPS + 1
-            : 0;
-    chSemSignal(&pointer_struct->dataloggerTHDVarsPointer.fifoData_GPS);
-
-    //! Unlocking &dataMutex for gps
-    chMtxUnlock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_GPS);
 }
 
 /**
@@ -254,6 +213,9 @@ void highGimuTickFunction(pointers *pointer_struct) {
         pointer_struct->highGimuPointer->get_z_gforce();
 
     // Unlock high g mutex
+
+    pointer_struct->dataloggerTHDVarsPointer.highGFifo.push(
+        pointer_struct->sensorDataPointer->highG_data);
     chMtxUnlock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_highG);
 
 #ifdef HIGHGIMU_DEBUG
@@ -265,30 +227,6 @@ void highGimuTickFunction(pointers *pointer_struct) {
     Serial.print(", ");
     Serial.println(pointer_struct->sensorDataPointer->highG_data.hg_az);
 #endif
-
-    // check that the high g data buffer can be written to
-    if (chSemWaitTimeout(
-            &pointer_struct->dataloggerTHDVarsPointer.fifoSpace_highG,
-            TIME_IMMEDIATE) != MSG_OK) {
-        pointer_struct->dataloggerTHDVarsPointer.bufferErrors_highG++;
-        digitalWrite(LED_BUILTIN, HIGH);
-        return;
-    }
-    // Lock high g mutex and write high g data to high g buffer
-    chMtxLock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_highG);
-    pointer_struct->dataloggerTHDVarsPointer
-        .fifoArray[pointer_struct->dataloggerTHDVarsPointer.fifoHead_highG]
-        .highG_data = pointer_struct->sensorDataPointer->highG_data;
-    pointer_struct->dataloggerTHDVarsPointer.bufferErrors_highG = 0;
-    pointer_struct->dataloggerTHDVarsPointer.fifoHead_highG =
-        pointer_struct->dataloggerTHDVarsPointer.fifoHead_highG <
-                (FIFO_SIZE - 1)
-            ? pointer_struct->dataloggerTHDVarsPointer.fifoHead_highG + 1
-            : 0;
-    chSemSignal(&pointer_struct->dataloggerTHDVarsPointer.fifoData_highG);
-
-    // Unlock high g mutex
-    chMtxUnlock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_highG);
 }
 
 #endif
