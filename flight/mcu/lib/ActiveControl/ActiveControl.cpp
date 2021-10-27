@@ -7,7 +7,7 @@
 #include "ServoControl.h"
 
 ActiveControl::ActiveControl(struct pointers* pointer_struct, PWMServo* ccw, PWMServo* cw): activeControlServos(ccw, cw) {
-    pointers = pointer_struct;
+    m_pointers = pointer_struct;
     gx = &pointer_struct->sensorDataPointer->lowG_data.gx;
     current_state = &pointer_struct->sensorDataPointer->rocketState_data.rocketState;
     mutex_lowG_ = &pointer_struct->dataloggerTHDVarsPointer.dataMutex_lowG;
@@ -53,8 +53,8 @@ void ActiveControl::acTickFunction() {
     e_prev = e;
     l1_prev = l1_cmd;
     l2_prev = l2_cmd;
-    pointers->sensorDataPointer->flaps.l1 = l1_cmd;
-    pointers->sensorDataPointer->flaps.l2 = l2_cmd;
+    m_pointers->sensorDataPointer->flaps.l1 = l1_cmd;
+    m_pointers->sensorDataPointer->flaps.l2 = l2_cmd;
 }
 
 bool ActiveControl::ActiveControl_ON() {

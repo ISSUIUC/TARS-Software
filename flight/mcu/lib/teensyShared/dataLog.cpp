@@ -165,6 +165,12 @@ void logData(File* dataFile, sensorDataStruct_t* data) {
     dataFile->print(",");
     dataFile->print(data->flaps.l2);
     dataFile->println();
+    Serial.print(data->lowG_data.gx);
+    Serial.print(",");
+    Serial.print(data->flaps.l1);
+    Serial.print(",");
+    Serial.print(data->flaps.l2);
+    Serial.println();
 
 
     // Flush data once for every 1000 writes (this keeps the ring buffer in sync

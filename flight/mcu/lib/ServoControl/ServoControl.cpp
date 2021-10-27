@@ -33,10 +33,7 @@ ServoControl::ServoControl(PWMServo* servo_cw,
     servo_cw_ = servo_cw;
     servo_ccw_ = servo_ccw;
 }
-<<<<<<< HEAD
-=======
 // TODO check values for max
->>>>>>> master
 void ServoControl::roundOffAngle(float& value) {
     if (value > 126) {
         value = 126;
