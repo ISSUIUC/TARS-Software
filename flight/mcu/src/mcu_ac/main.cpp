@@ -62,15 +62,13 @@ pointers sensor_pointers;
 
 uint8_t mpu_data[71];
 
-static THD_WORKING_AREA(gps_WA, 512);
-static THD_WORKING_AREA(rocket_FSM_WA, 512);
-static THD_WORKING_AREA(lowgIMU_WA, 512);
-static THD_WORKING_AREA(highgIMU_WA, 512);
-static THD_WORKING_AREA(servo_WA, 512);
-static THD_WORKING_AREA(lowg_dataLogger_WA, 512);
-static THD_WORKING_AREA(highg_dataLogger_WA, 512);
-static THD_WORKING_AREA(gps_dataLogger_WA, 512);
-static THD_WORKING_AREA(mpuComm_WA, 512);
+static THD_WORKING_AREA(gps_WA, 8192);
+static THD_WORKING_AREA(rocket_FSM_WA, 8192);
+static THD_WORKING_AREA(lowgIMU_WA, 8192);
+static THD_WORKING_AREA(highgIMU_WA, 8192);
+static THD_WORKING_AREA(servo_WA, 8192);
+static THD_WORKING_AREA(dataLogger_WA, 8192);
+static THD_WORKING_AREA(mpuComm_WA, 8192);
 
 /******************************************************************************/
 /* ROCKET FINITE STATE MACHINE THREAD                                         */
@@ -257,7 +255,7 @@ void chSetup() {
                       highgIMU_THD, &sensor_pointers);
     chThdCreateStatic(servo_WA, sizeof(servo_WA), NORMALPRIO + 1, servo_THD,
                       &sensor_pointers);
-    chThdCreateStatic(lowg_dataLogger_WA, sizeof(lowg_dataLogger_WA),
+    chThdCreateStatic(dataLogger_WA, sizeof(dataLogger_WA),
                       NORMALPRIO + 1, dataLogger_THD, &sensor_pointers);
     chThdCreateStatic(mpuComm_WA, sizeof(mpuComm_WA), NORMALPRIO + 1,
                       mpuComm_THD, NULL);
@@ -321,7 +319,8 @@ void setup() {
                                  // to flash and BBR
     gps.setNavigationFrequency(10);  // set sampling rate to 10hz
 
-    SD Card Setup if (SD.begin(BUILTIN_SDCARD)) {
+    // SD Card Setup 
+    if (SD.begin(BUILTIN_SDCARD)) {
         char file_extension[6] = ".dat";
 
         char data_name[16] = "data";

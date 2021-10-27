@@ -124,6 +124,14 @@ void lowGimuTickFunction(pointers *pointer_struct) {
 void gpsTickFunction(pointers *pointer_struct) {
     // get read timestamp
     systime_t timeStamp_GPS = chVTGetSystemTime();
+
+    //get the data with a 20 millisecond timeout
+    bool has_data = pointer_struct->GPSPointer->getPVT(20);
+
+    if(!has_data){
+        return;
+    }
+
     // Log lat, long, alt, posLock
     // all gps input is in 10^-7 degrees
     float latitude = pointer_struct->GPSPointer->getLatitude();
