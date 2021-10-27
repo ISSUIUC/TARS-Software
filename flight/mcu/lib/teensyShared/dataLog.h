@@ -8,6 +8,7 @@
 #include "FifoBuffer.h"
 #include "KX134-1211.h"       //High-G IMU Library
 #include "SparkFunLSM9DS1.h"  //Low-G IMU Library
+#include "ZOEM8Q0.hpp"
 #include "MS5611.h"           //Barometer Library
 #include "acShared.h"
 #include "dataStructs.h"
@@ -122,6 +123,7 @@ struct sensorDataStruct_t {
     gpsData gps_data;
 
     // Barometer data (temp and pres)
+    bool has_barometer_data;
     barometerData barometer_data;
 
     // State variables
@@ -150,6 +152,7 @@ struct datalogger_THD {
     FifoBuffer<gpsData, FIFO_SIZE> gpsFifo{};
     FifoBuffer<stateData, FIFO_SIZE> stateFifo{};
     FifoBuffer<rocketStateData, FIFO_SIZE> rocketStateFifo{};
+    FifoBuffer<barometerData, FIFO_SIZE> barometerFifo{};
 
     MUTEX_DECL(dataMutex_lowG);
     MUTEX_DECL(dataMutex_highG);

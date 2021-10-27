@@ -255,6 +255,7 @@ void barometerTickFunction(pointers *pointer_struct) {
     pointer_struct->sensorDataPointer->barometer_data.temperature =
         pointer_struct->barometerPointer->getTemperature()*0.01; // Converting both of them into correct unit (Probably degreeC)
 
+    pointer_struct->dataloggerTHDVarsPointer.barometerFifo.push(pointer_struct->sensorDataPointer->barometer_data);
     //! Unlocking &dataMutex for barometer
     chMtxUnlock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_barometer);
 
@@ -264,30 +265,6 @@ void barometerTickFunction(pointers *pointer_struct) {
     Serial.print(", ");
     Serial.print(pointer_struct->sensorDataPointer->barometer_data.temperature);
 #endif
-
-    // check that data can be added to the buffer
-    if (chSemWaitTimeout(
-            &pointer_struct->dataloggerTHDVarsPointer.fifoSpace_barometer,
-            TIME_IMMEDIATE) != MSG_OK) {
-        pointer_struct->dataloggerTHDVarsPointer.bufferErrors_barometer++;
-        digitalWrite(LED_BUILTIN, HIGH);
-        return;
-    }
-
-    // Lock mutex and write barometer data to the buffer
-    chMtxLock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_barometer);
-    pointer_struct->dataloggerTHDVarsPointer
-        .fifoArray[pointer_struct->dataloggerTHDVarsPointer.fifoHead_barometer]
-        .barometer_data = pointer_struct->sensorDataPointer->barometer_data;
-    pointer_struct->dataloggerTHDVarsPointer.bufferErrors_barometer = 0;
-    pointer_struct->dataloggerTHDVarsPointer.fifoHead_barometer =
-        pointer_struct->dataloggerTHDVarsPointer.fifoHead_barometer < (FIFO_SIZE - 1)
-            ? pointer_struct->dataloggerTHDVarsPointer.fifoHead_barometer + 1
-            : 0;
-    chSemSignal(&pointer_struct->dataloggerTHDVarsPointer.fifoData_barometer);
-
-    //! Unlocking &dataMutex for barometer
-    chMtxUnlock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_barometer);
 }
 
 
