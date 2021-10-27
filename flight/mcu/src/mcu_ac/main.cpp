@@ -341,8 +341,8 @@ void setup() {
     }
 
     // Servo Setup
-    servo_cw.attach(4, 770, 2250);
-    servo_ccw.attach(5, 770, 2250);
+    servo_cw.attach(SERVO_CW_PIN, 770, 2250);
+    servo_ccw.attach(SERVO_CCW_PIN, 770, 2250);
 
     Serial.println("Starting ChibiOS");
     chBegin(chSetup);
