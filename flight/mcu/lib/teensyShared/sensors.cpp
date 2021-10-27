@@ -153,7 +153,11 @@ void gpsTickFunction(pointers *pointer_struct) {
     pointer_struct->sensorDataPointer->gps_data.altitude = altitude;
     pointer_struct->sensorDataPointer->gps_data.posLock = posLock;
 
+    pointer_struct->dataloggerTHDVarsPointer.gpsFifo.push(
+        pointer_struct->sensorDataPointer->gps_data);
+
     //! Unlocking &dataMutex
+    chMtxUnlock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_GPS);
 
     // Toggle the LED to show if the gps has position lock
     if (posLock == true) {
@@ -161,10 +165,6 @@ void gpsTickFunction(pointers *pointer_struct) {
     } else {
         digitalWrite(LED_ORANGE, LOW);
     }
-
-    pointer_struct->dataloggerTHDVarsPointer.gpsFifo.push(
-        pointer_struct->sensorDataPointer->gps_data);
-    chMtxUnlock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_GPS);
 
 #ifdef GPS_DEBUG
     bool position_lock = pointer_struct->GPSPointer->get_position_lock();
