@@ -1,13 +1,14 @@
-#include "../eigen-3.4.0/Eigen/Core"
-#include "../eigen-3.4.0/Eigen/Dense"
+#include "Eigen30.h"
 
-using namespace Eigen;
+#include "acShared.h"
+#include "dataLog.h"
+#include "sensors.h"
+#include "ServoControl.h"
 
 class ActiveControl {
-   public:
-    ActiveControl();
+    public:
+        ActiveControl(struct pointers* pointer_struct, PWMServo* ccw, PWMServo* cw);
 
-<<<<<<< HEAD
         bool ActiveControl_ON();
 
         //Frequency should match output of sensor ready (angular velocity)
@@ -46,15 +47,6 @@ class ActiveControl {
         float e_prev = 0;
         FSM_State* current_state;
         ServoControl activeControlServos;
-        struct pointers* pointers;
+        
 };
-=======
-    // Frequency should match output of sensor ready (angular velocity)
-    // AV_X is x angular acceleration (roll) from LOWG IMU
-    void acTickFunction(float AV_X);
->>>>>>> 050ec086108d4593c8c46c0da8219e4543ef29ac
 
-   private:
-    // These matrices are solely for October launch, only roll control
-    Matrix<float, 2, 1> k_oct{{0.005}, {-0.005}};
-};
