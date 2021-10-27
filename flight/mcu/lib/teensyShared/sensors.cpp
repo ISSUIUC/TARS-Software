@@ -122,19 +122,18 @@ void lowGimuTickFunction(pointers *pointer_struct) {
  *
  */
 void gpsTickFunction(pointers *pointer_struct) {
-
-    //get read timestamp
+    // get read timestamp
     systime_t timeStamp_GPS = chVTGetSystemTime();
     // Log lat, long, alt, posLock
-    //all gps input is in 10^-7 degrees
+    // all gps input is in 10^-7 degrees
     float latitude = pointer_struct->GPSPointer->getLatitude();
     float longitude = pointer_struct->GPSPointer->getLongitude();
-    //adjust to floating point coordinates
+    // adjust to floating point coordinates
     latitude /= 10000000;
     longitude /= 10000000;
-    //altitude input is in mm
+    // altitude input is in mm
     float altitude = pointer_struct->GPSPointer->getAltitude();
-    //fixtype 3 means that we have a 3d position fix
+    // fixtype 3 means that we have a 3d position fix
     bool posLock = (pointer_struct->GPSPointer->getFixType() == 3);
 
     // Lock gps mutex

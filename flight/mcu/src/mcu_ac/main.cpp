@@ -27,8 +27,8 @@
 
 #include "KX134-1211.h"  //High-G IMU Library
 #include "ServoControl.h"
-#include "SparkFunLSM9DS1.h"  //Low-G IMU Library
-#include "SparkFun_u-blox_GNSS_Arduino_Library.h" //GPS Library
+#include "SparkFunLSM9DS1.h"                       //Low-G IMU Library
+#include "SparkFun_u-blox_GNSS_Arduino_Library.h"  //GPS Library
 #include "acShared.h"
 #include "dataLog.h"
 #include "hybridShared.h"
@@ -306,19 +306,22 @@ void setup() {
     lowGimu.setAccelScale(16);
 
     // GPS Setup
-    if(!gps.begin(SPI, ZOEM8Q0_CS, 4000000)){
+    if (!gps.begin(SPI, ZOEM8Q0_CS, 4000000)) {
         digitalWrite(LED_RED, HIGH);
-        Serial.println("Failed to communicate with ZOEM8Q0 gps. Stalling Program");
+        Serial.println(
+            "Failed to communicate with ZOEM8Q0 gps. Stalling Program");
         while (true)
             ;
     }
-    gps.setPortOutput(COM_PORT_SPI, COM_TYPE_UBX); //Set the SPI port to output UBX only (turn off NMEA noise)
-    gps.saveConfigSelective(VAL_CFG_SUBSEC_IOPORT); //Save (only) the communications port settings to flash and BBR
-    gps.setNavigationFrequency(10); //set sampling rate to 10hz
+    gps.setPortOutput(COM_PORT_SPI,
+                      COM_TYPE_UBX);  // Set the SPI port to output UBX only
+                                      // (turn off NMEA noise)
+    gps.saveConfigSelective(
+        VAL_CFG_SUBSEC_IOPORT);  // Save (only) the communications port settings
+                                 // to flash and BBR
+    gps.setNavigationFrequency(10);  // set sampling rate to 10hz
 
-
-    SD Card Setup
-    if (SD.begin(BUILTIN_SDCARD)) {
+    SD Card Setup if (SD.begin(BUILTIN_SDCARD)) {
         char file_extension[6] = ".dat";
 
         char data_name[16] = "data";
@@ -339,8 +342,8 @@ void setup() {
             "rocketState,ts_RS");
         sensor_pointers.dataloggerTHDVarsPointer.dataFile.flush();
         // Serial.println(lowg_datalogger_THD_vars.dataFile.name());
-
-    } else {
+    }
+    else {
         digitalWrite(LED_RED, HIGH);
         Serial.println("SD Begin Failed. Stalling Program");
         while (true)

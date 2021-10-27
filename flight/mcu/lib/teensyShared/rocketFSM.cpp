@@ -42,10 +42,12 @@ void rocketFSM::tickFSM() {
     // Lock mutexes for data used in switch
     chMtxLock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_lowG);
     chMtxLock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_RS);
-    chMtxLock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_GPS);  // TODO, used for state init?
+    chMtxLock(&pointer_struct->dataloggerTHDVarsPointer
+                   .dataMutex_GPS);  // TODO, used for state init?
     switch (pointer_struct->sensorDataPointer->rocketState_data.rocketState) {
         case STATE_INIT:
-            if (pointer_struct->sensorDataPointer->gps_data.posLock) {  // if GPS lock detected, go to state Idle
+            if (pointer_struct->sensorDataPointer->gps_data
+                    .posLock) {  // if GPS lock detected, go to state Idle
                 pointer_struct->sensorDataPointer->rocketState_data
                     .rocketState = STATE_IDLE;
             }
