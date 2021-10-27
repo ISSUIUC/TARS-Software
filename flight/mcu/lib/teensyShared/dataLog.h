@@ -113,6 +113,10 @@ struct sensorDataStruct_t {
     // Rocket State
     rocketStateData rocketState_data;
 
+    struct {
+        float l1, l2;
+    } flaps;
+
     
 };
 

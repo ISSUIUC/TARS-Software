@@ -254,14 +254,14 @@ void chSetup() {
     //                   rocket_FSM, &sensor_pointers);
     // chThdCreateStatic(gps_WA, sizeof(gps_WA), NORMALPRIO, gps_THD,
     //                   &sensor_pointers);
-    // chThdCreateStatic(lowgIMU_WA, sizeof(lowgIMU_WA), NORMALPRIO, lowgIMU_THD,
-    //                   &sensor_pointers);
+    chThdCreateStatic(lowgIMU_WA, sizeof(lowgIMU_WA), NORMALPRIO, lowgIMU_THD,
+                      &sensor_pointers);
     // chThdCreateStatic(highgIMU_WA, sizeof(highgIMU_WA), NORMALPRIO,
     //                   highgIMU_THD, &sensor_pointers);
     chThdCreateStatic(servo_WA, sizeof(servo_WA), NORMALPRIO, servo_THD,
                       &sensor_pointers);
-    // chThdCreateStatic(lowg_dataLogger_WA, sizeof(lowg_dataLogger_WA),
-    //                   NORMALPRIO, dataLogger_THD, &sensor_pointers);
+    chThdCreateStatic(lowg_dataLogger_WA, sizeof(lowg_dataLogger_WA),
+                      NORMALPRIO, dataLogger_THD, &sensor_pointers);
     // chThdCreateStatic(mpuComm_WA, sizeof(mpuComm_WA), NORMALPRIO, mpuComm_THD,
     //                   NULL);
 
