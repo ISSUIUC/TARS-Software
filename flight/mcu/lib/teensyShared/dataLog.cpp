@@ -9,8 +9,6 @@
 
 #include "sensors.h"
 
-#define THREAD_DEBUG
-
 MUTEX_DECL(SD_Card_Mutex);
 
 /**

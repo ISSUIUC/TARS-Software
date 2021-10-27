@@ -41,7 +41,7 @@
 
 // datalogger_THD datalogger_THD_vars;
 
-#define THREAD_DEBUG
+//#define THREAD_DEBUG
 //#define LOWGIMU_DEBUG
 //#define HIGHGIMU_DEBUG
 //#define GPS_DEBUG
@@ -313,7 +313,7 @@ void setup() {
 
     while (!Serial);
     
-    SPI.begin(); // Added while integrating barometer
+
 
     pinMode(LED_BLUE, OUTPUT);
     pinMode(LED_RED, OUTPUT);
@@ -332,6 +332,9 @@ void setup() {
     sensor_pointers.GPSPointer = &gps;
     sensor_pointers.sensorDataPointer = &sensorData;
 
+    SPI.begin(); // Added while integrating barometer
+    barometer.init(); // Initialize barometer
+
     // lowGimu setup
     if (lowGimu.beginSPI(LSM9DS1_AG_CS, LSM9DS1_M_CS) ==
         false)  // note, we need to sent this our CS pins (defined above)
@@ -344,7 +347,7 @@ void setup() {
 
     lowGimu.setAccelScale(16);
 
-    barometer.init(); // Initialize barometer
+
 
     // GPS Setup
     gps.beginSPI(ZOEM8Q0_CS);

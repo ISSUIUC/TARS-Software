@@ -300,9 +300,9 @@ void highGimuTickFunction(pointers *pointer_struct) {
  */
 void barometerTickFunction(pointers *pointer_struct) {
     // Reads data from the barometer
-    chSysLock();
+    // chSysLock();
     pointer_struct->barometerPointer->read(12);
-    chSysUnlock();
+    // chSysUnlock();
 
     // Lock barometer mutex
     chMtxLock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_barometer);
@@ -313,9 +313,9 @@ void barometerTickFunction(pointers *pointer_struct) {
 
     // Log pressure and temperature 
     pointer_struct->sensorDataPointer->barometer_data.pressure =
-        pointer_struct->barometerPointer->getPressure();
+        pointer_struct->barometerPointer->getPressure()*0.01; // Converting both of them into correct unit (Probably millibars)
     pointer_struct->sensorDataPointer->barometer_data.temperature =
-        pointer_struct->barometerPointer->getTemperature();
+        pointer_struct->barometerPointer->getTemperature()*0.01; // Converting both of them into correct unit (Probably degreeC)
 
     //! Unlocking &dataMutex for barometer
     chMtxUnlock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_barometer);

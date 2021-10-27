@@ -53,7 +53,7 @@ MS5611::MS5611(uint8_t CSn)
   digitalWrite(_cspin, HIGH);
   _temperature = -999;
   _pressure = -999;
-  init();
+  // init();
 }
 
 void MS5611::init()
