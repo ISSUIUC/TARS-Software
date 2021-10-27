@@ -25,6 +25,7 @@
 #include <SPI.h>
 #include <Wire.h>
 
+#include "ActiveControl.h"
 #include "KX134-1211.h"  //High-G IMU Library
 #include "ServoControl.h"
 #include "SparkFunLSM9DS1.h"  //Low-G IMU Library
@@ -154,16 +155,15 @@ static THD_FUNCTION(gps_THD, arg) {
 
 static THD_FUNCTION(servo_THD, arg) {
     struct pointers *pointer_struct = (struct pointers *)arg;
-    bool active_control = false;
 
-    ServoControl servo_control(pointer_struct, &servo_cw, &servo_ccw);
+    ActiveControl ac(pointer_struct, &servo_ccw, &servo_cw);
 
     while (true) {
 #ifdef THREAD_DEBUG
         Serial.println("### Servo thread entrance");
 #endif
 
-        servo_control.servoTickFunction();
+        ac.acTickFunction();
 
         chThdSleepMilliseconds(6);  // FSM runs at 100 Hz
     }
@@ -340,9 +340,8 @@ void setup() {
     }
 
     // Servo Setup
-    servo_cw.attach(BALL_VALVE_1_PIN, 770,
-                    2250);  // TODO: MAKE SURE TO CHANGE PINS
-    servo_ccw.attach(BALL_VALVE_2_PIN, 770, 2250);
+    servo_cw.attach(SERVO_CW_PIN, 770, 2250);
+    servo_ccw.attach(SERVO_CCW_PIN, 770, 2250);
 
     Serial.println("Starting ChibiOS");
     chBegin(chSetup);
