@@ -22,5 +22,7 @@
 #define LSM9DS1_M_CS 37
 // define accel/gyro chip select pin
 #define LSM9DS1_AG_CS 36
+// gps chip select pin
+#define ZOEM8Q0_CS 31
 
 #endif
