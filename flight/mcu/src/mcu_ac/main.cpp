@@ -255,8 +255,8 @@ void chSetup() {
                       highgIMU_THD, &sensor_pointers);
     chThdCreateStatic(servo_WA, sizeof(servo_WA), NORMALPRIO + 1, servo_THD,
                       &sensor_pointers);
-    chThdCreateStatic(dataLogger_WA, sizeof(dataLogger_WA),
-                      NORMALPRIO + 1, dataLogger_THD, &sensor_pointers);
+    chThdCreateStatic(dataLogger_WA, sizeof(dataLogger_WA), NORMALPRIO + 1,
+                      dataLogger_THD, &sensor_pointers);
     chThdCreateStatic(mpuComm_WA, sizeof(mpuComm_WA), NORMALPRIO + 1,
                       mpuComm_THD, NULL);
 
@@ -319,7 +319,7 @@ void setup() {
                                  // to flash and BBR
     gps.setNavigationFrequency(10);  // set sampling rate to 10hz
 
-    // SD Card Setup 
+    // SD Card Setup
     if (SD.begin(BUILTIN_SDCARD)) {
         char file_extension[6] = ".dat";
 
@@ -341,8 +341,7 @@ void setup() {
             "rocketState,ts_RS");
         sensor_pointers.dataloggerTHDVarsPointer.dataFile.flush();
         // Serial.println(lowg_datalogger_THD_vars.dataFile.name());
-    }
-    else {
+    } else {
         digitalWrite(LED_RED, HIGH);
         Serial.println("SD Begin Failed. Stalling Program");
         while (true)
