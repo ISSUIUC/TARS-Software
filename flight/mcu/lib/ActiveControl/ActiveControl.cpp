@@ -45,7 +45,14 @@ void ActiveControl::acTickFunction() {
     Serial.print(l2);
     Serial.print(" l2_cmd: ");
     Serial.print(l2_cmd);
-    
+
+    if (l1_cmd < 0.002794) {
+        l1_cmd = 0;
+    }
+    if (l2_cmd < 0.002794) {
+        l2_cmd = 0;
+    }
+
     // If statement only for testing, can change to if(activeControlOn) in future
     if(true) {
         activeControlServos.servoActuation(l1_cmd, l2_cmd);
