@@ -273,23 +273,22 @@ static THD_FUNCTION(dataLogger_THD, arg) {
  */
 void chSetup() {
     // added play_THD for creation
-
-    chThdCreateStatic(rocket_FSM_WA, sizeof(rocket_FSM_WA), NORMALPRIO,
+    chThdCreateStatic(rocket_FSM_WA, sizeof(rocket_FSM_WA), NORMALPRIO + 1,
                       rocket_FSM, &sensor_pointers);
-    chThdCreateStatic(gps_WA, sizeof(gps_WA), NORMALPRIO, gps_THD,
-                      &sensor_pointers);
-    chThdCreateStatic(lowgIMU_WA, sizeof(lowgIMU_WA), NORMALPRIO, lowgIMU_THD,
+    chThdCreateStatic(gps_WA, sizeof(gps_WA), NORMALPRIO + 1, gps_THD,
                       &sensor_pointers);
     chThdCreateStatic(barometer_WA, sizeof(barometer_WA), NORMALPRIO, barometer_THD,
                       &sensor_pointers);
-    chThdCreateStatic(highgIMU_WA, sizeof(highgIMU_WA), NORMALPRIO,
+    chThdCreateStatic(lowgIMU_WA, sizeof(lowgIMU_WA), NORMALPRIO + 1,
+                      lowgIMU_THD, &sensor_pointers);
+    chThdCreateStatic(highgIMU_WA, sizeof(highgIMU_WA), NORMALPRIO + 1,
                       highgIMU_THD, &sensor_pointers);
-    chThdCreateStatic(servo_WA, sizeof(servo_WA), NORMALPRIO, servo_THD,
+    chThdCreateStatic(servo_WA, sizeof(servo_WA), NORMALPRIO + 1, servo_THD,
                       &sensor_pointers);
     chThdCreateStatic(lowg_dataLogger_WA, sizeof(lowg_dataLogger_WA),
-                      NORMALPRIO, dataLogger_THD, &sensor_pointers);
-    chThdCreateStatic(mpuComm_WA, sizeof(mpuComm_WA), NORMALPRIO, mpuComm_THD,
-                      NULL);
+                      NORMALPRIO + 1, dataLogger_THD, &sensor_pointers);
+    chThdCreateStatic(mpuComm_WA, sizeof(mpuComm_WA), NORMALPRIO + 1,
+                      mpuComm_THD, NULL);
 
     while (true)
         ;
@@ -310,11 +309,6 @@ void setup() {
     while (!Serial) {
     }
 #endif
-
-    while (!Serial);
-    
-
-
     pinMode(LED_BLUE, OUTPUT);
     pinMode(LED_RED, OUTPUT);
     pinMode(LED_ORANGE, OUTPUT);
@@ -373,7 +367,8 @@ void setup() {
             "state_latitude,state_longitude,ts_state,"
             "rocketState,ts_RS");
         sensor_pointers.dataloggerTHDVarsPointer.dataFile.flush();
-        // Serial.println(lowg_datalogger_THD_vars.dataFile.name());
+        Serial.println(
+            sensor_pointers.dataloggerTHDVarsPointer.dataFile.name());
 
     } else {
         digitalWrite(LED_RED, HIGH);
