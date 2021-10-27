@@ -98,6 +98,12 @@ void rocketFSM::tickFSM() {
                 pointer_struct->sensorDataPointer->rocketState_data
                     .rocketState = STATE_BURNOUT_DETECT;
             }
+            // Switching to STATE_COAST if burn time exceeds a certian value
+            // 5 is an arbitrary value. Change later.
+            if (TIME_I2MS(rocketTimers.burn_timer) > 5) {
+                pointer_struct->sensorDataPointer->rocketState_data
+                    .rocketState = STATE_COAST;
+            }
 
             break;
 
