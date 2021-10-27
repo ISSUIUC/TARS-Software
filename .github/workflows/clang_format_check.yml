@@ -8,7 +8,7 @@ jobs:
       matrix:
         path:
           - check: 'flight'
-            exclude: '(ChRt|SparkFunLSM9DS1|EigenArduino-Eigen30)' # Exclude files containing these words
+            exclude: '(ChRt|SparkFunLSM9DS1|EigenArduino-Eigen30|eigen-3.4.0)' # Exclude files containing these words
           - check: 'ground'
             exclude: ''
     steps:
