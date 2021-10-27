@@ -8,6 +8,7 @@
 #include "KX134-1211.h"       //High-G IMU Library
 #include "SparkFunLSM9DS1.h"  //Low-G IMU Library
 #include "ZOEM8Q0.hpp"        //GPS Library
+#include "MS5611.h"           //Barometer Library
 #include "acShared.h"
 #include "dataStructs.h"
 
@@ -49,6 +50,16 @@ struct gpsData {
     float altitude;
     bool posLock;
     int32_t timeStamp_GPS;
+};
+
+/**
+ * @brief Structure for all values collected from the barometer
+ *
+ */
+struct barometerData {
+    float temperature; // Float or int is better?
+    float pressure;
+    int32_t timeStamp_barometer;
 };
 
 /**
@@ -107,6 +118,9 @@ struct sensorDataStruct_t {
     // GPS DATA
     gpsData gps_data;
 
+    // Barometer data (temp and pres)
+    barometerData barometer_data;
+
     // State variables
     stateData state_data;
 
@@ -118,7 +132,7 @@ struct sensorDataStruct_t {
  * @brief An enum to list all potential sensors.
  *
  */
-enum sensors { LOWG_IMU, HIGHG_IMU, GPS };
+enum sensors { LOWG_IMU, HIGHG_IMU, BAROMETER, GPS };
 
 #define FIFO_SIZE 1000
 /**
@@ -136,6 +150,9 @@ struct datalogger_THD {
     SEMAPHORE_DECL(fifoData_GPS, 0);
     SEMAPHORE_DECL(fifoSpace_GPS, FIFO_SIZE);
 
+    SEMAPHORE_DECL(fifoData_barometer, 0);
+    SEMAPHORE_DECL(fifoSpace_barometer, FIFO_SIZE);
+
     SEMAPHORE_DECL(fifoData_state, 0);
     SEMAPHORE_DECL(fifoSpace_state, FIFO_SIZE);
 
@@ -145,6 +162,7 @@ struct datalogger_THD {
     uint16_t fifoHead_lowG = 0;
     uint16_t fifoHead_highG = 0;
     uint16_t fifoHead_GPS = 0;
+    uint16_t fifoHead_barometer = 0;
     uint16_t fifoHead_state = 0;
     uint16_t fifoHead_RS = 0;
 
@@ -153,12 +171,14 @@ struct datalogger_THD {
     uint16_t bufferErrors_lowG = 0;
     uint16_t bufferErrors_highG = 0;
     uint16_t bufferErrors_GPS = 0;
+    uint16_t bufferErrors_barometer = 0;
     uint16_t bufferErrors_state = 0;
     uint16_t bufferErrors_RS = 0;
 
     MUTEX_DECL(dataMutex_lowG);
     MUTEX_DECL(dataMutex_highG);
     MUTEX_DECL(dataMutex_GPS);
+    MUTEX_DECL(dataMutex_barometer);
     MUTEX_DECL(dataMutex_state);
     MUTEX_DECL(dataMutex_RS);
 
@@ -174,6 +194,7 @@ struct pointers {
     LSM9DS1* lowGimuPointer;
     KX134* highGimuPointer;
     ZOEM8Q0* GPSPointer;
+    MS5611* barometerPointer;
 
     sensorDataStruct_t* sensorDataPointer;
 

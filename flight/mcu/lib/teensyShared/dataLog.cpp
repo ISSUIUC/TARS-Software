@@ -36,6 +36,16 @@ void dataLoggerTickFunction(pointers* pointer_struct) {
     chSemSignal(&pointer_struct->dataloggerTHDVarsPointer.fifoSpace_lowG);
     chMtxUnlock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_lowG);
 
+    // Copy barometer data
+    chSemWait(&pointer_struct->dataloggerTHDVarsPointer.fifoData_barometer);
+    chMtxLock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_barometer);
+    current_data.barometer_data =
+        pointer_struct->dataloggerTHDVarsPointer
+            .fifoArray[pointer_struct->dataloggerTHDVarsPointer.fifoTail_all]
+            .barometer_data;
+    chSemSignal(&pointer_struct->dataloggerTHDVarsPointer.fifoSpace_barometer);
+    chMtxUnlock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_barometer);
+
     // Copy high G data
     chSemWait(&pointer_struct->dataloggerTHDVarsPointer.fifoData_highG);
     chMtxLock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_highG);

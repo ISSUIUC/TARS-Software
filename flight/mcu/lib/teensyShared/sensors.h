@@ -18,6 +18,9 @@
 #include "KX134-1211.h"       //High-G IMU Library
 #include "SparkFunLSM9DS1.h"  //Low-G IMU Library
 #include "ZOEM8Q0.hpp"        //GPS Library
+
+#include "MS5611.h"           //Barometer Library
+
 #include "dataLog.h"
 
 /**
@@ -62,10 +65,26 @@ struct gps_PNTR {
     datalogger_THD *dataloggerTHDVarsPointer;
 };
 
+/**
+ * @brief A struct containing pointers needed by the barometer_THD
+ *
+ */
+struct barometer_PNTR {
+    MS5611 *barometerPointer;
+
+    sensorDataStruct_t *sensorDataPointer;
+
+    FSM_State *rocketStatePointer;
+
+    datalogger_THD *dataloggerTHDVarsPointer;
+};
+
 void lowGimuTickFunction(pointers *);
 
 void highGimuTickFunction(pointers *);
 
 void gpsTickFunction(pointers *);
+
+void barometerTickFunction(pointers *);
 
 #endif

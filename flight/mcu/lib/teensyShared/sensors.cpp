@@ -291,4 +291,66 @@ void highGimuTickFunction(pointers *pointer_struct) {
     chMtxUnlock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_highG);
 }
 
+/**
+ * @brief Construct a new thd function object to handle data collection from the
+ * barometer.
+ *
+ * @param arg Contains pointers to various objects needed by the barometer.
+ *
+ */
+void barometerTickFunction(pointers *pointer_struct) {
+    // Reads data from the barometer
+    chSysLock();
+    pointer_struct->barometerPointer->read(12);
+    chSysUnlock();
+
+    // Lock barometer mutex
+    chMtxLock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_barometer);
+
+    // Log timestamp
+    pointer_struct->sensorDataPointer->barometer_data.timeStamp_barometer =
+        chVTGetSystemTime();
+
+    // Log pressure and temperature 
+    pointer_struct->sensorDataPointer->barometer_data.pressure =
+        pointer_struct->barometerPointer->getPressure();
+    pointer_struct->sensorDataPointer->barometer_data.temperature =
+        pointer_struct->barometerPointer->getTemperature();
+
+    //! Unlocking &dataMutex for barometer
+    chMtxUnlock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_barometer);
+
+#ifdef BAROMETER_DEBUG
+    Serial.println("------------- BAROMETER THREAD ---------------");
+    Serial.print(pointer_struct->sensorDataPointer->barometer_data.pressure);
+    Serial.print(", ");
+    Serial.print(pointer_struct->sensorDataPointer->barometer_data.temperature);
+#endif
+
+    // check that data can be added to the buffer
+    if (chSemWaitTimeout(
+            &pointer_struct->dataloggerTHDVarsPointer.fifoSpace_barometer,
+            TIME_IMMEDIATE) != MSG_OK) {
+        pointer_struct->dataloggerTHDVarsPointer.bufferErrors_barometer++;
+        digitalWrite(LED_BUILTIN, HIGH);
+        return;
+    }
+
+    // Lock mutex and write barometer data to the buffer
+    chMtxLock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_barometer);
+    pointer_struct->dataloggerTHDVarsPointer
+        .fifoArray[pointer_struct->dataloggerTHDVarsPointer.fifoHead_barometer]
+        .barometer_data = pointer_struct->sensorDataPointer->barometer_data;
+    pointer_struct->dataloggerTHDVarsPointer.bufferErrors_barometer = 0;
+    pointer_struct->dataloggerTHDVarsPointer.fifoHead_barometer =
+        pointer_struct->dataloggerTHDVarsPointer.fifoHead_barometer < (FIFO_SIZE - 1)
+            ? pointer_struct->dataloggerTHDVarsPointer.fifoHead_barometer + 1
+            : 0;
+    chSemSignal(&pointer_struct->dataloggerTHDVarsPointer.fifoData_barometer);
+
+    //! Unlocking &dataMutex for barometer
+    chMtxUnlock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_barometer);
+}
+
+
 #endif

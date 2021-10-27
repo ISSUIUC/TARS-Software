@@ -29,6 +29,9 @@
 #include "ServoControl.h"
 #include "SparkFunLSM9DS1.h"  //Low-G IMU Library
 #include "ZOEM8Q0.hpp"        //GPS Library
+
+#include "MS5611.h" //Barometer library
+
 #include "acShared.h"
 #include "dataLog.h"
 #include "hybridShared.h"
@@ -53,6 +56,8 @@ KX134 highGimu;
 LSM9DS1 lowGimu;
 ZOEM8Q0 gps = ZOEM8Q0();
 
+MS5611 barometer{30};
+
 PWMServo servo_cw;   // Servo that induces clockwise roll moment
 PWMServo servo_ccw;  // Servo that counterclockwisei roll moment
 
@@ -65,6 +70,9 @@ uint8_t mpu_data[71];
 static THD_WORKING_AREA(gps_WA, 512);
 static THD_WORKING_AREA(rocket_FSM_WA, 512);
 static THD_WORKING_AREA(lowgIMU_WA, 512);
+
+static THD_WORKING_AREA(barometer_WA, 512);
+
 static THD_WORKING_AREA(highgIMU_WA, 512);
 static THD_WORKING_AREA(servo_WA, 512);
 static THD_WORKING_AREA(lowg_dataLogger_WA, 512);
@@ -104,6 +112,24 @@ static THD_FUNCTION(lowgIMU_THD, arg) {
 #endif
 
         lowGimuTickFunction(pointer_struct);
+
+        chThdSleepMilliseconds(6);
+    }
+}
+
+/******************************************************************************/
+/* BAROMETER THREAD                                                           */
+
+static THD_FUNCTION(barometer_THD, arg) {
+    // Load outside variables into the function
+    struct pointers *pointer_struct = (struct pointers *)arg;
+
+    while (true) {
+#ifdef THREAD_DEBUG
+        Serial.println("### Barometer thread entrance");
+#endif
+
+        barometerTickFunction(pointer_struct);
 
         chThdSleepMilliseconds(6);
     }
@@ -254,6 +280,8 @@ void chSetup() {
                       &sensor_pointers);
     chThdCreateStatic(lowgIMU_WA, sizeof(lowgIMU_WA), NORMALPRIO, lowgIMU_THD,
                       &sensor_pointers);
+    chThdCreateStatic(barometer_WA, sizeof(barometer_WA), NORMALPRIO, barometer_THD,
+                      &sensor_pointers);
     chThdCreateStatic(highgIMU_WA, sizeof(highgIMU_WA), NORMALPRIO,
                       highgIMU_THD, &sensor_pointers);
     chThdCreateStatic(servo_WA, sizeof(servo_WA), NORMALPRIO, servo_THD,
@@ -271,13 +299,21 @@ void chSetup() {
  * @brief Handles all configuration necessary before the threads start.
  *
  */
+
 void setup() {
-#if defined(THREAD_DEBUG) || defined(LOWGIMU_DEBUG) || \
-    defined(HIGHGIMU_DEBUG) || defined(GPS_DEBUG) || defined(SERVO_DEBUG)
+
+    int32_t temperature;
+
+#if defined(THREAD_DEBUG) || defined(LOWGIMU_DEBUG) || defined(BAROMETER_DEBUG) ||\
+    defined(HIGHGIMU_DEBUG) || defined(GPS_DEBUG) || defined(SERVO_DEBUG) 
     Serial.begin(115200);
     while (!Serial) {
     }
 #endif
+
+    while (!Serial);
+    
+    SPI.begin(); // Added while integrating barometer
 
     pinMode(LED_BLUE, OUTPUT);
     pinMode(LED_RED, OUTPUT);
@@ -292,6 +328,7 @@ void setup() {
 
     sensor_pointers.lowGimuPointer = &lowGimu;
     sensor_pointers.highGimuPointer = &highGimu;
+    sensor_pointers.barometerPointer = &barometer;
     sensor_pointers.GPSPointer = &gps;
     sensor_pointers.sensorDataPointer = &sensorData;
 
@@ -306,6 +343,8 @@ void setup() {
     }
 
     lowGimu.setAccelScale(16);
+
+    barometer.init(); // Initialize barometer
 
     // GPS Setup
     gps.beginSPI(ZOEM8Q0_CS);
