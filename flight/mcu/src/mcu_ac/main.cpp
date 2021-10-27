@@ -56,7 +56,7 @@ KX134 highGimu;
 LSM9DS1 lowGimu;
 ZOEM8Q0 gps = ZOEM8Q0();
 
-MS5611 barometer{30};
+MS5611 barometer{MS5611_CS};
 
 PWMServo servo_cw;   // Servo that induces clockwise roll moment
 PWMServo servo_ccw;  // Servo that counterclockwisei roll moment
