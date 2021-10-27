@@ -143,7 +143,7 @@ static THD_FUNCTION(gps_THD, arg) {
         Serial.println("### GPS thread exit");
 #endif
 
-        chThdSleepMilliseconds(6);  // Sensor DAQ @ ~100 Hz
+        chThdSleepMilliseconds(80);  // Read the gps @ ~10 Hz
     }
 }
 
