@@ -329,7 +329,6 @@ void setup() {
     digitalWrite(ZOEM8Q0_CS, HIGH);
     digitalWrite(MS5611_CS, HIGH);
 
-
     // TODO: Don't forget this
     // Serial.println("------------------------------------------------");
 
@@ -367,8 +366,8 @@ void setup() {
                           COM_TYPE_UBX);  // Set the SPI port to output UBX only
                                           // (turn off NMEA noise)
         gps.saveConfigSelective(
-            VAL_CFG_SUBSEC_IOPORT);  // Save (only) the communications port
-                                     // settings to flash and BBR
+            VAL_CFG_SUBSEC_IOPORT);      // Save (only) the communications port
+                                         // settings to flash and BBR
         gps.setNavigationFrequency(10);  // set sampling rate to 10hz
     }
     // while(!Serial);
@@ -416,7 +415,7 @@ void setup() {
     } else {
         digitalWrite(LED_RED, HIGH);
         Serial.println("SD Begin Failed. Stalling Program");
-        while (true){
+        while (true) {
             digitalWrite(LED_RED, HIGH);
             delay(100);
             digitalWrite(LED_RED, LOW);
