@@ -46,12 +46,11 @@ void rocketFSM::tickFSM() {
                    .dataMutex_GPS);  // TODO, used for state init?
     switch (pointer_struct->sensorDataPointer->rocketState_data.rocketState) {
         case STATE_INIT:
-            if (pointer_struct->GPSPointer
-                    ->get_position_lock()) {  // if GPS lock detected, go to
-                                              // state Idle
-                pointer_struct->sensorDataPointer->rocketState_data
-                    .rocketState = STATE_IDLE;
-            }
+            // if (pointer_struct->sensorDataPointer->gps_data
+            //         .posLock) {  // if GPS lock detected, go to state Idle
+            pointer_struct->sensorDataPointer->rocketState_data.rocketState =
+                STATE_IDLE;
+            // }
             break;
 
         case STATE_IDLE:
