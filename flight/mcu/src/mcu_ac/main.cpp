@@ -303,8 +303,6 @@ void setup() {
     while (!Serial) {
     }
 #endif
-    while (!Serial)
-        ;
     pinMode(LED_BLUE, OUTPUT);
     pinMode(LED_RED, OUTPUT);
     pinMode(LED_ORANGE, OUTPUT);
