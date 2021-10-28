@@ -6,6 +6,7 @@
 #include <ChRt.h>
 #include <SD.h>
 #include <stdio.h>
+#include "pins.h"
 
 #include "sensors.h"
 
@@ -132,7 +133,9 @@ char* sd_file_namer(char* fileName, char* fileExtensionParam) {
 int32_t flush_iterator = 0;
 void logData(File* dataFile, sensorDataStruct_t* data) {
     // Write raw bytes to SD card.
+    digitalWrite(LED_WHITE, HIGH);
     dataFile->write((const uint8_t*)data, sizeof(*data));
+    digitalWrite(LED_WHITE, LOW);
     // dataFile->print(data->has_lowG_data);
     // dataFile->print(" ");
     // dataFile->print(data->lowG_data.ax);
