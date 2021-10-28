@@ -25,6 +25,7 @@
 // #include "SparkFunLSM9DS1.h" //Low-G IMU Library
 // #include "KX134-1211.h" //High-G IMU Library
 // #include "ZOEM8Q0.hpp" //GPS Library
+#include "SparkFun_u-blox_GNSS_Arduino_Library.h"
 #include "acShared.h"
 #include "dataLog.h"
 #include "hybridShared.h"
@@ -142,7 +143,10 @@ void gpsTickFunction(pointers *pointer_struct) {
     // altitude input is in mm
     float altitude = pointer_struct->GPSPointer->getAltitude();
     // fixtype 3 means that we have a 3d position fix
-    bool posLock = (pointer_struct->GPSPointer->getFixType() == 3);
+    uint32_t fix_type = pointer_struct->GPSPointer->getFixType();
+    bool posLick = (fix_type == 3);
+
+    uint32_t SIV_count = pointer_struct->GPSPointer->getSIV();
 
     // Lock gps mutex
     chMtxLock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_GPS);
@@ -152,6 +156,8 @@ void gpsTickFunction(pointers *pointer_struct) {
     pointer_struct->sensorDataPointer->gps_data.longitude = longitude;
     pointer_struct->sensorDataPointer->gps_data.altitude = altitude;
     pointer_struct->sensorDataPointer->gps_data.posLock = posLock;
+    pointer_struct->sensorDataPointer->gps_data.fix_type = fix_type;
+    pointer_struct->sensorDataPointer->gps_data.siv_count = SIV_count;
 
     pointer_struct->dataloggerTHDVarsPointer.gpsFifo.push(
         pointer_struct->sensorDataPointer->gps_data);

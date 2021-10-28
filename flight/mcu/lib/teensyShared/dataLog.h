@@ -49,6 +49,8 @@ struct gpsData {
     float latitude;
     float longitude;
     float altitude;
+    uint32_t siv_count;
+    uint32_t fix_type;
     bool posLock;
     systime_t timeStamp_GPS;
 };
