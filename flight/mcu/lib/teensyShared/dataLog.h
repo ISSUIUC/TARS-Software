@@ -57,8 +57,9 @@ struct gpsData {
  *
  */
 struct barometerData {
-    float temperature;  // Float or int is better?
-    float pressure;
+    float temperature;  // in degC
+    float pressure;     // in mbar
+    float altitude;     // in meter
     int32_t timeStamp_barometer;
 };
 
