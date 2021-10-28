@@ -23,12 +23,12 @@
 #include <Wire.h>
 
 <<<<<<< HEAD
-=======
-// #include "SparkFunLSM9DS1.h" //Low-G IMU Library
-// #include "KX134-1211.h" //High-G IMU Library
-// #include "ZOEM8Q0.hpp" //GPS Library
+== == == =
+             // #include "SparkFunLSM9DS1.h" //Low-G IMU Library
+             // #include "KX134-1211.h" //High-G IMU Library
+             // #include "ZOEM8Q0.hpp" //GPS Library
 >>>>>>> master
-#include "SparkFun_u-blox_GNSS_Arduino_Library.h"
+    #include "SparkFun_u-blox_GNSS_Arduino_Library.h"
 #include "acShared.h"
 #include "dataLog.h"
 #include "hybridShared.h"
@@ -36,14 +36,15 @@
 #include "pins.h"
 #include "sensors.h"
 
-/**
- * @brief Construct a new thd function object to handle data collection from the
- * low-g IMU.
- *
- * @param arg Contains pointers to various objects needed by the low-g IMU.
- *
- */
-void lowGimuTickFunction(pointers *pointer_struct) {
+    /**
+     * @brief Construct a new thd function object to handle data collection from
+     * the low-g IMU.
+     *
+     * @param arg Contains pointers to various objects needed by the low-g IMU.
+     *
+     */
+    void
+    lowGimuTickFunction(pointers * pointer_struct) {
     // Reads data from the low g IMU
     chSysLock();
     pointer_struct->lowGimuPointer->readAccel();
@@ -149,8 +150,7 @@ void gpsTickFunction(pointers *pointer_struct) {
     uint32_t fix_type = pointer_struct->GPSPointer->getFixType();
 <<<<<<< HEAD
     bool posLock = (fix_type == 3);
-=======
-    bool posLick = (fix_type == 3);
+    == == == = bool posLick = (fix_type == 3);
 >>>>>>> master
 
     uint32_t SIV_count = pointer_struct->GPSPointer->getSIV();

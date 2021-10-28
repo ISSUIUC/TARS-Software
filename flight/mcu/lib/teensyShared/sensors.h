@@ -18,18 +18,18 @@
 <<<<<<< HEAD
 #include "dataLog.h"
 
-=======
+    == == == =
 #include "KX134-1211.h"       //High-G IMU Library
 #include "MS5611.h"           //Barometer Library
 #include "SparkFunLSM9DS1.h"  //Low-G IMU Library
 #include "ZOEM8Q0.hpp"        //GPS Library
 #include "dataLog.h"
 
-/**
+                 /**
  * @brief A struct containing pointers needed by the lowgIMU_THD
  *
  */
-struct lowg_PNTR {
+    struct lowg_PNTR {
     LSM9DS1 *lowGimuPointer;
 
     sensorDataStruct_t *sensorDataPointer;

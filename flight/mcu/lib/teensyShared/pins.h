@@ -18,7 +18,7 @@
 // define accel/gyro chip select pin
 #define LSM9DS1_AG_CS 36
 <<<<<<< HEAD
-=======
+== == == =
 // define barometer chip select pin
 #define MS5611_CS 30
 >>>>>>> master
