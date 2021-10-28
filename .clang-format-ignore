@@ -4,4 +4,6 @@
 
 ./flight/mcu/lib/eigen-3.4.0/*
 
+./flight/mcu/lib/EigenArduino-Eigen30/*
+
 ./misc/*
