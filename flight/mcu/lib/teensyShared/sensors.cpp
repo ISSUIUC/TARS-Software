@@ -22,9 +22,6 @@
 #include <SPI.h>
 #include <Wire.h>
 
-// #include "SparkFunLSM9DS1.h" //Low-G IMU Library
-// #include "KX134-1211.h" //High-G IMU Library
-// #include "ZOEM8Q0.hpp" //GPS Library
 #include "SparkFun_u-blox_GNSS_Arduino_Library.h"
 #include "acShared.h"
 #include "dataLog.h"
@@ -144,7 +141,7 @@ void gpsTickFunction(pointers *pointer_struct) {
     float altitude = pointer_struct->GPSPointer->getAltitude();
     // fixtype 3 means that we have a 3d position fix
     uint32_t fix_type = pointer_struct->GPSPointer->getFixType();
-    bool posLick = (fix_type == 3);
+    bool posLock = (fix_type == 3);
 
     uint32_t SIV_count = pointer_struct->GPSPointer->getSIV();
 
