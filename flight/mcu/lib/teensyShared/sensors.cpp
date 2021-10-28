@@ -270,19 +270,23 @@ void barometerTickFunction(pointers *pointer_struct) {
         0.01;  // Converting both of them into correct unit (in degC)
 
     // Compute altitude from pres and temp based on Hypsometric equation
-    // h = RTln(p0/p)/g, R = specific gas constant; T in K, g for grav. accel.; P for pressure
-    // P0 = 1013.25 mbar at sea level; R = 8.314 J/Kmol; g = 9.8m/s^2; Avg. Mole. Mass of air = 0.029kg/mol
-    // Some of these parameter may need to change when going into higher altitude, which would need more complex algorithm.
+    // h = RTln(p0/p)/g, R = specific gas constant; T in K, g for grav. accel.;
+    // P for pressure P0 = 1013.25 mbar at sea level; R = 8.314 J/Kmol; g
+    // = 9.8m/s^2; Avg. Mole. Mass of air = 0.029kg/mol Some of these parameter
+    // may need to change when going into higher altitude, which would need more
+    // complex algorithm.
 
-    // pointer_struct->sensorDataPointer->barometer_data.altitude = 
+    // pointer_struct->sensorDataPointer->barometer_data.altitude =
     // log(1013.25/pointer_struct->sensorDataPointer->barometer_data.pressure)*8.314*
     // (pointer_struct->sensorDataPointer->barometer_data.temperature+273.15)/9.8/0.029;
 
     // A version with no divide operation to enable faster computation, probably
-    pointer_struct->sensorDataPointer->barometer_data.altitude = 
-        -log(pointer_struct->sensorDataPointer->barometer_data.pressure*0.000987)*
-        (pointer_struct->sensorDataPointer->barometer_data.temperature+273.15)
-        *29.254;
+    pointer_struct->sensorDataPointer->barometer_data.altitude =
+        -log(pointer_struct->sensorDataPointer->barometer_data.pressure *
+             0.000987) *
+        (pointer_struct->sensorDataPointer->barometer_data.temperature +
+         273.15) *
+        29.254;
 
     pointer_struct->dataloggerTHDVarsPointer.barometerFifo.push(
         pointer_struct->sensorDataPointer->barometer_data);
