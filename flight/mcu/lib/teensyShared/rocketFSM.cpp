@@ -84,7 +84,7 @@ void rocketFSM::tickFSM() {
             if (TIME_I2MS(rocketTimers.burn_timer) > launch_time_thresh) {
                 pointer_struct->sensorDataPointer->rocketState_data
                     .rocketState = STATE_BOOST;
-                digitalWrite(LED_RED, HIGH);
+                // digitalWrite(LED_RED, HIGH);
             }
 
             break;
