@@ -7,8 +7,8 @@
 
 #include "FifoBuffer.h"
 #include "KX134-1211.h"       //High-G IMU Library
+#include "MS5611.h"           //Barometer Library
 #include "SparkFunLSM9DS1.h"  //Low-G IMU Library
-// #include "ZOEM8Q0.hpp"        //GPS Library
 #include "SparkFun_u-blox_GNSS_Arduino_Library.h"
 #include "acShared.h"
 #include "dataStructs.h"
@@ -53,6 +53,17 @@ struct gpsData {
     uint32_t fix_type;
     bool posLock;
     systime_t timeStamp_GPS;
+};
+
+/**
+ * @brief Structure for all values collected from the barometer
+ *
+ */
+struct barometerData {
+    float temperature;  // in degC
+    float pressure;     // in mbar
+    float altitude;     // in meter
+    int32_t timeStamp_barometer;
 };
 
 /**
@@ -114,6 +125,10 @@ struct sensorDataStruct_t {
     bool has_gps_data;
     gpsData gps_data;
 
+    // Barometer data (temp and pres)
+    bool has_barometer_data;
+    barometerData barometer_data;
+
     // State variables
     bool has_state_data;
     stateData state_data;
@@ -127,7 +142,7 @@ struct sensorDataStruct_t {
  * @brief An enum to list all potential sensors.
  *
  */
-enum sensors { LOWG_IMU, HIGHG_IMU, GPS };
+enum sensors { LOWG_IMU, HIGHG_IMU, BAROMETER, GPS };
 
 #define FIFO_SIZE 1000
 /**
@@ -140,10 +155,12 @@ struct datalogger_THD {
     FifoBuffer<gpsData, FIFO_SIZE> gpsFifo{};
     FifoBuffer<stateData, FIFO_SIZE> stateFifo{};
     FifoBuffer<rocketStateData, FIFO_SIZE> rocketStateFifo{};
+    FifoBuffer<barometerData, FIFO_SIZE> barometerFifo{};
 
     MUTEX_DECL(dataMutex_lowG);
     MUTEX_DECL(dataMutex_highG);
     MUTEX_DECL(dataMutex_GPS);
+    MUTEX_DECL(dataMutex_barometer);
     MUTEX_DECL(dataMutex_state);
     MUTEX_DECL(dataMutex_RS);
 
@@ -156,6 +173,7 @@ struct datalogger_THD {
 struct pointers {
     LSM9DS1* lowGimuPointer;
     KX134* highGimuPointer;
+    MS5611* barometerPointer;
     SFE_UBLOX_GNSS* GPSPointer;
 
     sensorDataStruct_t* sensorDataPointer;

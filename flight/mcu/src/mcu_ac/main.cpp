@@ -27,6 +27,7 @@
 
 #include "ActiveControl.h"
 #include "KX134-1211.h"  //High-G IMU Library
+#include "MS5611.h"      //Barometer library
 #include "ServoControl.h"
 #include "SparkFunLSM9DS1.h"                       //Low-G IMU Library
 #include "SparkFun_u-blox_GNSS_Arduino_Library.h"  //GPS Library
@@ -39,7 +40,7 @@
 
 // datalogger_THD datalogger_THD_vars;
 
-// #define THREAD_DEBUG
+//#define THREAD_DEBUG
 //#define LOWGIMU_DEBUG
 //#define HIGHGIMU_DEBUG
 //#define GPS_DEBUG
@@ -54,6 +55,8 @@ KX134 highGimu;
 LSM9DS1 lowGimu;
 SFE_UBLOX_GNSS gps;
 
+MS5611 barometer{MS5611_CS};
+
 PWMServo servo_cw;   // Servo that induces clockwise roll moment
 PWMServo servo_ccw;  // Servo that counterclockwisei roll moment
 
@@ -63,6 +66,7 @@ pointers sensor_pointers;
 
 uint8_t mpu_data[71];
 
+static THD_WORKING_AREA(barometer_WA, 8192);
 static THD_WORKING_AREA(gps_WA, 8192);
 static THD_WORKING_AREA(rocket_FSM_WA, 8192);
 static THD_WORKING_AREA(lowgIMU_WA, 8192);
@@ -103,6 +107,24 @@ static THD_FUNCTION(lowgIMU_THD, arg) {
 #endif
 
         lowGimuTickFunction(pointer_struct);
+
+        chThdSleepMilliseconds(6);
+    }
+}
+
+/******************************************************************************/
+/* BAROMETER THREAD                                                           */
+
+static THD_FUNCTION(barometer_THD, arg) {
+    // Load outside variables into the function
+    struct pointers *pointer_struct = (struct pointers *)arg;
+
+    while (true) {
+#ifdef THREAD_DEBUG
+        Serial.println("### Barometer thread entrance");
+#endif
+
+        barometerTickFunction(pointer_struct);
 
         chThdSleepMilliseconds(6);
     }
@@ -249,6 +271,8 @@ void chSetup() {
                       rocket_FSM, &sensor_pointers);
     chThdCreateStatic(gps_WA, sizeof(gps_WA), NORMALPRIO + 1, gps_THD,
                       &sensor_pointers);
+    chThdCreateStatic(barometer_WA, sizeof(barometer_WA), NORMALPRIO + 1,
+                      barometer_THD, &sensor_pointers);
     chThdCreateStatic(lowgIMU_WA, sizeof(lowgIMU_WA), NORMALPRIO + 1,
                       lowgIMU_THD, &sensor_pointers);
     chThdCreateStatic(highgIMU_WA, sizeof(highgIMU_WA), NORMALPRIO + 1,
@@ -268,9 +292,13 @@ void chSetup() {
  * @brief Handles all configuration necessary before the threads start.
  *
  */
+
 void setup() {
-#if defined(THREAD_DEBUG) || defined(LOWGIMU_DEBUG) || \
-    defined(HIGHGIMU_DEBUG) || defined(GPS_DEBUG) || defined(SERVO_DEBUG)
+    int32_t temperature;
+
+#if defined(THREAD_DEBUG) || defined(LOWGIMU_DEBUG) ||     \
+    defined(BAROMETER_DEBUG) || defined(HIGHGIMU_DEBUG) || \
+    defined(GPS_DEBUG) || defined(SERVO_DEBUG)
     Serial.begin(115200);
     while (!Serial) {
     }
@@ -288,8 +316,14 @@ void setup() {
 
     sensor_pointers.lowGimuPointer = &lowGimu;
     sensor_pointers.highGimuPointer = &highGimu;
+    sensor_pointers.barometerPointer = &barometer;
     sensor_pointers.GPSPointer = &gps;
     sensor_pointers.sensorDataPointer = &sensorData;
+
+    SPI.begin();
+
+    // Initialize barometer
+    barometer.init();
 
     // lowGimu setup
     if (lowGimu.beginSPI(LSM9DS1_AG_CS, LSM9DS1_M_CS) ==
