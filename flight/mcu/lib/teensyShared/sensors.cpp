@@ -25,6 +25,7 @@
 // #include "SparkFunLSM9DS1.h" //Low-G IMU Library
 // #include "KX134-1211.h" //High-G IMU Library
 // #include "ZOEM8Q0.hpp" //GPS Library
+#include "SparkFun_u-blox_GNSS_Arduino_Library.h"
 #include "acShared.h"
 #include "dataLog.h"
 #include "hybridShared.h"
@@ -122,43 +123,54 @@ void lowGimuTickFunction(pointers *pointer_struct) {
  *
  */
 void gpsTickFunction(pointers *pointer_struct) {
-    // Read data from gps
-    chSysLock();
-    pointer_struct->GPSPointer->update_data();
-    chSysUnlock();
+    // get read timestamp
+    systime_t timeStamp_GPS = chVTGetSystemTime();
+
+    // get the data with a 20 millisecond timeout
+    bool has_data = pointer_struct->GPSPointer->getPVT(20);
+
+    if (!has_data) {
+        return;
+    }
+
+    // Log lat, long, alt, posLock
+    // all gps input is in 10^-7 degrees
+    float latitude = pointer_struct->GPSPointer->getLatitude();
+    float longitude = pointer_struct->GPSPointer->getLongitude();
+    // adjust to floating point coordinates
+    latitude /= 10000000;
+    longitude /= 10000000;
+    // altitude input is in mm
+    float altitude = pointer_struct->GPSPointer->getAltitude();
+    // fixtype 3 means that we have a 3d position fix
+    uint32_t fix_type = pointer_struct->GPSPointer->getFixType();
+    bool posLick = (fix_type == 3);
+
+    uint32_t SIV_count = pointer_struct->GPSPointer->getSIV();
 
     // Lock gps mutex
     chMtxLock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_GPS);
 
-    // Log gps timestamp
-    pointer_struct->sensorDataPointer->gps_data.timeStamp_GPS =
-        chVTGetSystemTime();
+    pointer_struct->sensorDataPointer->gps_data.timeStamp_GPS = timeStamp_GPS;
+    pointer_struct->sensorDataPointer->gps_data.latitude = latitude;
+    pointer_struct->sensorDataPointer->gps_data.longitude = longitude;
+    pointer_struct->sensorDataPointer->gps_data.altitude = altitude;
+    pointer_struct->sensorDataPointer->gps_data.posLock = posLock;
+    pointer_struct->sensorDataPointer->gps_data.fix_type = fix_type;
+    pointer_struct->sensorDataPointer->gps_data.siv_count = SIV_count;
 
-    // Have the availability to wait until a lock is aquired with
-    // gps.get_position_lock();
-
-    // Log lat, long, alt, posLock
-    pointer_struct->sensorDataPointer->gps_data.latitude =
-        pointer_struct->GPSPointer->get_latitude();
-    pointer_struct->sensorDataPointer->gps_data.longitude =
-        pointer_struct->GPSPointer->get_longitude();
-    pointer_struct->sensorDataPointer->gps_data.altitude =
-        pointer_struct->GPSPointer->get_altitude();
-    pointer_struct->sensorDataPointer->gps_data.posLock =
-        pointer_struct->GPSPointer->get_position_lock();
+    pointer_struct->dataloggerTHDVarsPointer.gpsFifo.push(
+        pointer_struct->sensorDataPointer->gps_data);
 
     //! Unlocking &dataMutex
+    chMtxUnlock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_GPS);
 
     // Toggle the LED to show if the gps has position lock
-    if (pointer_struct->sensorDataPointer->gps_data.posLock == true) {
+    if (posLock == true) {
         digitalWrite(LED_ORANGE, HIGH);
     } else {
         digitalWrite(LED_ORANGE, LOW);
     }
-
-    pointer_struct->dataloggerTHDVarsPointer.gpsFifo.push(
-        pointer_struct->sensorDataPointer->gps_data);
-    chMtxUnlock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_GPS);
 
 #ifdef GPS_DEBUG
     bool position_lock = pointer_struct->GPSPointer->get_position_lock();

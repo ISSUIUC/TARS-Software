@@ -25,11 +25,12 @@
 #include <SPI.h>
 #include <Wire.h>
 
+#include "ActiveControl.h"
 #include "KX134-1211.h"  //High-G IMU Library
 #include "MS5611.h"      //Barometer library
 #include "ServoControl.h"
-#include "SparkFunLSM9DS1.h"  //Low-G IMU Library
-#include "ZOEM8Q0.hpp"        //GPS Library
+#include "SparkFunLSM9DS1.h"                       //Low-G IMU Library
+#include "SparkFun_u-blox_GNSS_Arduino_Library.h"  //GPS Library
 #include "acShared.h"
 #include "dataLog.h"
 #include "hybridShared.h"
@@ -52,7 +53,7 @@ FSM_State rocketState = STATE_INIT;
 
 KX134 highGimu;
 LSM9DS1 lowGimu;
-ZOEM8Q0 gps = ZOEM8Q0();
+SFE_UBLOX_GNSS gps;
 
 MS5611 barometer{MS5611_CS};
 
@@ -65,18 +66,14 @@ pointers sensor_pointers;
 
 uint8_t mpu_data[71];
 
-static THD_WORKING_AREA(gps_WA, 512);
-static THD_WORKING_AREA(rocket_FSM_WA, 512);
-static THD_WORKING_AREA(lowgIMU_WA, 512);
-
-static THD_WORKING_AREA(barometer_WA, 512);
-
-static THD_WORKING_AREA(highgIMU_WA, 512);
-static THD_WORKING_AREA(servo_WA, 512);
-static THD_WORKING_AREA(lowg_dataLogger_WA, 512);
-static THD_WORKING_AREA(highg_dataLogger_WA, 512);
-static THD_WORKING_AREA(gps_dataLogger_WA, 512);
-static THD_WORKING_AREA(mpuComm_WA, 512);
+static THD_WORKING_AREA(barometer_WA, 8192);
+static THD_WORKING_AREA(gps_WA, 8192);
+static THD_WORKING_AREA(rocket_FSM_WA, 8192);
+static THD_WORKING_AREA(lowgIMU_WA, 8192);
+static THD_WORKING_AREA(highgIMU_WA, 8192);
+static THD_WORKING_AREA(servo_WA, 8192);
+static THD_WORKING_AREA(dataLogger_WA, 8192);
+static THD_WORKING_AREA(mpuComm_WA, 8192);
 
 /******************************************************************************/
 /* ROCKET FINITE STATE MACHINE THREAD                                         */
@@ -169,7 +166,7 @@ static THD_FUNCTION(gps_THD, arg) {
         Serial.println("### GPS thread exit");
 #endif
 
-        chThdSleepMilliseconds(6);  // Sensor DAQ @ ~100 Hz
+        chThdSleepMilliseconds(80);  // Read the gps @ ~10 Hz
     }
 }
 
@@ -178,16 +175,15 @@ static THD_FUNCTION(gps_THD, arg) {
 
 static THD_FUNCTION(servo_THD, arg) {
     struct pointers *pointer_struct = (struct pointers *)arg;
-    bool active_control = false;
 
-    ServoControl servo_control(pointer_struct, &servo_cw, &servo_ccw);
+    ActiveControl ac(pointer_struct, &servo_ccw, &servo_cw);
 
     while (true) {
 #ifdef THREAD_DEBUG
         Serial.println("### Servo thread entrance");
 #endif
 
-        servo_control.servoTickFunction();
+        ac.acTickFunction();
 
         chThdSleepMilliseconds(6);  // FSM runs at 100 Hz
     }
@@ -283,8 +279,8 @@ void chSetup() {
                       highgIMU_THD, &sensor_pointers);
     chThdCreateStatic(servo_WA, sizeof(servo_WA), NORMALPRIO + 1, servo_THD,
                       &sensor_pointers);
-    chThdCreateStatic(lowg_dataLogger_WA, sizeof(lowg_dataLogger_WA),
-                      NORMALPRIO + 1, dataLogger_THD, &sensor_pointers);
+    chThdCreateStatic(dataLogger_WA, sizeof(dataLogger_WA), NORMALPRIO + 1,
+                      dataLogger_THD, &sensor_pointers);
     chThdCreateStatic(mpuComm_WA, sizeof(mpuComm_WA), NORMALPRIO + 1,
                       mpuComm_THD, NULL);
 
@@ -342,7 +338,20 @@ void setup() {
     lowGimu.setAccelScale(16);
 
     // GPS Setup
-    gps.beginSPI(ZOEM8Q0_CS);
+    if (!gps.begin(SPI, ZOEM8Q0_CS, 4000000)) {
+        digitalWrite(LED_RED, HIGH);
+        Serial.println(
+            "Failed to communicate with ZOEM8Q0 gps. Stalling Program");
+        while (true)
+            ;
+    }
+    gps.setPortOutput(COM_PORT_SPI,
+                      COM_TYPE_UBX);  // Set the SPI port to output UBX only
+                                      // (turn off NMEA noise)
+    gps.saveConfigSelective(
+        VAL_CFG_SUBSEC_IOPORT);  // Save (only) the communications port settings
+                                 // to flash and BBR
+    gps.setNavigationFrequency(10);  // set sampling rate to 10hz
 
     // SD Card Setup
     if (SD.begin(BUILTIN_SDCARD)) {
@@ -365,9 +374,7 @@ void setup() {
             "state_latitude,state_longitude,ts_state,"
             "rocketState,ts_RS");
         sensor_pointers.dataloggerTHDVarsPointer.dataFile.flush();
-        Serial.println(
-            sensor_pointers.dataloggerTHDVarsPointer.dataFile.name());
-
+        // Serial.println(lowg_datalogger_THD_vars.dataFile.name());
     } else {
         digitalWrite(LED_RED, HIGH);
         Serial.println("SD Begin Failed. Stalling Program");
@@ -376,9 +383,8 @@ void setup() {
     }
 
     // Servo Setup
-    servo_cw.attach(BALL_VALVE_1_PIN, 770,
-                    2250);  // TODO: MAKE SURE TO CHANGE PINS
-    servo_ccw.attach(BALL_VALVE_2_PIN, 770, 2250);
+    servo_cw.attach(SERVO_CW_PIN, 770, 2250);
+    servo_ccw.attach(SERVO_CCW_PIN, 770, 2250);
 
     Serial.println("Starting ChibiOS");
     chBegin(chSetup);
