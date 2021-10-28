@@ -2,27 +2,14 @@
 #define SERVO_CPP
 
 #include "ServoControl.h"
-<<<<<<< HEAD
-#include "SparkFunLSM9DS1.h"  //Low-G IMU Library
-#include "acShared.h"
-#include "dataLog.h"
-#include "hybridShared.h"
-#include "pins.h"
-#include "sensors.h"
-#include "thresholds.h"
 
-    float flap_drag;
-float native_drag;
-== == == =
->>>>>>> master
-
-             /**
-              * @brief A function to keep the value sent to the servo between 0
-              * and 180 degrees.
-              *
-              * @param value The value determined by the control algorithm.
-              */
-    ServoControl::ServoControl(PWMServo * servo_cw, PWMServo* servo_ccw) {
+/**
+ * @brief A function to keep the value sent to the servo between 0 and 180
+ * degrees.
+ *
+ * @param value The value determined by the control algorithm.
+ */
+ServoControl::ServoControl(PWMServo* servo_cw, PWMServo* servo_ccw) {
     servo_cw_ = servo_cw;
     servo_ccw_ = servo_ccw;
 }

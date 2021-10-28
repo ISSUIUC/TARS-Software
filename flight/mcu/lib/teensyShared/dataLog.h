@@ -9,19 +9,15 @@
 #include "KX134-1211.h"       //High-G IMU Library
 #include "MS5611.h"           //Barometer Library
 #include "SparkFunLSM9DS1.h"  //Low-G IMU Library
-<<<<<<< HEAD
-// #include "ZOEM8Q0.hpp"        //GPS Library
-== == == =
->>>>>>> master
-             #include "SparkFun_u-blox_GNSS_Arduino_Library.h"
+#include "SparkFun_u-blox_GNSS_Arduino_Library.h"
 #include "acShared.h"
 #include "dataStructs.h"
 
-    /**
-     * @brief Structure for all values collected from the low g sensor
-     *
-     */
-    struct lowGData {
+/**
+ * @brief Structure for all values collected from the low g sensor
+ *
+ */
+struct lowGData {
     float ax;
     float ay;
     float az;
@@ -177,9 +173,7 @@ struct datalogger_THD {
 struct pointers {
     LSM9DS1* lowGimuPointer;
     KX134* highGimuPointer;
-<<<<<<< HEAD
-    == == == = MS5611 * barometerPointer;
->>>>>>> master
+    MS5611* barometerPointer;
     SFE_UBLOX_GNSS* GPSPointer;
 
     sensorDataStruct_t* sensorDataPointer;
