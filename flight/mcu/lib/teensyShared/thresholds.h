@@ -2,25 +2,15 @@
 #ifndef THRESHOLDS_H
 #define THRESHOLDS_H
 
-// TODO set values for the thresholds
+// transition from boost to coast if low accleration detected for 300 ms
 static const float coast_time_thresh = 300;
-static const float coast_thresh = 0;
-static const float apogee_thresh = 0;
-static const float main_thresh_min =
-    -2;  // still not determined, check open rocket
-static const float main_thresh_max = -.1;   // still not determined
-static const float drogue_thresh_max = -2;  // still not determined
-static const float drogue_thresh_min = -2;  // still not determined
-static const float landed_thresh = -.1;
-static const float launch_az_thresh =
-    1;  // Minimum vert acc. for launch detection
-static const float launch_time_thresh = 300;  // Minimum time to confirm launch
-static const float apogee_time_thresh = 3000;
-static const float drogue_time_thresh = 2500;
-static const float main_time_thresh = 2500;
-static const float landing_time_thresh = 300;
-
-static bool launch_init = false;
-static bool coast_init = false;
+// 2 gs for launch detect
+static const float launch_linear_acceleration_thresh = 2;
+// required time of detected acceleration to switch to boost
+static const float launch_time_thresh = 300;
+// if we observe less than 0.5 g of accel, transition to coast
+static const float coast_thresh = 0.5;
+// switch to apogee state after 20 seconds
+static const float coast_to_apogee_time_threash = 20000;
 
 #endif

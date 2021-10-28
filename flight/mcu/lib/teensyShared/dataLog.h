@@ -5,9 +5,11 @@
 #include <SD.h>
 #include <stdint.h>
 
+#include "FifoBuffer.h"
 #include "KX134-1211.h"       //High-G IMU Library
+#include "MS5611.h"           //Barometer Library
 #include "SparkFunLSM9DS1.h"  //Low-G IMU Library
-#include "ZOEM8Q0.hpp"        //GPS Library
+#include "SparkFun_u-blox_GNSS_Arduino_Library.h"
 #include "acShared.h"
 #include "dataStructs.h"
 
@@ -25,7 +27,7 @@ struct lowGData {
     float mx;
     float my;
     float mz;
-    int32_t timeStamp_lowG;
+    systime_t timeStamp_lowG;
 };
 
 /**
@@ -36,7 +38,7 @@ struct highGData {
     float hg_ax;
     float hg_ay;
     float hg_az;
-    int32_t timeStamp_highG;
+    systime_t timeStamp_highG;
 };
 
 /**
@@ -47,8 +49,21 @@ struct gpsData {
     float latitude;
     float longitude;
     float altitude;
+    uint32_t siv_count;
+    uint32_t fix_type;
     bool posLock;
-    int32_t timeStamp_GPS;
+    systime_t timeStamp_GPS;
+};
+
+/**
+ * @brief Structure for all values collected from the barometer
+ *
+ */
+struct barometerData {
+    float temperature;  // in degC
+    float pressure;     // in mbar
+    float altitude;     // in meter
+    int32_t timeStamp_barometer;
 };
 
 /**
@@ -80,7 +95,7 @@ struct stateData {
     float state_latitude = 0;
     float state_longitude = 0;
 
-    int32_t timeStamp_state = 0;
+    systime_t timeStamp_state = 0;
 };
 
 /**
@@ -89,7 +104,7 @@ struct stateData {
  */
 struct rocketStateData {
     FSM_State rocketState = STATE_INIT;
-    int32_t timeStamp_RS = 0;
+    systime_t timeStamp_RS = 0;
 };
 
 /**
@@ -98,19 +113,28 @@ struct rocketStateData {
  *
  */
 struct sensorDataStruct_t {
-    //! data for lowGimu
+    // data for lowGimu
+    bool has_lowG_data;
     lowGData lowG_data;
 
-    //! data for highGimu accel data (hg_x, hg_y, hg_z)
+    // data for highGimu accel data (hg_x, hg_y, hg_z)
+    bool has_highG_data;
     highGData highG_data;
 
     // GPS DATA
+    bool has_gps_data;
     gpsData gps_data;
 
+    // Barometer data (temp and pres)
+    bool has_barometer_data;
+    barometerData barometer_data;
+
     // State variables
+    bool has_state_data;
     stateData state_data;
 
     // Rocket State
+    bool has_rocketState_data;
     rocketStateData rocketState_data;
 };
 
@@ -118,7 +142,7 @@ struct sensorDataStruct_t {
  * @brief An enum to list all potential sensors.
  *
  */
-enum sensors { LOWG_IMU, HIGHG_IMU, GPS };
+enum sensors { LOWG_IMU, HIGHG_IMU, BAROMETER, GPS };
 
 #define FIFO_SIZE 1000
 /**
@@ -126,43 +150,19 @@ enum sensors { LOWG_IMU, HIGHG_IMU, GPS };
  *
  */
 struct datalogger_THD {
-    // semaphore_t fifoData;
-    SEMAPHORE_DECL(fifoData_lowG, 0);
-    SEMAPHORE_DECL(fifoSpace_lowG, FIFO_SIZE);
-
-    SEMAPHORE_DECL(fifoData_highG, 0);
-    SEMAPHORE_DECL(fifoSpace_highG, FIFO_SIZE);
-
-    SEMAPHORE_DECL(fifoData_GPS, 0);
-    SEMAPHORE_DECL(fifoSpace_GPS, FIFO_SIZE);
-
-    SEMAPHORE_DECL(fifoData_state, 0);
-    SEMAPHORE_DECL(fifoSpace_state, FIFO_SIZE);
-
-    SEMAPHORE_DECL(fifoData_RS, 0);
-    SEMAPHORE_DECL(fifoSpace_RS, FIFO_SIZE);
-
-    uint16_t fifoHead_lowG = 0;
-    uint16_t fifoHead_highG = 0;
-    uint16_t fifoHead_GPS = 0;
-    uint16_t fifoHead_state = 0;
-    uint16_t fifoHead_RS = 0;
-
-    uint16_t fifoTail_all = 0;
-
-    uint16_t bufferErrors_lowG = 0;
-    uint16_t bufferErrors_highG = 0;
-    uint16_t bufferErrors_GPS = 0;
-    uint16_t bufferErrors_state = 0;
-    uint16_t bufferErrors_RS = 0;
+    FifoBuffer<lowGData, FIFO_SIZE> lowGFifo{};
+    FifoBuffer<highGData, FIFO_SIZE> highGFifo{};
+    FifoBuffer<gpsData, FIFO_SIZE> gpsFifo{};
+    FifoBuffer<stateData, FIFO_SIZE> stateFifo{};
+    FifoBuffer<rocketStateData, FIFO_SIZE> rocketStateFifo{};
+    FifoBuffer<barometerData, FIFO_SIZE> barometerFifo{};
 
     MUTEX_DECL(dataMutex_lowG);
     MUTEX_DECL(dataMutex_highG);
     MUTEX_DECL(dataMutex_GPS);
+    MUTEX_DECL(dataMutex_barometer);
     MUTEX_DECL(dataMutex_state);
     MUTEX_DECL(dataMutex_RS);
-
-    sensorDataStruct_t fifoArray[FIFO_SIZE];
 
     sensorDataStruct_t current_data;
 
@@ -173,7 +173,8 @@ struct datalogger_THD {
 struct pointers {
     LSM9DS1* lowGimuPointer;
     KX134* highGimuPointer;
-    ZOEM8Q0* GPSPointer;
+    MS5611* barometerPointer;
+    SFE_UBLOX_GNSS* GPSPointer;
 
     sensorDataStruct_t* sensorDataPointer;
 

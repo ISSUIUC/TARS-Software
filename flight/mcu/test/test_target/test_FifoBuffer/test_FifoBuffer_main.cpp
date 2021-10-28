@@ -9,8 +9,7 @@ void run_static_test_cases();
 void run_threaded_test_cases();
 void run_performance_test_cases();
 
-void run_tests() {
-    UNITY_BEGIN();
+void run_fifo_tests() {
     // Run tests that do not use threading
     run_static_test_cases();
 
@@ -19,13 +18,4 @@ void run_tests() {
 
     // Run performance testing
     run_performance_test_cases();
-
-    UNITY_END();
 }
-
-void setup() {
-    delay(2000);
-    chBegin(run_tests);
-}
-
-void loop() {}
