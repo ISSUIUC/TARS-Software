@@ -13,6 +13,12 @@ ActiveControl::ActiveControl(struct pointers* pointer_struct, PWMServo* ccw,
     current_state =
         &pointer_struct->sensorDataPointer->rocketState_data.rocketState;
     mutex_lowG_ = &pointer_struct->dataloggerTHDVarsPointer.dataMutex_lowG;
+
+    activeControlServos.servoActuation(0, 0);
+    chThdSleepMilliseconds(1000);
+    activeControlServos.servoActuation(1, 1);
+    chThdSleepMilliseconds(1000);
+    activeControlServos.servoActuation(0, 0);
 }
 
 void ActiveControl::acTickFunction() {
@@ -50,6 +56,8 @@ void ActiveControl::acTickFunction() {
 
     if (ActiveControl_ON()) {
         activeControlServos.servoActuation(l1_cmd, l2_cmd);
+    } else {
+        activeControlServos.servoActuation(0, 0);
     }
 
     e_prev = e;
