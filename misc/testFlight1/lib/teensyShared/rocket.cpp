@@ -38,7 +38,7 @@ static THD_FUNCTION(rocket_FSM, arg){
             case STATE_IDLE:
  
                 // If high acceleration is observed in z direction...
-                if(pointer_struct->sensorDataPointer->state_data.state_az > launch_az_thresh) {
+                if(pointer_struct->sensorDataPointer->state_data.state_az > launch_linear_acceleration_thresh) {
                     rocketTimers.launch_time = chVTGetSystemTime();
                     pointer_struct->sensorDataPointer->rocketState_data.rocketState = STATE_LAUNCH_DETECT;
                 }
@@ -48,7 +48,7 @@ static THD_FUNCTION(rocket_FSM, arg){
             case STATE_LAUNCH_DETECT:
  
                 //If the acceleration was too brief, go back to IDLE
-                if (pointer_struct->sensorDataPointer->state_data.state_az < launch_az_thresh) {
+                if (pointer_struct->sensorDataPointer->state_data.state_az < launch_linear_acceleration_thresh) {
                     pointer_struct->sensorDataPointer->rocketState_data.rocketState = STATE_IDLE;
                     break;
                 }

@@ -7,7 +7,7 @@ float coast_thresh = 100;
 float coast_timer;
 float descent_timer;
 float burn_timer; //Measuring how long the burn happens
-float launch_az_thresh = 3500; //Minimum vert acc. for launch detection
+float launch_linear_acceleration_thresh = 3500; //Minimum vert acc. for launch detection
 float launch_time_thresh = 300; //Minimum time to confirm launch
 float apogee_time_thresh;
 bool launch_init = false;
