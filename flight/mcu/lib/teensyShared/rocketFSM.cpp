@@ -46,22 +46,21 @@ void rocketFSM::tickFSM() {
                    .dataMutex_GPS);  // TODO, used for state init?
 
     // get the linear accelration from the lowgimu
-    float linear_acceleration = -pointer_struct->sensorDataPointer->lowG_data.ay;
+    float linear_acceleration =
+        -pointer_struct->sensorDataPointer->lowG_data.ay;
 
     switch (pointer_struct->sensorDataPointer->rocketState_data.rocketState) {
         case STATE_INIT:
-            // if (pointer_struct->sensorDataPointer->gps_data
-            //         .posLock) {  // if GPS lock detected, go to state Idle
-                pointer_struct->sensorDataPointer->rocketState_data
-                    .rocketState = STATE_IDLE;
-            // }
+            // go to state idle regardless of gps lock
+            pointer_struct->sensorDataPointer->rocketState_data.rocketState =
+                STATE_IDLE;
 
             break;
 
         case STATE_IDLE:
 
             // If high acceleration is observed in z direction...
-            if (linear_acceleration > launch_az_thresh) {
+            if (linear_acceleration > launch_linear_acceleration_thresh) {
                 rocketTimers.launch_time = chVTGetSystemTime();
                 pointer_struct->sensorDataPointer->rocketState_data
                     .rocketState = STATE_LAUNCH_DETECT;
@@ -72,7 +71,7 @@ void rocketFSM::tickFSM() {
         case STATE_LAUNCH_DETECT:
 
             // If the acceleration was too brief, go back to IDLE
-            if (linear_acceleration < launch_az_thresh) {
+            if (linear_acceleration < launch_linear_acceleration_thresh) {
                 pointer_struct->sensorDataPointer->rocketState_data
                     .rocketState = STATE_IDLE;
                 break;
@@ -135,13 +134,11 @@ void rocketFSM::tickFSM() {
             rocketTimers.coast_timer =
                 chVTGetSystemTime() - rocketTimers.burnout_time;
 
-            if(TIME_I2MS(rocketTimers.coast_timer) > coast_to_apogee_time_threash){
+            if (TIME_I2MS(rocketTimers.coast_timer) >
+                coast_to_apogee_time_threash) {
                 pointer_struct->sensorDataPointer->rocketState_data
                     .rocketState = STATE_APOGEE;
             }
-            // we don't have a measure of velocity, so to ensure that active
-            // control works for the whole launch this state will be the final
-            // state
 
             // // if velocity <= 0
             // if (pointer_struct->sensorDataPointer->state_data.state_vz <=
@@ -155,6 +152,10 @@ void rocketFSM::tickFSM() {
 
         default:
             break;
+
+            // we don't have a measure of velocity, so to ensure that active
+            // control works for the whole launch this state will be the final
+            // state
 
             // case STATE_APOGEE_DETECT:
             //     // If the negative velocity was too brief, go back to coast

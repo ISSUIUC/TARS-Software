@@ -51,7 +51,6 @@ void boost_detect() {
     sensor_pointers.sensorDataPointer = &sensorData;
     sensorData.gps_data.posLock = true;
 
-
     rocketFSM fsm{&sensor_pointers};
     fsm.tickFSM();
     sensor_pointers.sensorDataPointer->lowG_data.ay = 6;
@@ -65,7 +64,8 @@ void boost_detect() {
         STATE_BOOST);
 }
 
-// Testing whether rocket remains in STATE_BOOST if burn_timer hasn't passed 5000 ms
+// Testing whether rocket remains in STATE_BOOST if burn_timer hasn't passed
+// 5000 ms
 void boost_failsafe() {
     sensorDataStruct_t sensorData{};
     pointers sensor_pointers{};
@@ -78,21 +78,27 @@ void boost_failsafe() {
         fsm.tickFSM();
         chThdSleepMilliseconds(10);
     }
-    TEST_ASSERT_EQUAL(sensor_pointers.sensorDataPointer->rocketState_data.rocketState, STATE_IDLE);
-    
+    TEST_ASSERT_EQUAL(
+        sensor_pointers.sensorDataPointer->rocketState_data.rocketState,
+        STATE_IDLE);
+
     sensor_pointers.sensorDataPointer->state_data.state_ay(-2);
     for (int i = 0; i < 200; i++) {
         fsm.tickFSM();
         chThdSleepMilliseconds(10);
     }
-    TEST_ASSERT_EQUAL(sensor_pointers.sensorDataPointer->rocketState_data.rocketState, STATE_BOOST);
+    TEST_ASSERT_EQUAL(
+        sensor_pointers.sensorDataPointer->rocketState_data.rocketState,
+        STATE_BOOST);
 
     sensor_pointers.sensorDataPointer->state_data.state_ay(0);
     for (int i = 0; i < 100; i++) {
         fsm.tickFSM();
         chThdSleepMilliseconds(10);
     }
-    TEST_ASSERT_EQUAL(sensor_pointers.sensorDataPointer->rocketState_data.rocketState, STATE_BOOST);
+    TEST_ASSERT_EQUAL(
+        sensor_pointers.sensorDataPointer->rocketState_data.rocketState,
+        STATE_BOOST);
 }
 
 void bad_data_boost_detect() {
@@ -100,7 +106,6 @@ void bad_data_boost_detect() {
     pointers sensor_pointers{};
     sensor_pointers.sensorDataPointer = &sensorData;
     sensorData.gps_data.posLock = true;
-
 
     rocketFSM fsm{&sensor_pointers};
     fsm.tickFSM();
@@ -121,7 +126,6 @@ void burnout_detect() {
     pointers sensor_pointers{};
     sensor_pointers.sensorDataPointer = &sensorData;
     sensorData.gps_data.posLock = true;
-
 
     rocketFSM fsm{&sensor_pointers};
     fsm.tickFSM();

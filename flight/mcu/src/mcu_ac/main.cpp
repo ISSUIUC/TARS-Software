@@ -85,56 +85,6 @@ static THD_FUNCTION(rocket_FSM, arg) {
 
         stateMachine.tickFSM();
 
-        int state = (int)pointer_struct->sensorDataPointer->rocketState_data.rocketState;
-
-        Serial.print(pointer_struct->sensorDataPointer->lowG_data.ay);
-        Serial.print(" ");
-
-        switch(state){
-            case STATE_INIT:
-                Serial.println("STATE_INIT");
-                break;
-            case STATE_IDLE:
-                Serial.println("STATE_IDLE");
-                break;
-            case STATE_LAUNCH_DETECT:
-                Serial.println("STATE_LAUNCH_DETECT");
-                break;
-            case STATE_BOOST:
-                Serial.println("STATE_BOOST");
-                break;
-            case STATE_BURNOUT_DETECT:
-                Serial.println("STATE_BURNOUT_DETECT");
-                break;
-            case STATE_COAST:
-                Serial.println("STATE_COAST");
-                break;
-            case STATE_APOGEE_DETECT:
-                Serial.println("STATE_APOGEE_DETECT");
-                break;
-            case STATE_APOGEE:
-                Serial.println("STATE_APOGEE");
-                break;
-            case STATE_DROGUE_DETECT:
-                Serial.println("STATE_DROGUE_DETECT");
-                break;
-            case STATE_DROGUE:
-                Serial.println("STATE_DROGUE");
-                break;
-            case STATE_MAIN_DETECT:
-                Serial.println("STATE_MAIN_DETECT");
-                break;
-            case STATE_MAIN:
-                Serial.println("STATE_MAIN");
-                break;
-            case STATE_LANDED_DETECT:
-                Serial.println("STATE_LANDED_DETECT");
-                break;
-            case STATE_LANDED:
-                Serial.println("STATE_LANDED");
-                break;        
-        }
-
         chThdSleepMilliseconds(6);  // FSM runs at 100 Hz
     }
 }
@@ -325,7 +275,8 @@ void setup() {
     while (!Serial) {
     }
 #endif
-    while (!Serial);
+    while (!Serial)
+        ;
     pinMode(LED_BLUE, OUTPUT);
     pinMode(LED_RED, OUTPUT);
     pinMode(LED_ORANGE, OUTPUT);
@@ -366,7 +317,8 @@ void setup() {
     //                   COM_TYPE_UBX);  // Set the SPI port to output UBX only
     //                                   // (turn off NMEA noise)
     // gps.saveConfigSelective(
-    //     VAL_CFG_SUBSEC_IOPORT);  // Save (only) the communications port settings
+    //     VAL_CFG_SUBSEC_IOPORT);  // Save (only) the communications port
+    //     settings
     //                              // to flash and BBR
     // gps.setNavigationFrequency(10);  // set sampling rate to 10hz
 
