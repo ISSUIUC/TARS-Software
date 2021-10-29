@@ -271,7 +271,7 @@ void chSetup() {
     // added play_THD for creation
     if (lowG_connected) {
         chThdCreateStatic(servo_WA, sizeof(servo_WA), NORMALPRIO + 1, servo_THD,
-                      &sensor_pointers);
+                          &sensor_pointers);
         chThdCreateStatic(lowgIMU_WA, sizeof(lowgIMU_WA), NORMALPRIO + 1,
                           lowgIMU_THD, &sensor_pointers);
     }
@@ -286,7 +286,7 @@ void chSetup() {
     chThdCreateStatic(highgIMU_WA, sizeof(highgIMU_WA), NORMALPRIO + 1,
                       highgIMU_THD, &sensor_pointers);
     chThdCreateStatic(rocket_FSM_WA, sizeof(rocket_FSM_WA), NORMALPRIO + 1,
-                          rocket_FSM, &sensor_pointers);
+                      rocket_FSM, &sensor_pointers);
     chThdCreateStatic(dataLogger_WA, sizeof(dataLogger_WA), NORMALPRIO + 1,
                       dataLogger_THD, &sensor_pointers);
     // chThdCreateStatic(mpuComm_WA, sizeof(mpuComm_WA), NORMALPRIO + 1,

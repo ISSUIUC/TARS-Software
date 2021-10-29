@@ -54,6 +54,11 @@ struct gpsData {
     bool posLock;
     systime_t timeStamp_GPS;
 };
+struct flapData {
+    float l1;
+    float l2;
+    systime_t timeStamp_flaps;
+};
 
 /**
  * @brief Structure for all values collected from the barometer
@@ -136,6 +141,10 @@ struct sensorDataStruct_t {
     // Rocket State
     bool has_rocketState_data;
     rocketStateData rocketState_data;
+
+    // Flap state
+    bool has_flap_data;
+    flapData flap_data;
 };
 
 /**
@@ -156,6 +165,7 @@ struct datalogger_THD {
     FifoBuffer<stateData, FIFO_SIZE> stateFifo{};
     FifoBuffer<rocketStateData, FIFO_SIZE> rocketStateFifo{};
     FifoBuffer<barometerData, FIFO_SIZE> barometerFifo{};
+    FifoBuffer<flapData, FIFO_SIZE> flapFifo{};
 
     MUTEX_DECL(dataMutex_lowG);
     MUTEX_DECL(dataMutex_highG);

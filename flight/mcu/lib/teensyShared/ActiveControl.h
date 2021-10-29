@@ -36,4 +36,5 @@ class ActiveControl {
     float e_prev = 0;
     FSM_State* current_state;
     ServoControl activeControlServos;
+    pointers * m_pointers;
 };

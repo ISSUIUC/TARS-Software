@@ -37,7 +37,7 @@ void ServoControl::servoActuation(float length_one, float length_two) {
     // calculate what these values are. These are placeholders for now. m and
     // offset should include the radian to degree conversion.
     // float m = (1.0 / radius) * (180.0 / (3.1415));  // degrees / meter
-    float m = 5624.29696288; //measured meters/degree
+    float m = 5624.29696288;  // measured meters/degree
     float offset = 48.56;
 
     // This is the actual conversion from the inputted length to the angles
@@ -49,7 +49,7 @@ void ServoControl::servoActuation(float length_one, float length_two) {
     roundOffAngle(ccw_angle);
 
     // servo_cs rotates backwards
-    //fix fix TODO fix
+    // fix fix TODO fix
     servo_cw_->write(180 - cw_angle);
     servo_ccw_->write(ccw_angle);
 

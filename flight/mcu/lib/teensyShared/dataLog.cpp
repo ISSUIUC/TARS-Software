@@ -6,8 +6,8 @@
 #include <ChRt.h>
 #include <SD.h>
 #include <stdio.h>
-#include "pins.h"
 
+#include "pins.h"
 #include "sensors.h"
 
 MUTEX_DECL(SD_Card_Mutex);
@@ -48,11 +48,15 @@ void dataLoggerTickFunction(pointers* pointer_struct) {
         current_data.has_barometer_data =
             buffers.barometerFifo.pop(&current_data.barometer_data);
 
+        current_data.has_flap_data =
+            buffers.flapFifo.pop(&current_data.flap_data);
+
         // check if any buffers have data
         bool any_have_data =
             current_data.has_gps_data || current_data.has_highG_data ||
             current_data.has_lowG_data || current_data.has_rocketState_data ||
-            current_data.has_state_data || current_data.has_barometer_data;
+            current_data.has_state_data || current_data.has_barometer_data ||
+            current_data.has_flap_data;
 
         if (!any_have_data) {
             return;
