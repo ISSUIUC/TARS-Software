@@ -24,13 +24,13 @@ ActiveControl::ActiveControl(struct pointers* pointer_struct, PWMServo* ccw,
 void ActiveControl::acTickFunction() {
     chMtxLock(mutex_lowG_);  // Locking only for gy because we use local
                              // variables for everything else
-    float e = omega_goal + *gy;
+    float e = omega_goal - *gy;
     chMtxUnlock(mutex_lowG_);
 
     if (true) {
         e_sum += e * .006;
     }
-    float dedt = e - e_prev;
+    float dedt = (e - e_prev)/dt;
     Eigen::Matrix<float, 2, 1> u = (k_p * e) + (k_i * e_sum) + (k_d * dedt);
     float l1 = u(0, 0);
     float l2 = u(1, 0);
