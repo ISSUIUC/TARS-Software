@@ -50,7 +50,7 @@ void ServoControl::servoActuation(float length_one, float length_two) {
 
     // servo_cs rotates backwards
     // fix fix TODO fix
-    servo_cw_->write(140 - cw_angle);
+    servo_cw_->write(180 - cw_angle);
     servo_ccw_->write(ccw_angle);
 
 #ifdef SERVO_DEBUG
