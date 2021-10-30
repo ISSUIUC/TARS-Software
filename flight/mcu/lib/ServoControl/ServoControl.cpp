@@ -15,8 +15,8 @@ ServoControl::ServoControl(PWMServo* servo_cw, PWMServo* servo_ccw) {
 }
 // TODO check values for max
 void ServoControl::roundOffAngle(float& value) {
-    if (value > 180) {
-        value = 180;
+    if (value > 140) {
+        value = 140;
     }
     if (value < 0) {
         value = 0;
@@ -50,7 +50,7 @@ void ServoControl::servoActuation(float length_one, float length_two) {
 
     // servo_cs rotates backwards
     // fix fix TODO fix
-    servo_cw_->write(180 - cw_angle);
+    servo_cw_->write(140 - cw_angle);
     servo_ccw_->write(ccw_angle);
 
 #ifdef SERVO_DEBUG

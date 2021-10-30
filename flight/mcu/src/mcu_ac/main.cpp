@@ -347,6 +347,7 @@ void setup() {
         lowG_connected = false;
     } else {
         lowG_connected = true;
+        lowGimu.setGyroScale(2000);
         lowGimu.setAccelScale(16);
     }
 
