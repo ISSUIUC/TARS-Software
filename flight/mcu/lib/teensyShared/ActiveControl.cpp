@@ -14,6 +14,7 @@ ActiveControl::ActiveControl(struct pointers* pointer_struct, PWMServo* ccw,
         &pointer_struct->sensorDataPointer->rocketState_data.rocketState;
     mutex_lowG_ = &pointer_struct->dataloggerTHDVarsPointer.dataMutex_lowG;
 
+    // Flaps go in and out upon initializing for testing purposes
     activeControlServos.servoActuation(0, 0);
     chThdSleepMilliseconds(1000);
     activeControlServos.servoActuation(1, 1);
