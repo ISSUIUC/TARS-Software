@@ -1,17 +1,17 @@
-import { ReadStream } from "original-fs";
+import * as SerialPort from "serialport";
 
-const altitude_box = document.getElementById("Altitude");
-const liftoff_button = document.getElementById("Liftoff");
-altitude_box.innerHTML = "0";
-document.body.appendChild(altitude_box);
+const led_status = document.getElementById("led_status");
+const led_button = document.getElementById("Blink");
+led_status.innerHTML = "0";
+document.body.appendChild(led_status);
 
+let port = new SerialPort("idk");
 
-let time = 0
+let led = false;
 
-liftoff_button.addEventListener("click", ()=>{
-    setInterval(()=>{
-        time += 0.016;
-        const altitude = (100 * (time - time * time / 10)) | 0;
-        altitude_box.innerHTML = `Altitude is really ${altitude}`;
-    }, 16);
+led_button.addEventListener("click", ()=>{
+    led = !led;
+    const text = led ? "ON" : "OFF";
+    led_status.innerHTML = text;
+    port.write(text);
 });
