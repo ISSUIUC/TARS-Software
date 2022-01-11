@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+      "lib": ["es2020", "DOM"],
+      "target": "es5",
+      "noImplicitAny": true,
+      "allowJs": true,
+      "outDir": "build",
+      "sourceMap": true,   
+      "declaration": false,
+      "removeComments": true,
+      "moduleResolution": "node"
+  },
+  "exclude": ["webpack*", "dist", "build"],
+}
