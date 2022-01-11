@@ -1,5 +1,5 @@
-# electron-typescript-guide
-A sample project to introduce you to Electron in combination with Typescript.
+# Ground Station
+Telemtry Ground Station
 
 ## How to start
 
@@ -7,6 +7,14 @@ A sample project to introduce you to Electron in combination with Typescript.
    
         npm install
 
-2. Run the electron application
+2. Rebuild packages for the right version of node
+   
+       ./node_modules/.bin/electron-rebuild
+
+3. Build typescript
+  
+       npm run build
+      
+4. Run the electron application
 
         npm start
