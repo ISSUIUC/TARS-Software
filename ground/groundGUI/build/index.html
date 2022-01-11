@@ -5,11 +5,11 @@
 <body>
     <h1>ISS Ground Station</h1>
 </body>
-    <button id="Liftoff">Liftoff!</button>
+    <button id="Blink">Blink LED</button>
     <div>
-        <div>
-            Altitude: <div id="Altitude"></div>
-        </div>
+        <div id="led_status">OFF</div>
     </div>
-    <script src="bundle.js"></script> 
+    <script>
+        require("./main.js")
+    </script>
 </html>
