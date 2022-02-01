@@ -1,0 +1,3 @@
+[submodule "flight/mcu/lib/RadioHead"]
+	path = flight/mcu/lib/RadioHead
+	url = https://github.com/dragino/RadioHead
