@@ -6,15 +6,26 @@
 // level messaging abilities.
 // It is designed to work with the other example Arduino9x_TX
 
+
+
+/*
+This code was used to test the RFM LoRa modules on a breadboard:
+    - Frequency: 434Hz
+    - Make sure to change Teensy version in platformio
+    - Make sure to exclude/include the appropriate files to build in platformio.ini
+    - Current problem: Only one-way communication
+*/
+
 #include <SPI.h>
 #include <RH_RF95.h>
 
 
-// Change depending on routing
+// Ensure to change depending on wiring
 #define RFM95_CS 10
 #define RFM95_RST 15
 #define RFM95_EN 14
 #define RFM95_INT 17
+#define LED 13 // Blinks on receipt
 
 // Change to 434.0 or other frequency, must match RX's freq!
 #define RF95_FREQ 434.0
@@ -22,8 +33,7 @@
 // Singleton instance of the radio driver
 RH_RF95 rf95(RFM95_CS, RFM95_INT);
 
-// Blinky on receipt
-#define LED 13
+
 
 void setup() 
 {
@@ -37,7 +47,7 @@ void setup()
   Serial.begin(9600);
   delay(100);
 
-  Serial.println("Arduino LoRa RX Test!");
+  Serial.println("Arduino LoRa RX Test");
   
   // manual reset
   digitalWrite(RFM95_RST, LOW);
@@ -84,7 +94,7 @@ void loop()
       Serial.println(rf95.lastRssi(), DEC);
       
       // Send a reply
-      uint8_t data[] = "And hello back to you";
+      uint8_t data[] = "And hello back to you"; // This is currently not being received by the transmitter. 
       rf95.send(data, sizeof(data));
       rf95.waitPacketSent();
       Serial.println("Sent a reply");
