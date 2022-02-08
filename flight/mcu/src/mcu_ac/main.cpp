@@ -83,7 +83,8 @@ static THD_FUNCTION(telemetry_THD, arg) {
     struct pointers *pointer_struct = (struct pointers *)arg;
 
     while(true) {
-
+        Serial.println("thread");
+        chThdSleepMilliseconds(100);
     }
 }
 
@@ -281,7 +282,7 @@ void chSetup() {
     // added play_THD for creation
     chThdCreateStatic(telemetry_WA, sizeof(telemetry_WA), NORMALPRIO + 1,
                       telemetry_THD, &sensor_pointers);
-                      
+
     while (true)
         ;
 }
