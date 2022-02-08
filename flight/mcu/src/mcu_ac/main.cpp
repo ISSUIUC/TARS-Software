@@ -74,6 +74,18 @@ static THD_WORKING_AREA(highgIMU_WA, 8192);
 static THD_WORKING_AREA(servo_WA, 8192);
 static THD_WORKING_AREA(dataLogger_WA, 8192);
 static THD_WORKING_AREA(mpuComm_WA, 8192);
+static THD_WORKING_AREA(telemetry_WA, 8192);
+
+/******************************************************************************/
+/* TELEMETRY THREAD                                         */
+
+static THD_FUNCTION(telemetry_THD, arg) {
+    struct pointers *pointer_struct = (struct pointers *)arg;
+
+    while(true) {
+
+    }
+}
 
 /******************************************************************************/
 /* ROCKET FINITE STATE MACHINE THREAD                                         */
@@ -87,9 +99,8 @@ static THD_FUNCTION(rocket_FSM, arg) {
 #ifdef THREAD_DEBUG
         Serial.println("### Rocket FSM thread entrance");
 #endif
-        Serial.println("hi fsm");
-// your code thread 1
-        // stateMachine.tickFSM();
+
+        stateMachine.tickFSM();
 
         chThdSleepMilliseconds(6);  // FSM runs at 100 Hz
     }
@@ -106,9 +117,8 @@ static THD_FUNCTION(lowgIMU_THD, arg) {
 #ifdef THREAD_DEBUG
         Serial.println("### Low G IMU thread entrance");
 #endif
-        Serial.println("hi lowg");
-//your code thread 2
-        // lowGimuTickFunction(pointer_struct);
+        
+        lowGimuTickFunction(pointer_struct);
 
         chThdSleepMilliseconds(6);
     }
@@ -269,12 +279,9 @@ static THD_FUNCTION(dataLogger_THD, arg) {
  */
 void chSetup() {
     // added play_THD for creation
-    chThdCreateStatic(rocket_FSM_WA, sizeof(rocket_FSM_WA), NORMALPRIO + 1,
-                      rocket_FSM, &sensor_pointers);
-    chThdCreateStatic(lowgIMU_WA, sizeof(lowgIMU_WA), NORMALPRIO + 1,
-                      lowgIMU_THD, &sensor_pointers);
-    
-
+    chThdCreateStatic(telemetry_WA, sizeof(telemetry_WA), NORMALPRIO + 1,
+                      telemetry_THD, &sensor_pointers);
+                      
     while (true)
         ;
 }
