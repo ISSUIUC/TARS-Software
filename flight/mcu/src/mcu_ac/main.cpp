@@ -24,7 +24,7 @@
 #include <SD.h>
 #include <SPI.h>
 #include <Wire.h>
-
+#include <RH_RF95.h>
 #include "ActiveControl.h"
 #include "KX134-1211.h"  //High-G IMU Library
 #include "MS5611.h"      //Barometer library
@@ -38,6 +38,17 @@
 #include "rocketFSM.h"
 #include "sensors.h"
 
+
+//Make sure to change these pinout depending on wiring
+//Don't forget to change the ini file to build the correct main file
+#define RFM95_CS 10
+#define RFM95_RST 15
+#define RFM95_INT 17
+#define RFM95_EN 14
+
+// Change to 434.0 or other frequency, must match RX's freq!
+#define RF95_FREQ 434.0
+
 // datalogger_THD datalogger_THD_vars;
 
 //#define THREAD_DEBUG
@@ -49,8 +60,10 @@
 // Create a data struct to hold data from the sensors
 sensorDataStruct_t sensorData;
 
+
 FSM_State rocketState = STATE_INIT;
 
+RH_RF95 rf95(RFM95_CS, RFM95_INT);
 KX134 highGimu;
 LSM9DS1 lowGimu;
 SFE_UBLOX_GNSS gps;
@@ -81,10 +94,46 @@ static THD_WORKING_AREA(telemetry_WA, 8192);
 
 static THD_FUNCTION(telemetry_THD, arg) {
     struct pointers *pointer_struct = (struct pointers *)arg;
-
+    int packetnum = 0;
     while(true) {
-        Serial.println("thread");
-        chThdSleepMilliseconds(100);
+        Serial.println("Sending to rf95_server");
+  // Send a message to rf95_server
+  
+        char radiopacket[20] = "Hey bestie #      ";
+        itoa(packetnum++, radiopacket+13, 10);
+        Serial.print("Sending "); Serial.println(radiopacket);
+        radiopacket[19] = 0;
+        
+        Serial.println("Sending..."); delay(10);
+        rf95.send((uint8_t *)radiopacket, 20);
+
+        Serial.println("Waiting for packet to complete..."); delay(10);
+        rf95.waitPacketSent();
+        // Now wait for a reply
+        uint8_t buf[RH_RF95_MAX_MESSAGE_LEN];
+        uint8_t len = sizeof(buf);
+                                                //test without delay
+        Serial.println("Waiting for reply..."); //delay(10);
+        if (rf95.waitAvailableTimeout(1000))
+        { 
+            // Should be a reply message for us now   
+            if (rf95.recv(buf, &len))
+        {
+            Serial.print("Got reply: ");
+            Serial.println((char*)buf);
+            Serial.print("RSSI: ");
+            Serial.println(rf95.lastRssi(), DEC);    
+            }
+            else
+            {
+            Serial.println("Receive failed");
+            }
+        }
+        else
+        {
+            Serial.println("No reply, is there a listener around?");
+        }
+        chThdSleepMilliseconds(1000);
     }
 }
 
@@ -101,7 +150,8 @@ static THD_FUNCTION(rocket_FSM, arg) {
         Serial.println("### Rocket FSM thread entrance");
 #endif
 
-        stateMachine.tickFSM();
+        delay(80);
+        // stateMachine.tickFSM();
 
         chThdSleepMilliseconds(6);  // FSM runs at 100 Hz
     }
@@ -282,6 +332,14 @@ void chSetup() {
     // added play_THD for creation
     chThdCreateStatic(telemetry_WA, sizeof(telemetry_WA), NORMALPRIO + 1,
                       telemetry_THD, &sensor_pointers);
+    chThdCreateStatic(rocket_FSM_WA, sizeof(rocket_FSM_WA), NORMALPRIO + 1,
+                      rocket_FSM, &sensor_pointers);
+
+                      chThdCreateStatic(lowgIMU_WA, sizeof(lowgIMU_WA), NORMALPRIO + 1,
+                      rocket_FSM, &sensor_pointers);
+
+                      chThdCreateStatic(highgIMU_WA, sizeof(highgIMU_WA), NORMALPRIO + 1,
+                      rocket_FSM, &sensor_pointers);
 
     while (true)
         ;
@@ -303,6 +361,34 @@ void setup() {
     }
 #endif
     while(!Serial);
+
+    pinMode(RFM95_RST, OUTPUT);
+    pinMode(RFM95_EN, OUTPUT);
+    digitalWrite(RFM95_RST, HIGH);
+    digitalWrite(RFM95_EN, HIGH);
+
+    // manual reset
+  digitalWrite(RFM95_RST, LOW);
+  delay(10);
+  digitalWrite(RFM95_RST, HIGH);
+  delay(10);
+
+  while (!rf95.init()) {
+    Serial.println("LoRa radio init failed");
+    while (1);
+  }
+  Serial.println("LoRa radio init OK!");
+
+  // Defaults after init are 434.0MHz, modulation GFSK_Rb250Fd250, +13dbM
+  if (!rf95.setFrequency(RF95_FREQ)) {
+    Serial.println("setFrequency failed");
+    while (1);
+  }
+  Serial.print("Set Freq to: "); Serial.println(RF95_FREQ);
+
+  rf95.setTxPower(23, false);
+
+
     Serial.println("Starting ChibiOS");
     chBegin(chSetup);
     while (true)
