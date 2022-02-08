@@ -10,6 +10,7 @@
 #include <RH_RF95.h>
 
 //Make sure to change these pinout depending on wiring
+//Don't forget to change the ini file to build the correct main file
 #define RFM95_CS 10
 #define RFM95_RST 15
 #define RFM95_INT 16
