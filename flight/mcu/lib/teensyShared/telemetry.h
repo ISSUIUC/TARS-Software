@@ -19,12 +19,12 @@ enum TLM_state {
     STATE_PRE_LAUNCH,
     STATE_FLIGHT,
     STATE_POST_LAUNCH
-}
+};
 
 class Telemetry {
     public:
-    
-    
+        void receive();
+        void transmit();
     private:
-
+        TLM_state telemetryState = STATE_PRE_LAUNCH;
 };
