@@ -36,9 +36,9 @@ class Telemetry {
     public:
         Telemetry();
         void receive();
-        void transmit();
+        void transmit(const RH_RF95& rfm);
     private:
         TLM_state telemetryState = STATE_PRE_LAUNCH;
         int packetnum;
-        RH_RF95 rf95;
+        // RH_RF95 rf95;
 };

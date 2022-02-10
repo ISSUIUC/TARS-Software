@@ -42,13 +42,13 @@
 
 //Make sure to change these pinout depending on wiring
 //Don't forget to change the ini file to build the correct main file
-#define RFM95_CS 10
-#define RFM95_RST 15
-#define RFM95_INT 17
-#define RFM95_EN 14
+// #define RFM95_CS 10
+// #define RFM95_RST 15
+// #define RFM95_INT 17
+// #define RFM95_EN 14
 
-// Change to 434.0 or other frequency, must match RX's freq!
-#define RF95_FREQ 434.0
+// // Change to 434.0 or other frequency, must match RX's freq!
+// #define RF95_FREQ 434.0
 
 // datalogger_THD datalogger_THD_vars;
 
@@ -98,7 +98,8 @@ static THD_FUNCTION(telemetry_THD, arg) {
     // int packetnum = 0;
     Telemetry tlm;
     while(true) {
-        tlm.transmit();
+        tlm.transmit(rf95);
+        chThdSleepMilliseconds(1000);
 //         Serial.println("Sending to rf95_server");
 //   // Send a message to rf95_server
   
@@ -354,7 +355,10 @@ void chSetup() {
  */
 
 void setup() {
+    Telemetry tlm;
+    RH_RF95 rf95(RFM95_CS, RFM95_INT);
     int32_t temperature;
+    
 
 #if defined(THREAD_DEBUG) || defined(LOWGIMU_DEBUG) ||     \
     defined(BAROMETER_DEBUG) || defined(HIGHGIMU_DEBUG) || \

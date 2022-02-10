@@ -3,14 +3,14 @@
 
 Telemetry::Telemetry() {
     int packetnum = 0;
-    RH_RF95 rf95(RFM95_CS, RFM95_INT);
+    // RH_RF95 rf95(RFM95_CS, RFM95_INT);
 }
 
 void Telemetry::receive() {
     //test with demo rx code
 }
 
-void Telemetry::transmit() {
+void Telemetry::transmit(const RH_RF95& rf95) {
     //test with demo tx code
     Serial.println("Sending to rf95_server");
   // Send a message to rf95_server
