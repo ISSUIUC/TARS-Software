@@ -15,21 +15,25 @@ void Telemetry::transmit(const RH_RF95& rf95) {
     Serial.println("Sending to rf95_server");
   // Send a message to rf95_server
   
-        char radiopacket[20] = "Hey bestie #      ";
+        char radiopacket[40] = "Hey bestie#      ";
         itoa(packetnum++, radiopacket+13, 10);
         Serial.print("Sending "); Serial.println(radiopacket);
-        radiopacket[19] = 0;
         
-        Serial.println("Sending..."); delay(10);
-        rf95.send((uint8_t *)radiopacket, 20);
+        Serial.println("Sending..."); //delay(10);
+        // chThdSleepMilliseconds(10);
+        rf95.send((uint8_t *)radiopacket, 40);
 
-        Serial.println("Waiting for packet to complete..."); delay(10);
+        Serial.println("Waiting for packet to complete..."); //delay(10);
+        // delay(10);
+        // chThdSleepMilliseconds(10);
         rf95.waitPacketSent();
         // Now wait for a reply
         uint8_t buf[RH_RF95_MAX_MESSAGE_LEN];
         uint8_t len = sizeof(buf);
                                                 //test without delay
-        Serial.println("Waiting for reply..."); delay(10);
+        Serial.println("Waiting for reply...");  
+        // delay(10);
+        // chThdSleepMilliseconds(10);
         if (rf95.waitAvailableTimeout(1000))
         { 
             // Should be a reply message for us now   
@@ -49,6 +53,6 @@ void Telemetry::transmit(const RH_RF95& rf95) {
         {
             Serial.println("No reply, is there a listener around?");
         }
-        chThdSleepMilliseconds(1000);
+        // chThdSleepMilliseconds(800);
 }
 

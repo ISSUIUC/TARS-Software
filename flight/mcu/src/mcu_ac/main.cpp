@@ -99,7 +99,7 @@ static THD_FUNCTION(telemetry_THD, arg) {
     Telemetry tlm;
     while(true) {
         tlm.transmit(rf95);
-        chThdSleepMilliseconds(1000);
+        chThdSleepMilliseconds(1);
 //         Serial.println("Sending to rf95_server");
 //   // Send a message to rf95_server
   
@@ -153,9 +153,13 @@ static THD_FUNCTION(rocket_FSM, arg) {
 #ifdef THREAD_DEBUG
         Serial.println("### Rocket FSM thread entrance");
 #endif
-
-        delay(80);
+        // Serial.println("abcd1");
+        // Serial.println("abcd2");
+        // Serial.println("abcd3");
+        // Serial.println("abcd4");
+        // Serial.println("abcd5");
         // stateMachine.tickFSM();
+        // delay(100);
 
         chThdSleepMilliseconds(6);  // FSM runs at 100 Hz
     }
@@ -338,11 +342,9 @@ void chSetup() {
                       telemetry_THD, &sensor_pointers);
     chThdCreateStatic(rocket_FSM_WA, sizeof(rocket_FSM_WA), NORMALPRIO + 1,
                       rocket_FSM, &sensor_pointers);
-
-                      chThdCreateStatic(lowgIMU_WA, sizeof(lowgIMU_WA), NORMALPRIO + 1,
+    chThdCreateStatic(lowgIMU_WA, sizeof(lowgIMU_WA), NORMALPRIO + 1,
                       rocket_FSM, &sensor_pointers);
-
-                      chThdCreateStatic(highgIMU_WA, sizeof(highgIMU_WA), NORMALPRIO + 1,
+    chThdCreateStatic(highgIMU_WA, sizeof(highgIMU_WA), NORMALPRIO + 1,
                       rocket_FSM, &sensor_pointers);
 
     while (true)
