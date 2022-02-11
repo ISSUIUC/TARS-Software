@@ -29,7 +29,7 @@ void Telemetry::transmit(const RH_RF95& rf95) {
         uint8_t buf[RH_RF95_MAX_MESSAGE_LEN];
         uint8_t len = sizeof(buf);
                                                 //test without delay
-        Serial.println("Waiting for reply..."); //delay(10);
+        Serial.println("Waiting for reply..."); delay(10);
         if (rf95.waitAvailableTimeout(1000))
         { 
             // Should be a reply message for us now   

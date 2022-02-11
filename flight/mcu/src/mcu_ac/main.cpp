@@ -355,8 +355,7 @@ void chSetup() {
  */
 
 void setup() {
-    Telemetry tlm;
-    RH_RF95 rf95(RFM95_CS, RFM95_INT);
+    // Telemetry tlm;
     int32_t temperature;
     
 
