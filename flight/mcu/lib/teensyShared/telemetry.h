@@ -20,7 +20,7 @@ Data to be sent (in order of priority):
 //Don't forget to change the ini file to build the correct main file
 #define RFM95_CS 10
 #define RFM95_RST 15
-#define RFM95_INT 17
+#define RFM95_INT 16
 #define RFM95_EN 14
 
 // Change to 434.0 or other frequency, must match RX's freq!

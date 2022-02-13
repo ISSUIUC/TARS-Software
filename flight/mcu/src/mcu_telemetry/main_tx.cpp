@@ -22,6 +22,25 @@
 // Singleton instance of the radio driver
 RH_RF95 rf95(RFM95_CS, RFM95_INT);
 
+struct TELEM_DATA {
+  short data1 = 42;
+  short data2 = 43;
+  short data3 = 44;
+  short data4 = 45;
+  short data5 = 46;
+  short data6 = 47;
+  short data7 = 48;
+  short data8 = 49;
+  short data9 = 50;
+  short data10 = 51;
+  short data11 = 52;
+  short data12 = 53;
+  short data13 = 54;
+  short data14 = 56;
+  short data15 = 57;
+  short data16 = 58;
+};
+
 void setup() 
 {
   pinMode(RFM95_RST, OUTPUT);
@@ -70,12 +89,13 @@ void loop()
   // Send a message to rf95_server
   
   char radiopacket[20] = "Hey bestie #      ";
+  TELEM_DATA d;
   itoa(packetnum++, radiopacket+13, 10);
   Serial.print("Sending "); Serial.println(radiopacket);
   radiopacket[19] = 0;
   
   Serial.println("Sending..."); delay(10);
-  rf95.send((uint8_t *)radiopacket, 20);
+  rf95.send((uint8_t *)&d, sizeof(d));
 
   Serial.println("Waiting for packet to complete..."); delay(10);
   rf95.waitPacketSent();
