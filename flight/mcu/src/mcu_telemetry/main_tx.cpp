@@ -13,7 +13,7 @@
 //Don't forget to change the ini file to build the correct main file
 #define RFM95_CS 10
 #define RFM95_RST 15
-#define RFM95_INT 16
+#define RFM95_INT 17
 #define RFM95_EN 14
 
 // Change to 434.0 or other frequency, must match RX's freq!
@@ -21,6 +21,11 @@
 
 // Singleton instance of the radio driver
 RH_RF95 rf95(RFM95_CS, RFM95_INT);
+
+struct TELEM_DATA {
+  short data1 = 42;
+  short data2 = 43;
+};
 
 void setup() 
 {
@@ -70,12 +75,13 @@ void loop()
   // Send a message to rf95_server
   
   char radiopacket[20] = "Hey bestie #      ";
+  TELEM_DATA d;
   itoa(packetnum++, radiopacket+13, 10);
   Serial.print("Sending "); Serial.println(radiopacket);
   radiopacket[19] = 0;
   
   Serial.println("Sending..."); delay(10);
-  rf95.send((uint8_t *)radiopacket, 20);
+  rf95.send((uint8_t *)&d, sizeof(d));
 
   Serial.println("Waiting for packet to complete..."); delay(10);
   rf95.waitPacketSent();
