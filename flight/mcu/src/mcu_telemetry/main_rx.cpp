@@ -24,7 +24,7 @@ This code was used to test the RFM LoRa modules on a breadboard:
 #define RFM95_CS 10
 #define RFM95_RST 15
 #define RFM95_EN 14
-#define RFM95_INT 17
+#define RFM95_INT 16
 #define LED 13 // Blinks on receipt
 
 // Change to 434.0 or other frequency, must match RX's freq!
@@ -33,7 +33,25 @@ This code was used to test the RFM LoRa modules on a breadboard:
 // Singleton instance of the radio driver
 RH_RF95 rf95(RFM95_CS, RFM95_INT);
 
+struct TELEM_DATA{
+  short data1;
+  short data2;
+  short data3;
+  short data4;
+  short data5;
+  short data6;
+  short data7;
+  short data8;
+  short data9;
+  short data10;
+  short data11;
+  short data12;
+  short data13;
+  short data14;
+  short data15;
+  short data16;
 
+};
 
 void setup() 
 {
@@ -82,15 +100,33 @@ void loop()
   {
     // Should be a message for us now   
     uint8_t buf[RH_RF95_MAX_MESSAGE_LEN];
+    TELEM_DATA data;
     uint8_t len = sizeof(buf);
     
     if (rf95.recv(buf, &len))
     {
+      memcpy(&data, buf, sizeof(data));
       digitalWrite(LED, HIGH);
       RH_RF95::printBuffer("Received: ", buf, len);
       Serial.print("Got: ");
-      Serial.println((char*)buf);
-       Serial.print("RSSI: ");
+      Serial.println(data.data1);
+      Serial.println(data.data2);
+      Serial.println(data.data3);
+      Serial.println(data.data4);
+      Serial.println(data.data5);
+      Serial.println(data.data6);
+      Serial.println(data.data7);
+      Serial.println(data.data8);
+      Serial.println(data.data9);
+      Serial.println(data.data10);
+      Serial.println(data.data11);
+      Serial.println(data.data12);
+      Serial.println(data.data13);
+      Serial.println(data.data14);
+      Serial.println(data.data15);
+      Serial.println(data.data16);
+      //Serial.println(data.data2);
+      Serial.print("RSSI: ");
       Serial.println(rf95.lastRssi(), DEC);
       
       // Send a reply
