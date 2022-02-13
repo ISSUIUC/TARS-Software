@@ -25,6 +25,20 @@ RH_RF95 rf95(RFM95_CS, RFM95_INT);
 struct TELEM_DATA {
   short data1 = 42;
   short data2 = 43;
+  short data3 = 44;
+  short data4 = 45;
+  short data5 = 46;
+  short data6 = 47;
+  short data7 = 48;
+  short data8 = 49;
+  short data9 = 50;
+  short data10 = 51;
+  short data11 = 52;
+  short data12 = 53;
+  short data13 = 54;
+  short data14 = 56;
+  short data15 = 57;
+  short data16 = 58;
 };
 
 void setup() 
