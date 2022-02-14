@@ -200,32 +200,27 @@ void gpsTickFunction(pointers *pointer_struct) {
  * @param arg Contains pointers to the various objects needed by the high-g IMU.
  *
  */
-void highGimuTickFunction(pointers *pointer_struct) {
+void highGimuTickFunction(KX134* highG, datalogger_THD* data_log_buffer, highGData* state_buffer) {
     // Read data from high g IMU
     chSysLock();
-    pointer_struct->highGimuPointer->update_data();
+    highG->update_data();
     chSysUnlock();
 
     // Lock high g mutex
-    chMtxLock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_highG);
+    chMtxLock(&data_log_buffer->dataMutex_highG);
 
     // Log high g timestamp
-    pointer_struct->sensorDataPointer->highG_data.timeStamp_highG =
-        chVTGetSystemTime();
+    state_buffer->timeStamp_highG = chVTGetSystemTime();
 
-    // Log accelerations from high g
-    pointer_struct->sensorDataPointer->highG_data.hg_ax =
-        pointer_struct->highGimuPointer->get_x_gforce();
-    pointer_struct->sensorDataPointer->highG_data.hg_ay =
-        pointer_struct->highGimuPointer->get_y_gforce();
-    pointer_struct->sensorDataPointer->highG_data.hg_az =
-        pointer_struct->highGimuPointer->get_z_gforce();
+    // Log accelerations state_buffer
+    state_buffer->hg_ax = highG->get_x_gforce();
+    state_buffer->hg_ay = highG->get_y_gforce();
+    state_buffer->hg_az = highG->get_z_gforce();
 
     // Unlock high g mutex
 
-    pointer_struct->dataloggerTHDVarsPointer.highGFifo.push(
-        pointer_struct->sensorDataPointer->highG_data);
-    chMtxUnlock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_highG);
+    data_log_buffer->highGFifo.push(*state_buffer);
+    chMtxUnlock(&data_log_buffer->dataMutex_highG);
 
 #ifdef HIGHGIMU_DEBUG
     Serial.println("------------- HIGH-G THREAD ---------------");

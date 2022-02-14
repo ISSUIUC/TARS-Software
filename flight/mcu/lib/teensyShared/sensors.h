@@ -19,7 +19,7 @@
 
 void lowGimuTickFunction(pointers *);
 
-void highGimuTickFunction(pointers *);
+void highGimuTickFunction(KX134* highG, datalogger_THD* data_log_buffer, highGData* state_buffer);
 
 void gpsTickFunction(pointers *);
 

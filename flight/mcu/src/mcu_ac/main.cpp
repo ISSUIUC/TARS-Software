@@ -137,12 +137,18 @@ static THD_FUNCTION(highgIMU_THD, arg) {
     // Load outside variables into the function
     struct pointers *pointer_struct = (struct pointers *)arg;
 
+    KX134* highG = pointer_struct->highGimuPointer;
+
+    datalogger_THD* data_log_buffer = &pointer_struct->dataloggerTHDVarsPointer;
+
+    highGData* state_buffer = &pointer_struct->sensorDataPointer->highG_data;
+
     while (true) {
 #ifdef THREAD_DEBUG
         Serial.println("### High G IMU thread entrance");
 #endif
 
-        highGimuTickFunction(pointer_struct);
+        highGimuTickFunction(highG, data_log_buffer, state_buffer);
 
         chThdSleepMilliseconds(6);
     }
