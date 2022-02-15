@@ -47,6 +47,7 @@ struct telemetry_data {
   double IMU_mx;
   double IMU_my;
   double IMU_mz;
+  int FSM_state;
 };
 
 void setup() 
@@ -131,6 +132,8 @@ void loop()
       Serial.println(data.IMU_my);
       Serial.print("IMU mz ");
       Serial.println(data.IMU_mz);
+      Serial.print("FSM state");
+      Serial.println(data.FSM_state);
       Serial.print("RSSI: ");
       Serial.println(rf95.lastRssi(), DEC);
       
