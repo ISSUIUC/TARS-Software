@@ -50,7 +50,7 @@ void setup()
   Serial.begin(9600);
   delay(100);
 
-  Serial.println("Arduino LoRa TX Test!");
+  Serial.println("Telemetry Test");
 
   // manual reset
   digitalWrite(RFM95_RST, LOW);
@@ -59,17 +59,17 @@ void setup()
   delay(10);
 
   while (!rf95.init()) {
-    Serial.println("LoRa radio init failed");
+    Serial.println("Radio Initialization Failed");
     while (1);
   }
-  Serial.println("LoRa radio init OK!");
+  Serial.println("Radio Initialized");
 
   // Defaults after init are 434.0MHz, modulation GFSK_Rb250Fd250, +13dbM
   if (!rf95.setFrequency(RF95_FREQ)) {
-    Serial.println("setFrequency failed");
+    Serial.println("setFrequency Failed");
     while (1);
   }
-  Serial.print("Set Freq to: "); Serial.println(RF95_FREQ);
+  Serial.print("Frequency set to: "); Serial.println(RF95_FREQ);
   
   // Defaults after init are 434.0MHz, 13dBm, Bw = 125 kHz, Cr = 4/5, Sf = 128chips/symbol, CRC on
 
