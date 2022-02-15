@@ -33,24 +33,20 @@ This code was used to test the RFM LoRa modules on a breadboard:
 // Singleton instance of the radio driver
 RH_RF95 rf95(RFM95_CS, RFM95_INT);
 
-struct TELEM_DATA{
-  short data1;
-  short data2;
-  short data3;
-  short data4;
-  short data5;
-  short data6;
-  short data7;
-  short data8;
-  short data9;
-  short data10;
-  short data11;
-  short data12;
-  short data13;
-  short data14;
-  short data15;
-  short data16;
-
+struct telemetry_data {
+  double gps_lat;
+  double gps_long;
+  double gps_alt;
+  double barometer_alt;
+  double IMU_ax;
+  double IMU_ay;
+  double IMU_az;
+  double IMU_gx;
+  double IMU_gy;
+  double IMU_gz;
+  double IMU_mx;
+  double IMU_my;
+  double IMU_mz;
 };
 
 void setup() 
@@ -100,7 +96,7 @@ void loop()
   {
     // Should be a message for us now   
     uint8_t buf[RH_RF95_MAX_MESSAGE_LEN];
-    TELEM_DATA data;
+    telemetry_data data;
     uint8_t len = sizeof(buf);
     
     if (rf95.recv(buf, &len))
@@ -108,24 +104,33 @@ void loop()
       memcpy(&data, buf, sizeof(data));
       digitalWrite(LED, HIGH);
       RH_RF95::printBuffer("Received: ", buf, len);
-      Serial.print("Got: ");
-      Serial.println(data.data1);
-      Serial.println(data.data2);
-      Serial.println(data.data3);
-      Serial.println(data.data4);
-      Serial.println(data.data5);
-      Serial.println(data.data6);
-      Serial.println(data.data7);
-      Serial.println(data.data8);
-      Serial.println(data.data9);
-      Serial.println(data.data10);
-      Serial.println(data.data11);
-      Serial.println(data.data12);
-      Serial.println(data.data13);
-      Serial.println(data.data14);
-      Serial.println(data.data15);
-      Serial.println(data.data16);
-      //Serial.println(data.data2);
+      Serial.println("Got: ");
+      Serial.print("GPS Lat ");
+      Serial.println(data.gps_lat);
+      Serial.print("GPS Long ");
+      Serial.println(data.gps_long);
+      Serial.print("GPS Alt ");
+      Serial.println(data.gps_alt);
+      Serial.print("Barometer Alt ");
+      Serial.println(data.barometer_alt);
+      Serial.print("IMU ax ");
+      Serial.println(data.IMU_ax);
+      Serial.print("IMU ay ");
+      Serial.println(data.IMU_ay);
+      Serial.print("IMU az ");
+      Serial.println(data.IMU_az);
+      Serial.print("IMU gx ");
+      Serial.println(data.IMU_gx);
+      Serial.print("IMU gy ");
+      Serial.println(data.IMU_gy);
+      Serial.print("IMU gz ");
+      Serial.println(data.IMU_gz);
+      Serial.print("IMU mx ");
+      Serial.println(data.IMU_mx);
+      Serial.print("IMU my ");
+      Serial.println(data.IMU_my);
+      Serial.print("IMU mz ");
+      Serial.println(data.IMU_mz);
       Serial.print("RSSI: ");
       Serial.println(rf95.lastRssi(), DEC);
       
