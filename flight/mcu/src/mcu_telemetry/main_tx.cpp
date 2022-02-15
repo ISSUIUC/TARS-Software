@@ -39,6 +39,8 @@ struct telemetry_data {
   int FSM_state = 2;
 };
 
+int command_data;
+
 void setup() 
 {
   pinMode(RFM95_RST, OUTPUT);
@@ -86,13 +88,14 @@ void loop()
   Serial.println("Sending to rf95_server");
   // Send a message to rf95_server
   
-  char radiopacket[20] = "Hey bestie #      ";
-  telemetry_data d;
-  itoa(packetnum++, radiopacket+13, 10);
-  Serial.print("Sending "); Serial.println(radiopacket);
-  radiopacket[19] = 0;
   
-  Serial.println("Sending..."); delay(10);
+  telemetry_data d;
+  // char radiopacket[20] = "Hey bestie #      ";
+  // itoa(packetnum++, radiopacket+13, 10);
+  // Serial.print("Sending "); Serial.println(radiopacket);
+  // radiopacket[19] = 0;
+  
+  Serial.println("Sending sample sensor data..."); delay(10);
   rf95.send((uint8_t *)&d, sizeof(d));
 
   Serial.println("Waiting for packet to complete..."); delay(10);
