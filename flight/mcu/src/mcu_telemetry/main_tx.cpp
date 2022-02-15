@@ -36,6 +36,7 @@ struct telemetry_data {
   double IMU_mx = 0.4018;
   double IMU_my = -0.36078;
   double IMU_mz = 0.16828;
+  int FSM_state = 2;
 };
 
 void setup() 
