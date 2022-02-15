@@ -22,23 +22,20 @@
 // Singleton instance of the radio driver
 RH_RF95 rf95(RFM95_CS, RFM95_INT);
 
-struct TELEM_DATA {
-  short data1 = 42;
-  short data2 = 43;
-  short data3 = 44;
-  short data4 = 45;
-  short data5 = 46;
-  short data6 = 47;
-  short data7 = 48;
-  short data8 = 49;
-  short data9 = 50;
-  short data10 = 51;
-  short data11 = 52;
-  short data12 = 53;
-  short data13 = 54;
-  short data14 = 56;
-  short data15 = 57;
-  short data16 = 58;
+struct telemetry_data {
+  double gps_lat = 41.4804;
+  double gps_long = -89.501;
+  double gps_alt = 2362.07;
+  double barometer_alt = 2000.0;
+  double IMU_ax = 0.4209;
+  double IMU_ay = -0.733464;
+  double IMU_az = -0.5124;
+  double IMU_gx = 26.88;
+  double IMU_gy = -553.84;
+  double IMU_gz = 0.49;
+  double IMU_mx = 0.4018;
+  double IMU_my = -0.36078;
+  double IMU_mz = 0.16828;
 };
 
 void setup() 
@@ -89,7 +86,7 @@ void loop()
   // Send a message to rf95_server
   
   char radiopacket[20] = "Hey bestie #      ";
-  TELEM_DATA d;
+  telemetry_data d;
   itoa(packetnum++, radiopacket+13, 10);
   Serial.print("Sending "); Serial.println(radiopacket);
   radiopacket[19] = 0;
