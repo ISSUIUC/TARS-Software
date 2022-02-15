@@ -39,7 +39,7 @@ struct telemetry_data {
   int FSM_state = 2;
 };
 
-int command_data;
+int command_data = 0;
 
 void setup() 
 {
@@ -110,7 +110,9 @@ void loop()
     // Should be a reply message for us now   
     if (rf95.recv(buf, &len))
    {
+      memcpy(&command_data, buf, sizeof(command_data));
       Serial.print("Got reply: ");
+
       Serial.println((char*)buf);
       Serial.print("RSSI: ");
       Serial.println(rf95.lastRssi(), DEC);    
