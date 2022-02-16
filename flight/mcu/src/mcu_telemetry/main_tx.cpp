@@ -19,8 +19,15 @@
 // Change to 434.0 or other frequency, must match RX's freq!
 #define RF95_FREQ 434.0
 
+#define MAX_CMD_LEN 10
+
 // Singleton instance of the radio driver
 RH_RF95 rf95(RFM95_CS, RFM95_INT);
+
+//For reading from 
+char incomingCmd[MAX_CMD_LEN];
+
+
 
 struct telemetry_data {
   double gps_lat = 41.4804;
@@ -38,8 +45,6 @@ struct telemetry_data {
   double IMU_mz = 0.16828;
   int FSM_state = 2;
 };
-
-int command_data = 0;
 
 void setup() 
 {
@@ -110,7 +115,7 @@ void loop()
     // Should be a reply message for us now   
     if (rf95.recv(buf, &len))
    {
-      memcpy(&command_data, buf, sizeof(command_data));
+      memcpy(incomingCmd, buf, sizeof(incomingCmd));
       Serial.print("Got reply: ");
 
       Serial.println((char*)buf);

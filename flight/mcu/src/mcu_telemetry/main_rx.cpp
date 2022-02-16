@@ -30,8 +30,17 @@ This code was used to test the RFM LoRa modules on a breadboard:
 // Change to 434.0 or other frequency, must match RX's freq!
 #define RF95_FREQ 434.0
 
+#define DEFAULT_CMD 0
+#define MAX_CMD_LEN 10
+
 // Singleton instance of the radio driver
 RH_RF95 rf95(RFM95_CS, RFM95_INT);
+
+//For reading from 
+char incomingCmd[MAX_CMD_LEN];
+char curByte;
+short charIdx = 0;
+short readySend = 0;
 
 struct telemetry_data {
   double gps_lat;
@@ -89,6 +98,8 @@ void setup()
   // If you are using RFM95/96/97/98 modules which uses the PA_BOOST transmitter pin, then 
   // you can set transmitter powers from 5 to 23 dBm:
   rf95.setTxPower(23, false);
+
+
 }
 
 void loop()
@@ -138,8 +149,9 @@ void loop()
       Serial.println(rf95.lastRssi(), DEC);
       
       // Send a reply
-      uint8_t data[] = "And hello back to you"; // This is currently not being received by the transmitter. 
-      rf95.send(data, sizeof(data));
+      uint8_t cmd[] = "Hey Bestie!!";
+
+      rf95.send(cmd, sizeof(cmd));
       rf95.waitPacketSent();
       Serial.println("Sent a reply");
       digitalWrite(LED, LOW);
@@ -149,4 +161,19 @@ void loop()
       Serial.println("Receive failed");
     }
   }
+  if(Serial.available() > 0){
+    char curByte = Serial.read();
+    if(curByte == 32 || charIdx == 10) {
+      uint8_t cmd[MAX_CMD_LEN];
+      memcpy(cmd, &incomingCmd, sizeof(cmd));
+      rf95.send(cmd, sizeof(cmd));
+      rf95.waitPacketSent();
+      Serial.println("Sent a cmd");
+      digitalWrite(LED, LOW);
+      charIdx = 0;}
+    else {incomingCmd[charIdx++] = curByte;}
+    Serial.print("I got ");
+    Serial.println((char)curByte);
+  }
+  
 }
