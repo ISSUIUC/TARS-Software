@@ -37,77 +37,58 @@
  * @param arg Contains pointers to various objects needed by the low-g IMU.
  *
  */
-void lowGimuTickFunction(LSM9DS1* LSM_Pointer, datalogger_THD* THD_Datalog_Buffer, lowGData* lowG_Data) {
+void lowGimuTickFunction(LSM9DS1* lsm, DataLogBuffer* data_log_buffer,
+                         LowGData* lowG_Data) {
     // Reads data from the low g IMU
     chSysLock();
-    LSM_Pointer ->readAccel();
-    LSM_Pointer ->readGyro();
-    LSM_Pointer ->readMag();
+    lsm->readAccel();
+    lsm->readGyro();
+    lsm->readMag();
     chSysUnlock();
 
     // Lock low g mutex
-    chMtxLock(&THD_Datalog_Buffer->dataMutex_lowG);
+    chMtxLock(&data_log_buffer->dataMutex_lowG);
 
     // Log timestamp
-    lowG_Data->timeStamp_lowG =
-        chVTGetSystemTime();
+    lowG_Data->timeStamp_lowG = chVTGetSystemTime();
 
     // Log acceleration in Gs
-    lowG_Data->ax =
-        LSM_Pointer->calcAccel(
-            LSM_Pointer ->ax);
-    lowG_Data->ay =
-        LSM_Pointer ->calcAccel(
-            LSM_Pointer ->ay);
-    lowG_Data->
-        az = LSM_Pointer ->calcAccel(
-        LSM_Pointer ->az);  // There was a minus here. We
+    lowG_Data->ax = lsm->calcAccel(lsm->ax);
+    lowG_Data->ay = lsm->calcAccel(lsm->ay);
+    lowG_Data->az = lsm->calcAccel(lsm->az);  // There was a minus here. We
                                               // don't know why that did that
     // Log rotational speed in degrees per second
-    lowG_Data->gx =
-        LSM_Pointer->calcGyro(
-            LSM_Pointer->gx);
-    lowG_Data->gy =
-        LSM_Pointer->calcGyro(
-            LSM_Pointer->gy);
-    lowG_Data->gz =
-        LSM_Pointer->calcGyro(
-            LSM_Pointer->gz);
+    lowG_Data->gx = lsm->calcGyro(lsm->gx);
+    lowG_Data->gy = lsm->calcGyro(lsm->gy);
+    lowG_Data->gz = lsm->calcGyro(lsm->gz);
     // Log magnetometer data in gauss
-    lowG_Data->mx =
-        LSM_Pointer->calcMag(
-            LSM_Pointer->mx);
-    lowG_Data->my =
-        LSM_Pointer->calcMag(
-            LSM_Pointer->my);
-    lowG_Data->mz =
-        LSM_Pointer->calcMag(
-            LSM_Pointer->mz);
+    lowG_Data->mx = lsm->calcMag(lsm->mx);
+    lowG_Data->my = lsm->calcMag(lsm->my);
+    lowG_Data->mz = lsm->calcMag(lsm->mz);
     //! Unlocking &dataMutex for low g
 
-    THD_Datalog_Buffer->lowGFifo.push(
-       *lowG_Data);
-    chMtxUnlock(&THD_Datalog_Buffer->dataMutex_lowG);
+    data_log_buffer->lowGFifo.push(*lowG_Data);
+    chMtxUnlock(&data_log_buffer->dataMutex_lowG);
 
 #ifdef LOWGIMU_DEBUG
     Serial.println("------------- LOW-G THREAD ---------------");
-    Serial.print(pointer_struct->sensorDataPointer->lowG_data.ax);
+    Serial.print(lowG_data->ax);
     Serial.print(", ");
-    Serial.print(pointer_struct->sensorDataPointer->lowG_data.ay);
+    Serial.print(lowG_data->ay);
     Serial.print(", ");
-    Serial.print(pointer_struct->sensorDataPointer->lowG_data.az);
+    Serial.print(lowG_data->az);
     Serial.print(", ");
-    Serial.print(pointer_struct->sensorDataPointer->lowG_data.gx);
+    Serial.print(lowG_data->gx);
     Serial.print(", ");
-    Serial.print(pointer_struct->sensorDataPointer->lowG_data.gy);
+    Serial.print(lowG_data->gy);
     Serial.print(", ");
-    Serial.print(pointer_struct->sensorDataPointer->lowG_data.gz);
+    Serial.print(lowG_data->gz);
     Serial.print(", ");
-    Serial.print(pointer_struct->sensorDataPointer->lowG_data.mx);
+    Serial.print(lowG_data->mx);
     Serial.print(", ");
-    Serial.print(pointer_struct->sensorDataPointer->lowG_data.my);
+    Serial.print(lowG_data->my);
     Serial.print(", ");
-    Serial.print(pointer_struct->sensorDataPointer->lowG_data.mz);
+    Serial.print(lowG_data->mz);
     Serial.print(", ");
 #endif
 }
@@ -119,12 +100,13 @@ void lowGimuTickFunction(LSM9DS1* LSM_Pointer, datalogger_THD* THD_Datalog_Buffe
  * @param arg Contains pointers to various objects needed by the GPS.
  *
  */
-void gpsTickFunction(SFE_UBLOX_GNSS* GPSPointer, datalogger_THD* dataloggerTHDVarsPointer, gpsData* gps_data) {
+void gpsTickFunction(SFE_UBLOX_GNSS* gps, DataLogBuffer* data_log_buffer,
+                     GpsData* gps_data) {
     // get read timestamp
     systime_t timeStamp_GPS = chVTGetSystemTime();
 
     // get the data with a 20 millisecond timeout
-    bool has_data = GPSPointer->getPVT(20);
+    bool has_data = gps->getPVT(20);
 
     if (!has_data) {
         return;
@@ -132,20 +114,20 @@ void gpsTickFunction(SFE_UBLOX_GNSS* GPSPointer, datalogger_THD* dataloggerTHDVa
 
     // Log lat, long, alt, posLock
     // all gps input is in 10^-7 degrees
-    float latitude = GPSPointer->getLatitude();
-    float longitude = GPSPointer->getLongitude();
+    float latitude = gps->getLatitude();
+    float longitude = gps->getLongitude();
     // adjust to floating point coordinates
     latitude /= 10000000;
     longitude /= 10000000;
     // altitude input is in mm
-    float altitude = GPSPointer->getAltitude();
+    float altitude = gps->getAltitude();
     // fixtype 3 means that we have a 3d position fix
-    uint32_t fix_type = GPSPointer->getFixType();
+    uint32_t fix_type = gps->getFixType();
     bool posLock = (fix_type == 3);
 
-    uint32_t SIV_count = GPSPointer->getSIV();
+    uint32_t SIV_count = gps->getSIV();
 
-	mutex_t& gps_mutex = dataloggerTHDVarsPointer->dataMutex_GPS;
+    mutex_t& gps_mutex = data_log_buffer->dataMutex_GPS;
     // Lock gps mutex
     chMtxLock(&gps_mutex);
 
@@ -157,7 +139,7 @@ void gpsTickFunction(SFE_UBLOX_GNSS* GPSPointer, datalogger_THD* dataloggerTHDVa
     gps_data->fix_type = fix_type;
     gps_data->siv_count = SIV_count;
 
-    dataloggerTHDVarsPointer->gpsFifo.push(*gps_data);
+    data_log_buffer->gpsFifo.push(*gps_data);
 
     //! Unlocking &dataMutex
     chMtxUnlock(&gps_mutex);
@@ -170,24 +152,24 @@ void gpsTickFunction(SFE_UBLOX_GNSS* GPSPointer, datalogger_THD* dataloggerTHDVa
     }
 
 #ifdef GPS_DEBUG
-    bool position_lock = pointer_struct->GPSPointer->get_position_lock();
+    bool position_lock = pointer_struct->gps->get_position_lock();
     if (position_lock) {
         Serial.println("POSITION LOCK!");
         Serial.println("GPS Data: ");
         Serial.print("Latitude: ");
-        Serial.println(pointer_struct->sensorDataPointer->gps_data.latitude);
+        Serial.println(gps_data->latitude);
         Serial.print("Longitude: ");
-        Serial.println(pointer_struct->sensorDataPointer->gps_data.longitude);
+        Serial.println(gps_data->longitude);
         Serial.print("Altitude: ");
-        Serial.println(pointer_struct->sensorDataPointer->gps_data.altitude);
+        Serial.println(gps_data->altitude);
     } else {
         Serial.println("Searching...");
         Serial.print("Latitude: ");
-        Serial.println(pointer_struct->sensorDataPointer->gps_data.latitude);
+        Serial.println(gps_data->latitude);
         Serial.print("Longitude: ");
-        Serial.println(pointer_struct->sensorDataPointer->gps_data.longitude);
+        Serial.println(gps_data->longitude);
         Serial.print("Altitude: ");
-        Serial.println(pointer_struct->sensorDataPointer->gps_data.altitude);
+        Serial.println(gps_data->altitude);
         Serial.println("");
     }
 #endif
@@ -200,7 +182,8 @@ void gpsTickFunction(SFE_UBLOX_GNSS* GPSPointer, datalogger_THD* dataloggerTHDVa
  * @param arg Contains pointers to the various objects needed by the high-g IMU.
  *
  */
-void highGimuTickFunction(KX134* highG, datalogger_THD* data_log_buffer, highGData* state_buffer) {
+void highGimuTickFunction(KX134* highG, DataLogBuffer* data_log_buffer,
+                          HighGData* highg_data) {
     // Read data from high g IMU
     chSysLock();
     highG->update_data();
@@ -210,26 +193,26 @@ void highGimuTickFunction(KX134* highG, datalogger_THD* data_log_buffer, highGDa
     chMtxLock(&data_log_buffer->dataMutex_highG);
 
     // Log high g timestamp
-    state_buffer->timeStamp_highG = chVTGetSystemTime();
+    highg_data->timeStamp_highG = chVTGetSystemTime();
 
-    // Log accelerations state_buffer
-    state_buffer->hg_ax = highG->get_x_gforce();
-    state_buffer->hg_ay = highG->get_y_gforce();
-    state_buffer->hg_az = highG->get_z_gforce();
+    // Log accelerations highg_data
+    highg_data->hg_ax = highG->get_x_gforce();
+    highg_data->hg_ay = highG->get_y_gforce();
+    highg_data->hg_az = highG->get_z_gforce();
 
     // Unlock high g mutex
 
-    data_log_buffer->highGFifo.push(*state_buffer);
+    data_log_buffer->highGFifo.push(*highg_data);
     chMtxUnlock(&data_log_buffer->dataMutex_highG);
 
 #ifdef HIGHGIMU_DEBUG
     Serial.println("------------- HIGH-G THREAD ---------------");
     // high g data
-    Serial.print(pointer_struct->sensorDataPointer->highG_data.hg_ax);
+    Serial.print(highG_data->hg_ax);
     Serial.print(", ");
-    Serial.print(pointer_struct->sensorDataPointer->highG_data.hg_ay);
+    Serial.print(highG_data->hg_ay);
     Serial.print(", ");
-    Serial.println(pointer_struct->sensorDataPointer->highG_data.hg_az);
+    Serial.println(highG_data->hg_az);
 #endif
 }
 
@@ -241,25 +224,25 @@ void highGimuTickFunction(KX134* highG, datalogger_THD* data_log_buffer, highGDa
  *
  */
 // void barometerTickFunction(pointers *pointer_struct) {
-void barometerTickFunction(MS5611* barometerPointer, datalogger_THD* dataloggerTHDVarsPointer, barometerData* barometer_data) {
+void barometerTickFunction(MS5611* barometer, DataLogBuffer* data_log_buffer,
+                           BarometerData* barometer_data) {
     // Reads data from the barometer
     // chSysLock();
-    barometerPointer->read(12);
+    barometer->read(12);
     // chSysUnlock();
 
     // Lock barometer mutex
-    chMtxLock(&dataloggerTHDVarsPointer->dataMutex_barometer);
+    chMtxLock(&data_log_buffer->dataMutex_barometer);
 
     // Log timestamp
-    barometer_data->timeStamp_barometer =
-        chVTGetSystemTime();
+    barometer_data->timeStamp_barometer = chVTGetSystemTime();
 
     // Log pressure and temperature
     barometer_data->pressure =
-        barometerPointer->getPressure() *
+        barometer->getPressure() *
         0.01;  // Converting both of them into correct unit (in mbar)
     barometer_data->temperature =
-        barometerPointer->getTemperature() *
+        barometer->getTemperature() *
         0.01;  // Converting both of them into correct unit (in degC)
 
     // Compute altitude from pres and temp based on Hypsometric equation
@@ -274,25 +257,20 @@ void barometerTickFunction(MS5611* barometerPointer, datalogger_THD* dataloggerT
     // (pointer_struct->sensorDataPointer->barometer_data.temperature+273.15)/9.8/0.029;
 
     // A version with no divide operation to enable faster computation, probably
-    barometer_data->altitude =
-        -log(barometer_data->pressure *
-             0.000987) *
-        (barometer_data->temperature +
-         273.15) *
-        29.254;
+    barometer_data->altitude = -log(barometer_data->pressure * 0.000987) *
+                               (barometer_data->temperature + 273.15) * 29.254;
 
-    dataloggerTHDVarsPointer->barometerFifo.push(
-        *barometer_data);
+    data_log_buffer->barometerFifo.push(*barometer_data);
     //! Unlocking &dataMutex for barometer
-    chMtxUnlock(&dataloggerTHDVarsPointer->dataMutex_barometer);
+    chMtxUnlock(&data_log_buffer->dataMutex_barometer);
 
 #ifdef BAROMETER_DEBUG
     Serial.println("------------- BAROMETER THREAD ---------------");
-    Serial.print(pointer_struct->sensorDataPointer->barometer_data.pressure);
+    Serial.print(barometer_data->pressure);
     Serial.print(", ");
-    Serial.print(pointer_struct->sensorDataPointer->barometer_data.temperature);
+    Serial.print(barometer_data->temperature);
     Serial.print(", ");
-    Serial.print(pointer_struct->sensorDataPointer->barometer_data.altitude);
+    Serial.print(barometer_data->altitude);
 #endif
 }
 

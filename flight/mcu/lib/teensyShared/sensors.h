@@ -17,12 +17,16 @@
 
 #include "dataLog.h"
 
-void lowGimuTickFunction(LSM9DS1* LSM_Pointer, datalogger_THD* THD_Datalog_Buffer, lowGData* lowG_Data);
+void lowGimuTickFunction(LSM9DS1* lsm, DataLogBuffer* data_log_buffer,
+                         LowGData* lowG_data);
 
-void highGimuTickFunction(KX134* highG, datalogger_THD* data_log_buffer, highGData* state_buffer);
+void highGimuTickFunction(KX134* highG, DataLogBuffer* data_log_buffer,
+                          HighGData* highG_data);
 
-void gpsTickFunction(SFE_UBLOX_GNSS* GPSPointer, datalogger_THD* dataloggerTHDVarsPointer, gpsData* gps_data);
+void gpsTickFunction(SFE_UBLOX_GNSS* gps, DataLogBuffer* data_log_buffer,
+                     GpsData* gps_data);
 
-void barometerTickFunction(MS5611* barometerPointer, datalogger_THD* dataloggerTHDVarsPointer, barometerData* barometer_data);
+void barometerTickFunction(MS5611* barometer, DataLogBuffer* data_log_buffer,
+                           BarometerData* barometer_data);
 
 #endif
