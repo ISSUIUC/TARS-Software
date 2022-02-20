@@ -100,13 +100,15 @@ static THD_FUNCTION(rocket_FSM, arg) {
 static THD_FUNCTION(lowgIMU_THD, arg) {
     // Load outside variables into the function
     struct pointers *pointer_struct = (struct pointers *)arg;
-
+    LSM9DS1* LSMPointer = pointer_struct->lowGimuPointer;
+    datalogger_THD* Datalog_Buffer = &pointer_struct-> dataloggerTHDVarsPointer;
+    lowGData* lowG_Data = &pointer_struct-> sensorDataPointer->lowG_data;
     while (true) {
 #ifdef THREAD_DEBUG
         Serial.println("### Low G IMU thread entrance");
 #endif
 
-        lowGimuTickFunction(pointer_struct);
+        lowGimuTickFunction(LSMPointer, Datalog_Buffer, lowG_Data);
 
         chThdSleepMilliseconds(6);
     }

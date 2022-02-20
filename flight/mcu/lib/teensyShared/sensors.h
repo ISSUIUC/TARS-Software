@@ -17,7 +17,7 @@
 
 #include "dataLog.h"
 
-void lowGimuTickFunction(pointers *);
+void lowGimuTickFunction(LSM9DS1* LSM_Pointer, datalogger_THD* THD_Datalog_Buffer, lowGData* lowG_Data);
 
 void highGimuTickFunction(KX134* highG, datalogger_THD* data_log_buffer, highGData* state_buffer);
 
