@@ -119,7 +119,7 @@ void lowGimuTickFunction(pointers *pointer_struct) {
  * @param arg Contains pointers to various objects needed by the GPS.
  *
  */
-void gpsTickFunction(SFE_UBLOX_GNSS* GPSPointer, datalogger_THD dataloggerTHDVarsPointer, gpsData gps_data) {
+void gpsTickFunction(SFE_UBLOX_GNSS* GPSPointer, datalogger_THD* dataloggerTHDVarsPointer, gpsData* gps_data) {
     // get read timestamp
     systime_t timeStamp_GPS = chVTGetSystemTime();
 
@@ -145,22 +145,22 @@ void gpsTickFunction(SFE_UBLOX_GNSS* GPSPointer, datalogger_THD dataloggerTHDVar
 
     uint32_t SIV_count = GPSPointer->getSIV();
 
+	mutex_t& gps_mutex = dataloggerTHDVarsPointer->dataMutex_GPS;
     // Lock gps mutex
-    chMtxLock(&dataloggerTHDVarsPointer.dataMutex_GPS);
+    chMtxLock(&gps_mutex);
 
-    gps_data.timeStamp_GPS = timeStamp_GPS;
-    gps_data.latitude = latitude;
-    gps_data.longitude = longitude;
-    gps_data.altitude = altitude;
-    gps_data.posLock = posLock;
-    gps_data.fix_type = fix_type;
-    gps_data.siv_count = SIV_count;
+    gps_data->timeStamp_GPS = timeStamp_GPS;
+    gps_data->latitude = latitude;
+    gps_data->longitude = longitude;
+    gps_data->altitude = altitude;
+    gps_data->posLock = posLock;
+    gps_data->fix_type = fix_type;
+    gps_data->siv_count = SIV_count;
 
-    dataloggerTHDVarsPointer.gpsFifo.push(
-        sensorDataPointer->gps_data);
+    dataloggerTHDVarsPointer->gpsFifo.push(*gps_data);
 
     //! Unlocking &dataMutex
-    chMtxUnlock(&dataloggerTHDVarsPointer.dataMutex_GPS);
+    chMtxUnlock(&gps_mutex);
 
     // Toggle the LED to show if the gps has position lock
     if (posLock == true) {
