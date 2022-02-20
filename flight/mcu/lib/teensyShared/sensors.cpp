@@ -37,12 +37,12 @@
  * @param arg Contains pointers to various objects needed by the low-g IMU.
  *
  */
-void lowGimuTickFunction(pointers *pointer_struct) {
+void lowGimuTickFunction(LSM9DS1* LSM_Pointer) {
     // Reads data from the low g IMU
     chSysLock();
-    pointer_struct->lowGimuPointer->readAccel();
-    pointer_struct->lowGimuPointer->readGyro();
-    pointer_struct->lowGimuPointer->readMag();
+    LSM_Pointer ->readAccel();
+    LSM_Pointer ->readGyro();
+    LSM_Pointer ->readMag();
     chSysUnlock();
 
     // Lock low g mutex
@@ -54,14 +54,14 @@ void lowGimuTickFunction(pointers *pointer_struct) {
 
     // Log acceleration in Gs
     pointer_struct->sensorDataPointer->lowG_data.ax =
-        pointer_struct->lowGimuPointer->calcAccel(
-            pointer_struct->lowGimuPointer->ax);
+        LSM_Pointer->calcAccel(
+            LSM_Pointer ->ax);
     pointer_struct->sensorDataPointer->lowG_data.ay =
-        pointer_struct->lowGimuPointer->calcAccel(
-            pointer_struct->lowGimuPointer->ay);
+        LSM_Pointer ->calcAccel(
+            LSM_Pointer ->ay);
     pointer_struct->sensorDataPointer->lowG_data
-        .az = pointer_struct->lowGimuPointer->calcAccel(
-        pointer_struct->lowGimuPointer->az);  // There was a minus here. We
+        .az = LSM_Pointer ->calcAccel(
+        LSM_Pointer ->az);  // There was a minus here. We
                                               // don't know why that did that
     // Log rotational speed in degrees per second
     pointer_struct->sensorDataPointer->lowG_data.gx =
