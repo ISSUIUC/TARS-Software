@@ -121,12 +121,17 @@ static THD_FUNCTION(barometer_THD, arg) {
     // Load outside variables into the function
     struct pointers *pointer_struct = (struct pointers *)arg;
 
+	MS5611* barometerPointer = pointer_struct->barometerPointer;
+	datalogger_THD* dataloggerTHDVarsPointer = &pointer_struct->dataloggerTHDVarsPointer;
+	barometerData* barometer_data = &pointer_struct->sensorDataPointer->barometer_data;
+
     while (true) {
 #ifdef THREAD_DEBUG
         Serial.println("### Barometer thread entrance");
 #endif
 
-        barometerTickFunction(pointer_struct);
+        // barometerTickFunction(pointer_struct);
+        barometerTickFunction(barometerPointer, dataloggerTHDVarsPointer, barometer_data);
 
         chThdSleepMilliseconds(6);
     }
@@ -164,15 +169,15 @@ static THD_FUNCTION(gps_THD, arg) {
     struct pointers *pointer_struct = (struct pointers *)arg;
 
 	SFE_UBLOX_GNSS* GPSPointer = pointer_struct->GPSPointer;
-	datalogger_THD& dataloggerTHDVarsPointer = pointer_struct->dataloggerTHDVarsPointer;
-	gpsData& gps_data = pointer_struct->sensorDataPointer->gps_data;
+	datalogger_THD* dataloggerTHDVarsPointer = &pointer_struct->dataloggerTHDVarsPointer;
+	gpsData* gps_data = &pointer_struct->sensorDataPointer->gps_data;
 
     while (true) {
 #ifdef THREAD_DEBUG
         Serial.println("### GPS thread entrance");
 #endif
 
-        gpsTickFunction(GPSPointer, &dataloggerTHDVarsPointer, &gps_data);
+        gpsTickFunction(GPSPointer, dataloggerTHDVarsPointer, gps_data);
 
 #ifdef THREAD_DEBUG
         Serial.println("### GPS thread exit");
