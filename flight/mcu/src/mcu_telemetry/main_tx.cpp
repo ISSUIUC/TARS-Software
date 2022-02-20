@@ -27,34 +27,6 @@ RH_RF95 rf95(RFM95_CS, RFM95_INT);
 //For reading from 
 char incomingCmd[MAX_CMD_LEN];
 
-<<<<<<< HEAD
-struct telemetry_data {
-  double gps_lat;
-  double gps_long;
-  double gps_alt;
-  double barometer_alt;
-  // KX134 (highg) IMU DATA
-  double KX_IMU_ax;   // acceleration (in G's)
-  double KX_IMU_ay;
-  double KX_IMU_az;
-  // H3LIS331DL (highg) IMU DATA
-  double H3L_IMU_ax;
-  double H3L_IMU_ay;
-  double H3L_IMU_az;
-  // LSM9DS1 (lowg) IMU DATA
-  double LSM_IMU_ax;    // acceleration (in G's)
-  double LSM_IMU_ay;
-  double LSM_IMU_az;
-  double LSM_IMU_gx;    // Gyro data (in degrees/sec)
-  double LSM_IMU_gy;
-  double LSM_IMU_gz;
-  double LSM_IMU_mx;
-  double LSM_IMU_my;
-  double LSM_IMU_mz;
-  
-  int FSM_state;
-  char sign[] = callsign;
-=======
 
 // Data transmitted from rocket to ground station
 struct telemetry_data {
