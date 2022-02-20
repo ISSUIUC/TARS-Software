@@ -161,12 +161,16 @@ static THD_FUNCTION(gps_THD, arg) {
     // Load outside variables into the function
     struct pointers *pointer_struct = (struct pointers *)arg;
 
+	SFE_UBLOX_GNSS* GPSPointer = pointer_struct->GPSPointer;
+	datalogger_THD dataloggerTHDVarsPointer = pointer_struct->dataloggerTHDVarsPointer;
+	gpsData gps_data = pointer_struct->sensorDataPointer->gps_data;
+
     while (true) {
 #ifdef THREAD_DEBUG
         Serial.println("### GPS thread entrance");
 #endif
 
-        gpsTickFunction(pointer_struct);
+        gpsTickFunction(GPSPointer, dataloggerTHDVarsPointer, gps_data);
 
 #ifdef THREAD_DEBUG
         Serial.println("### GPS thread exit");

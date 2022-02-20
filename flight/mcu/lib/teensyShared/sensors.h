@@ -21,7 +21,8 @@ void lowGimuTickFunction(pointers *);
 
 void highGimuTickFunction(KX134* highG, datalogger_THD* data_log_buffer, highGData* state_buffer);
 
-void gpsTickFunction(pointers *);
+// void gpsTickFunction(pointers *);
+void gpsTickFunction(SFE_UBLOX_GNSS* GPSPointer, datalogger_THD dataloggerTHDVarsPointer, gpsData gps_data);
 
 void barometerTickFunction(pointers *);
 
