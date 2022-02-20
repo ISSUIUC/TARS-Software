@@ -48,7 +48,18 @@ void rocketFSM::tickFSM() {
     float linear_acceleration =
         -pointer_struct->sensorDataPointer->lowG_data.ay;
 
+    // links to abort for other states
+    if (STATE_ABORT) {
+        
+    }
+
+
+
     switch (pointer_struct->sensorDataPointer->rocketState_data.rocketState) {
+        case STATE_ABORT:
+            // if true, always stay in abort
+            break;
+
         case STATE_INIT:
             // go to state idle regardless of gps lock
             pointer_struct->sensorDataPointer->rocketState_data.rocketState =

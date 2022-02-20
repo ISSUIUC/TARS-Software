@@ -179,6 +179,8 @@ struct pointers {
     sensorDataStruct_t* sensorDataPointer;
 
     DataLogBuffer dataloggerTHDVarsPointer;
+    
+
 };
 
 void dataLoggerTickFunction(pointers*);
