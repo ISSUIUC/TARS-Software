@@ -240,25 +240,26 @@ void highGimuTickFunction(KX134* highG, datalogger_THD* data_log_buffer, highGDa
  * @param arg Contains pointers to various objects needed by the barometer.
  *
  */
-void barometerTickFunction(pointers *pointer_struct) {
+// void barometerTickFunction(pointers *pointer_struct) {
+void barometerTickFunction(MS5611* barometerPointer, datalogger_THD* dataloggerTHDVarsPointer, barometerData* barometer_data) {
     // Reads data from the barometer
     // chSysLock();
-    pointer_struct->barometerPointer->read(12);
+    barometerPointer->read(12);
     // chSysUnlock();
 
     // Lock barometer mutex
-    chMtxLock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_barometer);
+    chMtxLock(&dataloggerTHDVarsPointer->dataMutex_barometer);
 
     // Log timestamp
-    pointer_struct->sensorDataPointer->barometer_data.timeStamp_barometer =
+    barometer_data->timeStamp_barometer =
         chVTGetSystemTime();
 
     // Log pressure and temperature
-    pointer_struct->sensorDataPointer->barometer_data.pressure =
-        pointer_struct->barometerPointer->getPressure() *
+    barometer_data->pressure =
+        barometerPointer->getPressure() *
         0.01;  // Converting both of them into correct unit (in mbar)
-    pointer_struct->sensorDataPointer->barometer_data.temperature =
-        pointer_struct->barometerPointer->getTemperature() *
+    barometer_data->temperature =
+        barometerPointer->getTemperature() *
         0.01;  // Converting both of them into correct unit (in degC)
 
     // Compute altitude from pres and temp based on Hypsometric equation
@@ -273,17 +274,17 @@ void barometerTickFunction(pointers *pointer_struct) {
     // (pointer_struct->sensorDataPointer->barometer_data.temperature+273.15)/9.8/0.029;
 
     // A version with no divide operation to enable faster computation, probably
-    pointer_struct->sensorDataPointer->barometer_data.altitude =
-        -log(pointer_struct->sensorDataPointer->barometer_data.pressure *
+    barometer_data->altitude =
+        -log(barometer_data->pressure *
              0.000987) *
-        (pointer_struct->sensorDataPointer->barometer_data.temperature +
+        (barometer_data->temperature +
          273.15) *
         29.254;
 
-    pointer_struct->dataloggerTHDVarsPointer.barometerFifo.push(
-        pointer_struct->sensorDataPointer->barometer_data);
+    dataloggerTHDVarsPointer->barometerFifo.push(
+        *barometer_data);
     //! Unlocking &dataMutex for barometer
-    chMtxUnlock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_barometer);
+    chMtxUnlock(&dataloggerTHDVarsPointer->dataMutex_barometer);
 
 #ifdef BAROMETER_DEBUG
     Serial.println("------------- BAROMETER THREAD ---------------");

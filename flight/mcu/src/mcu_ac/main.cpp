@@ -119,12 +119,17 @@ static THD_FUNCTION(barometer_THD, arg) {
     // Load outside variables into the function
     struct pointers *pointer_struct = (struct pointers *)arg;
 
+	MS5611* barometerPointer = pointer_struct->barometerPointer;
+	datalogger_THD* dataloggerTHDVarsPointer = &pointer_struct->dataloggerTHDVarsPointer;
+	barometerData* barometer_data = &pointer_struct->sensorDataPointer->barometer_data;
+
     while (true) {
 #ifdef THREAD_DEBUG
         Serial.println("### Barometer thread entrance");
 #endif
 
-        barometerTickFunction(pointer_struct);
+        // barometerTickFunction(pointer_struct);
+        barometerTickFunction(barometerPointer, dataloggerTHDVarsPointer, barometer_data);
 
         chThdSleepMilliseconds(6);
     }
