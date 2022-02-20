@@ -119,7 +119,7 @@ void lowGimuTickFunction(pointers *pointer_struct) {
  * @param arg Contains pointers to various objects needed by the GPS.
  *
  */
-void gpsTickFunction(SFE_UBLOX_GNSS* GPSPointer, datalogger_THD dataloggerTHDVarsPointer, gpsData gps_data) {
+void gpsTickFunction(SFE_UBLOX_GNSS* GPSPointer, datalogger_THD* dataloggerTHDVarsPointer, gpsData gps_data) {
     // get read timestamp
     systime_t timeStamp_GPS = chVTGetSystemTime();
 
