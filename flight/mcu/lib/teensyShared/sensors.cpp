@@ -30,14 +30,87 @@
 #include "pins.h"
 #include "sensors.h"
 
-// /**
-//  * @brief Construct a new thd function object to handle data collection from the
-//  * low-g IMU.
-//  *
-//  * @param arg Contains pointers to various objects needed by the low-g IMU.
-//  *
-//  */
-void lowGimuTickFunction(LSM9DS1* LSM_Pointer) {
+/**
+ * @brief Construct a new thd function object to handle data collection from the
+ * low-g IMU.
+ *
+ * @param arg Contains pointers to various objects needed by the low-g IMU.
+ *
+ */
+void lowGimuTickFunction(LSM9DS1* LSM_Pointer, datalogger_THD* THD_Datalog_Buffer, lowGData* lowG_Data) {
+    // Reads data from the low g IMU
+    chSysLock();
+    LSM_Pointer ->readAccel();
+    LSM_Pointer ->readGyro();
+    LSM_Pointer ->readMag();
+    chSysUnlock();
+
+    // Lock low g mutex
+    chMtxLock(&THD_Datalog_Buffer->dataMutex_lowG);
+
+    // Log timestamp
+    lowG_Data->timeStamp_lowG =
+        chVTGetSystemTime();
+
+    // Log acceleration in Gs
+    lowG_Data->ax =
+        LSM_Pointer->calcAccel(
+            LSM_Pointer ->ax);
+    lowG_Data->ay =
+        LSM_Pointer ->calcAccel(
+            LSM_Pointer ->ay);
+    lowG_Data->
+        az = LSM_Pointer ->calcAccel(
+        LSM_Pointer ->az);  // There was a minus here. We
+                                              // don't know why that did that
+    // Log rotational speed in degrees per second
+    lowG_Data->gx =
+        LSM_Pointer->calcGyro(
+            LSM_Pointer->gx);
+    lowG_Data->gy =
+        LSM_Pointer->calcGyro(
+            LSM_Pointer->gy);
+    lowG_Data->gz =
+        LSM_Pointer->calcGyro(
+            LSM_Pointer->gz);
+    // Log magnetometer data in gauss
+    lowG_Data->mx =
+        LSM_Pointer->calcMag(
+            LSM_Pointer->mx);
+    lowG_Data->my =
+        LSM_Pointer->calcMag(
+            LSM_Pointer->my);
+    lowG_Data->mz =
+        LSM_Pointer->calcMag(
+            LSM_Pointer->mz);
+    //! Unlocking &dataMutex for low g
+
+    THD_Datalog_Buffer->lowGFifo.push(
+       *lowG_Data);
+    chMtxUnlock(&THD_Datalog_Buffer->dataMutex_lowG);
+
+#ifdef LOWGIMU_DEBUG
+    Serial.println("------------- LOW-G THREAD ---------------");
+    Serial.print(pointer_struct->sensorDataPointer->lowG_data.ax);
+    Serial.print(", ");
+    Serial.print(pointer_struct->sensorDataPointer->lowG_data.ay);
+    Serial.print(", ");
+    Serial.print(pointer_struct->sensorDataPointer->lowG_data.az);
+    Serial.print(", ");
+    Serial.print(pointer_struct->sensorDataPointer->lowG_data.gx);
+    Serial.print(", ");
+    Serial.print(pointer_struct->sensorDataPointer->lowG_data.gy);
+    Serial.print(", ");
+    Serial.print(pointer_struct->sensorDataPointer->lowG_data.gz);
+    Serial.print(", ");
+    Serial.print(pointer_struct->sensorDataPointer->lowG_data.mx);
+    Serial.print(", ");
+    Serial.print(pointer_struct->sensorDataPointer->lowG_data.my);
+    Serial.print(", ");
+    Serial.print(pointer_struct->sensorDataPointer->lowG_data.mz);
+    Serial.print(", ");
+#endif
+}
     // Reads data from the low g IMU
     chSysLock();
     LSM_Pointer ->readAccel();
