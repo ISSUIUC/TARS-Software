@@ -169,7 +169,26 @@ enum sensors { LOWG_IMU, HIGHG_IMU, BAROMETER, GPS };
 //     File dataFile;
 // };
 
-class DataLogBuffer {}
+class DataLogBuffer {
+private:
+	FifoBuffer<LowGData, FIFO_SIZE> lowGFifo{};
+    FifoBuffer<HighGData, FIFO_SIZE> highGFifo{};
+    FifoBuffer<GpsData, FIFO_SIZE> gpsFifo{};
+    FifoBuffer<stateData, FIFO_SIZE> stateFifo{};
+    FifoBuffer<rocketStateData, FIFO_SIZE> rocketStateFifo{};
+    FifoBuffer<BarometerData, FIFO_SIZE> barometerFifo{};
+public:
+    MUTEX_DECL(dataMutex_lowG);
+    MUTEX_DECL(dataMutex_highG);
+    MUTEX_DECL(dataMutex_GPS);
+    MUTEX_DECL(dataMutex_barometer);
+    MUTEX_DECL(dataMutex_state);
+    MUTEX_DECL(dataMutex_RS);
+
+    sensorDataStruct_t current_data;
+
+    File dataFile;
+};
 
 // TODO: Re-think this struct
 struct pointers {
