@@ -1,4 +1,4 @@
-// LoRa 9x_TX
+// LoRa 9x_TX  (Rocket)
 // -*- mode: C++ -*-
 // Example sketch showing how to create a simple messaging client (transmitter)
 // with the RH_RF95 class. RH_RF95 class does not provide for addressing or
@@ -27,6 +27,7 @@ RH_RF95 rf95(RFM95_CS, RFM95_INT);
 //For reading from 
 char incomingCmd[MAX_CMD_LEN];
 
+<<<<<<< HEAD
 struct telemetry_data {
   double gps_lat;
   double gps_long;
@@ -53,6 +54,55 @@ struct telemetry_data {
   
   int FSM_state;
   char sign[] = callsign;
+=======
+
+// Data transmitted from rocket to ground station
+struct telemetry_data {
+
+  // GPS Data
+  double gps_lat = 41.4804;
+  double gps_long = -89.501;
+  double gps_alt = 2362.07;
+
+  // Barometer Data
+  double barometer_alt = 2000.0;
+  
+  // Rocket Software FSM State
+  int FSM_state = 2;
+
+  // KX134 (HIGH_G) IMU Data
+  double HIGHG_IMU_ax = 0.4209;
+  double HIGHG_IMU_ay = -0.733464;
+  double HIGHG_IMU_az = -0.5124;
+  double HIGHG_IMU_gx = 26.88;
+  double HIGHG_IMU_gy = -553.84;
+  double HIGHG_IMU_gz = 0.49;
+  double HIGHG_IMU_mx = 0.4018;
+  double HIGHG_IMU_my = -0.36078;
+  double HIGHG_IMU_mz = 0.16828;
+
+  // LSM9DS1 (LOW_G) IMU Data
+  double LOWG_IMU_ax = 0.4209;
+  double LOWG_IMU_ay = -0.733464;
+  double LOWG_IMU_az = -0.5124;
+  double LOWG_IMU_gx = 26.88;
+  double LOWG_IMU_gy = -553.84;
+  double LOWG_IMU_gz = 0.49;
+  double LOWG_IMU_mx = 0.4018;
+  double LOWG_IMU_my = -0.36078;
+  double LOWG_IMU_mz = 0.16828;
+
+  // Callsign
+  char sign[];
+
+};
+
+// Commands transmitted from ground station to rocket
+struct telemetry_command {
+  int command;
+  char change_callsign[];
+  float change_frequency;
+>>>>>>> 3ada75a0bc86c38ca08151d13a50256abe9191f4
 };
 
 void setup() 
