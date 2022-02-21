@@ -1,6 +1,7 @@
 #ifndef GPSSENSOR_H
 #define GPSSENSOR_H
 
+#include <ChRt.h>
 #include <SparkFun_u-blox_GNSS_Arduino_Library.h>
 
 struct GPSSensor {
