@@ -3,7 +3,6 @@
 
 #include <KX134-1211.h>
 
-
 struct GForce {
     float x_gforce;
     float y_gforce;
@@ -14,7 +13,5 @@ struct HighGSensor {
     void readReadings();
     GForce getGForce();
 };
-
-
 
 #endif

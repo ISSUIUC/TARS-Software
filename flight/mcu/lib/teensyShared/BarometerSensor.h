@@ -14,7 +14,4 @@ struct BarometerSensor {
     float altitude;
 };
 
-
-
-
 #endif

@@ -1,10 +1,9 @@
-#include <MS5611.h>
 #include <ChRt.h>
+#include <MS5611.h>
+
 #include "BarometerSensor.h"
 
-void BarometerSensor::readReadings() {
-    MS->read(12);
-}
+void BarometerSensor::readReadings() { MS->read(12); }
 
 float BarometerSensor::getPressure() {
     pressure = MS->getPressure() * 0.01;

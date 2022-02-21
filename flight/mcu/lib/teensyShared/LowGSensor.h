@@ -3,7 +3,6 @@
 
 #include <SparkFunLSM9DS1.h>
 
-
 struct Acceleration {
     float ax;
     float ay;
@@ -28,9 +27,5 @@ struct LowGSensor {
     Gyroscope getGyroscope();
     Magnetometer getMagnetometer();
 };
-
-
-
-
 
 #endif

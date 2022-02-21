@@ -1,10 +1,9 @@
-#include <SparkFun_u-blox_GNSS_Arduino_Library.h>
-#include <ChRt.h>
 #include "GPSSensor.h"
 
-void GPSSensor::readReadings() {
-    GNSS->getPVT(20);
-}
+#include <ChRt.h>
+#include <SparkFun_u-blox_GNSS_Arduino_Library.h>
+
+void GPSSensor::readReadings() { GNSS->getPVT(20); }
 
 float GPSSensor::getLatitude() {
     latitude = GNSS->getLatitude();
@@ -26,9 +25,7 @@ uint32_t GPSSensor::getFixType() {
     return fix_type;
 }
 
-bool GPSSensor::getPosLock() {
-    return (fix_type == 3);
-}
+bool GPSSensor::getPosLock() { return (fix_type == 3); }
 
 uint32_t GPSSensor::getSIVCount() {
     SIV_count = GNSS->getSIV();
