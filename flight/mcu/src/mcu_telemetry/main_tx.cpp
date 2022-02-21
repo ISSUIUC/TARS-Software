@@ -30,43 +30,31 @@ char incomingCmd[MAX_CMD_LEN];
 
 // Data transmitted from rocket to ground station
 struct telemetry_data {
-
-  // GPS Data
-  double gps_lat = 41.4804;
-  double gps_long = -89.501;
-  double gps_alt = 2362.07;
-
-  // Barometer Data
-  double barometer_alt = 2000.0;
+  double gps_lat;
+  double gps_long;
+  double gps_alt;
+  double barometer_alt;
+  // KX134 (highg) IMU DATA
+  double KX_IMU_ax;   // acceleration (in G's)
+  double KX_IMU_ay;
+  double KX_IMU_az;
+  // H3LIS331DL (highg) IMU DATA
+  double H3L_IMU_ax;
+  double H3L_IMU_ay;
+  double H3L_IMU_az;
+  // LSM9DS1 (lowg) IMU DATA
+  double LSM_IMU_ax;    // acceleration (in G's)
+  double LSM_IMU_ay;
+  double LSM_IMU_az;
+  double LSM_IMU_gx;    // Gyro data (in degrees/sec)
+  double LSM_IMU_gy;
+  double LSM_IMU_gz;
+  double LSM_IMU_mx;
+  double LSM_IMU_my;
+  double LSM_IMU_mz;
   
-  // Rocket Software FSM State
-  int FSM_state = 2;
-
-  // KX134 (HIGH_G) IMU Data
-  double HIGHG_IMU_ax = 0.4209;
-  double HIGHG_IMU_ay = -0.733464;
-  double HIGHG_IMU_az = -0.5124;
-  double HIGHG_IMU_gx = 26.88;
-  double HIGHG_IMU_gy = -553.84;
-  double HIGHG_IMU_gz = 0.49;
-  double HIGHG_IMU_mx = 0.4018;
-  double HIGHG_IMU_my = -0.36078;
-  double HIGHG_IMU_mz = 0.16828;
-
-  // LSM9DS1 (LOW_G) IMU Data
-  double LOWG_IMU_ax = 0.4209;
-  double LOWG_IMU_ay = -0.733464;
-  double LOWG_IMU_az = -0.5124;
-  double LOWG_IMU_gx = 26.88;
-  double LOWG_IMU_gy = -553.84;
-  double LOWG_IMU_gz = 0.49;
-  double LOWG_IMU_mx = 0.4018;
-  double LOWG_IMU_my = -0.36078;
-  double LOWG_IMU_mz = 0.16828;
-
-  // Callsign
-  char sign[];
-
+  int FSM_state;
+  char sign[] = callsign;
 };
 
 // Commands transmitted from ground station to rocket
@@ -74,7 +62,7 @@ struct telemetry_command {
   int command;
   char change_callsign[];
   float change_frequency;
->>>>>>> 3ada75a0bc86c38ca08151d13a50256abe9191f4
+// >>>>>>> 3ada75a0bc86c38ca08151d13a50256abe9191f4
 };
 
 void setup() 
