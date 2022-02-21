@@ -54,7 +54,7 @@ struct telemetry_data {
   double LSM_IMU_mz;
   
   int FSM_state;
-  char sign[] = callsign;
+  char sign[];
 };
 
 // Commands transmitted from ground station to rocket
