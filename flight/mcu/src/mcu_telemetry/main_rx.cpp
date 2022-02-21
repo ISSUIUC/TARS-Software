@@ -127,6 +127,7 @@ void loop()
       memcpy(&data, buf, sizeof(data));
       digitalWrite(LED, HIGH);
       RH_RF95::printBuffer("Received: ", buf, len);
+      // This displays some of the data received 
       Serial.println("Got: ");
       Serial.print("GPS Lat ");
       Serial.println(data.gps_lat);
@@ -136,24 +137,12 @@ void loop()
       Serial.println(data.gps_alt);
       Serial.print("Barometer Alt ");
       Serial.println(data.barometer_alt);
-      Serial.print("IMU ax ");
-      Serial.println(data.IMU_ax);
-      Serial.print("IMU ay ");
-      Serial.println(data.IMU_ay);
-      Serial.print("IMU az ");
-      Serial.println(data.IMU_az);
-      Serial.print("IMU gx ");
-      Serial.println(data.IMU_gx);
-      Serial.print("IMU gy ");
-      Serial.println(data.IMU_gy);
-      Serial.print("IMU gz ");
-      Serial.println(data.IMU_gz);
-      Serial.print("IMU mx ");
-      Serial.println(data.IMU_mx);
-      Serial.print("IMU my ");
-      Serial.println(data.IMU_my);
-      Serial.print("IMU mz ");
-      Serial.println(data.IMU_mz);
+      Serial.print("KX IMU ax ");
+      Serial.println(data.KX_IMU_ax);
+      Serial.print("KX IMU ay ");
+      Serial.println(data.KX_IMU_ay);
+      Serial.print("KX IMU az ");
+      Serial.println(data.KX_IMU_az);
       Serial.print("FSM state");
       Serial.println(data.FSM_state);
       Serial.print("RSSI: ");
