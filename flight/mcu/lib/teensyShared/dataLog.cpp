@@ -27,7 +27,7 @@ void dataLoggerTickFunction(pointers* pointer_struct) {
     while (true) {
         sensorDataStruct_t current_data{};
 
-        datalogger_THD& buffers = pointer_struct->dataloggerTHDVarsPointer;
+        DataLogBuffer& buffers = pointer_struct->dataloggerTHDVarsPointer;
 
         // read each fifo once checking if they have data
         current_data.has_lowG_data =

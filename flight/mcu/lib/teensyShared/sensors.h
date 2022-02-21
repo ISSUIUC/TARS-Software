@@ -17,12 +17,16 @@
 
 #include "dataLog.h"
 
-void lowGimuTickFunction(pointers *);
+void lowGimuTickFunction(LSM9DS1* lsm, DataLogBuffer* data_log_buffer,
+                         LowGData* lowG_data);
 
-void highGimuTickFunction(pointers *);
+void highGimuTickFunction(KX134* highG, DataLogBuffer* data_log_buffer,
+                          HighGData* highG_data);
 
-void gpsTickFunction(pointers *);
+void gpsTickFunction(SFE_UBLOX_GNSS* gps, DataLogBuffer* data_log_buffer,
+                     GpsData* gps_data);
 
-void barometerTickFunction(pointers *);
+void barometerTickFunction(MS5611* barometer, DataLogBuffer* data_log_buffer,
+                           BarometerData* barometer_data);
 
 #endif

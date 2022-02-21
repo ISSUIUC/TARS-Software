@@ -38,7 +38,7 @@
 #include "rocketFSM.h"
 #include "sensors.h"
 
-// datalogger_THD datalogger_THD_vars;
+// DataLogBuffer datalogger_THD_vars;
 
 //#define THREAD_DEBUG
 //#define LOWGIMU_DEBUG
@@ -100,13 +100,16 @@ static THD_FUNCTION(rocket_FSM, arg) {
 static THD_FUNCTION(lowgIMU_THD, arg) {
     // Load outside variables into the function
     struct pointers *pointer_struct = (struct pointers *)arg;
+    LSM9DS1 *lsm = pointer_struct->lowGimuPointer;
+    DataLogBuffer *data_log_buffer = &pointer_struct->dataloggerTHDVarsPointer;
+    LowGData *lowG_Data = &pointer_struct->sensorDataPointer->lowG_data;
 
     while (true) {
 #ifdef THREAD_DEBUG
         Serial.println("### Low G IMU thread entrance");
 #endif
 
-        lowGimuTickFunction(pointer_struct);
+        lowGimuTickFunction(lsm, data_log_buffer, lowG_Data);
 
         chThdSleepMilliseconds(6);
     }
@@ -119,12 +122,18 @@ static THD_FUNCTION(barometer_THD, arg) {
     // Load outside variables into the function
     struct pointers *pointer_struct = (struct pointers *)arg;
 
+    MS5611 *barometer = pointer_struct->barometerPointer;
+    DataLogBuffer *data_log_buffer = &pointer_struct->dataloggerTHDVarsPointer;
+    BarometerData *barometer_data =
+        &pointer_struct->sensorDataPointer->barometer_data;
+
     while (true) {
 #ifdef THREAD_DEBUG
         Serial.println("### Barometer thread entrance");
 #endif
 
-        barometerTickFunction(pointer_struct);
+        // barometerTickFunction(pointer_struct);
+        barometerTickFunction(barometer, data_log_buffer, barometer_data);
 
         chThdSleepMilliseconds(6);
     }
@@ -137,12 +146,16 @@ static THD_FUNCTION(highgIMU_THD, arg) {
     // Load outside variables into the function
     struct pointers *pointer_struct = (struct pointers *)arg;
 
+    KX134 *highG = pointer_struct->highGimuPointer;
+    DataLogBuffer *data_log_buffer = &pointer_struct->dataloggerTHDVarsPointer;
+    HighGData *highg_data = &pointer_struct->sensorDataPointer->highG_data;
+
     while (true) {
 #ifdef THREAD_DEBUG
         Serial.println("### High G IMU thread entrance");
 #endif
 
-        highGimuTickFunction(pointer_struct);
+        highGimuTickFunction(highG, data_log_buffer, highg_data);
 
         chThdSleepMilliseconds(6);
     }
@@ -155,12 +168,16 @@ static THD_FUNCTION(gps_THD, arg) {
     // Load outside variables into the function
     struct pointers *pointer_struct = (struct pointers *)arg;
 
+    SFE_UBLOX_GNSS *gps = pointer_struct->GPSPointer;
+    DataLogBuffer *data_log_buffer = &pointer_struct->dataloggerTHDVarsPointer;
+    GpsData *gps_data = &pointer_struct->sensorDataPointer->gps_data;
+
     while (true) {
 #ifdef THREAD_DEBUG
         Serial.println("### GPS thread entrance");
 #endif
 
-        gpsTickFunction(pointer_struct);
+        gpsTickFunction(gps, data_log_buffer, gps_data);
 
 #ifdef THREAD_DEBUG
         Serial.println("### GPS thread exit");
