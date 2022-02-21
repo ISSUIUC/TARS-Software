@@ -67,7 +67,7 @@ struct telemetry_data {
   double LSM_IMU_mz;
   
   int FSM_state;
-  char sign[];
+  char sign[7] = "KC1QJA";
 };
 
 void setup() 
@@ -150,8 +150,10 @@ void loop()
       
       // Send a reply
       uint8_t cmd[] = "Hey Bestie!!";
+      // const uint8_t msg = (uint8_t) data.sign;
 
-      rf95.send(cmd, sizeof(cmd));
+      // rf95.send(cmd, sizeof(cmd));
+      rf95.send((uint8_t *)&data.sign, sizeof(data.sign));
       rf95.waitPacketSent();
       Serial.println("Sent a reply");
       digitalWrite(LED, LOW);
