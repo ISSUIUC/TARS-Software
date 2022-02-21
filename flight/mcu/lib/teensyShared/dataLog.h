@@ -178,6 +178,11 @@ private:
     FifoBuffer<rocketStateData, FIFO_SIZE> rocketStateFifo{};
     FifoBuffer<BarometerData, FIFO_SIZE> barometerFifo{};
 public:
+    bool lowG_push(LowGData in);
+    bool lowG_pop(*LowGData out);
+    bool highG_push(HighGData in);
+    bool highG_pop(*HighGData out);
+    
     MUTEX_DECL(dataMutex_lowG);
     MUTEX_DECL(dataMutex_highG);
     MUTEX_DECL(dataMutex_GPS);

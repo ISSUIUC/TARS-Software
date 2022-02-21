@@ -144,4 +144,21 @@ void logData(File* dataFile, sensorDataStruct_t* data) {
     }
 }
 
+
+bool lowG_push(LowGData in) {
+    return lowGFifo.push(in);
+}
+bool lowG_pop(*LowGData out) {
+    return lowGFifo.pop(out);
+}
+bool highG_push(HighGData in) {
+    return highGFifo.push(in);
+}
+bool highG_pop(*HighGData out) {
+    return highGFifo.pop(out);
+}
+
+
+
 #endif
+
