@@ -54,15 +54,23 @@ struct telemetry_data {
   double LSM_IMU_mz;
   
   int FSM_state;
-  char sign[];
+  char sign[8] = "HITHERE";
 };
 
 // Commands transmitted from ground station to rocket
+enum CommandType {
+  SET_FREQ,
+  SET_CALLSIGN,
+  ABORT,
+};
+
 struct telemetry_command {
-  int command;
-  char change_callsign[];
-  float change_frequency;
-// >>>>>>> 3ada75a0bc86c38ca08151d13a50256abe9191f4
+  CommandType command;
+  union {
+    char callsign[8];
+    int freq;
+    bool do_abort;
+  };
 };
 
 void setup() 
@@ -129,15 +137,20 @@ void loop()
   uint8_t len = sizeof(buf);
                                           //test without delay
   Serial.println("Waiting for reply..."); //delay(10);
-  if (rf95.waitAvailableTimeout(1000))
+  if (rf95.available())
   { 
     // Should be a reply message for us now   
     if (rf95.recv(buf, &len))
    {
-      memcpy(incomingCmd, buf, sizeof(incomingCmd));
-      Serial.print("Got reply: ");
-
-      Serial.println((char*)buf);
+      telemetry_command received;
+      memcpy(&received, buf, sizeof(received));
+      Serial.println("Got Commands:");
+      Serial.print("Call Sign: ");
+      Serial.println(received.callsign);
+      Serial.print("Abort? ");
+      Serial.println(received.do_abort);
+      Serial.print("Frequency: ");
+      Serial.println(received.freq);
       Serial.print("RSSI: ");
       Serial.println(rf95.lastRssi(), DEC);    
     }
