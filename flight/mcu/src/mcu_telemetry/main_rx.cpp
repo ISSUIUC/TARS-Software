@@ -67,8 +67,25 @@ struct telemetry_data {
   double LSM_IMU_mz;
   
   int FSM_state;
-  char sign[7] = "KC1QJA";
+  char sign[8] = "KC1QJA";
 };
+
+
+enum class CommandType {
+  SET_FREQ,
+  SET_CALLSIGN,
+  ABORT,
+};
+// Commands transmitted from ground station to rocket
+struct telemetry_command {
+  CommandType command;
+  union {
+    char callsign[8];
+    int freq;
+    bool do_abort;
+  };
+};
+
 
 void setup() 
 {
@@ -113,6 +130,7 @@ void setup()
 
 }
 
+
 void loop()
 {
   if (rf95.available())
@@ -126,56 +144,103 @@ void loop()
     {
       memcpy(&data, buf, sizeof(data));
       digitalWrite(LED, HIGH);
-      RH_RF95::printBuffer("Received: ", buf, len);
-      // This displays some of the data received 
-      Serial.println("Got: ");
-      Serial.print("GPS Lat ");
-      Serial.println(data.gps_lat);
-      Serial.print("GPS Long ");
-      Serial.println(data.gps_long);
-      Serial.print("GPS Alt ");
-      Serial.println(data.gps_alt);
-      Serial.print("Barometer Alt ");
-      Serial.println(data.barometer_alt);
-      Serial.print("KX IMU ax ");
-      Serial.println(data.KX_IMU_ax);
-      Serial.print("KX IMU ay ");
-      Serial.println(data.KX_IMU_ay);
-      Serial.print("KX IMU az ");
-      Serial.println(data.KX_IMU_az);
-      Serial.print("FSM state");
-      Serial.println(data.FSM_state);
-      Serial.print("RSSI: ");
-      Serial.println(rf95.lastRssi(), DEC);
+      // RH_RF95::printBuffer("Received: ", buf, len);
+      // // This displays some of the data received 
+      // Serial.println("Got: ");
+      // Serial.print("GPS Lat ");
+      // Serial.println(data.gps_lat);
+      // Serial.print("GPS Long ");
+      // Serial.println(data.gps_long);
+      // Serial.print("GPS Alt ");
+      // Serial.println(data.gps_alt);
+      // Serial.print("Barometer Alt ");
+      // Serial.println(data.barometer_alt);
+      // Serial.print("KX IMU ax ");
+      // Serial.println(data.KX_IMU_ax);
+      // Serial.print("KX IMU ay ");
+      // Serial.println(data.KX_IMU_ay);
+      // Serial.print("KX IMU az ");
+      // Serial.println(data.KX_IMU_az);
+      // Serial.print("FSM state");
+      // Serial.println(data.FSM_state);
+      // Serial.print("RSSI: ");
+      // Serial.println(rf95.lastRssi(), DEC);
       
       // Send a reply
-      uint8_t cmd[] = "Hey Bestie!!";
       // const uint8_t msg = (uint8_t) data.sign;
 
       // rf95.send(cmd, sizeof(cmd));
-      rf95.send((uint8_t *)&data.sign, sizeof(data.sign));
-      rf95.waitPacketSent();
-      Serial.println("Sent a reply");
-      digitalWrite(LED, LOW);
+      // telemetry_command t;
+      // static int i = 0;
+      // i++;
+      // i%=3;
+      // switch(i){
+      //   case 0:
+      //     t.command = CommandType::SET_CALLSIGN;
+      //     memcpy(t.callsign, "LAMO123\0", 8);
+      //     break;
+      //   case 1:
+      //     t.command = CommandType::SET_FREQ;
+      //     t.freq = 6969420;
+      //     break;
+      //   case 2:
+      //     t.command = CommandType::ABORT;
+      //     t.do_abort = true;
+      // }
+      
+      // rf95.send((uint8_t*)&t, sizeof(t));
+      // // Serial.println(data.sign);
+      // rf95.waitPacketSent();
+      // // Serial.println("Sent a reply");
+      // digitalWrite(LED, LOW);
     }
     else
     {
       Serial.println("Receive failed");
     }
   }
-  if(Serial.available() > 0){
+  while(Serial.available() > 0){
     char curByte = Serial.read();
-    if(curByte == 32 || charIdx == 10) {
-      uint8_t cmd[MAX_CMD_LEN];
-      memcpy(cmd, &incomingCmd, sizeof(cmd));
-      rf95.send(cmd, sizeof(cmd));
-      rf95.waitPacketSent();
-      Serial.println("Sent a cmd");
-      digitalWrite(LED, LOW);
-      charIdx = 0;}
-    else {incomingCmd[charIdx++] = curByte;}
-    Serial.print("I got ");
-    Serial.println((char)curByte);
+    static char read_buf[256];
+    static int read_head = 0;
+    read_buf[read_head++] = curByte;
+    Serial.print(curByte);
+    if(curByte == '\n'){
+      read_buf[read_head - 1] = 0;
+
+      telemetry_command t;
+      if(strncmp(read_buf, "ABORT", 5) == 0){
+        t.command = CommandType::ABORT;
+        t.do_abort = true;
+        rf95.send((uint8_t*)&t, sizeof(t));
+        // Serial.println(data.sign);
+        rf95.waitPacketSent();
+        Serial.println(read_buf);
+        Serial.println("Sent a reply 2");
+      }
+
+      if(strncmp(read_buf, "FREQ", 4) == 0) {
+        t.command = CommandType::SET_FREQ;
+        t.freq = 6969696;
+        rf95.send((uint8_t*)&t, sizeof(t));
+        // Serial.println(data.sign);
+        rf95.waitPacketSent();
+        Serial.println(read_buf);
+        Serial.println("Sent a reply 2");
+      }
+
+      if(strncmp(read_buf, "CALLSIGN", 8) == 0) {
+        t.command = CommandType::SET_CALLSIGN;
+        memcpy(t.callsign, read_buf + 9, 8);
+        rf95.send((uint8_t*)&t, sizeof(t));
+        // Serial.println(data.sign);
+        rf95.waitPacketSent();
+        Serial.println(read_buf);
+        Serial.println("Sent a reply 2");
+      }
+
+      read_head = 0;
+    }
   }
   
 }
