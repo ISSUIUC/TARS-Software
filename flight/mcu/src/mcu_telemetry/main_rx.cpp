@@ -18,6 +18,7 @@ This code was used to test the RFM LoRa modules on a breadboard:
 
 #include <SPI.h>
 #include <RH_RF95.h>
+#include "SerialParser.h"
 
 
 // Ensure to change depending on wiring
@@ -35,7 +36,6 @@ This code was used to test the RFM LoRa modules on a breadboard:
 
 // Singleton instance of the radio driver
 RH_RF95 rf95(RFM95_CS, RFM95_INT);
-
 //For reading from 
 char incomingCmd[MAX_CMD_LEN];
 char curByte;
@@ -86,6 +86,31 @@ struct telemetry_command {
   };
 };
 
+
+void SerialInput(const char * key, const char * value){
+  telemetry_command t;
+  
+  if(strcmp(key, "ABORT") == 0){
+    t.command = CommandType::ABORT;
+    t.do_abort = true;
+  } else if(strcmp(key, "FREQ") == 0) {
+    t.command = CommandType::SET_FREQ;
+    t.freq = atoi(value);
+  } else if(strcmp(key, "CALLSIGN") == 0) {
+    t.command = CommandType::SET_CALLSIGN;
+    memcpy(t.callsign, value, 8);
+  }
+
+  rf95.send((uint8_t*)&t, sizeof(t));
+  rf95.waitPacketSent();
+  Serial.println("Sent a reply 2");
+}
+
+void SerialError(){
+
+}
+
+SerialParser serial_parser(SerialInput, SerialError);
 
 void setup() 
 {
@@ -199,48 +224,5 @@ void loop()
       Serial.println("Receive failed");
     }
   }
-  while(Serial.available() > 0){
-    char curByte = Serial.read();
-    static char read_buf[256];
-    static int read_head = 0;
-    read_buf[read_head++] = curByte;
-    Serial.print(curByte);
-    if(curByte == '\n'){
-      read_buf[read_head - 1] = 0;
-
-      telemetry_command t;
-      if(strncmp(read_buf, "ABORT", 5) == 0){
-        t.command = CommandType::ABORT;
-        t.do_abort = true;
-        rf95.send((uint8_t*)&t, sizeof(t));
-        // Serial.println(data.sign);
-        rf95.waitPacketSent();
-        Serial.println(read_buf);
-        Serial.println("Sent a reply 2");
-      }
-
-      if(strncmp(read_buf, "FREQ", 4) == 0) {
-        t.command = CommandType::SET_FREQ;
-        t.freq = 6969696;
-        rf95.send((uint8_t*)&t, sizeof(t));
-        // Serial.println(data.sign);
-        rf95.waitPacketSent();
-        Serial.println(read_buf);
-        Serial.println("Sent a reply 2");
-      }
-
-      if(strncmp(read_buf, "CALLSIGN", 8) == 0) {
-        t.command = CommandType::SET_CALLSIGN;
-        memcpy(t.callsign, read_buf + 9, 8);
-        rf95.send((uint8_t*)&t, sizeof(t));
-        // Serial.println(data.sign);
-        rf95.waitPacketSent();
-        Serial.println(read_buf);
-        Serial.println("Sent a reply 2");
-      }
-
-      read_head = 0;
-    }
-  }
-  
+  serial_parser.read();
 }
