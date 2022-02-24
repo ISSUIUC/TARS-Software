@@ -169,7 +169,6 @@ void loop()
     {
       memcpy(&data, buf, sizeof(data));
       digitalWrite(LED, HIGH);
-      // RH_RF95::printBuffer("Received: ", buf, len);
       // // This displays some of the data received 
       // Serial.println("Got: ");
       // Serial.print("GPS Lat ");
@@ -191,34 +190,6 @@ void loop()
       // Serial.print("RSSI: ");
       // Serial.println(rf95.lastRssi(), DEC);
       
-      // Send a reply
-      // const uint8_t msg = (uint8_t) data.sign;
-
-      // rf95.send(cmd, sizeof(cmd));
-      // telemetry_command t;
-      // static int i = 0;
-      // i++;
-      // i%=3;
-      // switch(i){
-      //   case 0:
-      //     t.command = CommandType::SET_CALLSIGN;
-      //     memcpy(t.callsign, "LAMO123\0", 8);
-      //     break;
-      //   case 1:
-      //     t.command = CommandType::SET_FREQ;
-      //     t.freq = 6969420;
-      //     break;
-      //   case 2:
-      //     t.command = CommandType::ABORT;
-      //     t.do_abort = true;
-      // }
-      
-      // rf95.send((uint8_t*)&t, sizeof(t));
-      // // Serial.println(data.sign);
-      // rf95.waitPacketSent();
-      // // Serial.println("Sent a reply");
-      // digitalWrite(LED, LOW);
-    }
     else
     {
       Serial.println("Receive failed");
