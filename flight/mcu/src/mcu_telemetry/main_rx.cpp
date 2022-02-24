@@ -115,7 +115,7 @@ void SerialInput(const char * key, const char * value){
 }
 
 void SerialError(){
-  Serial.println(json_command_parse_error)
+  Serial.println(json_command_parse_error);
 }
 
 SerialParser serial_parser(SerialInput, SerialError);
@@ -197,7 +197,7 @@ void loop()
       // Serial.print("RSSI: ");
       // Serial.println(rf95.lastRssi(), DEC);
       
-    else
+    }else
     {
       Serial.println(json_receive_failure);
     }
