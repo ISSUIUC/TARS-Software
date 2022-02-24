@@ -86,10 +86,18 @@ struct telemetry_command {
   };
 };
 
+constexpr const char * json_command_success = R"({type: "command_success"})";
+constexpr const char * json_command_parse_error = R"({type: "command_error", error: "serial parse error"})";
+constexpr const char * json_init_failure = R"({type: "init_error", error: "failed to initilize LORA"})";
+constexpr const char * json_init_success = R"({type: "init_success"})";
+constexpr const char * json_set_frequency_failure = R"({type: "freq_error", error: "set_frequency failed"})";
+constexpr const char * json_receive_failure = R"({type: "receive_error", error: "recv failed"})";
+
+
 
 void SerialInput(const char * key, const char * value){
   telemetry_command t;
-  
+
   if(strcmp(key, "ABORT") == 0){
     t.command = CommandType::ABORT;
     t.do_abort = true;
@@ -103,11 +111,11 @@ void SerialInput(const char * key, const char * value){
 
   rf95.send((uint8_t*)&t, sizeof(t));
   rf95.waitPacketSent();
-  Serial.println("Sent a reply 2");
+  Serial.println(json_command_success);
 }
 
 void SerialError(){
-
+  Serial.println(json_command_parse_error)
 }
 
 SerialParser serial_parser(SerialInput, SerialError);
@@ -123,8 +131,6 @@ void setup()
   while (!Serial);
   Serial.begin(9600);
   delay(100);
-
-  Serial.println("Arduino LoRa RX Test");
   
   // manual reset
   digitalWrite(RFM95_RST, LOW);
@@ -133,17 +139,20 @@ void setup()
   delay(10);
 
   while (!rf95.init()) {
-    Serial.println("LoRa radio init failed");
+    Serial.println(json_init_failure);
     while (1);
   }
-  Serial.println("LoRa radio init OK!");
+  Serial.println(json_init_success);
 
   // Defaults after init are 434.0MHz, modulation GFSK_Rb250Fd250, +13dbM
   if (!rf95.setFrequency(RF95_FREQ)) {
-    Serial.println("setFrequency failed");
+    Serial.println(json_set_frequency_failure);
     while (1);
   }
-  Serial.print("Set Freq to: "); Serial.println(RF95_FREQ);
+
+  Serial.print(R"({type: "freq_success", frequency:)");
+  Serial.print(RF95_FREQ);
+  Serial.println("}");
 
   // Defaults after init are 434.0MHz, 13dBm, Bw = 125 kHz, Cr = 4/5, Sf = 128chips/symbol, CRC on
 
@@ -151,8 +160,6 @@ void setup()
   // If you are using RFM95/96/97/98 modules which uses the PA_BOOST transmitter pin, then 
   // you can set transmitter powers from 5 to 23 dBm:
   rf95.setTxPower(23, false);
-
-
 }
 
 
@@ -221,7 +228,7 @@ void loop()
     }
     else
     {
-      Serial.println("Receive failed");
+      Serial.println(json_receive_failure);
     }
   }
   serial_parser.read();
