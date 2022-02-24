@@ -93,7 +93,37 @@ constexpr const char * json_init_success = R"({type: "init_success"})";
 constexpr const char * json_set_frequency_failure = R"({type: "freq_error", error: "set_frequency failed"})";
 constexpr const char * json_receive_failure = R"({type: "receive_error", error: "recv failed"})";
 
+void SerialPrintTelemetryData(const telemetry_data & data){
+  //add null ternimator to sign
+  char sign[9]{};
+  memcpy(sign, data.sign, 8);
 
+  Serial.print(R"({type: "data", value: {)");
+
+  Serial.print(R"(gps_lat:)"); Serial.print(data.gps_lat); Serial.print(',');
+  Serial.print(R"(gps_long:)"); Serial.print(data.gps_long); Serial.print(',');
+  Serial.print(R"(gps_alt:)"); Serial.print(data.gps_alt); Serial.print(',');
+  Serial.print(R"(barometer_alt:)"); Serial.print(data.barometer_alt); Serial.print(',');
+  Serial.print(R"(KX_IMU_ax:)"); Serial.print(data.KX_IMU_ax); Serial.print(',');
+  Serial.print(R"(KX_IMU_ay:)"); Serial.print(data.KX_IMU_ay); Serial.print(',');
+  Serial.print(R"(KX_IMU_az:)"); Serial.print(data.KX_IMU_az); Serial.print(',');
+  Serial.print(R"(H3L_IMU_ax:)"); Serial.print(data.H3L_IMU_ax); Serial.print(',');
+  Serial.print(R"(H3L_IMU_ay:)"); Serial.print(data.H3L_IMU_ay); Serial.print(',');
+  Serial.print(R"(H3L_IMU_az:)"); Serial.print(data.H3L_IMU_az); Serial.print(',');
+  Serial.print(R"(LSM_IMU_ax:)"); Serial.print(data.LSM_IMU_ax); Serial.print(',');
+  Serial.print(R"(LSM_IMU_ay:)"); Serial.print(data.LSM_IMU_ay); Serial.print(',');
+  Serial.print(R"(LSM_IMU_az:)"); Serial.print(data.LSM_IMU_az); Serial.print(',');
+  Serial.print(R"(LSM_IMU_gx:)"); Serial.print(data.LSM_IMU_gx); Serial.print(',');
+  Serial.print(R"(LSM_IMU_gy:)"); Serial.print(data.LSM_IMU_gy); Serial.print(',');
+  Serial.print(R"(LSM_IMU_gz:)"); Serial.print(data.LSM_IMU_gz); Serial.print(',');
+  Serial.print(R"(LSM_IMU_mx:)"); Serial.print(data.LSM_IMU_mx); Serial.print(',');
+  Serial.print(R"(LSM_IMU_my:)"); Serial.print(data.LSM_IMU_my); Serial.print(',');
+  Serial.print(R"(LSM_IMU_mz:)"); Serial.print(data.LSM_IMU_mz); Serial.print(',');
+  Serial.print(R"(FSM_state:)"); Serial.print(data.FSM_state); Serial.print(',');
+  Serial.print(R"(sign:)"); Serial.print(sign); Serial.print(',');
+
+  Serial.println("}}");
+}
 
 void SerialInput(const char * key, const char * value){
   telemetry_command t;
@@ -175,6 +205,7 @@ void loop()
     if (rf95.recv(buf, &len))
     {
       memcpy(&data, buf, sizeof(data));
+      SerialPrintTelemetryData(data);
       digitalWrite(LED, HIGH);
       // // This displays some of the data received 
       // Serial.println("Got: ");
