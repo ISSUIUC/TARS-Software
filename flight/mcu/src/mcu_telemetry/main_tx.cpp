@@ -144,7 +144,10 @@ void loop()
    {
       telemetry_command received;
       memcpy(&received, buf, sizeof(received));
-      rf95.setFrequency(received.freq);
+      if (received.command == SET_FREQ) {
+        rf95.setFrequency(received.freq);
+      }
+      
       Serial.println("Got Commands:");
       Serial.print("Call Sign: ");
       Serial.println(received.callsign);
