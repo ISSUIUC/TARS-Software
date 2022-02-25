@@ -147,6 +147,10 @@ void loop()
       if (received.command == SET_FREQ) {
         rf95.setFrequency(received.freq);
       }
+
+      if (received.command == SET_CALLSIGN) {
+        telemetry_data.sign = telemetry_command.callsign;
+      }
       
       Serial.println("Got Commands:");
       Serial.print("Call Sign: ");
