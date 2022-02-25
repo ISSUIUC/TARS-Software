@@ -138,7 +138,8 @@ void SerialInput(const char * key, const char * value){
     t.do_abort = true;
   } else if(strcmp(key, "FREQ") == 0) {
     t.command = CommandType::SET_FREQ;
-    t.freq = atoi(value);
+    int v = atoi(value);
+    t.freq = min(max(v, 390), 445);
   } else if(strcmp(key, "CALLSIGN") == 0) {
     t.command = CommandType::SET_CALLSIGN;
     memcpy(t.callsign, value, 8);
