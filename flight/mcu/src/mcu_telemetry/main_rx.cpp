@@ -22,11 +22,11 @@ This code was used to test the RFM LoRa modules on a breadboard:
 
 
 // Ensure to change depending on wiring
-#define RFM95_CS 10
-#define RFM95_RST 15
-#define RFM95_EN 14
-#define RFM95_INT 16
-#define LED 13 // Blinks on receipt
+#define RFM95_CS 8
+#define RFM95_RST 4
+// #define RFM95_EN 
+#define RFM95_INT 3
+// #define LED 13 // Blinks on receipt
 
 // Change to 434.0 or other frequency, must match RX's freq!
 #define RF95_FREQ 434.0
@@ -152,20 +152,20 @@ SerialParser serial_parser(SerialInput, SerialError);
 
 void setup() 
 {
-  pinMode(LED, OUTPUT);     
-  pinMode(RFM95_RST, OUTPUT);
-  pinMode(RFM95_EN, OUTPUT);
-  digitalWrite(RFM95_RST, HIGH);
-  digitalWrite(RFM95_EN, HIGH);
+  // pinMode(LED, OUTPUT);     
+  // pinMode(RFM95_RST, OUTPUT);
+  // pinMode(RFM95_EN, OUTPUT);
+  // digitalWrite(RFM95_RST, HIGH);
+  // digitalWrite(RFM95_EN, HIGH);
 
   while (!Serial);
   Serial.begin(9600);
   delay(100);
   
   // manual reset
-  digitalWrite(RFM95_RST, LOW);
+  // digitalWrite(RFM95_RST, LOW);
   delay(10);
-  digitalWrite(RFM95_RST, HIGH);
+  // digitalWrite(RFM95_RST, HIGH);
   delay(10);
 
   while (!rf95.init()) {
@@ -206,7 +206,7 @@ void loop()
     {
       memcpy(&data, buf, sizeof(data));
       SerialPrintTelemetryData(data);
-      digitalWrite(LED, HIGH);
+      // digitalWrite(LED, HIGH);
       // // This displays some of the data received 
       // Serial.println("Got: ");
       // Serial.print("GPS Lat ");
