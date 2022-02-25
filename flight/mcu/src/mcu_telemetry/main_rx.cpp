@@ -125,6 +125,11 @@ void SerialPrintTelemetryData(const telemetry_data & data){
   Serial.println("}}");
 }
 
+
+void SerialError(){
+  Serial.println(json_command_parse_error);
+}
+
 void SerialInput(const char * key, const char * value){
   telemetry_command t;
 
@@ -137,16 +142,21 @@ void SerialInput(const char * key, const char * value){
   } else if(strcmp(key, "CALLSIGN") == 0) {
     t.command = CommandType::SET_CALLSIGN;
     memcpy(t.callsign, value, 8);
+  } else {
+    SerialError();
+    return;
   }
 
   rf95.send((uint8_t*)&t, sizeof(t));
   rf95.waitPacketSent();
+
+  if(t.command == CommandType::SET_FREQ){
+    rf95.setFrequency(t.freq);
+  }
+
   Serial.println(json_command_success);
 }
 
-void SerialError(){
-  Serial.println(json_command_parse_error);
-}
 
 SerialParser serial_parser(SerialInput, SerialError);
 
@@ -195,16 +205,16 @@ void setup()
 
 void loop()
 {
-  if (true || rf95.available())
+  if (rf95.available())
   {
     // Should be a message for us now   
     uint8_t buf[RH_RF95_MAX_MESSAGE_LEN];
     telemetry_data data{};
     uint8_t len = sizeof(buf);
     
-    if (true || rf95.recv(buf, &len))
+    if (rf95.recv(buf, &len))
     {
-      // memcpy(&data, buf, sizeof(data));
+      memcpy(&data, buf, sizeof(data));
       SerialPrintTelemetryData(data);
       // digitalWrite(LED, HIGH);
       // // This displays some of the data received 
