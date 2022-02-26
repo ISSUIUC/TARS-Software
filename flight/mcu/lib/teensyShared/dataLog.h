@@ -193,8 +193,8 @@ public:
 	bool pushLowGFifo(LowGData* lowG_Data);
 	bool popLowGFifo(LowGData* lowG_Data);
 
-	bool pushHighGFifo();
-	bool popHighGFifo();
+	bool pushHighGFifo(HighGData* highG_Data);
+	bool popHighGFifo(HighGData* highG_Data);
 
 	bool pushGpsFifo(GpsData* gps_Data);
 	bool popGpsFifo(GpsData* gps_Data);
@@ -202,8 +202,8 @@ public:
 	bool pushStateFifo(stateData* state_data);
 	bool popStateFifo(stateData* state_data);
 
-	bool pushRocketStateFifo();
-	bool popRocketStateFifo();
+	bool pushRocketStateFifo(rocketStateData* rocket_data);
+	bool popRocketStateFifo(rocketStateData* rocket_data);
 
 	bool pushBarometerFifo(BarometerData* barometer_data);
 	bool popBarometerFifo(BarometerData* barometer_data);
