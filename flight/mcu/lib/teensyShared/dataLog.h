@@ -196,8 +196,8 @@ public:
 	bool pushHighGFifo();
 	bool popHighGFifo();
 
-	bool pushGpsFifo();
-	bool popGpsFifo();
+	bool pushGpsFifo(GpsData* gps_Data);
+	bool popGpsFifo(GpsData* gps_Data);
 
 	bool pushStateFifo(stateData* state_data);
 	bool popStateFifo(stateData* state_data);
@@ -205,8 +205,8 @@ public:
 	bool pushRocketStateFifo();
 	bool popRocketStateFifo();
 
-	bool pushBarometerFifo();
-	bool popBarometerFifo();
+	bool pushBarometerFifo(BarometerData* barometer_data);
+	bool popBarometerFifo(BarometerData* barometer_data);
 };
 
 // TODO: Re-think this struct

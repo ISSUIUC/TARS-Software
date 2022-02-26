@@ -168,5 +168,13 @@ bool DataLogBuffer::popStateFifo(stateData* state_data) {
     stateFifo.pop(state_data);
 }
 
+bool DataLogBuffer::pushBarometerFifo(BarometerData* barometer_data) {
+    barometerFifo.push(*barometer_data);
+}
+
+bool DataLogBuffer::popBarometerFifo(BarometerData* barometer_data) {
+    barometerFifo.pop(barometer_data);
+}
+
 #endif
 
