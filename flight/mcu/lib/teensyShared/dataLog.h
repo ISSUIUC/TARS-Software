@@ -202,8 +202,8 @@ public:
 	bool pushStateFifo(stateData* state_data);
 	bool popStateFifo(stateData* state_data);
 
-	bool pushRocketStateFifo();
-	bool popRocketStateFifo();
+	bool pushRocketStateFifo(rocketStateData* rocket_data);
+	bool popRocketStateFifo(rocketStateData* rocket_data);
 
 	bool pushBarometerFifo();
 	bool popBarometerFifo();
