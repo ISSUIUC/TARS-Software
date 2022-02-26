@@ -190,8 +190,8 @@ public:
 
     File dataFile;
 
-	bool pushLowGFifo();
-	bool popLowGFifo();
+	bool pushLowGFifo(LowGData* lowG_Data);
+	bool popLowGFifo(LowGData* lowG_Data);
 
 	bool pushHighGFifo();
 	bool popHighGFifo();
@@ -199,8 +199,8 @@ public:
 	bool pushGpsFifo();
 	bool popGpsFifo();
 
-	bool pushStateFifo();
-	bool popStateFifo();
+	bool pushStateFifo(stateData* state_data);
+	bool popStateFifo(stateData* state_data);
 
 	bool pushRocketStateFifo();
 	bool popRocketStateFifo();

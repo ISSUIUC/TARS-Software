@@ -152,14 +152,21 @@ bool DataLogBuffer::popLowGFifo(LowGData* lowG_Data) {
     lowGFifo.pop(lowG_Data);
 }
 
-bool DataLogBuffer::pushGpsFifo() {
-    
+bool DataLogBuffer::pushGpsFifo(GpsData* gps_Data) {
+    lowGFifo.push(*gps_Data);
 }
-bool DataLogBuffer::popGpsFifo();
 
-bool DataLogBuffer::pushStateFifo();
-bool DataLogBuffer::popStateFifo();
+bool DataLogBuffer::popGpsFifo(GpsData* gpa_Data) {
+    lowGFifo.pop(gps_Data);
+}
 
+bool DataLogBuffer::pushStateFifo(stateData* state_data) {
+    stateFifo.push(*state_data);
+}
+
+bool DataLogBuffer::popStateFifo(stateData* state_data) {
+    stateFifo.pop(state_data);
+}
 
 #endif
 
