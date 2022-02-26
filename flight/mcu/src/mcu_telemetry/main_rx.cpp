@@ -68,6 +68,8 @@ struct telemetry_data {
   
   int FSM_state{};
   char sign[8] = "KC1QJA";
+  int rssi;
+  double battery_voltage;
 };
 
 

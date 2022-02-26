@@ -55,6 +55,8 @@ struct telemetry_data {
   
   int FSM_state;
   char sign[8] = "HITHERE";
+  int rssi;
+  double battery_voltage;
 };
 
 // Commands transmitted from ground station to rocket
