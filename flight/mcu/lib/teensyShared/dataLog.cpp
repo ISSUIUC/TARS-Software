@@ -152,5 +152,15 @@ bool DataLogBuffer::popLowGFifo(LowGData* lowG_Data) {
     lowGFifo.pop(lowG_Data);
 }
 
+bool DataLogBuffer::pushHighGFifo(HighGData* highG_Data) {
+    highGFifo.push(*highG_Data);
+}
+
+bool DataLogBuffer::popHighGFifo(HighGData* highG_Data) {
+    highGFifo.pop(highG_Data);
+}
+
+
+
 #endif
 
