@@ -193,8 +193,8 @@ public:
 	bool pushLowGFifo(LowGData* lowG_Data);
 	bool popLowGFifo(LowGData* lowG_Data);
 
-	bool pushHighGFifo();
-	bool popHighGFifo();
+	bool pushHighGFifo(HighGData* highG_Data);
+	bool popHighGFifo(HighGData* highG_Data);
 
 	bool pushGpsFifo();
 	bool popGpsFifo();
