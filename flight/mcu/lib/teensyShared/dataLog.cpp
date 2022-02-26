@@ -177,22 +177,23 @@ bool DataLogBuffer::popStateFifo(stateData* state_data) {
     stateFifo.pop(state_data);
 }
 
-<<<<<<< HEAD
 bool DataLogBuffer::pushBarometerFifo(BarometerData* barometer_data) {
     barometerFifo.push(*barometer_data);
 }
 
 bool DataLogBuffer::popBarometerFifo(BarometerData* barometer_data) {
     barometerFifo.pop(barometer_data);
-=======
+}
+
 bool DataLogBuffer::pushRocketStateFifo(rocketStateData* rocket_data) {
     rocketStateFifo.push(*rocket_data);
 }
 
 bool DataLogBuffer::popRocketStateFifo(rocketStateData* rocket_data) {
     rocketStateFifo.pop(rocket_data);
->>>>>>> 4e35b748ea0cae7a82875dae810796f9afbdb610
 }
+
+
 
 #endif
 
