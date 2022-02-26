@@ -188,6 +188,24 @@ public:
     sensorDataStruct_t current_data;
 
     File dataFile;
+
+	bool pushLowGFifo();
+	bool popLowGFifo();
+
+	bool pushHighGFifo();
+	bool popHighGFifo();
+
+	bool pushGpsFifo();
+	bool popGpsFifo();
+
+	bool pushStateFifo();
+	bool popStateFifo();
+
+	bool pushRocketStateFifo();
+	bool popRocketStateFifo();
+
+	bool pushBarometerFifo();
+	bool popBarometerFifo();
 };
 
 // TODO: Re-think this struct

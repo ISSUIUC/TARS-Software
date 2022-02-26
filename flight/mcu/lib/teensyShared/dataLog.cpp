@@ -144,4 +144,12 @@ void logData(File* dataFile, sensorDataStruct_t* data) {
     }
 }
 
+bool DataLogBuffer::pushLowGFifo(LowGData* lowG_Data) {
+    lowGFifo.push(*lowG_Data);
+}
+
+bool DataLogBuffer::popLowGFifo(LowGData* lowG_Data) {
+    lowGFifo.pop(lowG_Data);
+}
+
 #endif
