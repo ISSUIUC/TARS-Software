@@ -152,5 +152,14 @@ bool DataLogBuffer::popLowGFifo(LowGData* lowG_Data) {
     lowGFifo.pop(lowG_Data);
 }
 
+bool DataLogBuffer::pushGpsFifo() {
+    
+}
+bool DataLogBuffer::popGpsFifo();
+
+bool DataLogBuffer::pushStateFifo();
+bool DataLogBuffer::popStateFifo();
+
+
 #endif
 
