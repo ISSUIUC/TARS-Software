@@ -67,7 +67,7 @@ void lowGimuTickFunction(LSM9DS1* lsm, DataLogBuffer* data_log_buffer,
     lowG_Data->mz = lsm->calcMag(lsm->mz);
     //! Unlocking &dataMutex for low g
 
-    data_log_buffer->lowGFifo.push(*lowG_Data);
+	data_log_buffer->pushLowGFifo(*lowG_Data);
     chMtxUnlock(&data_log_buffer->dataMutex_lowG);
 
 #ifdef LOWGIMU_DEBUG
@@ -139,7 +139,7 @@ void gpsTickFunction(SFE_UBLOX_GNSS* gps, DataLogBuffer* data_log_buffer,
     gps_data->fix_type = fix_type;
     gps_data->siv_count = SIV_count;
 
-    data_log_buffer->gpsFifo.push(*gps_data);
+	data_log_buffer->pushGpsFifo(*gps_data);
 
     //! Unlocking &dataMutex
     chMtxUnlock(&gps_mutex);
@@ -202,7 +202,8 @@ void highGimuTickFunction(KX134* highG, DataLogBuffer* data_log_buffer,
 
     // Unlock high g mutex
 
-    data_log_buffer->highGFifo.push(*highg_data);
+	data_log_buffer->pushHighGFifo(*highg_data);
+
     chMtxUnlock(&data_log_buffer->dataMutex_highG);
 
 #ifdef HIGHGIMU_DEBUG
@@ -260,7 +261,7 @@ void barometerTickFunction(MS5611* barometer, DataLogBuffer* data_log_buffer,
     barometer_data->altitude = -log(barometer_data->pressure * 0.000987) *
                                (barometer_data->temperature + 273.15) * 29.254;
 
-    data_log_buffer->barometerFifo.push(*barometer_data);
+	data_log_buffer->pushBarometerFifo(*barometer_data);
     //! Unlocking &dataMutex for barometer
     chMtxUnlock(&data_log_buffer->dataMutex_barometer);
 

@@ -31,21 +31,21 @@ void dataLoggerTickFunction(pointers* pointer_struct) {
 
         // read each fifo once checking if they have data
         current_data.has_lowG_data =
-            buffers.lowGFifo.pop(&current_data.lowG_data);
+			buffers.popLowGFifo(&current_data.lowG_data);
 
         current_data.has_highG_data =
-            buffers.highGFifo.pop(&current_data.highG_data);
+			buffers.popHighGFifo(&current_data.highG_data);
 
-        current_data.has_gps_data = buffers.gpsFifo.pop(&current_data.gps_data);
+        current_data.has_gps_data = buffers.popGpsFifo(&current_data.gps_data);
 
         current_data.has_state_data =
-            buffers.stateFifo.pop(&current_data.state_data);
+			buffers.popStateFifo(&current_data.state_data);
 
         current_data.has_rocketState_data =
-            buffers.rocketStateFifo.pop(&current_data.rocketState_data);
+			buffers.popRocketStateFifo(&current_data.rocketState_data);
 
         current_data.has_barometer_data =
-            buffers.barometerFifo.pop(&current_data.barometer_data);
+			buffers.popBarometerFifo(&current_data.barometer_data);
 
         // check if any buffers have data
         bool any_have_data =
