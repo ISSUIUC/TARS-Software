@@ -161,6 +161,21 @@ bool DataLogBuffer::popHighGFifo(HighGData* highG_Data) {
 }
 
 
+bool DataLogBuffer::pushGpsFifo(GpsData* gps_Data) {
+    gpsFifo.push(*gps_Data);
+}
+
+bool DataLogBuffer::popGpsFifo(GpsData* gps_Data) {
+    gpsFifo.pop(gps_Data);
+}
+
+bool DataLogBuffer::pushStateFifo(stateData* state_data) {
+    stateFifo.push(*state_data);
+}
+
+bool DataLogBuffer::popStateFifo(stateData* state_data) {
+    stateFifo.pop(state_data);
+}
 
 #endif
 
