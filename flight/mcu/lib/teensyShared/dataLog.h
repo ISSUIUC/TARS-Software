@@ -178,6 +178,7 @@ private:
     FifoBuffer<rocketStateData, FIFO_SIZE> rocketStateFifo{};
     FifoBuffer<BarometerData, FIFO_SIZE> barometerFifo{};
 public:
+   
     MUTEX_DECL(dataMutex_lowG);
     MUTEX_DECL(dataMutex_highG);
     MUTEX_DECL(dataMutex_GPS);

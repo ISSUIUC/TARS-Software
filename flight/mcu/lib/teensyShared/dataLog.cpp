@@ -153,3 +153,4 @@ bool DataLogBuffer::popLowGFifo(LowGData* lowG_Data) {
 }
 
 #endif
+
