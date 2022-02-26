@@ -238,8 +238,8 @@ void loop()
       // Serial.println(data.KX_IMU_az);
       // Serial.print("FSM state");
       // Serial.println(data.FSM_state);
-      // Serial.print("RSSI: ");
-      // Serial.println(rf95.lastRssi(), DEC);
+      Serial.print("RSSI: ");
+      Serial.println(rf95.lastRssi(), DEC);
       
     }else
     {
