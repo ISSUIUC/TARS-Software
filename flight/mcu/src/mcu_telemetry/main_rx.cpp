@@ -122,7 +122,8 @@ void SerialPrintTelemetryData(const telemetry_data & data){
   Serial.print(R"("LSM_IMU_my":)"); Serial.print(data.LSM_IMU_my); Serial.print(',');
   Serial.print(R"("LSM_IMU_mz":)"); Serial.print(data.LSM_IMU_mz); Serial.print(',');
   Serial.print(R"("FSM_state":)"); Serial.print(data.FSM_state); Serial.print(',');
-  Serial.print(R"("sign":")"); Serial.print(sign); Serial.print("\"");
+  Serial.print(R"("sign":")"); Serial.print(sign); Serial.print(',');
+  Serial.print(R"("RSSI":")"); Serial.print(data.rssi); Serial.print("\"");
 
   Serial.println("}}");
 }
