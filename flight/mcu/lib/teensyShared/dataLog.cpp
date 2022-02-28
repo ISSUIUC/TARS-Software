@@ -31,21 +31,21 @@ void dataLoggerTickFunction(pointers* pointer_struct) {
 
         // read each fifo once checking if they have data
         current_data.has_lowG_data =
-            buffers.lowGFifo.pop(&current_data.lowG_data);
+            buffers.popLowGFifo(&current_data.lowG_data);
 
         current_data.has_highG_data =
-            buffers.highGFifo.pop(&current_data.highG_data);
+            buffers.popHighGFifo(&current_data.highG_data);
 
-        current_data.has_gps_data = buffers.gpsFifo.pop(&current_data.gps_data);
+        current_data.has_gps_data = buffers.popGpsFifo(&current_data.gps_data);
 
         current_data.has_state_data =
-            buffers.stateFifo.pop(&current_data.state_data);
+            buffers.popStateFifo(&current_data.state_data);
 
         current_data.has_rocketState_data =
-            buffers.rocketStateFifo.pop(&current_data.rocketState_data);
+            buffers.popRocketStateFifo(&current_data.rocketState_data);
 
         current_data.has_barometer_data =
-            buffers.barometerFifo.pop(&current_data.barometer_data);
+            buffers.popBarometerFifo(&current_data.barometer_data);
 
         // check if any buffers have data
         bool any_have_data =
@@ -142,6 +142,50 @@ void logData(File* dataFile, sensorDataStruct_t* data) {
     } else {
         flush_iterator++;
     }
+}
+
+bool DataLogBuffer::pushLowGFifo(LowGData* lowG_Data) {
+    lowGFifo.push(*lowG_Data);
+}
+
+bool DataLogBuffer::popLowGFifo(LowGData* lowG_Data) {
+    lowGFifo.pop(lowG_Data);
+}
+
+bool DataLogBuffer::pushHighGFifo(HighGData* highG_Data) {
+    highGFifo.push(*highG_Data);
+}
+
+bool DataLogBuffer::popHighGFifo(HighGData* highG_Data) {
+    highGFifo.pop(highG_Data);
+}
+
+bool DataLogBuffer::pushGpsFifo(GpsData* gps_Data) { gpsFifo.push(*gps_Data); }
+
+bool DataLogBuffer::popGpsFifo(GpsData* gps_Data) { gpsFifo.pop(gps_Data); }
+
+bool DataLogBuffer::pushStateFifo(stateData* state_data) {
+    stateFifo.push(*state_data);
+}
+
+bool DataLogBuffer::popStateFifo(stateData* state_data) {
+    stateFifo.pop(state_data);
+}
+
+bool DataLogBuffer::pushBarometerFifo(BarometerData* barometer_data) {
+    barometerFifo.push(*barometer_data);
+}
+
+bool DataLogBuffer::popBarometerFifo(BarometerData* barometer_data) {
+    barometerFifo.pop(barometer_data);
+}
+
+bool DataLogBuffer::pushRocketStateFifo(rocketStateData* rocket_data) {
+    rocketStateFifo.push(*rocket_data);
+}
+
+bool DataLogBuffer::popRocketStateFifo(rocketStateData* rocket_data) {
+    rocketStateFifo.pop(rocket_data);
 }
 
 #endif

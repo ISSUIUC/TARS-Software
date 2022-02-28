@@ -146,10 +146,12 @@ enum sensors { LOWG_IMU, HIGHG_IMU, BAROMETER, GPS };
 
 #define FIFO_SIZE 1000
 /**
- * @brief A struct to hold all info for ring buffers and mutexes used for data.
+ * @brief A class to hold all info for ring buffers and mutexes used for data.
  *
  */
-struct DataLogBuffer {
+
+class DataLogBuffer {
+   private:
     FifoBuffer<LowGData, FIFO_SIZE> lowGFifo{};
     FifoBuffer<HighGData, FIFO_SIZE> highGFifo{};
     FifoBuffer<GpsData, FIFO_SIZE> gpsFifo{};
@@ -157,6 +159,7 @@ struct DataLogBuffer {
     FifoBuffer<rocketStateData, FIFO_SIZE> rocketStateFifo{};
     FifoBuffer<BarometerData, FIFO_SIZE> barometerFifo{};
 
+   public:
     MUTEX_DECL(dataMutex_lowG);
     MUTEX_DECL(dataMutex_highG);
     MUTEX_DECL(dataMutex_GPS);
@@ -167,6 +170,24 @@ struct DataLogBuffer {
     sensorDataStruct_t current_data;
 
     File dataFile;
+
+    bool pushLowGFifo(LowGData* lowG_Data);
+    bool popLowGFifo(LowGData* lowG_Data);
+
+    bool pushHighGFifo(HighGData* highG_Data);
+    bool popHighGFifo(HighGData* highG_Data);
+
+    bool pushGpsFifo(GpsData* gps_Data);
+    bool popGpsFifo(GpsData* gps_Data);
+
+    bool pushStateFifo(stateData* state_data);
+    bool popStateFifo(stateData* state_data);
+
+    bool pushRocketStateFifo(rocketStateData* rocket_data);
+    bool popRocketStateFifo(rocketStateData* rocket_data);
+
+    bool pushBarometerFifo(BarometerData* barometer_data);
+    bool popBarometerFifo(BarometerData* barometer_data);
 };
 
 // TODO: Re-think this struct
