@@ -1,6 +1,7 @@
-#include <KX134-1211.h>
-#include <ChRt.h>
 #include "HighGSensor.h"
+
+#include <ChRt.h>
+#include <KX134-1211.h>
 
 void HighGSensor::readReadings() {
     chSysLock();
@@ -9,9 +10,9 @@ void HighGSensor::readReadings() {
 }
 
 GForce HighGSensor::getGForce() {
-    float x_gforce=KX->get_x_gforce();
-    float y_gforce=KX->get_y_gforce();
-    float z_gforce=KX->get_z_gforce();
+    float x_gforce = KX->get_x_gforce();
+    float y_gforce = KX->get_y_gforce();
+    float z_gforce = KX->get_z_gforce();
 
-    return GForce{x_gforce,y_gforce,z_gforce};
+    return GForce{x_gforce, y_gforce, z_gforce};
 }
