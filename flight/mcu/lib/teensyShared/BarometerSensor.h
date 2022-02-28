@@ -3,12 +3,15 @@
 
 #include <MS5611.h>
 
-struct BarometerSensor {
-    MS5611* MS;
+class BarometerSensor {
+   public:
     void readReadings();
     float getPressure();
     float getTemperature();
     float getAltitude();
+
+   private:
+    MS5611* MS;
     float pressure;
     float temperature;
     float altitude;

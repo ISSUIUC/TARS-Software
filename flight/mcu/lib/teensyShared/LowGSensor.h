@@ -20,12 +20,16 @@ struct Magnetometer {
     float my;
     float mz;
 };
-struct LowGSensor {
-    LSM9DS1* LSM;
+
+class LowGSensor {
+   public:
     void readReadings();
     Acceleration getAcceleration();
     Gyroscope getGyroscope();
     Magnetometer getMagnetometer();
+
+   private:
+    LSM9DS1* LSM;
 };
 
 #endif

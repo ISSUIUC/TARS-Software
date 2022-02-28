@@ -8,10 +8,13 @@ struct GForce {
     float y_gforce;
     float z_gforce;
 };
-struct HighGSensor {
-    KX134* KX;
+class HighGSensor {
+   public:
     void readReadings();
     GForce getGForce();
+
+   private:
+    KX134* KX;
 };
 
 #endif
