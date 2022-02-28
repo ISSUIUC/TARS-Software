@@ -180,8 +180,6 @@ struct pointers {
 
     DataLogBuffer dataloggerTHDVarsPointer;
     bool abort;
-    
-
 };
 
 void dataLoggerTickFunction(pointers*);

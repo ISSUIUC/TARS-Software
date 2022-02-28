@@ -50,7 +50,8 @@ void rocketFSM::tickFSM() {
 
     // links to abort for other states
     if (pointer_struct->abort) {
-        pointer_struct->sensorDataPointer->rocketState_data.rocketState = STATE_ABORT;
+        pointer_struct->sensorDataPointer->rocketState_data.rocketState =
+            STATE_ABORT;
     }
 
     switch (pointer_struct->sensorDataPointer->rocketState_data.rocketState) {
