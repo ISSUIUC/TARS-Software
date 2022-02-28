@@ -336,6 +336,7 @@ void setup() {
     sensor_pointers.barometerPointer = &barometer;
     sensor_pointers.GPSPointer = &gps;
     sensor_pointers.sensorDataPointer = &sensorData;
+    sensor_pointers.abort = false;
 
     SPI.begin();
 
