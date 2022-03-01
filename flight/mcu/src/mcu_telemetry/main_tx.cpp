@@ -24,8 +24,12 @@
 // Singleton instance of the radio driver
 RH_RF95 rf95(RFM95_CS, RFM95_INT);
 
+
 //For reading from 
 char incomingCmd[MAX_CMD_LEN];
+
+//storing command ID
+static int command_ID = 1;
 
 
 // Data transmitted from rocket to ground station
@@ -57,6 +61,7 @@ struct telemetry_data {
   char sign[8] = "HITHERE";
   int rssi;
   double battery_voltage;
+  int response_ID;
 };
 
 // Commands transmitted from ground station to rocket
@@ -68,6 +73,7 @@ enum CommandType {
 
 struct telemetry_command {
   CommandType command;
+  int cmd_id;
   union {
     char callsign[8];
     int freq;
@@ -146,6 +152,9 @@ void loop()
    {
       telemetry_command received;
       memcpy(&received, buf, sizeof(received));
+      
+      /* Check if lasted command ID matched current command ID */
+      if(received.cmd_id - 1 == d.response_ID) ++d.response_ID;
       if (received.command == SET_FREQ) {
         rf95.setFrequency(received.freq);
       } 

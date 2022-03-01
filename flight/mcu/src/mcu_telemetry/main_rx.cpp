@@ -71,6 +71,8 @@ struct telemetry_data {
   char sign[8] = "KC1QJA";
   int rssi;
   double battery_voltage;
+  int response_ID;
+
 };
 
 
