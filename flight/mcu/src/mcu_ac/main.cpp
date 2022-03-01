@@ -37,6 +37,7 @@
 #include "pins.h"
 #include "rocketFSM.h"
 #include "sensors.h"
+#include "telemetry.h"
 
 // datalogger_THD datalogger_THD_vars;
 
