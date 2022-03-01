@@ -74,6 +74,20 @@ static THD_WORKING_AREA(highgIMU_WA, 8192);
 static THD_WORKING_AREA(servo_WA, 8192);
 static THD_WORKING_AREA(dataLogger_WA, 8192);
 static THD_WORKING_AREA(mpuComm_WA, 8192);
+static THD_WORKING_AREA(telemetry_WA, 8192);
+
+/******************************************************************************/
+/* TELEMETRY THREAD                                         */
+
+static THD_FUNCTION(telemetry_THD, arg) {
+    struct pointers *pointer_struct = (struct pointers *)arg;
+    // int packetnum = 0;
+    Telemetry tlm;
+    while(true) {
+        tlm.transmit();
+        chThdSleepMilliseconds(1);
+    }
+}
 
 /******************************************************************************/
 /* ROCKET FINITE STATE MACHINE THREAD                                         */
