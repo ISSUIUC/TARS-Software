@@ -41,6 +41,7 @@ char incomingCmd[MAX_CMD_LEN];
 char curByte;
 short charIdx = 0;
 short readySend = 0;
+static int command_ID = 1;
 
 struct telemetry_data {
   double gps_lat{};
@@ -81,6 +82,7 @@ enum class CommandType {
 // Commands transmitted from ground station to rocket
 struct telemetry_command {
   CommandType command;
+  int id;
   union {
     char callsign[8];
     int freq;
@@ -150,7 +152,9 @@ void SerialInput(const char * key, const char * value){
     SerialError();
     return;
   }
-
+  t.id = command_ID;
+  command_ID++;
+  
   rf95.send((uint8_t*)&t, sizeof(t));
   rf95.waitPacketSent();
 
