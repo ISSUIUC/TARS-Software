@@ -154,7 +154,7 @@ void loop()
       memcpy(&received, buf, sizeof(received));
       
       /* Check if lasted command ID matched current command ID */
-      if(received.cmd_id - 1 == d.response_ID) ++d.response_ID;
+      d.response_ID = received.cmd_id;
       if (received.command == SET_FREQ) {
         rf95.setFrequency(received.freq);
       } 
