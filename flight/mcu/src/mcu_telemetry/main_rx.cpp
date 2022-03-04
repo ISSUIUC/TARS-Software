@@ -19,14 +19,23 @@ This code was used to test the RFM LoRa modules on a breadboard:
 #include <SPI.h>
 #include <RH_RF95.h>
 #include "SerialParser.h"
+#include <queue>
 
+/* Pins for feather*/
+// // Ensure to change depending on wiring
+// #define RFM95_CS 8
+// #define RFM95_RST 4
+// // #define RFM95_EN 
+// #define RFM95_INT 3
+// // #define LED 13 // Blinks on receipt
 
+/* Pins for Teensy 31*/
 // Ensure to change depending on wiring
-#define RFM95_CS 8
-#define RFM95_RST 4
-// #define RFM95_EN 
-#define RFM95_INT 3
-// #define LED 13 // Blinks on receipt
+#define RFM95_CS 10
+#define RFM95_RST 15
+#define RFM95_EN 14
+#define RFM95_INT 16
+#define LED 13 // Blinks on receipt
 
 // Change to 434.0 or other frequency, must match RX's freq!
 #define RF95_FREQ 434.0
@@ -41,7 +50,8 @@ char incomingCmd[MAX_CMD_LEN];
 char curByte;
 short charIdx = 0;
 short readySend = 0;
-static int command_ID = 1;
+int command_ID = 0;
+short cmd_number = 0;
 
 struct telemetry_data {
   double gps_lat{};
@@ -92,6 +102,9 @@ struct telemetry_command {
   };
 };
 
+telemetry_command main_cmd;
+std::queue<telemetry_command> cmd_queue;
+
 constexpr const char * json_command_success = R"({type: "command_success"})";
 constexpr const char * json_command_parse_error = R"({type: "command_error", error: "serial parse error"})";
 constexpr const char * json_init_failure = R"({type: "init_error", error: "failed to initilize LORA"})";
@@ -105,7 +118,7 @@ void SerialPrintTelemetryData(const telemetry_data & data){
   memcpy(sign, data.sign, 8);
 
   Serial.print(R"({"type": "data", "value": {)");
-
+  Serial.print(R"("response_ID":)"); Serial.print(data.response_ID); Serial.print(',');
   Serial.print(R"("gps_lat":)"); Serial.print(data.gps_lat); Serial.print(',');
   Serial.print(R"("gps_long":)"); Serial.print(data.gps_long); Serial.print(',');
   Serial.print(R"("gps_alt":)"); Serial.print(data.gps_alt); Serial.print(',');
@@ -138,34 +151,53 @@ void SerialError(){
 }
 
 void SerialInput(const char * key, const char * value){
-  telemetry_command t;
 
+  /* If queue is not empty, do not accept new command*/
+  if(!cmd_queue.empty()){
+    SerialError();
+    return;
+  }
   if(strcmp(key, "ABORT") == 0){
-    t.command = CommandType::ABORT;
-    t.do_abort = true;
+    main_cmd.command = CommandType::ABORT;
+    main_cmd.do_abort = true;
   } else if(strcmp(key, "FREQ") == 0) {
-    t.command = CommandType::SET_FREQ;
+    main_cmd.command = CommandType::SET_FREQ;
     int v = atoi(value);
-    t.freq = min(max(v, 390), 445);
+    main_cmd.freq = min(max(v, 390), 445);
   } else if(strcmp(key, "CALLSIGN") == 0) {
-    t.command = CommandType::SET_CALLSIGN;
-    memcpy(t.callsign, value, 8);
+    main_cmd.command = CommandType::SET_CALLSIGN;
+    memcpy(main_cmd.callsign, value, 8);
   } else {
     SerialError();
     return;
   }
-  t.id = command_ID;
-  command_ID++;
-  
+
+  main_cmd.id = ++command_ID;
+
+  for(int i = 0; i < 5; ++i) {
+    cmd_queue.push(main_cmd); //add the command to queue
+    ++cmd_number;
+  }
+}
+
+void sendCommand(){
+  telemetry_command t;
+  if(cmd_queue.empty()) return;
+  if(cmd_number > 0) {
+    t = cmd_queue.front();
+    cmd_queue.pop();
+    --cmd_number;}
   rf95.send((uint8_t*)&t, sizeof(t));
   rf95.waitPacketSent();
 
+  /* THIS WILL NEED TO BE MOVED AS DON'T CHANGE FREQ UNTIL CONFIRMED CMD RECEIVED BY ROCEKT*/
   if(t.command == CommandType::SET_FREQ){
     rf95.setFrequency(t.freq);
   }
-
+  Serial.println("Command sent!");
   Serial.println(json_command_success);
 }
+
 
 
 SerialParser serial_parser(SerialInput, SerialError);
@@ -226,28 +258,20 @@ void loop()
     {
       memcpy(&data, buf, sizeof(data));
       SerialPrintTelemetryData(data);
-      // digitalWrite(LED, HIGH);
-      // // This displays some of the data received 
-      // Serial.println("Got: ");
-      // Serial.print("GPS Lat ");
-      // Serial.println(data.gps_lat);
-      // Serial.print("GPS Long ");
-      // Serial.println(data.gps_long);
-      // Serial.print("GPS Alt ");
-      // Serial.println(data.gps_alt);
-      // Serial.print("Barometer Alt ");
-      // Serial.println(data.barometer_alt);
-      // Serial.print("KX IMU ax ");
-      // Serial.println(data.KX_IMU_ax);
-      // Serial.print("KX IMU ay ");
-      // Serial.println(data.KX_IMU_ay);
-      // Serial.print("KX IMU az ");
-      // Serial.println(data.KX_IMU_az);
-      // Serial.print("FSM state");
-      // Serial.println(data.FSM_state);
       Serial.print("RSSI: ");
       Serial.println(rf95.lastRssi(), DEC);
-      
+      Serial.print("Number of elem in queue ");
+      Serial.println(cmd_queue.size());
+      if(data.response_ID != command_ID){
+        sendCommand();
+      }
+      else{
+        while(cmd_number > 0){
+          cmd_queue.pop();
+          --cmd_number;
+        }
+      }
+    
     }else
     {
       Serial.println(json_receive_failure);
