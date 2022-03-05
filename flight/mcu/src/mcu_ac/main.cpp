@@ -19,9 +19,6 @@
  */
 
 #include <Arduino.h>
-#include <ChRt.h>
-#include <PWMServo.h>
-#include <SD.h>
 #include <SPI.h>
 #include <Wire.h>
 
@@ -58,12 +55,21 @@ MS5611 barometer{MS5611_CS};
 bool test_barometer(){
     barometer.init();
     barometer.read(12);
+
     float temp = barometer.getTemperature() *
         0.01;
+    bool did_change = false;
+    for(int i = 0; i < 20; i++){
+        barometer.read(12);
+        float temp_new = barometer.getTemperature() *
+            0.01;
+        if(temp_new != temp) did_change = true;
+        Serial.print("Temperature: "); Serial.println(temp_new);
+        delay(100);
+    }
+    
 
-    Serial.print("Temperature: "); Serial.println(temp);
-
-    return temp > 0 && temp < 40;
+    return did_change;
 }
 
 bool test_lowg(){
@@ -84,9 +90,16 @@ bool test_highg(){
     highGimu.update_data();
     float accel = highGimu.get_x_accel();
 
-    Serial.print("Accel X: "); Serial.println(accel);
+    bool did_change = false;
+    for(int i = 0; i < 20; i++){
+        highGimu.update_data();
+        float new_accel = highGimu.get_x_accel();
+        if(new_accel != accel) did_change = true;
+        Serial.print("Accel X: "); Serial.println(accel);
+        delay(100);
+    }
 
-    return accel > -2 && accel < 2;
+    return did_change;
 }
 
 bool test_gps(){
