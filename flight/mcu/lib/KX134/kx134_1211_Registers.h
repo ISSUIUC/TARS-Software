@@ -1,7 +1,7 @@
 #ifndef __KX134_Registers_H__
 #define __KS134_Registers_H__
 
-#define KX134_CS_PIN 10
+#define KX134_CS_PIN 27
 
 /////////////////////////////////////////
 // KX134-1121 Registers //
