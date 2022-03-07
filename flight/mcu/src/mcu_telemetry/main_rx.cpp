@@ -243,6 +243,7 @@ void loop()
       memcpy(&data, buf, sizeof(data));
       // SerialPrintTelemetryData(data);
 
+      Serial.println(data.response_ID);
       if(!cmd_queue.empty()){
         if(cmd_queue.front().command.id <= data.response_ID){
           cmd_queue.pop();
