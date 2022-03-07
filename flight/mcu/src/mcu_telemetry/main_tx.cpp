@@ -122,6 +122,8 @@ void setup()
 }
 
 int16_t packetnum = 0;  // packet counter, we increment per xmission
+int last_command_id = -1;
+
 
 void loop()
 {
@@ -130,6 +132,7 @@ void loop()
   
   
   telemetry_data d;
+  d.response_ID = last_command_id;
   // char radiopacket[20] = "Hey bestie #      ";
   // itoa(packetnum++, radiopacket+13, 10);
   // Serial.print("Sending "); Serial.println(radiopacket);
@@ -154,7 +157,7 @@ void loop()
       memcpy(&received, buf, sizeof(received));
       
       /* Check if lasted command ID matched current command ID */
-      d.response_ID = received.cmd_id;
+      last_command_id = received.cmd_id;
       if (received.command == SET_FREQ) {
         rf95.setFrequency(received.freq);
       } 

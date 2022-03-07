@@ -23,18 +23,18 @@ This code was used to test the RFM LoRa modules on a breadboard:
 
 /* Pins for feather*/
 // // Ensure to change depending on wiring
-// #define RFM95_CS 8
-// #define RFM95_RST 4
-// // #define RFM95_EN 
-// #define RFM95_INT 3
+#define RFM95_CS 8
+#define RFM95_RST 4
+// #define RFM95_EN 
+#define RFM95_INT 3
 // // #define LED 13 // Blinks on receipt
 
 /* Pins for Teensy 31*/
 // Ensure to change depending on wiring
-#define RFM95_CS 10
-#define RFM95_RST 15
-#define RFM95_EN 14
-#define RFM95_INT 16
+// #define RFM95_CS 10
+// #define RFM95_RST 15
+// #define RFM95_EN 14
+// #define RFM95_INT 16
 #define LED 13 // Blinks on receipt
 
 // Change to 434.0 or other frequency, must match RX's freq!
@@ -102,8 +102,12 @@ struct telemetry_command {
   };
 };
 
-telemetry_command main_cmd;
-std::queue<telemetry_command> cmd_queue;
+struct TelemetryCommandQueueElement {
+  telemetry_command command;
+  int retry_count;
+};
+
+std::queue<TelemetryCommandQueueElement> cmd_queue;
 
 constexpr const char * json_command_success = R"({type: "command_success"})";
 constexpr const char * json_command_parse_error = R"({type: "command_error", error: "serial parse error"})";
@@ -111,6 +115,8 @@ constexpr const char * json_init_failure = R"({type: "init_error", error: "faile
 constexpr const char * json_init_success = R"({type: "init_success"})";
 constexpr const char * json_set_frequency_failure = R"({type: "freq_error", error: "set_frequency failed"})";
 constexpr const char * json_receive_failure = R"({type: "receive_error", error: "recv failed"})";
+constexpr const char * json_send_failure = R"({type: "send_error", error: "command_retries_exceded"})";
+constexpr int max_command_retries = 5;
 
 void SerialPrintTelemetryData(const telemetry_data & data){
   //add null ternimator to sign
@@ -157,45 +163,35 @@ void SerialInput(const char * key, const char * value){
     SerialError();
     return;
   }
+
+  telemetry_command command{};
   if(strcmp(key, "ABORT") == 0){
-    main_cmd.command = CommandType::ABORT;
-    main_cmd.do_abort = true;
+    command.command = CommandType::ABORT;
+    command.do_abort = true;
   } else if(strcmp(key, "FREQ") == 0) {
-    main_cmd.command = CommandType::SET_FREQ;
+    command.command = CommandType::SET_FREQ;
     int v = atoi(value);
-    main_cmd.freq = min(max(v, 390), 445);
+    command.freq = min(max(v, 390), 445);
   } else if(strcmp(key, "CALLSIGN") == 0) {
-    main_cmd.command = CommandType::SET_CALLSIGN;
-    memcpy(main_cmd.callsign, value, 8);
+    command.command = CommandType::SET_CALLSIGN;
+    memcpy(command.callsign, value, 8);
   } else {
     SerialError();
     return;
   }
-
-  main_cmd.id = ++command_ID;
-
-  for(int i = 0; i < 5; ++i) {
-    cmd_queue.push(main_cmd); //add the command to queue
-    ++cmd_number;
-  }
+  Serial.println(json_command_success);
+  command_ID++;
+  command.id = command_ID;
+  cmd_queue.push({command, 0});
 }
 
-void sendCommand(){
-  telemetry_command t;
+void process_command_queue(){
   if(cmd_queue.empty()) return;
-  if(cmd_number > 0) {
-    t = cmd_queue.front();
-    cmd_queue.pop();
-    --cmd_number;}
-  rf95.send((uint8_t*)&t, sizeof(t));
-  rf95.waitPacketSent();
 
-  /* THIS WILL NEED TO BE MOVED AS DON'T CHANGE FREQ UNTIL CONFIRMED CMD RECEIVED BY ROCEKT*/
-  if(t.command == CommandType::SET_FREQ){
-    rf95.setFrequency(t.freq);
-  }
-  Serial.println("Command sent!");
-  Serial.println(json_command_success);
+
+  TelemetryCommandQueueElement cmd = cmd_queue.front();
+  rf95.send((uint8_t*)&cmd.command, sizeof(cmd.command));
+  rf95.waitPacketSent();
 }
 
 
@@ -204,26 +200,14 @@ SerialParser serial_parser(SerialInput, SerialError);
 
 void setup() 
 {
-  // pinMode(LED, OUTPUT);     
-  // pinMode(RFM95_RST, OUTPUT);
-  // pinMode(RFM95_EN, OUTPUT);
-  // digitalWrite(RFM95_RST, HIGH);
-  // digitalWrite(RFM95_EN, HIGH);
-
   while (!Serial);
   Serial.begin(9600);
-  delay(100);
   
-  // manual reset
-  // digitalWrite(RFM95_RST, LOW);
-  delay(10);
-  // digitalWrite(RFM95_RST, HIGH);
-  delay(10);
-
-  while (!rf95.init()) {
+  if (!rf95.init()) {
     Serial.println(json_init_failure);
     while (1);
   }
+
   Serial.println(json_init_success);
 
   // Defaults after init are 434.0MHz, modulation GFSK_Rb250Fd250, +13dbM
@@ -257,23 +241,23 @@ void loop()
     if (rf95.recv(buf, &len))
     {
       memcpy(&data, buf, sizeof(data));
-      SerialPrintTelemetryData(data);
-      Serial.print("RSSI: ");
-      Serial.println(rf95.lastRssi(), DEC);
-      Serial.print("Number of elem in queue ");
-      Serial.println(cmd_queue.size());
-      if(data.response_ID != command_ID){
-        sendCommand();
-      }
-      else{
-        while(cmd_number > 0){
+      // SerialPrintTelemetryData(data);
+
+      if(!cmd_queue.empty()){
+        if(cmd_queue.front().command.id <= data.response_ID){
           cmd_queue.pop();
-          --cmd_number;
+        } else {
+          cmd_queue.front().retry_count++;
+          if(cmd_queue.front().retry_count >= max_command_retries){
+            cmd_queue.pop();
+            Serial.println(json_send_failure);
+          }
         }
       }
-    
-    }else
-    {
+
+      process_command_queue();
+
+    } else {
       Serial.println(json_receive_failure);
     }
   }
