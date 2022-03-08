@@ -28,8 +28,6 @@ RH_RF95 rf95(RFM95_CS, RFM95_INT);
 //For reading from 
 char incomingCmd[MAX_CMD_LEN];
 
-//storing command ID
-static int command_ID = 1;
 
 
 // Data transmitted from rocket to ground station
@@ -123,7 +121,39 @@ void setup()
 
 int16_t packetnum = 0;  // packet counter, we increment per xmission
 int last_command_id = -1;
+char callsign[8] = "NO SIGN";
 
+struct {
+  bool should_change{};
+  int new_freq{};
+} freq_status;
+
+void handle_command(const telemetry_command & cmd){
+/* Check if lasted command ID matched current command ID */
+      if(last_command_id == cmd.cmd_id){
+        return;
+      }
+      last_command_id = cmd.cmd_id;
+      if (cmd.command == SET_FREQ) {
+        freq_status.should_change = true;
+        freq_status.new_freq = cmd.freq;
+      } 
+
+      if (cmd.command == SET_CALLSIGN) {
+        memcpy(callsign, cmd.callsign, sizeof(cmd.callsign));
+      }
+      
+      Serial.println("Got Commands:");
+      Serial.print("Call Sign: ");
+      Serial.println(cmd.callsign);
+
+      Serial.print("Abort? ");
+      Serial.println(cmd.do_abort);
+      Serial.print("Frequency: ");
+      Serial.println(cmd.freq);
+      Serial.print("RSSI: ");
+      Serial.println(rf95.lastRssi(), DEC);  
+}
 
 void loop()
 {
@@ -131,12 +161,14 @@ void loop()
   // Send a message to rf95_server
   
   
-  telemetry_data d;
+  telemetry_data d{};
   d.response_ID = last_command_id;
-  // char radiopacket[20] = "Hey bestie #      ";
-  // itoa(packetnum++, radiopacket+13, 10);
-  // Serial.print("Sending "); Serial.println(radiopacket);
-  // radiopacket[19] = 0;
+  memcpy(d.sign, callsign, sizeof(callsign));
+
+  if(freq_status.should_change){
+    rf95.setFrequency(freq_status.new_freq);
+    freq_status.should_change = false;
+  }
   
   Serial.println("Sending sample sensor data..."); delay(10);
   rf95.send((uint8_t *)&d, sizeof(d));
@@ -156,29 +188,7 @@ void loop()
       telemetry_command received;
       memcpy(&received, buf, sizeof(received));
       
-      /* Check if lasted command ID matched current command ID */
-      if(last_command_id == received.cmd_id){
-        return;
-      }
-      last_command_id = received.cmd_id;
-      if (received.command == SET_FREQ) {
-        rf95.setFrequency(received.freq);
-      } 
-
-      if (received.command == SET_CALLSIGN) {
-        memcpy(d.sign, received.callsign, sizeof(received.callsign));
-      }
-      
-      Serial.println("Got Commands:");
-      Serial.print("Call Sign: ");
-      Serial.println(received.callsign);
-
-      Serial.print("Abort? ");
-      Serial.println(received.do_abort);
-      Serial.print("Frequency: ");
-      Serial.println(received.freq);
-      Serial.print("RSSI: ");
-      Serial.println(rf95.lastRssi(), DEC);    
+      handle_command(received);
     }
     else
     {

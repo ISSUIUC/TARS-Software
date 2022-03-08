@@ -109,13 +109,13 @@ struct TelemetryCommandQueueElement {
 
 std::queue<TelemetryCommandQueueElement> cmd_queue;
 
-constexpr const char * json_command_success = R"({type: "command_success"})";
-constexpr const char * json_command_parse_error = R"({type: "command_error", error: "serial parse error"})";
-constexpr const char * json_init_failure = R"({type: "init_error", error: "failed to initilize LORA"})";
-constexpr const char * json_init_success = R"({type: "init_success"})";
-constexpr const char * json_set_frequency_failure = R"({type: "freq_error", error: "set_frequency failed"})";
-constexpr const char * json_receive_failure = R"({type: "receive_error", error: "recv failed"})";
-constexpr const char * json_send_failure = R"({type: "send_error", error: "command_retries_exceded"})";
+constexpr const char * json_command_success = R"({"type": "command_success"})";
+constexpr const char * json_command_parse_error = R"({"type": "command_error", "error": "serial parse error"})";
+constexpr const char * json_init_failure = R"({"type": "init_error", "error": "failed to initilize LORA"})";
+constexpr const char * json_init_success = R"({"type": "init_success"})";
+constexpr const char * json_set_frequency_failure = R"({"type": "freq_error", "error": "set_frequency failed"})";
+constexpr const char * json_receive_failure = R"({"type": "receive_error", "error": "recv failed"})";
+constexpr const char * json_send_failure = R"({"type": "send_error", "error": "command_retries_exceded"})";
 constexpr int max_command_retries = 5;
 
 void SerialPrintTelemetryData(const telemetry_data & data){
@@ -145,8 +145,8 @@ void SerialPrintTelemetryData(const telemetry_data & data){
   Serial.print(R"("LSM_IMU_my":)"); Serial.print(data.LSM_IMU_my); Serial.print(',');
   Serial.print(R"("LSM_IMU_mz":)"); Serial.print(data.LSM_IMU_mz); Serial.print(',');
   Serial.print(R"("FSM_state":)"); Serial.print(data.FSM_state); Serial.print(',');
-  Serial.print(R"("sign":")"); Serial.print(sign); Serial.print(',');
-  Serial.print(R"("RSSI":")"); Serial.print(data.rssi); Serial.print("\"");
+  Serial.print(R"("sign":")"); Serial.print(sign); Serial.print("\",");
+  Serial.print(R"("RSSI":)"); Serial.print(data.rssi); Serial.print("");
 
   Serial.println("}}");
 }
@@ -216,7 +216,7 @@ void setup()
     while (1);
   }
 
-  Serial.print(R"({type: "freq_success", frequency:)");
+  Serial.print(R"({"type": "freq_success", "frequency":)");
   Serial.print(RF95_FREQ);
   Serial.println("}");
 
@@ -241,15 +241,18 @@ void loop()
     if (rf95.recv(buf, &len))
     {
       memcpy(&data, buf, sizeof(data));
-      // SerialPrintTelemetryData(data);
+      SerialPrintTelemetryData(data);
 
-      Serial.println(data.response_ID);
       if(!cmd_queue.empty()){
-        if(cmd_queue.front().command.id <= data.response_ID){
+        auto & cmd = cmd_queue.front();
+        if(cmd.command.id <= data.response_ID){
+          if(cmd.command.command == CommandType::SET_FREQ){
+            rf95.setFrequency(cmd.command.freq);
+          }
           cmd_queue.pop();
         } else {
-          cmd_queue.front().retry_count++;
-          if(cmd_queue.front().retry_count >= max_command_retries){
+          cmd.retry_count++;
+          if(cmd.retry_count >= max_command_retries){
             cmd_queue.pop();
             Serial.println(json_send_failure);
           }
