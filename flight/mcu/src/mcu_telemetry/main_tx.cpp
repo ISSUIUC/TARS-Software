@@ -28,6 +28,9 @@ RH_RF95 rf95(RFM95_CS, RFM95_INT);
 //For reading from 
 char incomingCmd[MAX_CMD_LEN];
 
+// input value for sine function
+double dummy_input = 0; 
+
 
 
 // Data transmitted from rocket to ground station
@@ -162,6 +165,43 @@ void loop()
   
   
   telemetry_data d{};
+
+  // Looping input value from 0 to 2pi over and over 
+  if (dummy_input > 628) {
+    dummy_input = 0;
+  } else {
+    dummy_input+=30;
+  }
+
+  // Computing sine value
+  double sin_value = sin(dummy_input/100);
+  double cos_value = cos(dummy_input/100);
+  double tan_value = tan(dummy_input/100);
+
+
+  // Setting each sensor value to the current sine value
+  d.gps_lat=sin_value;
+  d.gps_long=cos_value;
+  d.gps_alt=-1 * dummy_input/100;
+  d.barometer_alt=sin_value;
+  d.KX_IMU_ax=cos_value;
+  d.KX_IMU_ay=sin_value;
+  d.KX_IMU_az=dummy_input/100;
+  d.H3L_IMU_ax=sin_value;
+  d.H3L_IMU_ay=cos_value;
+  d.H3L_IMU_az=sin_value+cos_value;
+  d.LSM_IMU_ax=cos_value;    
+  d.LSM_IMU_ay=sin_value;
+  d.LSM_IMU_az=((dummy_input/100)*(dummy_input/100))/2;
+  d.LSM_IMU_gx=tan_value;    
+  d.LSM_IMU_gy=sin_value;
+  d.LSM_IMU_gz=cos_value;
+  d.LSM_IMU_mx=sin_value;
+  d.LSM_IMU_my=sin_value;
+  d.LSM_IMU_mz=sin_value;
+
+  d.rssi = rf95.lastRssi();
+
   d.response_ID = last_command_id;
   memcpy(d.sign, callsign, sizeof(callsign));
   
@@ -200,5 +240,5 @@ void loop()
   {
     Serial.println("No reply, is there a listener around?");
   }
-  delay(1000);
+  delay(100);
 }
