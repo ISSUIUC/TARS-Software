@@ -17,7 +17,7 @@
 #define RFM95_EN 14
 
 // Change to 434.0 or other frequency, must match RX's freq!
-#define RF95_FREQ 434.0
+#define RF95_FREQ 440.0
 
 #define MAX_CMD_LEN 10
 
@@ -89,7 +89,7 @@ void setup()
   digitalWrite(RFM95_RST, HIGH);
   digitalWrite(RFM95_EN, HIGH);
 
-  while (!Serial);
+  // while (!Serial);
   Serial.begin(9600);
   delay(100);
 

@@ -38,7 +38,7 @@ This code was used to test the RFM LoRa modules on a breadboard:
 #define LED 13 // Blinks on receipt
 
 // Change to 434.0 or other frequency, must match RX's freq!
-#define RF95_FREQ 434.0
+#define RF95_FREQ 440.0
 
 #define DEFAULT_CMD 0
 #define MAX_CMD_LEN 10
@@ -175,6 +175,14 @@ void SerialInput(const char * key, const char * value){
   } else if(strcmp(key, "CALLSIGN") == 0) {
     command.command = CommandType::SET_CALLSIGN;
     memcpy(command.callsign, value, 8);
+  } else if(strcmp(key, "FLOC") == 0){
+    int v = atoi(value);
+    rf95.setFrequency(min(max(v, 390), 445));
+    Serial.println(json_command_success);
+    Serial.print(R"({"type": "freq_success", "frequency":)");
+    Serial.print(v);
+    Serial.println("}");
+    return;
   } else {
     SerialError();
     return;
