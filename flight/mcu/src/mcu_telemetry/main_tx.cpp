@@ -213,6 +213,7 @@ void loop()
 
   //change the freqencey after we acknowledge
   if(freq_status.should_change){
+    Serial.println(freq_status.new_freq);
     rf95.setFrequency(freq_status.new_freq);
     freq_status.should_change = false;
   }
