@@ -164,17 +164,18 @@ void loop()
   telemetry_data d{};
   d.response_ID = last_command_id;
   memcpy(d.sign, callsign, sizeof(callsign));
-
-  if(freq_status.should_change){
-    rf95.setFrequency(freq_status.new_freq);
-    freq_status.should_change = false;
-  }
   
   Serial.println("Sending sample sensor data..."); delay(10);
   rf95.send((uint8_t *)&d, sizeof(d));
 
   Serial.println("Waiting for packet to complete..."); delay(10);
   rf95.waitPacketSent();
+
+  //change the freqencey after we acknowledge
+  if(freq_status.should_change){
+    rf95.setFrequency(freq_status.new_freq);
+    freq_status.should_change = false;
+  }
   // Now wait for a reply
   uint8_t buf[RH_RF95_MAX_MESSAGE_LEN];
   uint8_t len = sizeof(buf);

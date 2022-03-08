@@ -248,6 +248,9 @@ void loop()
         if(cmd.command.id <= data.response_ID){
           if(cmd.command.command == CommandType::SET_FREQ){
             rf95.setFrequency(cmd.command.freq);
+            Serial.print(R"({"type": "freq_success", "frequency":)");
+            Serial.print(cmd.command.freq);
+            Serial.println("}");
           }
           cmd_queue.pop();
         } else {
