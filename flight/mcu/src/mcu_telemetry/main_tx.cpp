@@ -70,6 +70,7 @@ enum CommandType {
   SET_FREQ,
   SET_CALLSIGN,
   ABORT,
+  EMPTY
 };
 
 struct telemetry_command {
