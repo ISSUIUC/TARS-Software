@@ -90,6 +90,7 @@ enum class CommandType {
   SET_FREQ,
   SET_CALLSIGN,
   ABORT,
+  EMPTY
 };
 // Commands transmitted from ground station to rocket
 struct telemetry_command {
@@ -156,6 +157,14 @@ void SerialError(){
   Serial.println(json_command_parse_error);
 }
 
+void set_freq_local_bug_fix(float freq){
+  telemetry_command t;
+  t.command = CommandType::EMPTY;
+  rf95.send((uint8_t*)&t, sizeof(t));
+  rf95.waitPacketSent();
+  rf95.setFrequency(freq);
+}
+
 void SerialInput(const char * key, const char * value){
 
   /* If queue is not empty, do not accept new command*/
@@ -177,7 +186,8 @@ void SerialInput(const char * key, const char * value){
     memcpy(command.callsign, value, 8);
   } else if(strcmp(key, "FLOC") == 0){
     int v = atoi(value);
-    rf95.setFrequency(min(max(v, 390), 445));
+    v = min(max(v, 390), 445);
+    set_freq_local_bug_fix(v);;
     Serial.println(json_command_success);
     Serial.print(R"({"type": "freq_success", "frequency":)");
     Serial.print(v);
@@ -255,7 +265,7 @@ void loop()
         auto & cmd = cmd_queue.front();
         if(cmd.command.id <= data.response_ID){
           if(cmd.command.command == CommandType::SET_FREQ){
-            rf95.setFrequency(cmd.command.freq);
+            set_freq_local_bug_fix(cmd.command.freq);
             Serial.print(R"({"type": "freq_success", "frequency":)");
             Serial.print(cmd.command.freq);
             Serial.println("}");
