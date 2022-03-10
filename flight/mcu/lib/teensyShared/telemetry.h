@@ -86,22 +86,21 @@ void handle_command(const telemetry_command & cmd){
       }
       
       // !! Remove any serial stuff after done debugging !!
-      Serial.println("Got Commands:");
-      Serial.print("Call Sign: ");
-      Serial.println(cmd.callsign);
+      // Serial.println("Got Commands:");
+      // Serial.print("Call Sign: ");
+      // Serial.println(cmd.callsign);
 
-      Serial.print("Abort? ");
-      Serial.println(cmd.do_abort);
-      Serial.print("Frequency: ");
-      Serial.println(cmd.freq);
-      Serial.print("RSSI: ");
-      Serial.println(rf95.lastRssi(), DEC);  
+      // Serial.print("Abort? ");
+      // Serial.println(cmd.do_abort);
+      // Serial.print("Frequency: ");
+      // Serial.println(cmd.freq);
+      // Serial.print("RSSI: ");
+      // Serial.println(rf95.lastRssi(), DEC);  
 }
 
 class Telemetry {
     public:
         Telemetry();
-        void receive();
         void transmit();
     private:
         int packetnum;
