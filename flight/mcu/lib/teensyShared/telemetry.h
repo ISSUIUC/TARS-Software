@@ -2,8 +2,6 @@
 #include <RH_RF95.h>
 #include <ChRt.h>
 
-
-
 //Make sure to change these pinout depending on wiring
 //Don't forget to change the ini file to build the correct main file
 #define RFM95_CS 10
@@ -17,8 +15,7 @@
 #define MAX_CMD_LEN 10
 // Change to 434.0 or other frequency, must match RX's freq!
 
-
-
+// Data transmitted from rocket to ground station
 struct telemetry_data {
   double gps_lat;
   double gps_long;
@@ -44,19 +41,23 @@ struct telemetry_data {
   double LSM_IMU_mz;
   
   int FSM_state;
-  char sign[8] = "KD9TQD";
+  char sign[8] = "HITHERE";
   int rssi;
   double battery_voltage;
+  int response_ID;
 };
 
+// Commands transmitted from ground station to rocket
 enum CommandType {
   SET_FREQ,
   SET_CALLSIGN,
   ABORT,
+  EMPTY
 };
 
 struct telemetry_command {
   CommandType command;
+  int cmd_id;
   union {
     char callsign[8];
     int freq;
@@ -73,5 +74,4 @@ class Telemetry {
         int packetnum;
         telemetry_data d;
         RH_RF95 rf95;
-        // RH_RF95 rf95;
 };
