@@ -70,6 +70,12 @@ struct {
   int new_freq{};
 } freq_status;
 
+// Initializing command ID
+int last_command_id = -1;
+
+// Initializing callsign
+char callsign[8] = "NO SIGN";
+
 void handle_command(const telemetry_command & cmd){
 /* Check if lasted command ID matched current command ID */
       if(last_command_id == cmd.cmd_id){
