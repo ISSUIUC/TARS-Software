@@ -1,6 +1,7 @@
 #include <SPI.h>
 #include <RH_RF95.h>
 #include <ChRt.h>
+#include "sensors.h"
 
 //Make sure to change these pinout depending on wiring
 //Don't forget to change the ini file to build the correct main file
