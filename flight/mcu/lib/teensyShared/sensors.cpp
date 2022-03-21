@@ -30,6 +30,9 @@
 #include "pins.h"
 #include "sensors.h"
 
+static dummy_input_lowG = 0;
+static dummy_input_GPS = 0;
+
 /**
  * @brief Construct a new thd function object to handle data collection from the
  * low-g IMU.
@@ -39,6 +42,22 @@
  */
 void lowGimuTickFunction(pointers *pointer_struct) {
     // Reads data from the low g IMU
+
+    // Looping input value from 0 to 2pi over and over 
+    if (dummy_input_lowG > 628) {
+        dummy_input_lowG = 0;
+    } else {
+        dummy_input_lowG+=30;
+    }
+
+    // Computing sine value
+    double sin_value = sin(dummy_input_lowG/100);
+    double cos_value = cos(dummy_input_lowG/100);
+    double tan_value = tan(dummy_input_lowG/100);
+
+
+    
+
     chSysLock();
     pointer_struct->lowGimuPointer->readAccel();
     pointer_struct->lowGimuPointer->readGyro();
@@ -53,36 +72,19 @@ void lowGimuTickFunction(pointers *pointer_struct) {
         chVTGetSystemTime();
 
     // Log acceleration in Gs
-    pointer_struct->sensorDataPointer->lowG_data.ax =
-        pointer_struct->lowGimuPointer->calcAccel(
-            pointer_struct->lowGimuPointer->ax);
-    pointer_struct->sensorDataPointer->lowG_data.ay =
-        pointer_struct->lowGimuPointer->calcAccel(
-            pointer_struct->lowGimuPointer->ay);
-    pointer_struct->sensorDataPointer->lowG_data
-        .az = pointer_struct->lowGimuPointer->calcAccel(
-        pointer_struct->lowGimuPointer->az);  // There was a minus here. We
-                                              // don't know why that did that
+    pointer_struct->sensorDataPointer->lowG_data.ax = cos_value;
+    pointer_struct->sensorDataPointer->lowG_data.ay = sin_value;
+    pointer_struct->sensorDataPointer->lowG_data.az = ((dummy_input/100)*(dummy_input/100))/2;
+    // There was a minus here. We
+    // don't know why that did that
     // Log rotational speed in degrees per second
-    pointer_struct->sensorDataPointer->lowG_data.gx =
-        pointer_struct->lowGimuPointer->calcGyro(
-            pointer_struct->lowGimuPointer->gx);
-    pointer_struct->sensorDataPointer->lowG_data.gy =
-        pointer_struct->lowGimuPointer->calcGyro(
-            pointer_struct->lowGimuPointer->gy);
-    pointer_struct->sensorDataPointer->lowG_data.gz =
-        pointer_struct->lowGimuPointer->calcGyro(
-            pointer_struct->lowGimuPointer->gz);
+    pointer_struct->sensorDataPointer->lowG_data.gx = tan_value;
+    pointer_struct->sensorDataPointer->lowG_data.gy = sin_value;
+    pointer_struct->sensorDataPointer->lowG_data.gz = cos_value;
     // Log magnetometer data in gauss
-    pointer_struct->sensorDataPointer->lowG_data.mx =
-        pointer_struct->lowGimuPointer->calcMag(
-            pointer_struct->lowGimuPointer->mx);
-    pointer_struct->sensorDataPointer->lowG_data.my =
-        pointer_struct->lowGimuPointer->calcMag(
-            pointer_struct->lowGimuPointer->my);
-    pointer_struct->sensorDataPointer->lowG_data.mz =
-        pointer_struct->lowGimuPointer->calcMag(
-            pointer_struct->lowGimuPointer->mz);
+    pointer_struct->sensorDataPointer->lowG_data.mx = sin_value;
+    pointer_struct->sensorDataPointer->lowG_data.my = sin_value;
+    pointer_struct->sensorDataPointer->lowG_data.mz = sin_value;
     //! Unlocking &dataMutex for low g
 
     pointer_struct->dataloggerTHDVarsPointer.lowGFifo.push(
@@ -120,6 +122,40 @@ void lowGimuTickFunction(pointers *pointer_struct) {
  *
  */
 void gpsTickFunction(pointers *pointer_struct) {
+
+    // Looping input value from 0 to 2pi over and over 
+    if (dummy_input_GPS > 628) {
+        dummy_input_GPS = 0;
+    } else {
+        dummy_input_GPS+=30;
+    }
+
+    // Computing sine value
+    double sin_value = sin(dummy_input_GPS/100);
+    double cos_value = cos(dummy_input_GPS/100);
+    double tan_value = tan(dummy_input_GPS/100);
+
+    // Setting each sensor value to the current sine value
+    // d.gps_lat=sin_value;
+    // d.gps_long=cos_value;
+    // d.gps_alt=-1 * dummy_input/100;
+    // d.barometer_alt=sin_value;
+    // d.KX_IMU_ax=cos_value;
+    // d.KX_IMU_ay=sin_value;
+    // d.KX_IMU_az=dummy_input/100;
+    // d.H3L_IMU_ax=sin_value;
+    // d.H3L_IMU_ay=cos_value;
+    // d.H3L_IMU_az=sin_value+cos_value;
+    // d.LSM_IMU_ax=cos_value;    
+    // d.LSM_IMU_ay=sin_value;
+    // d.LSM_IMU_az=((dummy_input/100)*(dummy_input/100))/2;
+    // d.LSM_IMU_gx=tan_value;    
+    // d.LSM_IMU_gy=sin_value;
+    // d.LSM_IMU_gz=cos_value;
+    // d.LSM_IMU_mx=sin_value;
+    // d.LSM_IMU_my=sin_value;
+    // d.LSM_IMU_mz=sin_value;
+
     // get read timestamp
     systime_t timeStamp_GPS = chVTGetSystemTime();
 
@@ -149,9 +185,9 @@ void gpsTickFunction(pointers *pointer_struct) {
     chMtxLock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_GPS);
 
     pointer_struct->sensorDataPointer->gps_data.timeStamp_GPS = timeStamp_GPS;
-    pointer_struct->sensorDataPointer->gps_data.latitude = latitude;
-    pointer_struct->sensorDataPointer->gps_data.longitude = longitude;
-    pointer_struct->sensorDataPointer->gps_data.altitude = altitude;
+    pointer_struct->sensorDataPointer->gps_data.latitude = sin_value;
+    pointer_struct->sensorDataPointer->gps_data.longitude = cos_value;
+    pointer_struct->sensorDataPointer->gps_data.altitude = -1 * dummy_input/100;;
     pointer_struct->sensorDataPointer->gps_data.posLock = posLock;
     pointer_struct->sensorDataPointer->gps_data.fix_type = fix_type;
     pointer_struct->sensorDataPointer->gps_data.siv_count = SIV_count;
@@ -214,12 +250,9 @@ void highGimuTickFunction(pointers *pointer_struct) {
         chVTGetSystemTime();
 
     // Log accelerations from high g
-    pointer_struct->sensorDataPointer->highG_data.hg_ax =
-        pointer_struct->highGimuPointer->get_x_gforce();
-    pointer_struct->sensorDataPointer->highG_data.hg_ay =
-        pointer_struct->highGimuPointer->get_y_gforce();
-    pointer_struct->sensorDataPointer->highG_data.hg_az =
-        pointer_struct->highGimuPointer->get_z_gforce();
+    pointer_struct->sensorDataPointer->highG_data.hg_ax = 0.5;
+    pointer_struct->sensorDataPointer->highG_data.hg_ay = 0.2;
+    pointer_struct->sensorDataPointer->highG_data.hg_az = -0.5
 
     // Unlock high g mutex
 
@@ -259,12 +292,8 @@ void barometerTickFunction(pointers *pointer_struct) {
         chVTGetSystemTime();
 
     // Log pressure and temperature
-    pointer_struct->sensorDataPointer->barometer_data.pressure =
-        pointer_struct->barometerPointer->getPressure() *
-        0.01;  // Converting both of them into correct unit (in mbar)
-    pointer_struct->sensorDataPointer->barometer_data.temperature =
-        pointer_struct->barometerPointer->getTemperature() *
-        0.01;  // Converting both of them into correct unit (in degC)
+    pointer_struct->sensorDataPointer->barometer_data.pressure = 0.2 // Converting both of them into correct unit (in mbar)
+    pointer_struct->sensorDataPointer->barometer_data.temperature = -0.2// Converting both of them into correct unit (in degC)
 
     // Compute altitude from pres and temp based on Hypsometric equation
     // h = RTln(p0/p)/g, R = specific gas constant; T in K, g for grav. accel.;
@@ -278,12 +307,7 @@ void barometerTickFunction(pointers *pointer_struct) {
     // (pointer_struct->sensorDataPointer->barometer_data.temperature+273.15)/9.8/0.029;
 
     // A version with no divide operation to enable faster computation, probably
-    pointer_struct->sensorDataPointer->barometer_data.altitude =
-        -log(pointer_struct->sensorDataPointer->barometer_data.pressure *
-             0.000987) *
-        (pointer_struct->sensorDataPointer->barometer_data.temperature +
-         273.15) *
-        29.254;
+    pointer_struct->sensorDataPointer->barometer_data.altitude = 0.4;
 
     pointer_struct->dataloggerTHDVarsPointer.barometerFifo.push(
         pointer_struct->sensorDataPointer->barometer_data);
