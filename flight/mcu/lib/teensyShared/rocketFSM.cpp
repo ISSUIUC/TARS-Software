@@ -48,7 +48,17 @@ void rocketFSM::tickFSM() {
     float linear_acceleration =
         -pointer_struct->sensorDataPointer->lowG_data.ay;
 
+    // links to abort for other states
+    if (pointer_struct->abort) {
+        pointer_struct->sensorDataPointer->rocketState_data.rocketState =
+            STATE_ABORT;
+    }
+
     switch (pointer_struct->sensorDataPointer->rocketState_data.rocketState) {
+        case STATE_ABORT:
+            // if true, always stay in abort
+            break;
+
         case STATE_INIT:
             // go to state idle regardless of gps lock
             pointer_struct->sensorDataPointer->rocketState_data.rocketState =
@@ -295,8 +305,8 @@ void rocketFSM::tickFSM() {
     pointer_struct->sensorDataPointer->rocketState_data.timeStamp_RS =
         chVTGetSystemTime();
 
-    pointer_struct->dataloggerTHDVarsPointer.rocketStateFifo.push(
-        pointer_struct->sensorDataPointer->rocketState_data);
+    pointer_struct->dataloggerTHDVarsPointer.pushRocketStateFifo(
+        &pointer_struct->sensorDataPointer->rocketState_data);
 
     // Unlock mutexes used during the switch statement
     chMtxUnlock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_RS);

@@ -10,6 +10,13 @@ Illinois Space Society's flight software codebase for the TARS system.
 ### Branch Naming Convention
 Please use the following naming conventions when creating branches while developing:
 
+Your `<branch-name>` should consist of the Trello ticket ID and a short description of the work being done. For example:
+
+`AV-420-write-cp-location-interpolation-function`
+
+Then use the following scheme to then organize your branches:
+
+- `<branch-name>` for small and simple contributions pertaining to a ticket
 - `user/<github-username>/<branch-name>` for individual tasks or contributions, or as a sandbox for yourself
 - `feature/<branch-name>` for **new** functionality that didn't exist before
 - `bug/<branch-name>` for bug fixes

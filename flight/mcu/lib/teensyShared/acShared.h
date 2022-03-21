@@ -19,7 +19,8 @@ enum FSM_State {
     STATE_MAIN_DETECT,
     STATE_MAIN,
     STATE_LANDED_DETECT,
-    STATE_LANDED
+    STATE_LANDED,
+    STATE_ABORT
 };
 
 // stores time the rocket state is reached as well as timers used to confirm

@@ -17,7 +17,7 @@
  * @brief Structure for all values collected from the low g sensor
  *
  */
-struct lowGData {
+struct LowGData {
     float ax;
     float ay;
     float az;
@@ -34,7 +34,7 @@ struct lowGData {
  * @brief Structure for all values collected from the high g sensor
  *
  */
-struct highGData {
+struct HighGData {
     float hg_ax;
     float hg_ay;
     float hg_az;
@@ -45,7 +45,7 @@ struct highGData {
  * @brief Structure for all values collected from the gps
  *
  */
-struct gpsData {
+struct GpsData {
     float latitude;
     float longitude;
     float altitude;
@@ -59,7 +59,7 @@ struct gpsData {
  * @brief Structure for all values collected from the barometer
  *
  */
-struct barometerData {
+struct BarometerData {
     float temperature;  // in degC
     float pressure;     // in mbar
     float altitude;     // in meter
@@ -115,19 +115,19 @@ struct rocketStateData {
 struct sensorDataStruct_t {
     // data for lowGimu
     bool has_lowG_data;
-    lowGData lowG_data;
+    LowGData lowG_data;
 
     // data for highGimu accel data (hg_x, hg_y, hg_z)
     bool has_highG_data;
-    highGData highG_data;
+    HighGData highG_data;
 
     // GPS DATA
     bool has_gps_data;
-    gpsData gps_data;
+    GpsData gps_data;
 
     // Barometer data (temp and pres)
     bool has_barometer_data;
-    barometerData barometer_data;
+    BarometerData barometer_data;
 
     // State variables
     bool has_state_data;
@@ -146,17 +146,20 @@ enum sensors { LOWG_IMU, HIGHG_IMU, BAROMETER, GPS };
 
 #define FIFO_SIZE 1000
 /**
- * @brief A struct to hold all info for ring buffers and mutexes used for data.
+ * @brief A class to hold all info for ring buffers and mutexes used for data.
  *
  */
-struct datalogger_THD {
-    FifoBuffer<lowGData, FIFO_SIZE> lowGFifo{};
-    FifoBuffer<highGData, FIFO_SIZE> highGFifo{};
-    FifoBuffer<gpsData, FIFO_SIZE> gpsFifo{};
+
+class DataLogBuffer {
+   private:
+    FifoBuffer<LowGData, FIFO_SIZE> lowGFifo{};
+    FifoBuffer<HighGData, FIFO_SIZE> highGFifo{};
+    FifoBuffer<GpsData, FIFO_SIZE> gpsFifo{};
     FifoBuffer<stateData, FIFO_SIZE> stateFifo{};
     FifoBuffer<rocketStateData, FIFO_SIZE> rocketStateFifo{};
-    FifoBuffer<barometerData, FIFO_SIZE> barometerFifo{};
+    FifoBuffer<BarometerData, FIFO_SIZE> barometerFifo{};
 
+   public:
     MUTEX_DECL(dataMutex_lowG);
     MUTEX_DECL(dataMutex_highG);
     MUTEX_DECL(dataMutex_GPS);
@@ -167,6 +170,24 @@ struct datalogger_THD {
     sensorDataStruct_t current_data;
 
     File dataFile;
+
+    bool pushLowGFifo(LowGData* lowG_Data);
+    bool popLowGFifo(LowGData* lowG_Data);
+
+    bool pushHighGFifo(HighGData* highG_Data);
+    bool popHighGFifo(HighGData* highG_Data);
+
+    bool pushGpsFifo(GpsData* gps_Data);
+    bool popGpsFifo(GpsData* gps_Data);
+
+    bool pushStateFifo(stateData* state_data);
+    bool popStateFifo(stateData* state_data);
+
+    bool pushRocketStateFifo(rocketStateData* rocket_data);
+    bool popRocketStateFifo(rocketStateData* rocket_data);
+
+    bool pushBarometerFifo(BarometerData* barometer_data);
+    bool popBarometerFifo(BarometerData* barometer_data);
 };
 
 // TODO: Re-think this struct
@@ -178,7 +199,8 @@ struct pointers {
 
     sensorDataStruct_t* sensorDataPointer;
 
-    datalogger_THD dataloggerTHDVarsPointer;
+    DataLogBuffer dataloggerTHDVarsPointer;
+    bool abort;
 };
 
 void dataLoggerTickFunction(pointers*);
