@@ -108,7 +108,7 @@ void handle_command(const telemetry_command & cmd){
 class Telemetry {
     public:
         Telemetry();
-        void transmit();
+        void transmit(sensorDataStruct_t &input_data);
     private:
         int packetnum;
         telemetry_data d;

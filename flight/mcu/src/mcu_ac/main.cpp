@@ -85,7 +85,7 @@ static THD_FUNCTION(telemetry_THD, arg) {
     // int packetnum = 0;
     Telemetry tlm;
     while(true) {
-        tlm.transmit();
+        tlm.transmit(sensorData);
         chThdSleepMilliseconds(1);
     }
 }

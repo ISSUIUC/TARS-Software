@@ -30,8 +30,8 @@
 #include "pins.h"
 #include "sensors.h"
 
-static dummy_input_lowG = 0;
-static dummy_input_GPS = 0;
+static int dummy_input_lowG = 0;
+static int dummy_input_GPS = 0;
 
 /**
  * @brief Construct a new thd function object to handle data collection from the
@@ -187,7 +187,7 @@ void gpsTickFunction(pointers *pointer_struct) {
     pointer_struct->sensorDataPointer->gps_data.timeStamp_GPS = timeStamp_GPS;
     pointer_struct->sensorDataPointer->gps_data.latitude = sin_value;
     pointer_struct->sensorDataPointer->gps_data.longitude = cos_value;
-    pointer_struct->sensorDataPointer->gps_data.altitude = -1 * dummy_input/100;;
+    pointer_struct->sensorDataPointer->gps_data.altitude = -1 * dummy_input_GPS/100;;
     pointer_struct->sensorDataPointer->gps_data.posLock = posLock;
     pointer_struct->sensorDataPointer->gps_data.fix_type = fix_type;
     pointer_struct->sensorDataPointer->gps_data.siv_count = SIV_count;
@@ -252,7 +252,7 @@ void highGimuTickFunction(pointers *pointer_struct) {
     // Log accelerations from high g
     pointer_struct->sensorDataPointer->highG_data.hg_ax = 0.5;
     pointer_struct->sensorDataPointer->highG_data.hg_ay = 0.2;
-    pointer_struct->sensorDataPointer->highG_data.hg_az = -0.5
+    pointer_struct->sensorDataPointer->highG_data.hg_az = -0.5;
 
     // Unlock high g mutex
 
@@ -292,8 +292,8 @@ void barometerTickFunction(pointers *pointer_struct) {
         chVTGetSystemTime();
 
     // Log pressure and temperature
-    pointer_struct->sensorDataPointer->barometer_data.pressure = 0.2 // Converting both of them into correct unit (in mbar)
-    pointer_struct->sensorDataPointer->barometer_data.temperature = -0.2// Converting both of them into correct unit (in degC)
+    pointer_struct->sensorDataPointer->barometer_data.pressure = 0.2; // Converting both of them into correct unit (in mbar)
+    pointer_struct->sensorDataPointer->barometer_data.temperature = -0.2; // Converting both of them into correct unit (in degC)
 
     // Compute altitude from pres and temp based on Hypsometric equation
     // h = RTln(p0/p)/g, R = specific gas constant; T in K, g for grav. accel.;
