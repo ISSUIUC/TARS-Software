@@ -86,7 +86,7 @@ static THD_FUNCTION(telemetry_THD, arg) {
     Telemetry tlm;
     while(true) {
         tlm.transmit(sensorData);
-        chThdSleepMilliseconds(1);
+        chThdSleepMilliseconds(100);
     }
 }
 
@@ -282,22 +282,24 @@ static THD_FUNCTION(dataLogger_THD, arg) {
  */
 void chSetup() {
     // added play_THD for creation
-    chThdCreateStatic(rocket_FSM_WA, sizeof(rocket_FSM_WA), NORMALPRIO + 1,
-                      rocket_FSM, &sensor_pointers);
-    chThdCreateStatic(gps_WA, sizeof(gps_WA), NORMALPRIO + 1, gps_THD,
-                      &sensor_pointers);
-    chThdCreateStatic(barometer_WA, sizeof(barometer_WA), NORMALPRIO + 1,
-                      barometer_THD, &sensor_pointers);
-    chThdCreateStatic(lowgIMU_WA, sizeof(lowgIMU_WA), NORMALPRIO + 1,
-                      lowgIMU_THD, &sensor_pointers);
-    chThdCreateStatic(highgIMU_WA, sizeof(highgIMU_WA), NORMALPRIO + 1,
-                      highgIMU_THD, &sensor_pointers);
-    chThdCreateStatic(servo_WA, sizeof(servo_WA), NORMALPRIO + 1, servo_THD,
-                      &sensor_pointers);
-    chThdCreateStatic(dataLogger_WA, sizeof(dataLogger_WA), NORMALPRIO + 1,
-                      dataLogger_THD, &sensor_pointers);
-    chThdCreateStatic(mpuComm_WA, sizeof(mpuComm_WA), NORMALPRIO + 1,
-                      mpuComm_THD, NULL);
+    chThdCreateStatic(telemetry_WA, sizeof(telemetry_WA), NORMALPRIO + 1,
+                      telemetry_THD, &sensor_pointers);
+    // chThdCreateStatic(rocket_FSM_WA, sizeof(rocket_FSM_WA), NORMALPRIO + 1,
+    //                   rocket_FSM, &sensor_pointers);
+    // chThdCreateStatic(gps_WA, sizeof(gps_WA), NORMALPRIO + 1, gps_THD,
+    //                   &sensor_pointers);
+    // chThdCreateStatic(barometer_WA, sizeof(barometer_WA), NORMALPRIO + 1,
+    //                   barometer_THD, &sensor_pointers);
+    // chThdCreateStatic(lowgIMU_WA, sizeof(lowgIMU_WA), NORMALPRIO + 1,
+    //                   lowgIMU_THD, &sensor_pointers);
+    // chThdCreateStatic(highgIMU_WA, sizeof(highgIMU_WA), NORMALPRIO + 1,
+    //                   highgIMU_THD, &sensor_pointers);
+    // chThdCreateStatic(servo_WA, sizeof(servo_WA), NORMALPRIO + 1, servo_THD,
+    //                   &sensor_pointers);
+    // chThdCreateStatic(dataLogger_WA, sizeof(dataLogger_WA), NORMALPRIO + 1,
+    //                   dataLogger_THD, &sensor_pointers);
+    // chThdCreateStatic(mpuComm_WA, sizeof(mpuComm_WA), NORMALPRIO + 1,
+    //                   mpuComm_THD, NULL);
 
     while (true)
         ;
@@ -309,97 +311,97 @@ void chSetup() {
  */
 
 void setup() {
-    int32_t temperature;
+//     int32_t temperature;
 
-#if defined(THREAD_DEBUG) || defined(LOWGIMU_DEBUG) ||     \
-    defined(BAROMETER_DEBUG) || defined(HIGHGIMU_DEBUG) || \
-    defined(GPS_DEBUG) || defined(SERVO_DEBUG)
+// #if defined(THREAD_DEBUG) || defined(LOWGIMU_DEBUG) ||     \
+//     defined(BAROMETER_DEBUG) || defined(HIGHGIMU_DEBUG) || \
+//     defined(GPS_DEBUG) || defined(SERVO_DEBUG)
     Serial.begin(115200);
     while (!Serial) {
     }
-#endif
-    pinMode(LED_BLUE, OUTPUT);
-    pinMode(LED_RED, OUTPUT);
-    pinMode(LED_ORANGE, OUTPUT);
-    pinMode(LED_WHITE, OUTPUT);
+// #endif
+//     pinMode(LED_BLUE, OUTPUT);
+//     pinMode(LED_RED, OUTPUT);
+//     pinMode(LED_ORANGE, OUTPUT);
+//     pinMode(LED_WHITE, OUTPUT);
 
-    digitalWrite(LED_BLUE, HIGH);
-    digitalWrite(LED_ORANGE, HIGH);
+//     digitalWrite(LED_BLUE, HIGH);
+//     digitalWrite(LED_ORANGE, HIGH);
 
-    // TODO: Don't forget this
-    Serial.println("------------------------------------------------");
+//     // TODO: Don't forget this
+//     Serial.println("------------------------------------------------");
 
-    sensor_pointers.lowGimuPointer = &lowGimu;
-    sensor_pointers.highGimuPointer = &highGimu;
-    sensor_pointers.barometerPointer = &barometer;
-    sensor_pointers.GPSPointer = &gps;
-    sensor_pointers.sensorDataPointer = &sensorData;
+//     sensor_pointers.lowGimuPointer = &lowGimu;
+//     sensor_pointers.highGimuPointer = &highGimu;
+//     sensor_pointers.barometerPointer = &barometer;
+//     sensor_pointers.GPSPointer = &gps;
+//     sensor_pointers.sensorDataPointer = &sensorData;
 
-    SPI.begin();
+//     SPI.begin();
 
-    // Initialize barometer
-    barometer.init();
+//     // Initialize barometer
+//     barometer.init();
 
-    // lowGimu setup
-    if (lowGimu.beginSPI(LSM9DS1_AG_CS, LSM9DS1_M_CS) ==
-        false)  // note, we need to sent this our CS pins (defined above)
-    {
-        digitalWrite(LED_RED, HIGH);
-        Serial.println("Failed to communicate with LSM9DS1. Stalling Program");
-        while (true)
-            ;
-    }
+//     // lowGimu setup
+//     if (lowGimu.beginSPI(LSM9DS1_AG_CS, LSM9DS1_M_CS) ==
+//         false)  // note, we need to sent this our CS pins (defined above)
+//     {
+//         digitalWrite(LED_RED, HIGH);
+//         Serial.println("Failed to communicate with LSM9DS1. Stalling Program");
+//         while (true)
+//             ;
+//     }
 
-    lowGimu.setAccelScale(16);
+//     lowGimu.setAccelScale(16);
 
-    // GPS Setup
-    if (!gps.begin(SPI, ZOEM8Q0_CS, 4000000)) {
-        digitalWrite(LED_RED, HIGH);
-        Serial.println(
-            "Failed to communicate with ZOEM8Q0 gps. Stalling Program");
-        while (true)
-            ;
-    }
-    gps.setPortOutput(COM_PORT_SPI,
-                      COM_TYPE_UBX);  // Set the SPI port to output UBX only
-                                      // (turn off NMEA noise)
-    gps.saveConfigSelective(
-        VAL_CFG_SUBSEC_IOPORT);  // Save (only) the communications port settings
-                                 // to flash and BBR
-    gps.setNavigationFrequency(10);  // set sampling rate to 10hz
+//     // GPS Setup
+//     if (!gps.begin(SPI, ZOEM8Q0_CS, 4000000)) {
+//         digitalWrite(LED_RED, HIGH);
+//         Serial.println(
+//             "Failed to communicate with ZOEM8Q0 gps. Stalling Program");
+//         while (true)
+//             ;
+//     }
+//     gps.setPortOutput(COM_PORT_SPI,
+//                       COM_TYPE_UBX);  // Set the SPI port to output UBX only
+//                                       // (turn off NMEA noise)
+//     gps.saveConfigSelective(
+//         VAL_CFG_SUBSEC_IOPORT);  // Save (only) the communications port settings
+//                                  // to flash and BBR
+//     gps.setNavigationFrequency(10);  // set sampling rate to 10hz
 
-    // SD Card Setup
-    if (SD.begin(BUILTIN_SDCARD)) {
-        char file_extension[6] = ".dat";
+//     // SD Card Setup
+//     if (SD.begin(BUILTIN_SDCARD)) {
+//         char file_extension[6] = ".dat";
 
-        char data_name[16] = "data";
-        // Initialize SD card
-        sensor_pointers.dataloggerTHDVarsPointer.dataFile =
-            SD.open(sd_file_namer(data_name, file_extension),
-                    O_CREAT | O_WRITE | O_TRUNC);
-        // print header to file on sd card that lists each variable that is
-        // logged
-        sensor_pointers.dataloggerTHDVarsPointer.dataFile.println(
-            "ax,ay,az,gx,gy,gz,mx,my,mz,ts_lowg,"
-            "hg_ax,hg_ay,hg_az,ts_highg,"
-            "latitude,longitude,altitude,GPS Lock,ts_gps,"
-            "state_q0,state_q1,state_q2,state_q3,state_x,state_y,state_z,state_"
-            "vx,state_vy,state_vz,"
-            "state_ax,state_ay,state_az,state_omegax,state_omegay,state_omegaz,"
-            "state_latitude,state_longitude,ts_state,"
-            "rocketState,ts_RS");
-        sensor_pointers.dataloggerTHDVarsPointer.dataFile.flush();
-        // Serial.println(lowg_datalogger_THD_vars.dataFile.name());
-    } else {
-        digitalWrite(LED_RED, HIGH);
-        Serial.println("SD Begin Failed. Stalling Program");
-        while (true)
-            ;
-    }
+//         char data_name[16] = "data";
+//         // Initialize SD card
+//         sensor_pointers.dataloggerTHDVarsPointer.dataFile =
+//             SD.open(sd_file_namer(data_name, file_extension),
+//                     O_CREAT | O_WRITE | O_TRUNC);
+//         // print header to file on sd card that lists each variable that is
+//         // logged
+//         sensor_pointers.dataloggerTHDVarsPointer.dataFile.println(
+//             "ax,ay,az,gx,gy,gz,mx,my,mz,ts_lowg,"
+//             "hg_ax,hg_ay,hg_az,ts_highg,"
+//             "latitude,longitude,altitude,GPS Lock,ts_gps,"
+//             "state_q0,state_q1,state_q2,state_q3,state_x,state_y,state_z,state_"
+//             "vx,state_vy,state_vz,"
+//             "state_ax,state_ay,state_az,state_omegax,state_omegay,state_omegaz,"
+//             "state_latitude,state_longitude,ts_state,"
+//             "rocketState,ts_RS");
+//         sensor_pointers.dataloggerTHDVarsPointer.dataFile.flush();
+//         // Serial.println(lowg_datalogger_THD_vars.dataFile.name());
+//     } else {
+//         digitalWrite(LED_RED, HIGH);
+//         Serial.println("SD Begin Failed. Stalling Program");
+//         while (true)
+//             ;
+//     }
 
-    // Servo Setup
-    servo_cw.attach(SERVO_CW_PIN, 770, 2250);
-    servo_ccw.attach(SERVO_CCW_PIN, 770, 2250);
+//     // Servo Setup
+//     servo_cw.attach(SERVO_CW_PIN, 770, 2250);
+//     servo_ccw.attach(SERVO_CCW_PIN, 770, 2250);
 
     Serial.println("Starting ChibiOS");
     chBegin(chSetup);

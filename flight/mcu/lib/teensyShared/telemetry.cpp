@@ -9,12 +9,8 @@ Telemetry::Telemetry(): rf95(RFM95_CS, RFM95_INT) {
     pinMode(RFM95_EN, OUTPUT);
     digitalWrite(RFM95_RST, HIGH);
     digitalWrite(RFM95_EN, HIGH);
-    // while (!Serial);
-    // Serial.begin(9600);
 
     delay(100);
-
-    // Serial.println("Telemetry Test");
 
     // manual reset
     digitalWrite(RFM95_RST, LOW);
@@ -26,21 +22,35 @@ Telemetry::Telemetry(): rf95(RFM95_CS, RFM95_INT) {
         // Serial.println("Radio Initialization Failed");
         while (1);
     }
-    // Serial.println("Radio Initialized");
+    Serial.println("Radio Initialized");
 
     // Defaults after init are 434.0MHz, modulation GFSK_Rb250Fd250, +13dbM
     if (!rf95.setFrequency(RF95_FREQ)) {
         // Serial.println("setFrequency Failed");
         while (1);
-    }
-    // Serial.print("Frequency set to: "); Serial.println(RF95_FREQ);
-    
+    }    
     // Defaults after init are 434.0MHz, 13dBm, Bw = 125 kHz, Cr = 4/5, Sf = 128chips/symbol, CRC on
 
     // The default transmitter power is 13dBm, using PA_BOOST.
     // If you are using RFM95/96/97/98 modules which uses the PA_BOOST transmitter pin, then 
     // you can set transmitter powers from 5 to 23 dBm:
     rf95.setTxPower(23, false);
+}
+
+void Telemetry::handle_command(const telemetry_command & cmd){
+/* Check if lasted command ID matched current command ID */
+      if(last_command_id == cmd.cmd_id){
+        return;
+      }
+      last_command_id = cmd.cmd_id;
+      if (cmd.command == SET_FREQ) {
+        freq_status.should_change = true;
+        freq_status.new_freq = cmd.freq;
+      } 
+
+      if (cmd.command == SET_CALLSIGN) {
+        memcpy(callsign, cmd.callsign, sizeof(cmd.callsign));
+      }
 }
 
 void Telemetry::transmit(const sensorDataStruct_t &sensor_data) {
@@ -105,10 +115,9 @@ void Telemetry::transmit(const sensorDataStruct_t &sensor_data) {
   d.response_ID = last_command_id;
   memcpy(d.sign, callsign, sizeof(callsign));
   
-  // Serial.println("Sending sample sensor data..."); delay(10);
+  Serial.println("Sending sample sensor data..."); delay(10);
   rf95.send((uint8_t *)&d, sizeof(d));
 
-  // Serial.println("Waiting for packet to complete..."); delay(10);
   rf95.waitPacketSent();
 
   //change the freqencey after we acknowledge
@@ -140,7 +149,5 @@ void Telemetry::transmit(const sensorDataStruct_t &sensor_data) {
   else
   {
     // Serial.println("No reply, is there a listener around?");
-  }
-  delay(100);
-    
+  } 
 }
