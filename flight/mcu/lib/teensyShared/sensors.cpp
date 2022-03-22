@@ -74,7 +74,7 @@ void lowGimuTickFunction(pointers *pointer_struct) {
     // Log acceleration in Gs
     pointer_struct->sensorDataPointer->lowG_data.ax = cos_value;
     pointer_struct->sensorDataPointer->lowG_data.ay = sin_value;
-    pointer_struct->sensorDataPointer->lowG_data.az = ((dummy_input/100)*(dummy_input/100))/2;
+    pointer_struct->sensorDataPointer->lowG_data.az = sin_value;
     // There was a minus here. We
     // don't know why that did that
     // Log rotational speed in degrees per second
