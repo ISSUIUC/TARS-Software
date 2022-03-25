@@ -30,10 +30,10 @@
 #define LSM9_CS_AG 4
 #define LSM9_CS_M 5
 #define LSM9_INT1_AG 6
-#define SNS_SPI_SCK 7
-#define SNS_SPI_MISO 8
-#define SNS_SPI_MOSI 9
-#define ZOE_M8Q_CS 12
+#define SNS_SPI_SCK 13
+#define SNS_SPI_MISO 12
+#define SNS_SPI_MOSI 11
+#define ZOE_M8Q_CS 10
 #define SNS_UART_SDO 14
 #define SNS_UART_SDI 15
 #define MS5611_CS 21
@@ -103,7 +103,8 @@ bool test_highg(){
 }
 
 bool test_gps(){
-    if(!gps.begin(SPI, ZOE_M8Q_CS, 4000000)){
+
+    if(!gps.begin(SPI, ZOE_M8Q_CS, 1000000)){
         return false;
     }
 
