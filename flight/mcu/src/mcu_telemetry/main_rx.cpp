@@ -23,11 +23,11 @@ This code was used to test the RFM LoRa modules on a breadboard:
 
 /* Pins for feather*/
 // // Ensure to change depending on wiring
-// #define RFM95_CS 8
-// #define RFM95_RST 4
-// // #define RFM95_EN 
-// #define RFM95_INT 3
-// // #define LED 13 // Blinks on receipt
+//#define RFM95_CS 8
+//#define RFM95_RST 4
+// #define RFM95_EN 
+//#define RFM95_INT 3
+// #define LED 13 // Blinks on receipt
 
 /* Pins for Teensy 31*/
 // Ensure to change depending on wiring
@@ -119,7 +119,9 @@ constexpr const char * json_receive_failure = R"({"type": "receive_error", "erro
 constexpr const char * json_send_failure = R"({"type": "send_error", "error": "command_retries_exceded"})";
 constexpr int max_command_retries = 5;
 
-void SerialPrintTelemetryData(const telemetry_data & data){
+float current_freq = RF95_FREQ;
+
+void SerialPrintTelemetryData(const telemetry_data & data, float frequency){
   //add null ternimator to sign
   char sign[9]{};
   memcpy(sign, data.sign, 8);
@@ -147,7 +149,9 @@ void SerialPrintTelemetryData(const telemetry_data & data){
   Serial.print(R"("LSM_IMU_mz":)"); Serial.print(data.LSM_IMU_mz); Serial.print(',');
   Serial.print(R"("FSM_state":)"); Serial.print(data.FSM_state); Serial.print(',');
   Serial.print(R"("sign":")"); Serial.print(sign); Serial.print("\",");
-  Serial.print(R"("RSSI":)"); Serial.print(rf95.lastRssi()); Serial.print("");
+  Serial.print(R"("RSSI":)"); Serial.print(rf95.lastRssi()); Serial.print(',');
+  Serial.print(R"("Voltage":)"); Serial.print(data.battery_voltage); Serial.print(',');
+  Serial.print(R"("frequency":)"); Serial.print(frequency); Serial.print("");
 
   Serial.println("}}");
 }
@@ -163,6 +167,7 @@ void set_freq_local_bug_fix(float freq){
   rf95.send((uint8_t*)&t, sizeof(t));
   rf95.waitPacketSent();
   rf95.setFrequency(freq);
+  current_freq = freq;
 }
 
 void SerialInput(const char * key, const char * value){
@@ -183,7 +188,8 @@ void SerialInput(const char * key, const char * value){
     command.freq = min(max(v, 390), 445);
   } else if(strcmp(key, "CALLSIGN") == 0) {
     command.command = CommandType::SET_CALLSIGN;
-    memcpy(command.callsign, value, 8);
+    memset(command.callsign, ' ', sizeof(command.callsign));
+    memcpy(command.callsign, value, min(strlen(value), sizeof(command.callsign)));
   } else if(strcmp(key, "FLOC") == 0){
     int v = atoi(value);
     v = min(max(v, 390), 445);
@@ -259,7 +265,7 @@ void loop()
     if (rf95.recv(buf, &len))
     {
       memcpy(&data, buf, sizeof(data));
-      SerialPrintTelemetryData(data);
+      SerialPrintTelemetryData(data, current_freq);
 
       if(!cmd_queue.empty()){
         auto & cmd = cmd_queue.front();
