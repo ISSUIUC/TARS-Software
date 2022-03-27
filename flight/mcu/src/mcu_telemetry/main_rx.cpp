@@ -23,22 +23,22 @@ This code was used to test the RFM LoRa modules on a breadboard:
 
 /* Pins for feather*/
 // // Ensure to change depending on wiring
-#define RFM95_CS 8
-#define RFM95_RST 4
-// #define RFM95_EN 
-#define RFM95_INT 3
+// #define RFM95_CS 8
+// #define RFM95_RST 4
+// // #define RFM95_EN 
+// #define RFM95_INT 3
 // // #define LED 13 // Blinks on receipt
 
 /* Pins for Teensy 31*/
 // Ensure to change depending on wiring
-// #define RFM95_CS 10
-// #define RFM95_RST 15
-// #define RFM95_EN 14
-// #define RFM95_INT 16
+#define RFM95_CS 10
+#define RFM95_RST 15
+#define RFM95_EN 14
+#define RFM95_INT 16
 #define LED 13 // Blinks on receipt
 
 // Change to 434.0 or other frequency, must match RX's freq!
-#define RF95_FREQ 440.0
+#define RF95_FREQ 434.0
 
 #define DEFAULT_CMD 0
 #define MAX_CMD_LEN 10
@@ -54,33 +54,33 @@ int command_ID = 0;
 short cmd_number = 0;
 
 struct telemetry_data {
-  double gps_lat{};
-  double gps_long{};
-  double gps_alt{};
-  double barometer_alt{};
+  float gps_lat{};
+  float gps_long{};
+  float gps_alt{};
+  float barometer_alt{};
   // KX134 (highg) IMU DATA
-  double KX_IMU_ax{};   // acceleration (in G's)
-  double KX_IMU_ay{};
-  double KX_IMU_az{};
+  float KX_IMU_ax{};   // acceleration (in G's)
+  float KX_IMU_ay{};
+  float KX_IMU_az{};
   // H3LIS331DL (highg) IMU DATA
-  double H3L_IMU_ax{};
-  double H3L_IMU_ay{};
-  double H3L_IMU_az{};
+  float H3L_IMU_ax{};
+  float H3L_IMU_ay{};
+  float H3L_IMU_az{};
   // LSM9DS1 (lowg) IMU DATA
-  double LSM_IMU_ax{};    // acceleration (in G's)
-  double LSM_IMU_ay{};
-  double LSM_IMU_az{};
-  double LSM_IMU_gx{};    // Gyro data (in degrees/sec)
-  double LSM_IMU_gy{};
-  double LSM_IMU_gz{};
-  double LSM_IMU_mx{};
-  double LSM_IMU_my{};
-  double LSM_IMU_mz{};
+  float LSM_IMU_ax{};    // acceleration (in G's)
+  float LSM_IMU_ay{};
+  float LSM_IMU_az{};
+  float LSM_IMU_gx{};    // Gyro data (in degrees/sec)
+  float LSM_IMU_gy{};
+  float LSM_IMU_gz{};
+  float LSM_IMU_mx{};
+  float LSM_IMU_my{};
+  float LSM_IMU_mz{};
   
   int FSM_state{};
   char sign[8] = "KC1QJA";
   int rssi;
-  double battery_voltage;
+  float battery_voltage;
   int response_ID;
 
 };
