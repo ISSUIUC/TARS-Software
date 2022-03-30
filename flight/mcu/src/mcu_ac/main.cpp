@@ -21,6 +21,8 @@
 #include <Arduino.h>
 #include <SPI.h>
 #include <Wire.h>
+#include <RH_RF95.h>
+#include <RHSoftwareSPI.h>
 
 #include "KX134-1211.h"  //High-G IMU Library
 #include "MS5611.h"      //Barometer library
@@ -46,12 +48,19 @@
 #define GPS_EXTINT 32
 #define LSM9_INT2_AG 33
 #define LSM9_INT_M 34
+#define RFM95_CS 41
+#define RFM95_RST 20
+#define RFM95_INT 40
+
+#define RF95_FREQ 434.0
 
 KX134 highGimu;
 LSM9DS1 lowGimu;
 SFE_UBLOX_GNSS gps;
 
 MS5611 barometer{MS5611_CS};
+
+RHSoftwareSPI s;
 
 bool test_barometer(){
     barometer.init();
@@ -112,13 +121,46 @@ bool test_highg(){
 
 bool test_gps(){
 
-    if(!gps.begin(SPI, ZOE_M8Q_CS, 1000000)){
-        return false;
-    }
+    // if(!gps.begin(SPI, ZOE_M8Q_CS, 1000000)){
+    //     return false;
+    // }
 
-    //cant read data because gps needs time to connect
-    
-    return true;
+    // //cant read data because gps needs time to connect
+    s.setPins(39, 26, 27);
+    RH_RF95 rf95(RFM95_CS, RFM95_INT, s);
+    // return true;
+    pinMode(RFM95_RST, OUTPUT);
+    // pinMode(RFM95_EN, OUTPUT);
+    digitalWrite(RFM95_RST, HIGH);
+    // digitalWrite(RFM95_EN, HIGH);
+
+    delay(100);
+
+    // manual reset
+    digitalWrite(RFM95_RST, LOW);
+    delay(10);
+    digitalWrite(RFM95_RST, HIGH);
+    delay(10);
+
+    while (!rf95.init()) {
+        Serial.println("Radio Initialization Failed");
+        // while (1);
+        return -1;
+    }
+    Serial.println("Radio Initialized");
+
+    // Defaults after init are 434.0MHz, modulation GFSK_Rb250Fd250, +13dbM
+    if (!rf95.setFrequency(RF95_FREQ)) {
+        // Serial.println("setFrequency Failed");
+        // while (1);
+        return -1;
+    }    
+    // Defaults after init are 434.0MHz, 13dBm, Bw = 125 kHz, Cr = 4/5, Sf = 128chips/symbol, CRC on
+
+    // The default transmitter power is 13dBm, using PA_BOOST.
+    // If you are using RFM95/96/97/98 modules which uses the PA_BOOST transmitter pin, then 
+    // you can set transmitter powers from 5 to 23 dBm:
+    rf95.setTxPower(23, false);
 }
 
 void setup() {
@@ -145,6 +187,8 @@ void setup() {
     digitalWrite(KX122_CS, HIGH);
     pinMode(H3LIS331DL_CS, OUTPUT);
     digitalWrite(H3LIS331DL_CS, HIGH);
+    pinMode(RFM95_CS, OUTPUT);
+    digitalWrite(RFM95_CS, HIGH);
     Serial.println(
     R"(
         Sensor testing program, press number to test sensor
@@ -188,6 +232,12 @@ void loop() {
                     Serial.println("barometer fail");
                 }
                 break;
+            case '5':
+                pinMode(27, OUTPUT);
+                digitalWrite(27, HIGH); 
+                delay(1000);
+                digitalWrite(27, LOW); 
+break;
             default:
                 Serial.println("unrecognized input, expected one of [1234]");
         }
