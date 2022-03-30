@@ -190,6 +190,7 @@ void MS5611::convert(const uint8_t addr, uint8_t bits) {
     uint8_t offset = (bits - 8) * 2;
     SPI.beginTransaction(settingsA);  // start SPI transaction
     digitalWrite(_cspin, LOW);        // pull CS line low
+    Serial.println(addr + offset);
     SPI.transfer(addr + offset);      // send command
     delay(del[offset /
               2]);  // MS5611 needs some time for conversion; wait for this...

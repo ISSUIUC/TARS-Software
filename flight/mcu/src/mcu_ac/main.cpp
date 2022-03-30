@@ -26,20 +26,21 @@
 #include "MS5611.h"      //Barometer library
 #include "SparkFunLSM9DS1.h"                       //Low-G IMU Library
 #include "SparkFun_u-blox_GNSS_Arduino_Library.h"  //GPS Library
+#include "H3LIS331DL.h"
 
-#define LSM9_CS_AG 4
-#define LSM9_CS_M 5
+#define LSM9_CS_AG 2
+#define LSM9_CS_M 3
 #define LSM9_INT1_AG 6
 #define SNS_SPI_SCK 13
 #define SNS_SPI_MISO 12
 #define SNS_SPI_MOSI 11
-#define ZOE_M8Q_CS 10
+#define ZOE_M8Q_CS 6
 #define SNS_UART_SDO 14
 #define SNS_UART_SDI 15
-#define MS5611_CS 21
-#define H3LIS331DL_CS 23
+#define MS5611_CS 9
+#define H3LIS331DL_CS 5
 #define H3LIS331DL_INT1 24
-#define KX122_CS 27
+#define KX122_CS 4
 #define KX122_INT1 28
 #define GPS_RESET 31
 #define GPS_EXTINT 32
@@ -77,29 +78,36 @@ bool test_lowg(){
         return false;
     }
 
-    lowGimu.readAccel();
-    float accel = lowGimu.calcAccel(lowGimu.ax);
-    Serial.print("Accel X: "); Serial.println(accel);
+    for(int i = 0; i < 100; i++){
+      lowGimu.readAccel();
+      float accel = lowGimu.calcAccel(lowGimu.ax);
+      Serial.print("Accel X: "); Serial.println(accel);
+      lowGimu.readMag();
+      float mag = lowGimu.calcMag(lowGimu.mx);
+      Serial.print("Mag x: "); Serial.println(mag);
+      delay(100);
+    }
+    
+
 
     return true;
 }
 
+
 bool test_highg(){
-    highGimu.init();
-
-    highGimu.update_data();
-    float accel = highGimu.get_x_accel();
-
-    bool did_change = false;
-    for(int i = 0; i < 20; i++){
-        highGimu.update_data();
-        float new_accel = highGimu.get_x_accel();
-        if(new_accel != accel) did_change = true;
-        Serial.print("Accel X: "); Serial.println(accel);
-        delay(100);
+    LIS331 highg{};
+    highg.setSPICSPin(H3LIS331DL_CS);
+    highg.begin(LIS331::comm_mode::USE_SPI);
+    int16_t x,y,z;
+    highg.readAxes(x,y,z);
+    
+    for(int i = 0; i < 100; i++){
+    highg.readAxes(x,y,z);
+    Serial.println(x);
+    Serial.println(y);
+    Serial.println(z);
+    delay(100);
     }
-
-    return did_change;
 }
 
 bool test_gps(){
@@ -125,6 +133,18 @@ void setup() {
     while(!Serial);
 
     SPI.begin();
+    pinMode(LSM9_CS_AG, OUTPUT);
+    digitalWrite(LSM9_CS_AG, HIGH);
+    pinMode(LSM9_CS_M, OUTPUT);
+    digitalWrite(LSM9_CS_M, HIGH);
+    pinMode(ZOE_M8Q_CS, OUTPUT);
+    digitalWrite(ZOE_M8Q_CS, HIGH);
+    pinMode(MS5611_CS, OUTPUT);
+    digitalWrite(MS5611_CS, HIGH);
+    pinMode(KX122_CS, OUTPUT);
+    digitalWrite(KX122_CS, HIGH);
+    pinMode(H3LIS331DL_CS, OUTPUT);
+    digitalWrite(H3LIS331DL_CS, HIGH);
     Serial.println(
     R"(
         Sensor testing program, press number to test sensor

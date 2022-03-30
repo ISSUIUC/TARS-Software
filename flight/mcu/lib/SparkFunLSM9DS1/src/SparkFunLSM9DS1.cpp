@@ -214,6 +214,8 @@ uint16_t LSM9DS1::beginSPI(uint8_t ag_CS_pin, uint8_t m_CS_pin)
 	// each device. Store those in a variable so we can return them.
 	uint8_t mTest = mReadByte(WHO_AM_I_M);		// Read the gyro WHO_AM_I
 	uint8_t xgTest = xgReadByte(WHO_AM_I_XG);	// Read the accel/mag WHO_AM_I
+	Serial.println(mTest);
+	Serial.println(xgTest);
 	uint16_t whoAmICombined = (xgTest << 8) | mTest;
 	
 	if (whoAmICombined != ((WHO_AM_I_AG_RSP << 8) | WHO_AM_I_M_RSP))
@@ -1138,7 +1140,7 @@ void LSM9DS1::initSPI()
 	
 	SPI.begin();
 	// Maximum SPI frequency is 10MHz, could divide by 2 here:
-	SPI.setClockDivider(SPI_CLOCK_DIV2);
+	SPI.setClockDivider(SPI_CLOCK_DIV64);
 	// Data is read and written MSb first.
 	SPI.setBitOrder(MSBFIRST);
 	// Data is captured on rising edge of clock (CPHA = 0)
