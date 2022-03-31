@@ -38,6 +38,11 @@
 #include "rocketFSM.h"
 #include "sensors.h"
 #include "telemetry.h"
+#include <RHSoftwareSPI.h>
+
+#define RFM95_CS 41
+#define RFM95_RST 20
+#define RFM95_INT 40
 
 
 //Make sure to change these pinout depending on wiring
@@ -64,7 +69,11 @@ sensorDataStruct_t sensorData;
 
 FSM_State rocketState = STATE_INIT;
 
-RH_RF95 rf95(RFM95_CS, RFM95_INT);
+RHSoftwareSPI s;
+
+
+RH_RF95 rf95(RFM95_CS, RFM95_INT, s);
+
 KX134 highGimu;
 LSM9DS1 lowGimu;
 SFE_UBLOX_GNSS gps;
@@ -94,6 +103,7 @@ static THD_WORKING_AREA(telemetry_WA, 8192);
 /* TELEMETRY THREAD                                         */
 
 static THD_FUNCTION(telemetry_THD, arg) {
+    
     struct pointers *pointer_struct = (struct pointers *)arg;
     // int packetnum = 0;
     Telemetry tlm;
@@ -340,12 +350,12 @@ void chSetup() {
     // added play_THD for creation
     chThdCreateStatic(telemetry_WA, sizeof(telemetry_WA), NORMALPRIO + 1,
                       telemetry_THD, &sensor_pointers);
-    chThdCreateStatic(rocket_FSM_WA, sizeof(rocket_FSM_WA), NORMALPRIO + 1,
-                      rocket_FSM, &sensor_pointers);
-    chThdCreateStatic(lowgIMU_WA, sizeof(lowgIMU_WA), NORMALPRIO + 1,
-                      rocket_FSM, &sensor_pointers);
-    chThdCreateStatic(highgIMU_WA, sizeof(highgIMU_WA), NORMALPRIO + 1,
-                      rocket_FSM, &sensor_pointers);
+    // chThdCreateStatic(rocket_FSM_WA, sizeof(rocket_FSM_WA), NORMALPRIO + 1,
+    //                   rocket_FSM, &sensor_pointers);
+    // chThdCreateStatic(lowgIMU_WA, sizeof(lowgIMU_WA), NORMALPRIO + 1,
+    //                   rocket_FSM, &sensor_pointers);
+    // chThdCreateStatic(highgIMU_WA, sizeof(highgIMU_WA), NORMALPRIO + 1,
+    //                   rocket_FSM, &sensor_pointers);
 
     while (true)
         ;
@@ -368,7 +378,11 @@ void setup() {
     while (!Serial) {
     }
 #endif
+    Serial.begin(9600);
     while(!Serial);
+    Serial.println("ho");
+    s.setPins(39, 26, 27);
+
 
     pinMode(RFM95_RST, OUTPUT);
     pinMode(RFM95_EN, OUTPUT);
