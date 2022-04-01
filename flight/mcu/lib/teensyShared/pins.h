@@ -21,9 +21,10 @@
 #define MS5611_CS 9
 // gps chip select pin
 #define ZOEM8Q0_CS 6
-
+#define H3LIS331DL_CS 5
 #define RFM95_CS 41
 #define RFM95_INT 40
 #define RFM95_RST 20
+#define KX122_CS 4
 
 #endif

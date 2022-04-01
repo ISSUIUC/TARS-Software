@@ -345,6 +345,21 @@ void setup() {
     digitalWrite(LED_BLUE, HIGH);
     digitalWrite(LED_ORANGE, HIGH);
 
+    pinMode(LSM9DS1_AG_CS, OUTPUT);
+    digitalWrite(LSM9DS1_AG_CS, HIGH);
+    pinMode(LSM9DS1_M_CS, OUTPUT);
+    digitalWrite(LSM9DS1_M_CS, HIGH);
+    pinMode(ZOEM8Q0_CS, OUTPUT);
+    digitalWrite(ZOEM8Q0_CS, HIGH);
+    pinMode(MS5611_CS, OUTPUT);
+    digitalWrite(MS5611_CS, HIGH);
+    pinMode(KX122_CS, OUTPUT);
+    digitalWrite(KX122_CS, HIGH);
+    pinMode(H3LIS331DL_CS, OUTPUT);
+    digitalWrite(H3LIS331DL_CS, HIGH);
+    pinMode(RFM95_CS, OUTPUT);
+    digitalWrite(RFM95_CS, HIGH);
+
     // TODO: Don't forget this
     Serial.println("------------------------------------------------");
 
