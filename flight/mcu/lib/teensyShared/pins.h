@@ -14,12 +14,16 @@
 #define LED_BLUE 9
 
 // define magnetometer chip select pin
-#define LSM9DS1_M_CS 37
+#define LSM9DS1_M_CS 3
 // define accel/gyro chip select pin
-#define LSM9DS1_AG_CS 36
+#define LSM9DS1_AG_CS 2
 // define barometer chip select pin
-#define MS5611_CS 30
+#define MS5611_CS 9
 // gps chip select pin
-#define ZOEM8Q0_CS 31
+#define ZOEM8Q0_CS 6
+
+#define RFM95_CS 41
+#define RFM95_INT 40
+#define RFM95_RST 20
 
 #endif

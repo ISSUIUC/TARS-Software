@@ -85,8 +85,8 @@ static THD_FUNCTION(telemetry_THD, arg) {
     // int packetnum = 0;
     Telemetry tlm;
     while(true) {
-        tlm.transmit();
-        chThdSleepMilliseconds(1);
+        tlm.transmit(sensorData);
+        chThdSleepMilliseconds(100);
     }
 }
 
@@ -299,22 +299,24 @@ static THD_FUNCTION(dataLogger_THD, arg) {
  */
 void chSetup() {
     // added play_THD for creation
-    chThdCreateStatic(rocket_FSM_WA, sizeof(rocket_FSM_WA), NORMALPRIO + 1,
-                      rocket_FSM, &sensor_pointers);
-    chThdCreateStatic(gps_WA, sizeof(gps_WA), NORMALPRIO + 1, gps_THD,
-                      &sensor_pointers);
-    chThdCreateStatic(barometer_WA, sizeof(barometer_WA), NORMALPRIO + 1,
-                      barometer_THD, &sensor_pointers);
-    chThdCreateStatic(lowgIMU_WA, sizeof(lowgIMU_WA), NORMALPRIO + 1,
-                      lowgIMU_THD, &sensor_pointers);
-    chThdCreateStatic(highgIMU_WA, sizeof(highgIMU_WA), NORMALPRIO + 1,
-                      highgIMU_THD, &sensor_pointers);
-    chThdCreateStatic(servo_WA, sizeof(servo_WA), NORMALPRIO + 1, servo_THD,
-                      &sensor_pointers);
-    chThdCreateStatic(dataLogger_WA, sizeof(dataLogger_WA), NORMALPRIO + 1,
-                      dataLogger_THD, &sensor_pointers);
-    chThdCreateStatic(mpuComm_WA, sizeof(mpuComm_WA), NORMALPRIO + 1,
-                      mpuComm_THD, NULL);
+    chThdCreateStatic(telemetry_WA, sizeof(telemetry_WA), NORMALPRIO + 1,
+                      telemetry_THD, &sensor_pointers);
+    // chThdCreateStatic(rocket_FSM_WA, sizeof(rocket_FSM_WA), NORMALPRIO + 1,
+    //                   rocket_FSM, &sensor_pointers);
+    // chThdCreateStatic(gps_WA, sizeof(gps_WA), NORMALPRIO + 1, gps_THD,
+    //                   &sensor_pointers);
+    // chThdCreateStatic(barometer_WA, sizeof(barometer_WA), NORMALPRIO + 1,
+    //                   barometer_THD, &sensor_pointers);
+    // chThdCreateStatic(lowgIMU_WA, sizeof(lowgIMU_WA), NORMALPRIO + 1,
+    //                   lowgIMU_THD, &sensor_pointers);
+    // chThdCreateStatic(highgIMU_WA, sizeof(highgIMU_WA), NORMALPRIO + 1,
+    //                   highgIMU_THD, &sensor_pointers);
+    // chThdCreateStatic(servo_WA, sizeof(servo_WA), NORMALPRIO + 1, servo_THD,
+    //                   &sensor_pointers);
+    // chThdCreateStatic(dataLogger_WA, sizeof(dataLogger_WA), NORMALPRIO + 1,
+    //                   dataLogger_THD, &sensor_pointers);
+    // chThdCreateStatic(mpuComm_WA, sizeof(mpuComm_WA), NORMALPRIO + 1,
+    //                   mpuComm_THD, NULL);
 
     while (true)
         ;
@@ -326,15 +328,15 @@ void chSetup() {
  */
 
 void setup() {
-    int32_t temperature;
+//     int32_t temperature;
 
-#if defined(THREAD_DEBUG) || defined(LOWGIMU_DEBUG) ||     \
-    defined(BAROMETER_DEBUG) || defined(HIGHGIMU_DEBUG) || \
-    defined(GPS_DEBUG) || defined(SERVO_DEBUG)
+// #if defined(THREAD_DEBUG) || defined(LOWGIMU_DEBUG) ||     \
+//     defined(BAROMETER_DEBUG) || defined(HIGHGIMU_DEBUG) || \
+//     defined(GPS_DEBUG) || defined(SERVO_DEBUG)
     Serial.begin(115200);
     while (!Serial) {
     }
-#endif
+// #endif
     pinMode(LED_BLUE, OUTPUT);
     pinMode(LED_RED, OUTPUT);
     pinMode(LED_ORANGE, OUTPUT);
@@ -354,6 +356,7 @@ void setup() {
     sensor_pointers.abort = false;
 
     SPI.begin();
+    SPI1.setMISO(39);
 
     // Initialize barometer
     barometer.init();

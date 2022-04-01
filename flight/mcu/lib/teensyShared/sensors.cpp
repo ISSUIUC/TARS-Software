@@ -21,6 +21,7 @@
 #include <SD.h>
 #include <SPI.h>
 #include <Wire.h>
+#include <cmath>
 
 #include "SparkFun_u-blox_GNSS_Arduino_Library.h"
 #include "acShared.h"
@@ -29,6 +30,9 @@
 // #include "thresholds.h"
 #include "pins.h"
 #include "sensors.h"
+
+static int dummy_input_lowG = 0;
+static int dummy_input_GPS = 0;
 
 /**
  * @brief Construct a new thd function object to handle data collection from the
@@ -40,6 +44,22 @@
 void lowGimuTickFunction(LSM9DS1* lsm, DataLogBuffer* data_log_buffer,
                          LowGData* lowG_Data) {
     // Reads data from the low g IMU
+
+    // Looping input value from 0 to 2pi over and over 
+    if (dummy_input_lowG > 628) {
+        dummy_input_lowG = 0;
+    } else {
+        dummy_input_lowG+=30;
+    }
+
+    // Computing sine value
+    double sin_value = sin(dummy_input_lowG/100);
+    double cos_value = cos(dummy_input_lowG/100);
+    double tan_value = tan(dummy_input_lowG/100);
+
+
+    
+
     chSysLock();
     lsm->readAccel();
     lsm->readGyro();
