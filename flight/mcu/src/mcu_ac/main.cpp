@@ -86,7 +86,7 @@ static THD_FUNCTION(telemetry_THD, arg) {
     Telemetry tlm;
     while(true) {
         tlm.transmit(sensorData);
-        chThdSleepMilliseconds(100);
+        chThdSleepMilliseconds(200);
     }
 }
 
@@ -305,8 +305,8 @@ void chSetup() {
     //                   rocket_FSM, &sensor_pointers);
     // chThdCreateStatic(gps_WA, sizeof(gps_WA), NORMALPRIO + 1, gps_THD,
     //                   &sensor_pointers);
-    // chThdCreateStatic(barometer_WA, sizeof(barometer_WA), NORMALPRIO + 1,
-    //                   barometer_THD, &sensor_pointers);
+    chThdCreateStatic(barometer_WA, sizeof(barometer_WA), NORMALPRIO + 1,
+                      barometer_THD, &sensor_pointers);
     chThdCreateStatic(lowgIMU_WA, sizeof(lowgIMU_WA), NORMALPRIO + 1,
                       lowgIMU_THD, &sensor_pointers);
     // chThdCreateStatic(highgIMU_WA, sizeof(highgIMU_WA), NORMALPRIO + 1,

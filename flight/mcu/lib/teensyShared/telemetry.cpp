@@ -49,17 +49,20 @@ void Telemetry::handle_command(const telemetry_command & cmd){
       if (cmd.command == SET_CALLSIGN) {
         memcpy(callsign, cmd.callsign, sizeof(cmd.callsign));
       }
+      Serial.println(cmd.freq);
+      Serial.println(cmd.callsign);
+      Serial.println(cmd.command);
 }
 
 void Telemetry::transmit(const sensorDataStruct_t &sensor_data) {
   telemetry_data d{};
 
   // Looping input value from 0 to 2pi over and over 
-  if (dummy_input > 628) {
-    dummy_input = 0;
-  } else {
-    dummy_input+=30;
-  }
+  // if (dummy_input > 628) {
+  //   dummy_input = 0;
+  // } else {
+  //   dummy_input+=30;
+  // }
 
   // Computing sine value
   // double sin_value = sin(dummy_input/100);
@@ -113,7 +116,7 @@ void Telemetry::transmit(const sensorDataStruct_t &sensor_data) {
   d.response_ID = last_command_id;
   memcpy(d.sign, callsign, sizeof(callsign));
   
-  Serial.println("Sending sample sensor data..."); delay(10);
+  Serial.println("Sending sample sensor data..."); 
   rf95.send((uint8_t *)&d, sizeof(d));
 
   rf95.waitPacketSent();

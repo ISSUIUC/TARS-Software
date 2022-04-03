@@ -60,7 +60,9 @@ void lowGimuTickFunction(LSM9DS1* lsm, DataLogBuffer* data_log_buffer,
     // Log acceleration in Gs
     lowG_Data->ax = lsm->calcAccel(lsm->ax);
     lowG_Data->ay = lsm->calcAccel(lsm->ay);
-    lowG_Data->az = lsm->calcAccel(lsm->az);  // There was a minus here. We
+    lowG_Data->az = lsm->calcAccel(lsm->az);
+    // Serial.println(lowG_Data->ax);
+                                              // There was a minus here. We
                                               // don't know why that did that
     // Log rotational speed in degrees per second
     lowG_Data->gx = lsm->calcGyro(lsm->gx);
