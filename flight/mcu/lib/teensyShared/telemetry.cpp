@@ -116,10 +116,17 @@ void Telemetry::transmit(const sensorDataStruct_t &sensor_data) {
   d.response_ID = last_command_id;
   memcpy(d.sign, callsign, sizeof(callsign));
   
+  
   Serial.println("Sending sample sensor data..."); 
   rf95.send((uint8_t *)&d, sizeof(d));
-
+  chThdSleepMilliseconds(187);
+  int millis1 = chVTGetSystemTime();
   rf95.waitPacketSent();
+  int millis2 = chVTGetSystemTime();
+  Serial.println(TIME_I2MS(millis2-millis1) );
+  
+
+  
 
   //change the freqencey after we acknowledge
   if(freq_status.should_change){
@@ -142,13 +149,12 @@ void Telemetry::transmit(const sensorDataStruct_t &sensor_data) {
       
       handle_command(received);
     }
-    else
-    {
-      // Serial.println("Receive failed");
+    else {
+      Serial.println("receive failed");
     }
+
   }
-  else
-  {
-    // Serial.println("No reply, is there a listener around?");
-  } 
+  
+  
+
 }
