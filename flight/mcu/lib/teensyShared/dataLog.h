@@ -6,7 +6,7 @@
 #include <stdint.h>
 
 #include "FifoBuffer.h"
-#include "KX134-1211.h"       //High-G IMU Library
+#include "SparkFun_Qwiic_KX13X.h"       //High-G IMU Library
 #include "MS5611.h"           //Barometer Library
 #include "SparkFunLSM9DS1.h"  //Low-G IMU Library
 #include "SparkFun_u-blox_GNSS_Arduino_Library.h"
@@ -193,7 +193,7 @@ class DataLogBuffer {
 // TODO: Re-think this struct
 struct pointers {
     LSM9DS1* lowGimuPointer;
-    KX134* highGimuPointer;
+    QwiicKX134* highGimuPointer;
     MS5611* barometerPointer;
     SFE_UBLOX_GNSS* GPSPointer;
 

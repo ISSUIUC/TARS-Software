@@ -189,11 +189,11 @@ void gpsTickFunction(SFE_UBLOX_GNSS* gps, DataLogBuffer* data_log_buffer,
  * @param arg Contains pointers to the various objects needed by the high-g IMU.
  *
  */
-void highGimuTickFunction(KX134* highG, DataLogBuffer* data_log_buffer,
+void highGimuTickFunction(QwiicKX134* highG, DataLogBuffer* data_log_buffer,
                           HighGData* highg_data) {
     // Read data from high g IMU
     chSysLock();
-    highG->update_data();
+    auto data = highG->getAccelData();
     chSysUnlock();
 
     // Lock high g mutex
@@ -203,9 +203,9 @@ void highGimuTickFunction(KX134* highG, DataLogBuffer* data_log_buffer,
     highg_data->timeStamp_highG = chVTGetSystemTime();
 
     // Log accelerations highg_data
-    highg_data->hg_ax = highG->get_x_gforce();
-    highg_data->hg_ay = highG->get_y_gforce();
-    highg_data->hg_az = highG->get_z_gforce();
+    highg_data->hg_ax = data.xData;
+    highg_data->hg_ay = data.yData;
+    highg_data->hg_az = data.zData;
 
     // Unlock high g mutex
 
