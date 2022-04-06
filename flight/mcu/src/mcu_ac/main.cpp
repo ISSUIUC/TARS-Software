@@ -26,7 +26,7 @@
 #include <Wire.h>
 
 #include "ActiveControl.h"
-#include "KX134-1211.h"  //High-G IMU Library
+#include "SparkFun_Qwiic_KX13X.h"  //High-G IMU Library
 #include "MS5611.h"      //Barometer library
 #include "ServoControl.h"
 #include "SparkFunLSM9DS1.h"                       //Low-G IMU Library
@@ -51,7 +51,7 @@ sensorDataStruct_t sensorData;
 
 FSM_State rocketState = STATE_INIT;
 
-KX134 highGimu;
+QwiicKX134 highGimu;
 LSM9DS1 lowGimu;
 SFE_UBLOX_GNSS gps;
 
@@ -146,7 +146,7 @@ static THD_FUNCTION(highgIMU_THD, arg) {
     // Load outside variables into the function
     struct pointers *pointer_struct = (struct pointers *)arg;
 
-    KX134 *highG = pointer_struct->highGimuPointer;
+    QwiicKX134 *highG = pointer_struct->highGimuPointer;
     DataLogBuffer *data_log_buffer = &pointer_struct->dataloggerTHDVarsPointer;
     HighGData *highg_data = &pointer_struct->sensorDataPointer->highG_data;
 
@@ -354,6 +354,21 @@ void setup() {
     }
 
     lowGimu.setAccelScale(16);
+
+    if(!highGimu.beginSPI(KX134_CS, 1000000, SPI)){
+        digitalWrite(LED_RED, HIGH);
+        Serial.println("Failed to communicate with KX134. Stalling Program");
+        while (true)
+            ;
+    }
+
+    if(!highGimu.initialize(DEFAULT_SETTINGS)){
+        digitalWrite(LED_RED, HIGH);
+        Serial.println("Could not initialize KX134. Stalling Program");
+        while (true)
+            ;
+    }
+    
 
     // GPS Setup
     if (!gps.begin(SPI, ZOEM8Q0_CS, 4000000)) {

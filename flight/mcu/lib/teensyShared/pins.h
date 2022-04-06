@@ -21,5 +21,7 @@
 #define MS5611_CS 30
 // gps chip select pin
 #define ZOEM8Q0_CS 31
+// kx chip select pin
+#define KX134_CS 5
 
 #endif

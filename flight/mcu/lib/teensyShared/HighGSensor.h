@@ -1,7 +1,7 @@
 #ifndef HIGHGSENSOR_H
 #define HIGHGSENSOR_H
 
-#include <KX134-1211.h>
+#include "SparkFun_Qwiic_KX13X.h"
 
 struct GForce {
     float x_gforce;
@@ -14,7 +14,8 @@ class HighGSensor {
     GForce getGForce();
 
    private:
-    KX134* KX;
+    float ax, ay, az;
+    QwiicKX134* KX;
 };
 
 #endif

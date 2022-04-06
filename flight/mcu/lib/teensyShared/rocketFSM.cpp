@@ -24,8 +24,6 @@
 #include <SPI.h>
 #include <Wire.h>
 
-#include "KX134-1211.h"       //High-G IMU Library
-#include "SparkFunLSM9DS1.h"  //Low-G IMU Library
 #include "acShared.h"
 #include "dataLog.h"
 #include "hybridShared.h"
