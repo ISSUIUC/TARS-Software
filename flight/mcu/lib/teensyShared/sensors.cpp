@@ -88,7 +88,6 @@ void lowGimuTickFunction(pointers *pointer_struct) {
     pointer_struct->dataloggerTHDVarsPointer.lowGFifo.push(
         pointer_struct->sensorDataPointer->lowG_data);
     chMtxUnlock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_lowG);
-
 #ifdef LOWGIMU_DEBUG
     Serial.println("------------- LOW-G THREAD ---------------");
     Serial.print(pointer_struct->sensorDataPointer->lowG_data.ax);

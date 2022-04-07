@@ -52,9 +52,9 @@ sensorDataStruct_t sensorData;
 FSM_State rocketState = STATE_INIT;
 
 KX134 highGimu;
-bool lowG_connected;
+bool lowG_connected{};
 LSM9DS1 lowGimu;
-bool gps_connected;
+bool gps_connected{};
 SFE_UBLOX_GNSS gps;
 
 MS5611 barometer{MS5611_CS};
@@ -310,7 +310,10 @@ void setup() {
     // Serial.begin(115200);
     // while (!Serial) {
     // }
-#endif
+#endif 
+    // Serial.begin(115200);
+    // while (!Serial) {
+    // }
     pinMode(LED_BLUE, OUTPUT);
     pinMode(LED_RED, OUTPUT);
     pinMode(LED_ORANGE, OUTPUT);
@@ -356,21 +359,21 @@ void setup() {
     // Initialize barometer
     barometer.init();
 
-    // GPS Setup
-    if (!gps.begin(SPI, ZOEM8Q0_CS, 4000000)) {
-        digitalWrite(LED_RED, HIGH);
-        Serial.println("Failed to communicate with ZOEM8Q0 gps");
-        gps_connected = false;
-    } else {
-        gps_connected = true;
-        gps.setPortOutput(COM_PORT_SPI,
-                          COM_TYPE_UBX);  // Set the SPI port to output UBX only
-                                          // (turn off NMEA noise)
-        gps.saveConfigSelective(
-            VAL_CFG_SUBSEC_IOPORT);      // Save (only) the communications port
-                                         // settings to flash and BBR
-        gps.setNavigationFrequency(10);  // set sampling rate to 10hz
-    }
+    // // GPS Setup
+    // if (!gps.begin(SPI, ZOEM8Q0_CS, 4000000)) {
+    //     digitalWrite(LED_RED, HIGH);
+    //     Serial.println("Failed to communicate with ZOEM8Q0 gps");
+    //     gps_connected = false;
+    // } else {
+    //     gps_connected = true;
+    //     gps.setPortOutput(COM_PORT_SPI,
+    //                       COM_TYPE_UBX);  // Set the SPI port to output UBX only
+    //                                       // (turn off NMEA noise)
+    //     gps.saveConfigSelective(
+    //         VAL_CFG_SUBSEC_IOPORT);      // Save (only) the communications port
+    //                                      // settings to flash and BBR
+    //     gps.setNavigationFrequency(10);  // set sampling rate to 10hz
+    // }
     // while(!Serial);
     // // SD Card Setup
     // if (SD.begin(BUILTIN_SDCARD)){

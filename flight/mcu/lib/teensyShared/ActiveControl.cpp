@@ -47,7 +47,6 @@ void ActiveControl::acTickFunction() {
         int sign = ((l2 - l2_prev) / dt) / abs((l2 - l2_prev) / dt);
         l2_cmd = l2 + sign * min(abs((l2 - l2_prev) / dt), du_max);
     }
-
     // low pass filter
     if (l1_cmd < 0.002794) {
         l1_cmd = 0;
@@ -56,7 +55,7 @@ void ActiveControl::acTickFunction() {
         l2_cmd = 0;
     }
 
-    if (ActiveControl_ON()) {
+    if (ActiveControl_ON() || true) {
         activeControlServos.servoActuation(l1_cmd, l2_cmd);
     } else {
         activeControlServos.servoActuation(0, 0);

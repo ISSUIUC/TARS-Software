@@ -2,6 +2,7 @@
 #define SERVO_CPP
 
 #include "ServoControl.h"
+#include <Arduino.h>
 
 /**
  * @brief A function to keep the value sent to the servo between 0 and 180
@@ -37,6 +38,9 @@ void ServoControl::servoActuation(float length_one, float length_two) {
     // calculate what these values are. These are placeholders for now. m and
     // offset should include the radian to degree conversion.
     // float m = (1.0 / radius) * (180.0 / (3.1415));  // degrees / meter
+    // Serial.print(length_one);
+    // Serial.print(' ');
+    // Serial.println(length_two);
     float m = 5624.29696288;  // measured meters/degree
     float offset = 48.56;
 
