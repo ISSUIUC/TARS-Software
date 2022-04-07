@@ -15,7 +15,7 @@ class HighGSensor {
 
    private:
     float ax, ay, az;
-    QwiicKX134* KX;
+    QwiicKX132* KX;
 };
 
 #endif

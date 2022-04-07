@@ -6,7 +6,9 @@ double dummy_input = 0;
 Telemetry::Telemetry(): rf95(RFM95_CS, RFM95_INT) {
 
     pinMode(RFM95_RST, OUTPUT);
+    //pinMode(RFM95_EN, OUTPUT);
     digitalWrite(RFM95_RST, HIGH);
+    //digitalWrite(RFM95_EN, HIGH);
 
     delay(100);
 
@@ -20,7 +22,7 @@ Telemetry::Telemetry(): rf95(RFM95_CS, RFM95_INT) {
         // Serial.println("Radio Initialization Failed");
         while (1);
     }
-    Serial.println("Radio Initialized");
+    //Serial.println("Radio Initialized");
 
     // Defaults after init are 434.0MHz, modulation GFSK_Rb250Fd250, +13dbM
     if (!rf95.setFrequency(RF95_FREQ)) {
@@ -49,20 +51,17 @@ void Telemetry::handle_command(const telemetry_command & cmd){
       if (cmd.command == SET_CALLSIGN) {
         memcpy(callsign, cmd.callsign, sizeof(cmd.callsign));
       }
-      Serial.println(cmd.freq);
-      Serial.println(cmd.callsign);
-      Serial.println(cmd.command);
 }
 
 void Telemetry::transmit(const sensorDataStruct_t &sensor_data) {
   telemetry_data d{};
 
   // Looping input value from 0 to 2pi over and over 
-  // if (dummy_input > 628) {
-  //   dummy_input = 0;
-  // } else {
-  //   dummy_input+=30;
-  // }
+  if (dummy_input > 628) {
+    dummy_input = 0;
+  } else {
+    dummy_input+=30;
+  }
 
   // Computing sine value
   // double sin_value = sin(dummy_input/100);
@@ -116,17 +115,10 @@ void Telemetry::transmit(const sensorDataStruct_t &sensor_data) {
   d.response_ID = last_command_id;
   memcpy(d.sign, callsign, sizeof(callsign));
   
-  
-  Serial.println("Sending sample sensor data..."); 
+  //Serial.println("Sending sample sensor data..."); delay(10);
   rf95.send((uint8_t *)&d, sizeof(d));
-  chThdSleepMilliseconds(187);
-  int millis1 = chVTGetSystemTime();
-  rf95.waitPacketSent();
-  int millis2 = chVTGetSystemTime();
-  Serial.println(TIME_I2MS(millis2-millis1) );
-  
 
-  
+  rf95.waitPacketSent();
 
   //change the freqencey after we acknowledge
   if(freq_status.should_change){
@@ -149,12 +141,13 @@ void Telemetry::transmit(const sensorDataStruct_t &sensor_data) {
       
       handle_command(received);
     }
-    else {
-      Serial.println("receive failed");
+    else
+    {
+      // Serial.println("Receive failed");
     }
-
   }
-  
-  
-
+  else
+  {
+    // Serial.println("No reply, is there a listener around?");
+  } 
 }

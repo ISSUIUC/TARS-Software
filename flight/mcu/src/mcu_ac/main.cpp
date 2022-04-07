@@ -52,7 +52,7 @@ sensorDataStruct_t sensorData;
 
 FSM_State rocketState = STATE_INIT;
 
-QwiicKX134 highGimu;
+QwiicKX132 highGimu;
 LSM9DS1 lowGimu;
 SFE_UBLOX_GNSS gps;
 
@@ -161,7 +161,7 @@ static THD_FUNCTION(highgIMU_THD, arg) {
     // Load outside variables into the function
     struct pointers *pointer_struct = (struct pointers *)arg;
 
-    QwiicKX134 *highG = pointer_struct->highGimuPointer;
+    QwiicKX132 *highG = pointer_struct->highGimuPointer;
     DataLogBuffer *data_log_buffer = &pointer_struct->dataloggerTHDVarsPointer;
     HighGData *highg_data = &pointer_struct->sensorDataPointer->highG_data;
 
@@ -301,20 +301,20 @@ void chSetup() {
     // added play_THD for creation
     chThdCreateStatic(telemetry_WA, sizeof(telemetry_WA), NORMALPRIO + 1,
                       telemetry_THD, &sensor_pointers);
-    // chThdCreateStatic(rocket_FSM_WA, sizeof(rocket_FSM_WA), NORMALPRIO + 1,
-    //                   rocket_FSM, &sensor_pointers);
+    chThdCreateStatic(rocket_FSM_WA, sizeof(rocket_FSM_WA), NORMALPRIO + 1,
+                      rocket_FSM, &sensor_pointers);
     // chThdCreateStatic(gps_WA, sizeof(gps_WA), NORMALPRIO + 1, gps_THD,
     //                   &sensor_pointers);
     chThdCreateStatic(barometer_WA, sizeof(barometer_WA), NORMALPRIO + 1,
                       barometer_THD, &sensor_pointers);
     chThdCreateStatic(lowgIMU_WA, sizeof(lowgIMU_WA), NORMALPRIO + 1,
                       lowgIMU_THD, &sensor_pointers);
-    // chThdCreateStatic(highgIMU_WA, sizeof(highgIMU_WA), NORMALPRIO + 1,
-    //                   highgIMU_THD, &sensor_pointers);
+    chThdCreateStatic(highgIMU_WA, sizeof(highgIMU_WA), NORMALPRIO + 1,
+                      highgIMU_THD, &sensor_pointers);
     // chThdCreateStatic(servo_WA, sizeof(servo_WA), NORMALPRIO + 1, servo_THD,
     //                   &sensor_pointers);
-    // chThdCreateStatic(dataLogger_WA, sizeof(dataLogger_WA), NORMALPRIO + 1,
-    //                   dataLogger_THD, &sensor_pointers);
+    chThdCreateStatic(dataLogger_WA, sizeof(dataLogger_WA), NORMALPRIO + 1,
+                      dataLogger_THD, &sensor_pointers);
     // chThdCreateStatic(mpuComm_WA, sizeof(mpuComm_WA), NORMALPRIO + 1,
     //                   mpuComm_THD, NULL);
 
@@ -353,15 +353,15 @@ void setup() {
     digitalWrite(ZOEM8Q0_CS, HIGH);
     pinMode(MS5611_CS, OUTPUT);
     digitalWrite(MS5611_CS, HIGH);
-    pinMode(KX122_CS, OUTPUT);
-    digitalWrite(KX122_CS, HIGH);
+    pinMode(KX134_CS, OUTPUT);
+    digitalWrite(KX134_CS, HIGH);
     pinMode(H3LIS331DL_CS, OUTPUT);
     digitalWrite(H3LIS331DL_CS, HIGH);
     pinMode(RFM95_CS, OUTPUT);
     digitalWrite(RFM95_CS, HIGH);
 
     // TODO: Don't forget this
-    Serial.println("------------------------------------------------");
+    //Serial.println("------------------------------------------------");
 
     sensor_pointers.lowGimuPointer = &lowGimu;
     sensor_pointers.highGimuPointer = &highGimu;
@@ -376,19 +376,7 @@ void setup() {
     // Initialize barometer
     barometer.init();
 
-    // lowGimu setup
-    if (lowGimu.beginSPI(LSM9DS1_AG_CS, LSM9DS1_M_CS) ==
-        false)  // note, we need to sent this our CS pins (defined above)
-    {
-        digitalWrite(LED_RED, HIGH);
-        Serial.println("Failed to communicate with LSM9DS1. Stalling Program");
-        while (true)
-            ;
-    }
-
-    lowGimu.setAccelScale(16);
-
-    if(!highGimu.beginSPI(KX134_CS, 1000000, SPI)){
+    if(!highGimu.beginSPICore(KX134_CS, 1000000, SPI)){
         digitalWrite(LED_RED, HIGH);
         Serial.println("Failed to communicate with KX134. Stalling Program");
         while (true)
@@ -401,6 +389,20 @@ void setup() {
         while (true)
             ;
     }
+
+    // lowGimu setup
+    if (lowGimu.beginSPI(LSM9DS1_AG_CS, LSM9DS1_M_CS) ==
+        false)  // note, we need to sent this our CS pins (defined above)
+    {
+        digitalWrite(LED_RED, HIGH);
+        Serial.println("Failed to communicate with LSM9DS1. Stalling Program");
+        while (true)
+            ;
+    }
+
+    lowGimu.setAccelScale(16);
+
+    
     
 
     // GPS Setup
@@ -452,7 +454,7 @@ void setup() {
     servo_cw.attach(SERVO_CW_PIN, 770, 2250);
     servo_ccw.attach(SERVO_CCW_PIN, 770, 2250);
 
-    Serial.println("Starting ChibiOS");
+    //Serial.println("Starting ChibiOS");
     chBegin(chSetup);
     while (true)
         ;

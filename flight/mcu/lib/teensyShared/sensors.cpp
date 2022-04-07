@@ -44,7 +44,7 @@ static int dummy_input_GPS = 0;
 void lowGimuTickFunction(LSM9DS1* lsm, DataLogBuffer* data_log_buffer,
                          LowGData* lowG_Data) {
     // Reads data from the low g IMU
-    Serial.println("lowg");
+    //Serial.println("lowg");
     chSysLock();
     lsm->readAccel();
     lsm->readGyro();
@@ -189,7 +189,7 @@ void gpsTickFunction(SFE_UBLOX_GNSS* gps, DataLogBuffer* data_log_buffer,
  * @param arg Contains pointers to the various objects needed by the high-g IMU.
  *
  */
-void highGimuTickFunction(QwiicKX134* highG, DataLogBuffer* data_log_buffer,
+void highGimuTickFunction(QwiicKX132* highG, DataLogBuffer* data_log_buffer,
                           HighGData* highg_data) {
     // Read data from high g IMU
     chSysLock();
