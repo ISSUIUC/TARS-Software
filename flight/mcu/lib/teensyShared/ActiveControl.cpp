@@ -9,6 +9,7 @@
 ActiveControl::ActiveControl(struct pointers* pointer_struct, PWMServo* ccw,
                              PWMServo* cw)
     : activeControlServos(ccw, cw) {
+        Serial.println("yolo");
     gy = &pointer_struct->sensorDataPointer->lowG_data.gy;
     current_state =
         &pointer_struct->sensorDataPointer->rocketState_data.rocketState;
@@ -26,8 +27,10 @@ ActiveControl::ActiveControl(struct pointers* pointer_struct, PWMServo* ccw,
 
 void ActiveControl::acTickFunction() {
     if (ac_abort) {
+        Serial.println("is_abort");
         activeControlServos.servoActuation(0);
     } else {
+        Serial.println("isnt_abort");
         activeControlServos.servoActuation(180);
     }
     return;

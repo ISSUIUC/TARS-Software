@@ -41,7 +41,7 @@
 
 // DataLogBuffer datalogger_THD_vars;
 
-//#define THREAD_DEBUG
+#define THREAD_DEBUG
 //#define LOWGIMU_DEBUG
 //#define HIGHGIMU_DEBUG
 //#define GPS_DEBUG
@@ -85,7 +85,7 @@ static THD_FUNCTION(telemetry_THD, arg) {
     
     // int packetnum = 0;
     Telemetry tlm;
-
+    Serial.println("hiho");
     while(true) {
         tlm.transmit(sensorData);
         pointer_struct->abort = tlm.abort;
@@ -241,7 +241,7 @@ static THD_FUNCTION(mpuComm_THD, arg) {
         //! locking data from sensorData struct
         chMtxLock(&sensor_pointers.dataloggerTHDVarsPointer.dataMutex_lowG);
 
-        digitalWrite(LED_WHITE, HIGH);
+        // digitalWrite(LED_WHITE, HIGH);
 
         // write transmission code here
         unsigned i = 3;  // because the first 3 indices are already set to be
@@ -267,7 +267,7 @@ static THD_FUNCTION(mpuComm_THD, arg) {
 
         Serial1.write(mpu_data, sizeof(mpu_data));
 
-        digitalWrite(LED_WHITE, LOW);
+        // digitalWrite(LED_WHITE, LOW);
 
         /* for (uint8_t i = 0; i < sizeof(mpu_data); ++i) {
                       Serial.printf("0x%.2X\t", mpu_data[i]);
@@ -306,18 +306,18 @@ void chSetup() {
                       telemetry_THD, &sensor_pointers);
     chThdCreateStatic(rocket_FSM_WA, sizeof(rocket_FSM_WA), NORMALPRIO + 1,
                       rocket_FSM, &sensor_pointers);
-    // chThdCreateStatic(gps_WA, sizeof(gps_WA), NORMALPRIO + 1, gps_THD,
-    //                   &sensor_pointers);
+    // // chThdCreateStatic(gps_WA, sizeof(gps_WA), NORMALPRIO + 1, gps_THD,
+    // //                   &sensor_pointers);
     chThdCreateStatic(barometer_WA, sizeof(barometer_WA), NORMALPRIO + 1,
                       barometer_THD, &sensor_pointers);
     chThdCreateStatic(lowgIMU_WA, sizeof(lowgIMU_WA), NORMALPRIO + 1,
                       lowgIMU_THD, &sensor_pointers);
     chThdCreateStatic(highgIMU_WA, sizeof(highgIMU_WA), NORMALPRIO + 1,
                       highgIMU_THD, &sensor_pointers);
-    // chThdCreateStatic(servo_WA, sizeof(servo_WA), NORMALPRIO + 1, servo_THD,
-    //                   &sensor_pointers);
-    chThdCreateStatic(dataLogger_WA, sizeof(dataLogger_WA), NORMALPRIO + 1,
-                      dataLogger_THD, &sensor_pointers);
+    chThdCreateStatic(servo_WA, sizeof(servo_WA), NORMALPRIO + 1, servo_THD,
+                      &sensor_pointers);
+    // chThdCreateStatic(dataLogger_WA, sizeof(dataLogger_WA), NORMALPRIO + 1,
+    //                   dataLogger_THD, &sensor_pointers);
     // chThdCreateStatic(mpuComm_WA, sizeof(mpuComm_WA), NORMALPRIO + 1,
     //                   mpuComm_THD, NULL);
 
@@ -336,17 +336,17 @@ void setup() {
 // #if defined(THREAD_DEBUG) || defined(LOWGIMU_DEBUG) ||     \
 //     defined(BAROMETER_DEBUG) || defined(HIGHGIMU_DEBUG) || \
 //     defined(GPS_DEBUG) || defined(SERVO_DEBUG)
-    Serial.begin(115200);
+    Serial.begin(9600);
     while (!Serial) {
     }
 // #endif
-    pinMode(LED_BLUE, OUTPUT);
-    pinMode(LED_RED, OUTPUT);
-    pinMode(LED_ORANGE, OUTPUT);
-    pinMode(LED_WHITE, OUTPUT);
+    // pinMode(LED_BLUE, OUTPUT);
+    // pinMode(LED_RED, OUTPUT);
+    // pinMode(LED_ORANGE, OUTPUT);
+    // pinMode(LED_WHITE, OUTPUT);
 
-    digitalWrite(LED_BLUE, HIGH);
-    digitalWrite(LED_ORANGE, HIGH);
+    // digitalWrite(LED_BLUE, HIGH);
+    // digitalWrite(LED_ORANGE, HIGH);
 
     pinMode(LSM9DS1_AG_CS, OUTPUT);
     digitalWrite(LSM9DS1_AG_CS, HIGH);
@@ -380,14 +380,14 @@ void setup() {
     barometer.init();
 
     if(!highGimu.beginSPICore(KX134_CS, 1000000, SPI)){
-        digitalWrite(LED_RED, HIGH);
+        // digitalWrite(LED_RED, HIGH);
         Serial.println("Failed to communicate with KX134. Stalling Program");
         while (true)
             ;
     }
 
     if(!highGimu.initialize(DEFAULT_SETTINGS)){
-        digitalWrite(LED_RED, HIGH);
+        // digitalWrite(LED_RED, HIGH);
         Serial.println("Could not initialize KX134. Stalling Program");
         while (true)
             ;
@@ -397,7 +397,7 @@ void setup() {
     if (lowGimu.beginSPI(LSM9DS1_AG_CS, LSM9DS1_M_CS) ==
         false)  // note, we need to sent this our CS pins (defined above)
     {
-        digitalWrite(LED_RED, HIGH);
+        // digitalWrite(LED_RED, HIGH);
         Serial.println("Failed to communicate with LSM9DS1. Stalling Program");
         while (true)
             ;
@@ -457,7 +457,7 @@ void setup() {
     servo_cw.attach(SERVO_CW_PIN, 770, 2250);
     servo_ccw.attach(SERVO_CCW_PIN, 770, 2250);
 
-    //Serial.println("Starting ChibiOS");
+    Serial.println("Starting ChibiOS");
     chBegin(chSetup);
     while (true)
         ;

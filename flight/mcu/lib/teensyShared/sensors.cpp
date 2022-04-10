@@ -153,9 +153,9 @@ void gpsTickFunction(SFE_UBLOX_GNSS* gps, DataLogBuffer* data_log_buffer,
 
     // Toggle the LED to show if the gps has position lock
     if (posLock == true) {
-        digitalWrite(LED_ORANGE, HIGH);
+        // digitalWrite(LED_ORANGE, HIGH);
     } else {
-        digitalWrite(LED_ORANGE, LOW);
+        // digitalWrite(LED_ORANGE, LOW);
     }
 
 #ifdef GPS_DEBUG

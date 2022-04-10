@@ -9,24 +9,25 @@ Telemetry::Telemetry(): rf95(RFM95_CS, RFM95_INT) {
     //pinMode(RFM95_EN, OUTPUT);
     digitalWrite(RFM95_RST, HIGH);
     //digitalWrite(RFM95_EN, HIGH);
-
     delay(100);
 
     // manual reset
+    Serial.println("asdf Initialization Failed");
+
     digitalWrite(RFM95_RST, LOW);
     delay(10);
     digitalWrite(RFM95_RST, HIGH);
     delay(10);
 
     while (!rf95.init()) {
-        // Serial.println("Radio Initialization Failed");
+        Serial.println("Radio Initialization Failed");
         while (1);
     }
     //Serial.println("Radio Initialized");
 
     // Defaults after init are 434.0MHz, modulation GFSK_Rb250Fd250, +13dbM
     if (!rf95.setFrequency(RF95_FREQ)) {
-        // Serial.println("setFrequency Failed");
+        Serial.println("setFrequency Failed");
         while (1);
     }    
     // Defaults after init are 434.0MHz, 13dBm, Bw = 125 kHz, Cr = 4/5, Sf = 128chips/symbol, CRC on
