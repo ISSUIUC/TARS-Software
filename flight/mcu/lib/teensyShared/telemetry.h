@@ -43,6 +43,7 @@ struct telemetry_data {
   int rssi;
   float battery_voltage;
   int response_ID;
+  // float flap_extension;
 };
 
 // Commands transmitted from ground station to rocket
@@ -73,10 +74,12 @@ class Telemetry {
         Telemetry();
         void transmit(const sensorDataStruct_t&);
         void handle_command(const telemetry_command & cmd);
+        bool abort = false;
     private:
         int packetnum;
         telemetry_data d;
         RH_RF95 rf95;
+        
         // Initializing command ID
         int last_command_id = -1;
 

@@ -82,10 +82,13 @@ static THD_WORKING_AREA(telemetry_WA, 8192);
 
 static THD_FUNCTION(telemetry_THD, arg) {
     struct pointers *pointer_struct = (struct pointers *)arg;
+    
     // int packetnum = 0;
     Telemetry tlm;
+
     while(true) {
         tlm.transmit(sensorData);
+        pointer_struct->abort = tlm.abort;
         chThdSleepMilliseconds(200);
     }
 }

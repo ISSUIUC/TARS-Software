@@ -14,6 +14,8 @@ ActiveControl::ActiveControl(struct pointers* pointer_struct, PWMServo* ccw,
         &pointer_struct->sensorDataPointer->rocketState_data.rocketState;
     mutex_lowG_ = &pointer_struct->dataloggerTHDVarsPointer.dataMutex_lowG;
 
+    ac_abort = pointer_struct->abort;
+
     // Flaps go in and out upon initializing for testing purposes
     activeControlServos.servoActuation(0, 0);
     chThdSleepMilliseconds(1000);
@@ -23,6 +25,13 @@ ActiveControl::ActiveControl(struct pointers* pointer_struct, PWMServo* ccw,
 }
 
 void ActiveControl::acTickFunction() {
+    if (ac_abort) {
+        activeControlServos.servoActuation(0);
+    } else {
+        activeControlServos.servoActuation(180);
+    }
+    return;
+
     chMtxLock(mutex_lowG_);  // Locking only for gy because we use local
                              // variables for everything else
     float e = omega_goal + *gy;

@@ -51,6 +51,10 @@ void Telemetry::handle_command(const telemetry_command & cmd){
       if (cmd.command == SET_CALLSIGN) {
         memcpy(callsign, cmd.callsign, sizeof(cmd.callsign));
       }
+
+      if (cmd.command == ABORT) {
+        abort = !abort;
+      }
 }
 
 void Telemetry::transmit(const sensorDataStruct_t &sensor_data) {

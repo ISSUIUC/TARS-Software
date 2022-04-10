@@ -19,6 +19,7 @@ class ServoControl {
      * runs during servo thread
      */
     void servoActuation(float length_one, float length_two);
+    void servoActuation(float angle);
 
    private:
     const float radius = 0.0127;  // pitch radius of gear

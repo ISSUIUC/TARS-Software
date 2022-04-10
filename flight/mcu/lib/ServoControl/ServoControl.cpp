@@ -59,4 +59,20 @@ void ServoControl::servoActuation(float length_one, float length_two) {
 #endif
 }
 
+// Overload for Mk3 AC stack (only one set of flaps for drag control)
+void ServoControl::servoActuation(float angle) {
+    // float m = (1.0 / radius) * (180.0 / (3.1415));  // degrees / meter
+    // float offset = 0;
+    // float ccw_angle = (length_one * m + offset);
+    roundOffAngle(angle);
+    servo_ccw_->write(angle);
+    #ifdef SERVO_DEBUG
+    Serial.print("\nclockwise: ");
+    Serial.print(cw_angle);
+    Serial.print(" counterclockwise: ");
+    Serial.print(ccw_angle);
+    #endif
+}
+
 #endif
+
