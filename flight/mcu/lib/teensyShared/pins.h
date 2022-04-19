@@ -34,7 +34,7 @@
 #define RFM95_RST 15
 #define RFM95_EN 14
 #define RFM95_INT 16
-#define LED 13 // Blinks on receipt
+#define LED 13 // Blinks on receipt, nonessential
 // */
 
 // kx chip select pin
