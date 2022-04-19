@@ -67,15 +67,15 @@ pointers sensor_pointers;
 
 uint8_t mpu_data[71];
 
-static THD_WORKING_AREA(barometer_WA, 8192);
-static THD_WORKING_AREA(gps_WA, 8192);
-static THD_WORKING_AREA(rocket_FSM_WA, 8192);
-static THD_WORKING_AREA(lowgIMU_WA, 8192);
-static THD_WORKING_AREA(highgIMU_WA, 8192);
-static THD_WORKING_AREA(servo_WA, 8192);
-static THD_WORKING_AREA(dataLogger_WA, 8192);
-static THD_WORKING_AREA(mpuComm_WA, 8192);
-static THD_WORKING_AREA(telemetry_WA, 8192);
+// static THD_WORKING_AREA(barometer_WA, 8192);
+// static THD_WORKING_AREA(gps_WA, 8192);
+// static THD_WORKING_AREA(rocket_FSM_WA, 8192);
+// static THD_WORKING_AREA(lowgIMU_WA, 8192);
+// static THD_WORKING_AREA(highgIMU_WA, 8192);
+static THD_WORKING_AREA(servo_WA, 4096);
+// static THD_WORKING_AREA(dataLogger_WA, 8192);
+// static THD_WORKING_AREA(mpuComm_WA, 8192);
+static THD_WORKING_AREA(telemetry_WA, 4096);
 
 /******************************************************************************/
 /* TELEMETRY THREAD                                         */
@@ -89,6 +89,7 @@ static THD_FUNCTION(telemetry_THD, arg) {
     while(true) {
         tlm.transmit(sensorData);
         pointer_struct->abort = tlm.abort;
+        pointer_struct->testing_flaps = tlm.testing;
         chThdSleepMilliseconds(200);
     }
 }
@@ -304,20 +305,20 @@ void chSetup() {
     // added play_THD for creation
     chThdCreateStatic(telemetry_WA, sizeof(telemetry_WA), NORMALPRIO + 1,
                       telemetry_THD, &sensor_pointers);
-    chThdCreateStatic(rocket_FSM_WA, sizeof(rocket_FSM_WA), NORMALPRIO + 1,
-                      rocket_FSM, &sensor_pointers);
+    // chThdCreateStatic(rocket_FSM_WA, sizeof(rocket_FSM_WA), NORMALPRIO + 1,
+    //                   rocket_FSM, &sensor_pointers);
     // chThdCreateStatic(gps_WA, sizeof(gps_WA), NORMALPRIO + 1, gps_THD,
     //                   &sensor_pointers);
-    chThdCreateStatic(barometer_WA, sizeof(barometer_WA), NORMALPRIO + 1,
-                      barometer_THD, &sensor_pointers);
-    chThdCreateStatic(lowgIMU_WA, sizeof(lowgIMU_WA), NORMALPRIO + 1,
-                      lowgIMU_THD, &sensor_pointers);
-    chThdCreateStatic(highgIMU_WA, sizeof(highgIMU_WA), NORMALPRIO + 1,
-                      highgIMU_THD, &sensor_pointers);
-    // chThdCreateStatic(servo_WA, sizeof(servo_WA), NORMALPRIO + 1, servo_THD,
-    //                   &sensor_pointers);
-    chThdCreateStatic(dataLogger_WA, sizeof(dataLogger_WA), NORMALPRIO + 1,
-                      dataLogger_THD, &sensor_pointers);
+    // chThdCreateStatic(barometer_WA, sizeof(barometer_WA), NORMALPRIO + 1,
+    //                   barometer_THD, &sensor_pointers);
+    // chThdCreateStatic(lowgIMU_WA, sizeof(lowgIMU_WA), NORMALPRIO + 1,
+    //                   lowgIMU_THD, &sensor_pointers);
+    // chThdCreateStatic(highgIMU_WA, sizeof(highgIMU_WA), NORMALPRIO + 1,
+    //                   highgIMU_THD, &sensor_pointers);
+    chThdCreateStatic(servo_WA, sizeof(servo_WA), NORMALPRIO + 1, servo_THD,
+                      &sensor_pointers);
+    // chThdCreateStatic(dataLogger_WA, sizeof(dataLogger_WA), NORMALPRIO + 1,
+    //                   dataLogger_THD, &sensor_pointers);
     // chThdCreateStatic(mpuComm_WA, sizeof(mpuComm_WA), NORMALPRIO + 1,
     //                   mpuComm_THD, NULL);
 
@@ -345,21 +346,21 @@ void setup() {
     pinMode(LED_ORANGE, OUTPUT);
     pinMode(LED_WHITE, OUTPUT);
 
-    digitalWrite(LED_BLUE, HIGH);
-    digitalWrite(LED_ORANGE, HIGH);
+    // digitalWrite(LED_BLUE, HIGH);
+    // digitalWrite(LED_ORANGE, HIGH);
 
-    pinMode(LSM9DS1_AG_CS, OUTPUT);
-    digitalWrite(LSM9DS1_AG_CS, HIGH);
-    pinMode(LSM9DS1_M_CS, OUTPUT);
-    digitalWrite(LSM9DS1_M_CS, HIGH);
-    pinMode(ZOEM8Q0_CS, OUTPUT);
-    digitalWrite(ZOEM8Q0_CS, HIGH);
-    pinMode(MS5611_CS, OUTPUT);
-    digitalWrite(MS5611_CS, HIGH);
-    pinMode(KX134_CS, OUTPUT);
-    digitalWrite(KX134_CS, HIGH);
-    pinMode(H3LIS331DL_CS, OUTPUT);
-    digitalWrite(H3LIS331DL_CS, HIGH);
+    // pinMode(LSM9DS1_AG_CS, OUTPUT);
+    // digitalWrite(LSM9DS1_AG_CS, HIGH);
+    // pinMode(LSM9DS1_M_CS, OUTPUT);
+    // digitalWrite(LSM9DS1_M_CS, HIGH);
+    // pinMode(ZOEM8Q0_CS, OUTPUT);
+    // digitalWrite(ZOEM8Q0_CS, HIGH);
+    // pinMode(MS5611_CS, OUTPUT);
+    // digitalWrite(MS5611_CS, HIGH);
+    // pinMode(KX134_CS, OUTPUT);
+    // digitalWrite(KX134_CS, HIGH);
+    // pinMode(H3LIS331DL_CS, OUTPUT);
+    // digitalWrite(H3LIS331DL_CS, HIGH);
     pinMode(RFM95_CS, OUTPUT);
     digitalWrite(RFM95_CS, HIGH);
 
@@ -374,36 +375,36 @@ void setup() {
     sensor_pointers.abort = false;
 
     SPI.begin();
-    SPI1.setMISO(39);
+    // SPI.setMISO(39);
 
-    // Initialize barometer
-    barometer.init();
+    // // Initialize barometer
+    // barometer.init();
 
-    if(!highGimu.beginSPICore(KX134_CS, 1000000, SPI)){
-        digitalWrite(LED_RED, HIGH);
-        Serial.println("Failed to communicate with KX134. Stalling Program");
-        while (true)
-            ;
-    }
+    // if(!highGimu.beginSPICore(KX134_CS, 1000000, SPI)){
+    //     digitalWrite(LED_RED, HIGH);
+    //     Serial.println("Failed to communicate with KX134. Stalling Program");
+    //     while (true)
+    //         ;
+    // }
 
-    if(!highGimu.initialize(DEFAULT_SETTINGS)){
-        digitalWrite(LED_RED, HIGH);
-        Serial.println("Could not initialize KX134. Stalling Program");
-        while (true)
-            ;
-    }
+    // if(!highGimu.initialize(DEFAULT_SETTINGS)){
+    //     digitalWrite(LED_RED, HIGH);
+    //     Serial.println("Could not initialize KX134. Stalling Program");
+    //     while (true)
+    //         ;
+    // }
 
-    // lowGimu setup
-    if (lowGimu.beginSPI(LSM9DS1_AG_CS, LSM9DS1_M_CS) ==
-        false)  // note, we need to sent this our CS pins (defined above)
-    {
-        digitalWrite(LED_RED, HIGH);
-        Serial.println("Failed to communicate with LSM9DS1. Stalling Program");
-        while (true)
-            ;
-    }
+    // // lowGimu setup
+    // if (lowGimu.beginSPI(LSM9DS1_AG_CS, LSM9DS1_M_CS) ==
+    //     false)  // note, we need to sent this our CS pins (defined above)
+    // {
+    //     digitalWrite(LED_RED, HIGH);
+    //     Serial.println("Failed to communicate with LSM9DS1. Stalling Program");
+    //     while (true)
+    //         ;
+    // }
 
-    lowGimu.setAccelScale(16);
+    // lowGimu.setAccelScale(16);
 
     
     
