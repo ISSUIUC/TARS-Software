@@ -5,7 +5,7 @@
 // $Id: RHHardwareSPI.cpp,v 1.16 2016/07/07 00:02:53 mikem Exp $
 
 #include <RHHardwareSPI.h>
-// #define SPI SPI1
+#define SPI SPI1
 
 // Declare a single default instance of the hardware SPI interface class
 RHHardwareSPI hardware_spi;

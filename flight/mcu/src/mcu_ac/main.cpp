@@ -212,6 +212,7 @@ static THD_FUNCTION(gps_THD, arg) {
 static THD_FUNCTION(servo_THD, arg) {
     struct pointers *pointer_struct = (struct pointers *)arg;
 
+    Serial.println("hihi");
     ActiveControl ac(pointer_struct, &servo_ccw, &servo_cw);
 
     while (true) {
@@ -303,8 +304,8 @@ static THD_FUNCTION(dataLogger_THD, arg) {
  */
 void chSetup() {
     // added play_THD for creation
-    chThdCreateStatic(telemetry_WA, sizeof(telemetry_WA), NORMALPRIO + 1,
-                      telemetry_THD, &sensor_pointers);
+    // chThdCreateStatic(telemetry_WA, sizeof(telemetry_WA), NORMALPRIO + 1,
+    //                   telemetry_THD, &sensor_pointers);
     // chThdCreateStatic(rocket_FSM_WA, sizeof(rocket_FSM_WA), NORMALPRIO + 1,
     //                   rocket_FSM, &sensor_pointers);
     // chThdCreateStatic(gps_WA, sizeof(gps_WA), NORMALPRIO + 1, gps_THD,
@@ -458,7 +459,7 @@ void setup() {
     servo_cw.attach(SERVO_CW_PIN, 770, 2250);
     servo_ccw.attach(SERVO_CCW_PIN, 770, 2250);
 
-    //Serial.println("Starting ChibiOS");
+    Serial.println("Starting ChibiOS");
     chBegin(chSetup);
     while (true)
         ;

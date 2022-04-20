@@ -1,10 +1,10 @@
 #ifndef PINS_H
 #define PINS_H
 
-#define SERVO_CW_PIN 4
+#define SERVO_CW_PIN 14
 
 // This is the one we are using for Mk3
-#define SERVO_CCW_PIN 4
+#define SERVO_CCW_PIN 14
 
 #define HYBRID_PT_1_PIN 20
 #define HYBRID_PT_2_PIN 21
@@ -25,16 +25,16 @@
 
 #define ZOEM8Q0_CS 6
 #define H3LIS331DL_CS 5
-// #define RFM95_CS 41
-// #define RFM95_INT 40
-// #define RFM95_RST 20
+#define RFM95_CS 41
+#define RFM95_INT 40
+#define RFM95_RST 20
 
 // /* Pins for testing on breadboard radio
-#define RFM95_CS 10
-#define RFM95_RST 15
-#define RFM95_EN 14
-#define RFM95_INT 16
-#define LED 13 // Blinks on receipt, nonessential
+// #define RFM95_CS 10
+// #define RFM95_RST 15
+// #define RFM95_EN 14
+// #define RFM95_INT 16
+// #define LED 13 // Blinks on receipt, nonessential
 // */
 
 // kx chip select pin
