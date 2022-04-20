@@ -304,8 +304,8 @@ static THD_FUNCTION(dataLogger_THD, arg) {
  */
 void chSetup() {
     // added play_THD for creation
-    // chThdCreateStatic(telemetry_WA, sizeof(telemetry_WA), NORMALPRIO + 1,
-    //                   telemetry_THD, &sensor_pointers);
+    chThdCreateStatic(telemetry_WA, sizeof(telemetry_WA), NORMALPRIO + 1,
+                      telemetry_THD, &sensor_pointers);
     // chThdCreateStatic(rocket_FSM_WA, sizeof(rocket_FSM_WA), NORMALPRIO + 1,
     //                   rocket_FSM, &sensor_pointers);
     // chThdCreateStatic(gps_WA, sizeof(gps_WA), NORMALPRIO + 1, gps_THD,
@@ -375,8 +375,8 @@ void setup() {
     sensor_pointers.sensorDataPointer = &sensorData;
     sensor_pointers.abort = false;
 
-    SPI.begin();
-    // SPI.setMISO(39);
+    // SPI1.begin();
+    SPI1.setMISO(39);
 
     // // Initialize barometer
     // barometer.init();
