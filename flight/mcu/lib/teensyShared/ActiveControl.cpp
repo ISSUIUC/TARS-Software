@@ -14,8 +14,7 @@ ActiveControl::ActiveControl(struct pointers* pointer_struct, PWMServo* ccw,
         &pointer_struct->sensorDataPointer->rocketState_data.rocketState;
     mutex_lowG_ = &pointer_struct->dataloggerTHDVarsPointer.dataMutex_lowG;
 
-    ac_abort = pointer_struct->abort;
-    ac_test = pointer_struct->testing_flaps;
+    ac_test = &pointer_struct->testing_flaps;
 
     // Flaps go in and out upon initializing for testing purposes
     // activeControlServos.servoActuation(0, 0);
@@ -34,9 +33,15 @@ ActiveControl::ActiveControl(struct pointers* pointer_struct, PWMServo* ccw,
 }
 
 void ActiveControl::acTickFunction() {
-    if (ac_abort) {
+    Serial.println(*ac_test);
+    if (*ac_test) {
         activeControlServos.servoActuation(0);
-    } 
+        // chThdSleepMilliseconds(1000);
+        // activeControlServos.servoActuation(180);
+        // chThdSleepMilliseconds(1000);
+    } else {
+        activeControlServos.servoActuation(180);
+    }
     return;
     if (ac_test) {
         activeControlServos.servoActuation(0);

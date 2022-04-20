@@ -16,8 +16,7 @@ class ActiveControl {
 
    private:
     mutex_t* mutex_lowG_;
-    bool ac_abort = false;
-    bool ac_test = false;
+    bool* ac_test = false;
 
     // These matrices are solely for October launch, only roll control
     Eigen::Matrix<float, 2, 1> k_p{0.003, -0.003};

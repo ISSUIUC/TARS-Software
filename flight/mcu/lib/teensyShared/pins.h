@@ -4,7 +4,7 @@
 #define SERVO_CW_PIN 4
 
 // This is the one we are using for Mk3
-#define SERVO_CCW_PIN 17
+#define SERVO_CCW_PIN 4
 
 #define HYBRID_PT_1_PIN 20
 #define HYBRID_PT_2_PIN 21
