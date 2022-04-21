@@ -108,7 +108,7 @@ void rocketFSM::tickFSM() {
             }
             // Keeping rocket in STATE_BOOST if time below a certain value
             // 5000 is an arbitrary value. Change later.
-            if (TIME_I2MS(rocketTimers.burn_timer) < 5000) {
+            if (TIME_I2MS(rocketTimers.burn_timer) < 4000) {
                 pointer_struct->sensorDataPointer->rocketState_data
                     .rocketState = STATE_BOOST;
             }
