@@ -20,22 +20,23 @@ This code was used to test the RFM LoRa modules on a breadboard:
 #include <RH_RF95.h>
 #include "SerialParser.h"
 #include <queue>
+#include <array>
 
 /* Pins for feather*/
 // // Ensure to change depending on wiring
-//#define RFM95_CS 8
-//#define RFM95_RST 4
+#define RFM95_CS 8
+#define RFM95_RST 4
 // #define RFM95_EN 
-//#define RFM95_INT 3
+#define RFM95_INT 3
 // #define LED 13 // Blinks on receipt
 
 /* Pins for Teensy 31*/
 // Ensure to change depending on wiring
-#define RFM95_CS 10
-#define RFM95_RST 15
-#define RFM95_EN 14
-#define RFM95_INT 16
-#define LED 13 // Blinks on receipt
+// #define RFM95_CS 10
+// #define RFM95_RST 15
+// #define RFM95_EN 14
+// #define RFM95_INT 16
+// #define LED 13 // Blinks on receipt
 
 // Change to 434.0 or other frequency, must match RX's freq!
 #define RF95_FREQ 434.0
@@ -101,6 +102,7 @@ struct telemetry_command {
     int freq;
     bool do_abort;
   };
+  std::array<char, 6> verify = {'A', 'Y', 'B', 'E', 'R', 'K'};
 };
 
 struct TelemetryCommandQueueElement {
@@ -269,7 +271,7 @@ void loop()
 
       if(!cmd_queue.empty()){
         auto & cmd = cmd_queue.front();
-        if(cmd.command.id <= data.response_ID){
+        if(cmd.command.id == data.response_ID){
           if(cmd.command.command == CommandType::SET_FREQ){
             set_freq_local_bug_fix(cmd.command.freq);
             Serial.print(R"({"type": "freq_success", "frequency":)");
