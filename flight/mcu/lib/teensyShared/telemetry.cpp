@@ -41,6 +41,9 @@ Telemetry::Telemetry(): rf95(RFM95_CS, RFM95_INT) {
 
 void Telemetry::handle_command(const telemetry_command & cmd){
 /* Check if lasted command ID matched current command ID */
+      if (cmd.verify != std::array<char, 6>{'A', 'Y', 'B', 'E', 'R','K'}) {
+        return;
+      }
       if(last_command_id == cmd.cmd_id){
         return;
       }

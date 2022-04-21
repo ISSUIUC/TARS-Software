@@ -4,6 +4,7 @@
 #include <ServoControl.h>
 #include "sensors.h"
 #include "pins.h"
+#include <array>
 
 //Make sure to change these pinout depending on wiring
 //Don't forget to change the ini file to build the correct main file
@@ -64,6 +65,7 @@ struct telemetry_command {
     int freq;
     bool do_abort;
   };
+  std::array<char, 6> verify;
 };
 
 struct command_handler_struct{

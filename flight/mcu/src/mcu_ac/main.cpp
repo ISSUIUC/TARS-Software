@@ -85,7 +85,6 @@ static THD_FUNCTION(telemetry_THD, arg) {
     
     // int packetnum = 0;
     Telemetry tlm;
-    Serial.println("hiho");
     while(true) {
         tlm.transmit(sensorData);
         pointer_struct->abort = tlm.abort;
