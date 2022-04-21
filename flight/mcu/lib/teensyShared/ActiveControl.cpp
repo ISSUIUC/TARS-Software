@@ -9,29 +9,46 @@
 ActiveControl::ActiveControl(struct pointers* pointer_struct, PWMServo* ccw,
                              PWMServo* cw)
     : activeControlServos(ccw, cw) {
-        Serial.println("yolo");
     gy = &pointer_struct->sensorDataPointer->lowG_data.gy;
     current_state =
         &pointer_struct->sensorDataPointer->rocketState_data.rocketState;
     mutex_lowG_ = &pointer_struct->dataloggerTHDVarsPointer.dataMutex_lowG;
 
-    ac_abort = pointer_struct->abort;
+    ac_test = &pointer_struct->testing_flaps;
+    ac_abort = &pointer_struct->abort;
 
     // Flaps go in and out upon initializing for testing purposes
-    activeControlServos.servoActuation(0, 0);
+    // activeControlServos.servoActuation(0, 0);
+    // chThdSleepMilliseconds(1000);
+    // activeControlServos.servoActuation(1, 1);
+    // chThdSleepMilliseconds(1000);
+    // activeControlServos.servoActuation(0, 0);
+
+
+    // Code to test overload for one servo (and takes angle as parameter)
+    activeControlServos.servoActuation(180);
+
     chThdSleepMilliseconds(1000);
-    activeControlServos.servoActuation(1, 1);
+
+    activeControlServos.servoActuation(0);
     chThdSleepMilliseconds(1000);
-    activeControlServos.servoActuation(0, 0);
+    activeControlServos.servoActuation(180);
 }
 
 void ActiveControl::acTickFunction() {
-    if (ac_abort) {
+    if (*ac_abort) {
         Serial.println("is_abort");
+    }
+    // Serial.println(*ac_test);
+    if (*ac_test) {
         activeControlServos.servoActuation(0);
     } else {
-        Serial.println("isnt_abort");
         activeControlServos.servoActuation(180);
+    }
+    
+    if (*ac_abort) {
+        activeControlServos.servoActuation(0);
+        
     }
     return;
 

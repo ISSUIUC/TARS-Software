@@ -34,8 +34,12 @@ RH_RF95::RH_RF95(uint8_t slaveSelectPin, uint8_t interruptPin, RHGenericSPI& spi
 
 bool RH_RF95::init()
 {
+    Serial.println("init1");
     if (!RHSPIDriver::init())
 	return false;
+
+
+    Serial.println("init2");
 
     // Determine the interrupt number that corresponds to the interruptPin
     int interruptNumber = digitalPinToInterrupt(_interruptPin);
@@ -51,9 +55,12 @@ bool RH_RF95::init()
     spiWrite(RH_RF95_REG_01_OP_MODE, RH_RF95_MODE_SLEEP | RH_RF95_LONG_RANGE_MODE);
     delay(10); // Wait for sleep mode to take over from say, CAD
     // Check we are in sleep mode, with LORA set
-    if (spiRead(RH_RF95_REG_01_OP_MODE) != (RH_RF95_MODE_SLEEP | RH_RF95_LONG_RANGE_MODE))
+    auto val = spiRead(RH_RF95_REG_01_OP_MODE);
+    if (val != (RH_RF95_MODE_SLEEP | RH_RF95_LONG_RANGE_MODE))
     {
 //	Serial.println(spiRead(RH_RF95_REG_01_OP_MODE), HEX);
+    Serial.println(val);
+    Serial.println("init3");
 	return false; // No device present?
     }
 
@@ -71,11 +78,13 @@ bool RH_RF95::init()
     if (_myInterruptIndex == 0xff)
     {
 	// First run, no interrupt allocated yet
+    Serial.println("init4");
 	if (_interruptCount <= RH_RF95_NUM_INTERRUPTS)
 	    _myInterruptIndex = _interruptCount++;
 	else
 	    return false; // Too many devices, not enough interrupt vectors
     }
+    Serial.println("init5");
     _deviceForInterrupt[_myInterruptIndex] = this;
     if (_myInterruptIndex == 0)
 	attachInterrupt(interruptNumber, isr0, RISING);
@@ -85,6 +94,8 @@ bool RH_RF95::init()
 	attachInterrupt(interruptNumber, isr2, RISING);
     else
 	return false; // Too many devices, not enough interrupt vectors
+
+    Serial.println("init6");
 
     // Set up FIFO
     // We configure so that we can use the entire 256 byte FIFO for either receive

@@ -144,7 +144,7 @@ struct sensorDataStruct_t {
  */
 enum sensors { LOWG_IMU, HIGHG_IMU, BAROMETER, GPS };
 
-#define FIFO_SIZE 1000
+#define FIFO_SIZE 1
 /**
  * @brief A class to hold all info for ring buffers and mutexes used for data.
  *
@@ -201,6 +201,7 @@ struct pointers {
 
     DataLogBuffer dataloggerTHDVarsPointer;
     bool abort;
+    bool testing_flaps;
 };
 
 void dataLoggerTickFunction(pointers*);

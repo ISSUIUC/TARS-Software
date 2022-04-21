@@ -1,5 +1,6 @@
 #include <telemetry.h>
 
+
 // input value for sine function
 double dummy_input = 0; 
 
@@ -47,14 +48,24 @@ void Telemetry::handle_command(const telemetry_command & cmd){
       if (cmd.command == SET_FREQ) {
         freq_status.should_change = true;
         freq_status.new_freq = cmd.freq;
+        Serial.println("Got freq");
       } 
 
       if (cmd.command == SET_CALLSIGN) {
         memcpy(callsign, cmd.callsign, sizeof(cmd.callsign));
+        Serial.println("Got callsign");
       }
 
       if (cmd.command == ABORT) {
-        abort = !abort;
+        if (abort == false) {
+          abort = !abort;
+        }
+        Serial.println("Got abort");
+      }
+
+      if (cmd.command == TEST_FLAPS) {
+        Serial.println("Got test flaps");
+        testing = !testing;
       }
 }
 

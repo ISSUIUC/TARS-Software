@@ -1,6 +1,7 @@
 #include <SPI.h>
 #include <RH_RF95.h>
 #include <ChRt.h>
+#include <ServoControl.h>
 #include "sensors.h"
 #include "pins.h"
 
@@ -51,6 +52,7 @@ enum CommandType {
   SET_FREQ,
   SET_CALLSIGN,
   ABORT,
+  TEST_FLAPS,
   EMPTY
 };
 
@@ -73,8 +75,9 @@ class Telemetry {
     public:
         Telemetry();
         void transmit(const sensorDataStruct_t&);
-        void handle_command(const telemetry_command & cmd);
+        void handle_command(const telemetry_command & cmd );
         bool abort = false;
+        bool testing = false;
     private:
         int packetnum;
         telemetry_data d;

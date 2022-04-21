@@ -89,6 +89,7 @@ static THD_FUNCTION(telemetry_THD, arg) {
     while(true) {
         tlm.transmit(sensorData);
         pointer_struct->abort = tlm.abort;
+        pointer_struct->testing_flaps = tlm.testing;
         chThdSleepMilliseconds(200);
     }
 }
@@ -211,6 +212,7 @@ static THD_FUNCTION(gps_THD, arg) {
 static THD_FUNCTION(servo_THD, arg) {
     struct pointers *pointer_struct = (struct pointers *)arg;
 
+    Serial.println("hihi");
     ActiveControl ac(pointer_struct, &servo_ccw, &servo_cw);
 
     while (true) {
@@ -376,8 +378,8 @@ void setup() {
     SPI.begin();
     SPI1.setMISO(39);
 
-    // Initialize barometer
-    barometer.init();
+    // // Initialize barometer
+    // barometer.init();
 
     if(!highGimu.beginSPICore(KX134_CS, 1000000, SPI)){
         // digitalWrite(LED_RED, HIGH);
