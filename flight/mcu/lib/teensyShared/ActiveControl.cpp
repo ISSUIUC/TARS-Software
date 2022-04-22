@@ -41,14 +41,13 @@ void ActiveControl::acTickFunction() {
     }
     // Serial.println(*ac_test);
     if (*ac_test) {
-        activeControlServos.servoActuation(0);
+        activeControlServos.servoActuation(0);   
     } else {
         activeControlServos.servoActuation(180);
     }
     
     if (*ac_abort) {
-        activeControlServos.servoActuation(0);
-        
+        activeControlServos.servoActuation(0);    //extend flaps if true? If 180 is retracted
     }
     return;
 

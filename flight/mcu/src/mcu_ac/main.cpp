@@ -370,6 +370,7 @@ void setup() {
     sensor_pointers.GPSPointer = &gps;
     sensor_pointers.sensorDataPointer = &sensorData;
     sensor_pointers.abort = false;
+    sensor_pointers.testing_flaps = false;
 
     SPI.begin();
     SPI1.setMISO(39);

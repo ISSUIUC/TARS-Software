@@ -51,23 +51,23 @@ void Telemetry::handle_command(const telemetry_command & cmd){
       if (cmd.command == SET_FREQ) {
         freq_status.should_change = true;
         freq_status.new_freq = cmd.freq;
-        Serial.println("Got freq");
+        //Serial.println("Got freq");  //don't want serial prints in flight code
       } 
 
       if (cmd.command == SET_CALLSIGN) {
         memcpy(callsign, cmd.callsign, sizeof(cmd.callsign));
-        Serial.println("Got callsign");
+        //Serial.println("Got callsign");
       }
 
       if (cmd.command == ABORT) {
         if (abort == false) {
           abort = !abort;
         }
-        Serial.println("Got abort");
+        //Serial.println("Got abort");
       }
 
       if (cmd.command == TEST_FLAPS) {
-        Serial.println("Got test flaps");
+        //Serial.println("Got test flaps");
         testing = !testing;
       }
 }
