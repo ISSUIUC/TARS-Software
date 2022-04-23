@@ -155,7 +155,8 @@ void SerialPrintTelemetryData(const telemetry_data & data, float frequency){
   Serial.print(R"("sign":")"); Serial.print(sign); Serial.print("\",");
   Serial.print(R"("RSSI":)"); Serial.print(rf95.lastRssi()); Serial.print(',');
   Serial.print(R"("Voltage":)"); Serial.print(data.battery_voltage); Serial.print(',');
-  Serial.print(R"("frequency":)"); Serial.print(frequency); Serial.print("");
+  Serial.print(R"("frequency":)"); Serial.print(frequency); Serial.print(',');
+  Serial.print(R"("flap_extension":)"); Serial.print(data.flap_extension); Serial.print("");
 
   Serial.println("}}");
 }
