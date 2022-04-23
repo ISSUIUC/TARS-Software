@@ -26,12 +26,12 @@ ActiveControl::ActiveControl(struct pointers* pointer_struct, PWMServo* ccw,
 
 
     // Code to test overload for one servo (and takes angle as parameter)
-    activeControlServos.servoActuation(180);
+    // activeControlServos.servoActuation(180);
 
     m_pointers = pointer_struct;
-    activeControlServos.servoActuation(0, 0);
+    
+    activeControlServos.servoActuation(180;
     chThdSleepMilliseconds(1000);
-
     activeControlServos.servoActuation(0);
     chThdSleepMilliseconds(1000);
     activeControlServos.servoActuation(180);

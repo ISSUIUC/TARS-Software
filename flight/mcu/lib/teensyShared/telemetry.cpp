@@ -13,7 +13,6 @@ Telemetry::Telemetry(): rf95(RFM95_CS, RFM95_INT) {
     delay(100);
 
     // manual reset
-    Serial.println("asdf Initialization Failed");
 
     digitalWrite(RFM95_RST, LOW);
     delay(10);
