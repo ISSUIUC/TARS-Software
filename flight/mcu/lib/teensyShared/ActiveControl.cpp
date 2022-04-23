@@ -28,6 +28,8 @@ ActiveControl::ActiveControl(struct pointers* pointer_struct, PWMServo* ccw,
     // Code to test overload for one servo (and takes angle as parameter)
     activeControlServos.servoActuation(180);
 
+    m_pointers = pointer_struct;
+    activeControlServos.servoActuation(0, 0);
     chThdSleepMilliseconds(1000);
 
     activeControlServos.servoActuation(0);
@@ -53,13 +55,15 @@ void ActiveControl::acTickFunction() {
 
     chMtxLock(mutex_lowG_);  // Locking only for gy because we use local
                              // variables for everything else
+
+                             //gy is minus what it should be
     float e = omega_goal + *gy;
     chMtxUnlock(mutex_lowG_);
 
     if (true) {
         e_sum += e * .006;
     }
-    float dedt = e - e_prev;
+    float dedt = (e - e_prev) / dt;
     Eigen::Matrix<float, 2, 1> u = (k_p * e) + (k_i * e_sum) + (k_d * dedt);
     float l1 = u(0, 0);
     float l2 = u(1, 0);
@@ -92,6 +96,10 @@ void ActiveControl::acTickFunction() {
     e_prev = e;
     l1_prev = l1_cmd;
     l2_prev = l2_cmd;
+
+
+    flapData f{l1_cmd, l2_cmd, chVTGetSystemTime()};
+    m_pointers->dataloggerTHDVarsPointer.flapFifo.push(f);
 }
 
 bool ActiveControl::ActiveControl_ON() {

@@ -15,8 +15,8 @@ ServoControl::ServoControl(PWMServo* servo_cw, PWMServo* servo_ccw) {
 }
 // TODO check values for max
 void ServoControl::roundOffAngle(float& value) {
-    if (value > 126) {
-        value = 126;
+    if (value > 140) {
+        value = 140;
     }
     if (value < 0) {
         value = 0;
@@ -36,8 +36,9 @@ void ServoControl::servoActuation(float length_one, float length_two) {
     // These are correcting factors for finding the angle. We still need to
     // calculate what these values are. These are placeholders for now. m and
     // offset should include the radian to degree conversion.
-    float m = (1.0 / radius) * (180.0 / (3.1415));  // degrees / meter
-    float offset = 0;
+    // float m = (1.0 / radius) * (180.0 / (3.1415));  // degrees / meter
+    float m = 5624.29696288;  // measured meters/degree
+    float offset = 48.56;
 
     // This is the actual conversion from the inputted length to the angles
     // desired for the servos.
@@ -48,7 +49,8 @@ void ServoControl::servoActuation(float length_one, float length_two) {
     roundOffAngle(ccw_angle);
 
     // servo_cs rotates backwards
-    servo_cw_->write(126 - cw_angle);
+    // fix fix TODO fix
+    servo_cw_->write(180 - cw_angle);
     servo_ccw_->write(ccw_angle);
 
 #ifdef SERVO_DEBUG

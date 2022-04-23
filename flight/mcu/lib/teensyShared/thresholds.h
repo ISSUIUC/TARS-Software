@@ -2,6 +2,8 @@
 #ifndef THRESHOLDS_H
 #define THRESHOLDS_H
 
+// TODO PUT BACK
+
 // transition from boost to coast if low accleration detected for 300 ms
 static const float coast_time_thresh = 300;
 // 2 gs for launch detect

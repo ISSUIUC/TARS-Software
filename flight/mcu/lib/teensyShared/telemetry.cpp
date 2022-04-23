@@ -128,6 +128,7 @@ void Telemetry::transmit(const sensorDataStruct_t &sensor_data) {
   d.LSM_IMU_mx = sensor_data.lowG_data.mx;
   d.LSM_IMU_my = sensor_data.lowG_data.my;
   d.LSM_IMU_mz = sensor_data.lowG_data.mz;
+  d.flap_extension = sensor_data.flap_data.l1;
 
   d.rssi = rf95.lastRssi();
 

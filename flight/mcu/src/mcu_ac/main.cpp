@@ -54,6 +54,7 @@ FSM_State rocketState = STATE_INIT;
 
 QwiicKX132 highGimu;
 LSM9DS1 lowGimu;
+bool gps_connected;
 SFE_UBLOX_GNSS gps;
 
 MS5611 barometer{MS5611_CS};
@@ -311,8 +312,6 @@ void chSetup() {
     // //                   &sensor_pointers);
     chThdCreateStatic(barometer_WA, sizeof(barometer_WA), NORMALPRIO + 1,
                       barometer_THD, &sensor_pointers);
-    chThdCreateStatic(lowgIMU_WA, sizeof(lowgIMU_WA), NORMALPRIO + 1,
-                      lowgIMU_THD, &sensor_pointers);
     chThdCreateStatic(highgIMU_WA, sizeof(highgIMU_WA), NORMALPRIO + 1,
                       highgIMU_THD, &sensor_pointers);
     chThdCreateStatic(servo_WA, sizeof(servo_WA), NORMALPRIO + 1, servo_THD,
@@ -361,6 +360,16 @@ void setup() {
     pinMode(RFM95_CS, OUTPUT);
     digitalWrite(RFM95_CS, HIGH);
 
+    pinMode(LSM9DS1_AG_CS, OUTPUT);
+    pinMode(LSM9DS1_M_CS, OUTPUT);
+    pinMode(ZOEM8Q0_CS, OUTPUT);
+    pinMode(MS5611_CS, OUTPUT);
+
+    digitalWrite(LSM9DS1_AG_CS, HIGH);
+    digitalWrite(LSM9DS1_M_CS, HIGH);
+    digitalWrite(ZOEM8Q0_CS, HIGH);
+    digitalWrite(MS5611_CS, HIGH);
+
     // TODO: Don't forget this
     //Serial.println("------------------------------------------------");
 
@@ -406,7 +415,10 @@ void setup() {
             ;
     }
 
-    lowGimu.setAccelScale(16);
+    SPI.begin();
+
+    // Initialize barometer
+    barometer.init();
 
     
     
@@ -439,23 +451,20 @@ void setup() {
         // print header to file on sd card that lists each variable that is
         // logged
         sensor_pointers.dataloggerTHDVarsPointer.dataFile.println(
-            "ax,ay,az,gx,gy,gz,mx,my,mz,ts_lowg,"
-            "hg_ax,hg_ay,hg_az,ts_highg,"
-            "latitude,longitude,altitude,GPS Lock,ts_gps,"
-            "state_q0,state_q1,state_q2,state_q3,state_x,state_y,state_z,state_"
-            "vx,state_vy,state_vz,"
-            "state_ax,state_ay,state_az,state_omegax,state_omegay,state_omegaz,"
-            "state_latitude,state_longitude,ts_state,"
-            "rocketState,ts_RS");
+            "binary logging of sensor_data_t");
         sensor_pointers.dataloggerTHDVarsPointer.dataFile.flush();
-        // Serial.println(lowg_datalogger_THD_vars.dataFile.name());
+        // Serial.println(sensor_pointers.dataloggerTHDVarsPointer.dataFile.name());
     } else {
         digitalWrite(LED_RED, HIGH);
         digitalWrite(LED_ORANGE, HIGH);
         digitalWrite(LED_BLUE, HIGH);
         Serial.println("SD Begin Failed. Stalling Program");
-        while (true)
-            ;
+        while (true) {
+            digitalWrite(LED_RED, HIGH);
+            delay(100);
+            digitalWrite(LED_RED, LOW);
+            delay(100);
+        }
     }
 
     digitalWrite(LED_GREEN, HIGH);

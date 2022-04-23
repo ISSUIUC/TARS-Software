@@ -20,7 +20,7 @@ class ActiveControl {
     bool* ac_abort;
 
     // These matrices are solely for October launch, only roll control
-    Eigen::Matrix<float, 2, 1> k_p{0.003, -0.003};
+    Eigen::Matrix<float, 2, 1> k_p{0.00015, -0.00015};
 
     Eigen::Matrix<float, 2, 1> k_i{.0000007, -.0000007};
 
@@ -38,4 +38,5 @@ class ActiveControl {
     float e_prev = 0;
     FSM_State* current_state;
     ServoControl activeControlServos;
+    pointers * m_pointers;
 };
