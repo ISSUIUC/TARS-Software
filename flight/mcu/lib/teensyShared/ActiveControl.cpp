@@ -47,7 +47,7 @@ void ActiveControl::acTickFunction() {
     }
     
     if (*ac_abort) {
-        activeControlServos.servoActuation(0);    //extend flaps if true? If 180 is retracted
+        activeControlServos.servoActuation(180);    //extend flaps if true? If 180 is retracted
     }
     return;
 

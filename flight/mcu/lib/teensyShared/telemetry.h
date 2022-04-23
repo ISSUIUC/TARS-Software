@@ -39,6 +39,8 @@ struct telemetry_data {
   float LSM_IMU_mx;
   float LSM_IMU_my;
   float LSM_IMU_mz;
+
+  float flap_extension;
   
   int FSM_state;
   char sign[8] = "HITHERE";
