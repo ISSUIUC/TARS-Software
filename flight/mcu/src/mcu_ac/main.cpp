@@ -239,12 +239,21 @@ static THD_FUNCTION(servo_THD, arg) {
 /* MPU COMMUNICATION THREAD                                                   */
 
 static THD_FUNCTION(voltage_THD, arg) {
-    (void)arg;
+    struct pointers *pointer_struct = (struct pointers *)arg;
+
+    DataLogBuffer *data_log_buffer = &pointer_struct->dataloggerTHDVarsPointer;
+    VoltageData *volt_data = &pointer_struct->sensorDataPointer->voltage_data;
+
+    VoltageSensor volt_sensor{Serial1};
 
     while (true) {
 #ifdef THREAD_DEBUG
         Serial.println("### voltage thread entrance");
 #endif
+        chMtxLock(&data_log_buffer->dataMutex_voltage);
+        voltageTickFunction(&volt_sensor, data_log_buffer, volt_data);
+        chMtxUnlock(&data_log_buffer->dataMutex_voltage);
+
         chThdSleepMilliseconds(
             6);  // Set equal sleep time as the other threads, can change
     }
@@ -278,6 +287,8 @@ void chSetup() {
                       rocket_FSM, &sensor_pointers);
     // chThdCreateStatic(gps_WA, sizeof(gps_WA), NORMALPRIO + 1, gps_THD,
     //                   &sensor_pointers);
+    chThdCreateStatic(lowgIMU_WA, sizeof(lowgIMU_WA), NORMALPRIO + 1,
+                      lowgIMU_THD, &sensor_pointers);
     chThdCreateStatic(barometer_WA, sizeof(barometer_WA), NORMALPRIO + 1,
                       barometer_THD, &sensor_pointers);
     chThdCreateStatic(highgIMU_WA, sizeof(highgIMU_WA), NORMALPRIO + 1,
@@ -287,7 +298,7 @@ void chSetup() {
     chThdCreateStatic(dataLogger_WA, sizeof(dataLogger_WA), NORMALPRIO + 1,
                       dataLogger_THD, &sensor_pointers);
     chThdCreateStatic(voltage_WA, sizeof(voltage_WA), NORMALPRIO + 1,
-                      voltage_THD, NULL);
+                      voltage_THD, &sensor_pointers);
 
     while (true)
         ;

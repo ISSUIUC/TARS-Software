@@ -17,7 +17,7 @@ class VoltageSensor {
 public:
     VoltageSensor(HardwareSerial& serial): serial(serial){
         serial.begin(115200);
-        serial.setTimeout(1);
+        serial.setTimeout(3);
     };
     VoltageData read(){
         return {
@@ -42,6 +42,7 @@ private:
   * 'B' = battery line
   */
     float read_voltage(char voltage_src){
+        if(voltage_src != 'B') return 0;
         serial.print(voltage_src);
         int val = 0;
         int read_num = serial.readBytes((char*)&val, sizeof(val));
