@@ -82,7 +82,7 @@ struct telemetry_data {
   float voltage_battry;
   
   int FSM_state;
-  char sign[8] = "HITHERE";
+  char sign[8] = "KC1QJA";
   int rssi;
   float battery_voltage;
   int response_ID;
@@ -155,9 +155,10 @@ void SerialPrintTelemetryData(const telemetry_data & data, float frequency){
   Serial.print(R"("FSM_state":)"); Serial.print(data.FSM_state); Serial.print(',');
   Serial.print(R"("sign":")"); Serial.print(sign); Serial.print("\",");
   Serial.print(R"("RSSI":)"); Serial.print(rf95.lastRssi()); Serial.print(',');
-  Serial.print(R"("Voltage":)"); Serial.print(data.voltage_battery); Serial.print(',');
-  Serial.print(R"("flap":)"); Serial.print(data.flap_extension); Serial.print(',');
-  Serial.print(R"("frequency":)"); Serial.print(frequency); Serial.print("");
+  Serial.print(R"("Voltage":)"); Serial.print(data.voltage_battry); Serial.print(',');
+  Serial.print(R"("frequency":)"); Serial.print(frequency); Serial.print(',');
+  Serial.print(R"("flap_extension":)"); Serial.print(data.flap_extension); Serial.print("");
+
   Serial.println("}}");
 }
 
