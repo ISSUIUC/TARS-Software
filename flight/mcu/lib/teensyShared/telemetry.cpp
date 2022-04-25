@@ -69,6 +69,9 @@ void Telemetry::handle_command(const telemetry_command & cmd){
 }
 
 void Telemetry::transmit(const sensorDataStruct_t &sensor_data) {
+  static bool blue_state = false;
+  digitalWrite(LED_BLUE, blue_state);
+  blue_state = !blue_state;
   telemetry_data d{};
 
   d.gps_lat = sensor_data.gps_data.latitude;
