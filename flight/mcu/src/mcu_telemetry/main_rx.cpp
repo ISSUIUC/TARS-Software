@@ -55,31 +55,34 @@ int command_ID = 0;
 short cmd_number = 0;
 
 struct telemetry_data {
-  float gps_lat{};
-  float gps_long{};
-  float gps_alt{};
-  float barometer_alt{};
+  float gps_lat;
+  float gps_long;
+  float gps_alt;
+  float barometer_alt;
   // KX134 (highg) IMU DATA
-  float KX_IMU_ax{};   // acceleration (in G's)
-  float KX_IMU_ay{};
-  float KX_IMU_az{};
+  float KX_IMU_ax;   // acceleration (in G's)
+  float KX_IMU_ay;
+  float KX_IMU_az;
   // H3LIS331DL (highg) IMU DATA
-  float H3L_IMU_ax{};
-  float H3L_IMU_ay{};
-  float H3L_IMU_az{};
+  float H3L_IMU_ax;
+  float H3L_IMU_ay;
+  float H3L_IMU_az;
   // LSM9DS1 (lowg) IMU DATA
-  float LSM_IMU_ax{};    // acceleration (in G's)
-  float LSM_IMU_ay{};
-  float LSM_IMU_az{};
-  float LSM_IMU_gx{};    // Gyro data (in degrees/sec)
-  float LSM_IMU_gy{};
-  float LSM_IMU_gz{};
-  float LSM_IMU_mx{};
-  float LSM_IMU_my{};
-  float LSM_IMU_mz{};
+  float LSM_IMU_ax;    // acceleration (in G's)
+  float LSM_IMU_ay;
+  float LSM_IMU_az;
+  float LSM_IMU_gx;    // Gyro data (in degrees/sec)
+  float LSM_IMU_gy;
+  float LSM_IMU_gz;
+  float LSM_IMU_mx;
+  float LSM_IMU_my;
+  float LSM_IMU_mz;
+
+  float flap_extension;
+  float voltage_battry;
   
-  int FSM_state{};
-  char sign[8] = "KC1QJA";
+  int FSM_state;
+  char sign[8] = "HITHERE";
   int rssi;
   float battery_voltage;
   int response_ID;
@@ -152,9 +155,9 @@ void SerialPrintTelemetryData(const telemetry_data & data, float frequency){
   Serial.print(R"("FSM_state":)"); Serial.print(data.FSM_state); Serial.print(',');
   Serial.print(R"("sign":")"); Serial.print(sign); Serial.print("\",");
   Serial.print(R"("RSSI":)"); Serial.print(rf95.lastRssi()); Serial.print(',');
-  Serial.print(R"("Voltage":)"); Serial.print(data.battery_voltage); Serial.print(',');
+  Serial.print(R"("Voltage":)"); Serial.print(data.voltage_battery); Serial.print(',');
+  Serial.print(R"("flap":)"); Serial.print(data.flap_extension); Serial.print(',');
   Serial.print(R"("frequency":)"); Serial.print(frequency); Serial.print("");
-
   Serial.println("}}");
 }
 
