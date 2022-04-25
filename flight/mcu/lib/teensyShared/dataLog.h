@@ -5,6 +5,7 @@
 #include <SD.h>
 #include <stdint.h>
 
+#include "VoltageSensor.h"
 #include "FifoBuffer.h"
 #include "SparkFun_Qwiic_KX13X.h"       //High-G IMU Library
 #include "MS5611.h"           //Barometer Library
@@ -68,7 +69,7 @@ struct BarometerData {
     float temperature;  // in degC
     float pressure;     // in mbar
     float altitude;     // in meter
-    int32_t timeStamp_barometer;
+    systime_t timeStamp_barometer;
 };
 
 /**
@@ -145,6 +146,10 @@ struct sensorDataStruct_t {
     // Flap state
     bool has_flap_data;
     flapData flap_data;
+
+    // Voltage state
+    bool has_voltage_data;
+    VoltageData voltage_data;
 };
 
 /**
@@ -166,19 +171,20 @@ class DataLogBuffer {
     FifoBuffer<GpsData, FIFO_SIZE> gpsFifo{};
     FifoBuffer<stateData, FIFO_SIZE> stateFifo{};
     FifoBuffer<rocketStateData, FIFO_SIZE> rocketStateFifo{};
-
-
+    FifoBuffer<flapData, FIFO_SIZE> flapFifo{};
+    FifoBuffer<VoltageData, FIFO_SIZE> voltageFifo{};
     FifoBuffer<BarometerData, FIFO_SIZE> barometerFifo{};
     
 
    public:
-   FifoBuffer<flapData, FIFO_SIZE> flapFifo{};
     MUTEX_DECL(dataMutex_lowG);
     MUTEX_DECL(dataMutex_highG);
     MUTEX_DECL(dataMutex_GPS);
     MUTEX_DECL(dataMutex_barometer);
-    MUTEX_DECL(dataMutex_state);
-    MUTEX_DECL(dataMutex_RS);
+    MUTEX_DECL(dataMutex_flaps);
+    MUTEX_DECL(dataMutex_rocket_state);
+    MUTEX_DECL(dataMutex_voltage);
+
 
     sensorDataStruct_t current_data;
 
@@ -201,6 +207,12 @@ class DataLogBuffer {
 
     bool pushBarometerFifo(BarometerData* barometer_data);
     bool popBarometerFifo(BarometerData* barometer_data);
+
+    bool pushFlapsFifo(flapData* flap_data);
+    bool popFlapsFifo(flapData* flap_data);
+
+    bool pushVoltageFifo(VoltageData* voltage_data);
+    bool popVoltageFifo(VoltageData* voltage_data);
 };
 
 // TODO: Re-think this struct

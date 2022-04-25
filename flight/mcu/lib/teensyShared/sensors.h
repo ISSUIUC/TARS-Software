@@ -16,6 +16,7 @@
 #define SENSORS_H
 
 #include "dataLog.h"
+#include "VoltageSensor.h"
 
 void lowGimuTickFunction(LSM9DS1* lsm, DataLogBuffer* data_log_buffer,
                          LowGData* lowG_data);
@@ -28,5 +29,7 @@ void gpsTickFunction(SFE_UBLOX_GNSS* gps, DataLogBuffer* data_log_buffer,
 
 void barometerTickFunction(MS5611* barometer, DataLogBuffer* data_log_buffer,
                            BarometerData* barometer_data);
+
+void voltageTickFunction(VoltageSensor* voltage, DataLogBuffer* data_log_buffer, VoltageData* voltage_data);
 
 #endif

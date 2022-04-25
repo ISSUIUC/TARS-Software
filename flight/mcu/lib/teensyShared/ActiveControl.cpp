@@ -30,7 +30,7 @@ ActiveControl::ActiveControl(struct pointers* pointer_struct, PWMServo* ccw,
 
     m_pointers = pointer_struct;
     
-    activeControlServos.servoActuation(180;
+    activeControlServos.servoActuation(180);
     chThdSleepMilliseconds(1000);
     activeControlServos.servoActuation(0);
     chThdSleepMilliseconds(1000);
@@ -99,7 +99,7 @@ void ActiveControl::acTickFunction() {
 
 
     flapData f{l1_cmd, l2_cmd, chVTGetSystemTime()};
-    m_pointers->dataloggerTHDVarsPointer.flapFifo.push(f);
+    m_pointers->dataloggerTHDVarsPointer.pushFlapsFifo(&f);
 }
 
 bool ActiveControl::ActiveControl_ON() {
