@@ -30,11 +30,11 @@ ActiveControl::ActiveControl(struct pointers* pointer_struct, PWMServo* ccw,
 
     m_pointers = pointer_struct;
     
-    activeControlServos.servoActuation(180);
-    chThdSleepMilliseconds(1000);
-    activeControlServos.servoActuation(0);
-    chThdSleepMilliseconds(1000);
-    activeControlServos.servoActuation(180);
+    // activeControlServos.servoActuation(180);
+    // chThdSleepMilliseconds(1000);
+    activeControlServos.servoActuation(50);
+    // chThdSleepMilliseconds(1000);
+    // activeControlServos.servoActuation(180);
 }
 
 void ActiveControl::acTickFunction() {
@@ -43,7 +43,7 @@ void ActiveControl::acTickFunction() {
     }
     // Serial.println(*ac_test);
     if (*ac_test) {
-        activeControlServos.servoActuation(0);   
+        activeControlServos.servoActuation(50);   
     } else {
         activeControlServos.servoActuation(180);
     }
