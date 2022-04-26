@@ -94,6 +94,7 @@ enum class CommandType {
   SET_FREQ,
   SET_CALLSIGN,
   ABORT,
+  TEST_FLAP,
   EMPTY
 };
 // Commands transmitted from ground station to rocket
@@ -199,12 +200,14 @@ void SerialInput(const char * key, const char * value){
   } else if(strcmp(key, "FLOC") == 0){
     int v = atoi(value);
     v = min(max(v, 390), 445);
-    set_freq_local_bug_fix(v);;
+    set_freq_local_bug_fix(v);
     Serial.println(json_command_success);
     Serial.print(R"({"type": "freq_success", "frequency":)");
     Serial.print(v);
     Serial.println("}");
     return;
+  } else if(strcmp(key, "FLAP") == 0){
+    command.command = CommandType::TEST_FLAP;
   } else {
     SerialError();
     return;
