@@ -218,7 +218,7 @@ class DataLogBuffer {
 // TODO: Re-think this struct
 struct pointers {
     LSM9DS1* lowGimuPointer;
-    QwiicKX132* highGimuPointer;
+    QwiicKX134* highGimuPointer;
     MS5611* barometerPointer;
     SFE_UBLOX_GNSS* GPSPointer;
 

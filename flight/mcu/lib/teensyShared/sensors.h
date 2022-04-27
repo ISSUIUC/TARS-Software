@@ -21,7 +21,7 @@
 void lowGimuTickFunction(LSM9DS1* lsm, DataLogBuffer* data_log_buffer,
                          LowGData* lowG_data);
 
-void highGimuTickFunction(QwiicKX132* highG, DataLogBuffer* data_log_buffer,
+void highGimuTickFunction(QwiicKX134* highG, DataLogBuffer* data_log_buffer,
                           HighGData* highG_data);
 
 void gpsTickFunction(SFE_UBLOX_GNSS* gps, DataLogBuffer* data_log_buffer,

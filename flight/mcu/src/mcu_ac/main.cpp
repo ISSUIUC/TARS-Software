@@ -52,7 +52,7 @@ sensorDataStruct_t sensorData;
 
 FSM_State rocketState = STATE_INIT;
 
-QwiicKX132 highGimu;
+QwiicKX134 highGimu;
 LSM9DS1 lowGimu;
 bool gps_connected;
 SFE_UBLOX_GNSS gps;
@@ -90,7 +90,8 @@ static THD_FUNCTION(telemetry_THD, arg) {
         tlm.transmit(sensorData);
         pointer_struct->abort = tlm.abort;
         pointer_struct->testing_flaps = tlm.testing;
-        chThdSleepMilliseconds(200);
+        chThdSleepMilliseconds(1);
+        //transmit has a sleep in it
     }
 }
 
@@ -172,7 +173,7 @@ static THD_FUNCTION(highgIMU_THD, arg) {
     // Load outside variables into the function
     struct pointers *pointer_struct = (struct pointers *)arg;
 
-    QwiicKX132 *highG = pointer_struct->highGimuPointer;
+    QwiicKX134 *highG = pointer_struct->highGimuPointer;
     DataLogBuffer *data_log_buffer = &pointer_struct->dataloggerTHDVarsPointer;
     HighGData *highg_data = &pointer_struct->sensorDataPointer->highG_data;
 
@@ -211,7 +212,7 @@ static THD_FUNCTION(gps_THD, arg) {
         Serial.println("### GPS thread exit");
 #endif
 
-        chThdSleepMilliseconds(80);  // Read the gps @ ~10 Hz
+        chThdSleepMilliseconds(95);  // Read the gps @ ~10 Hz
     }
 }
 
