@@ -22,8 +22,9 @@
 // define barometer chip select pin
 #define MS5611_CS 9
 // gps chip select pin
+// magwired onto servo2 pin because reasons
+#define ZOEM8Q0_CS 16
 
-#define ZOEM8Q0_CS 6
 #define H3LIS331DL_CS 5
 #define RFM95_CS 41
 #define RFM95_INT 40

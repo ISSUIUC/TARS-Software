@@ -184,7 +184,7 @@ static THD_FUNCTION(highgIMU_THD, arg) {
         highGimuTickFunction(highG, data_log_buffer, highg_data);
         chMtxUnlock(&data_log_buffer->dataMutex_highG);
 
-        chThdSleepMilliseconds(6);
+        chThdSleepMilliseconds(20); //highg reads at 50 hz
     }
 }
 
@@ -221,7 +221,6 @@ static THD_FUNCTION(gps_THD, arg) {
 static THD_FUNCTION(servo_THD, arg) {
     struct pointers *pointer_struct = (struct pointers *)arg;
 
-    Serial.println("hihi");
     ActiveControl ac(pointer_struct, &servo_ccw, &servo_cw);
 
     while (true) {
@@ -285,8 +284,8 @@ void chSetup() {
                       telemetry_THD, &sensor_pointers);
     chThdCreateStatic(rocket_FSM_WA, sizeof(rocket_FSM_WA), NORMALPRIO + 1,
                       rocket_FSM, &sensor_pointers);
-    // chThdCreateStatic(gps_WA, sizeof(gps_WA), NORMALPRIO + 1, gps_THD,
-    //                   &sensor_pointers);
+    chThdCreateStatic(gps_WA, sizeof(gps_WA), NORMALPRIO + 1, gps_THD,
+                      &sensor_pointers);
     chThdCreateStatic(lowgIMU_WA, sizeof(lowgIMU_WA), NORMALPRIO + 1,
                       lowgIMU_THD, &sensor_pointers);
     chThdCreateStatic(barometer_WA, sizeof(barometer_WA), NORMALPRIO + 1,
@@ -367,6 +366,8 @@ void setup() {
             ;
     }
 
+    highGimu.setRange(3); // set range to 3 = 64 g range
+
     // lowGimu setup
     if (lowGimu.beginSPI(LSM9DS1_AG_CS, LSM9DS1_M_CS) ==
         false)  // note, we need to sent this our CS pins (defined above)
@@ -384,21 +385,27 @@ void setup() {
     
     
 
-    // GPS Setup
-    // if (!gps.begin(SPI, ZOEM8Q0_CS, 4000000)) {
-    //     digitalWrite(LED_RED, HIGH);
-    //     Serial.println(
-    //         "Failed to communicate with ZOEM8Q0 gps. Stalling Program");
-    //     while (true)
-    //         ;
-    // }
-    // gps.setPortOutput(COM_PORT_SPI,
-    //                   COM_TYPE_UBX);  // Set the SPI port to output UBX only
-    //                                   // (turn off NMEA noise)
-    // gps.saveConfigSelective(
-    //     VAL_CFG_SUBSEC_IOPORT);  // Save (only) the communications port settings
-    //                              // to flash and BBR
-    // gps.setNavigationFrequency(10);  // set sampling rate to 10hz
+    // // GPS Setup
+    SPI1.begin();
+    digitalWrite(LED_RED, HIGH);
+    if (!gps.begin(SPI1, ZOEM8Q0_CS, 4000000)) {
+        digitalWrite(LED_RED, HIGH);
+        digitalWrite(LED_ORANGE, HIGH);
+        Serial.println(
+            "Failed to communicate with ZOEM8Q0 gps. Stalling Program");
+        while (true)
+            ;
+    } else {
+
+    }
+
+    gps.setPortOutput(COM_PORT_SPI,
+                      COM_TYPE_UBX);  // Set the SPI port to output UBX only
+                                      // (turn off NMEA noise)
+    gps.saveConfigSelective(
+        VAL_CFG_SUBSEC_IOPORT);  // Save (only) the communications port settings
+                                 // to flash and BBR
+    gps.setNavigationFrequency(10);  // set sampling rate to 10hz
 
     // SD Card Setup
     if (SD.begin(BUILTIN_SDCARD)) {
@@ -433,7 +440,7 @@ void setup() {
     // Servo Setup
     servo_cw.attach(SERVO_CW_PIN, 770, 2250);
     servo_ccw.attach(SERVO_CCW_PIN, 770, 2250);
-
+    Serial.println("chibios begin");
     chBegin(chSetup);
     while (true)
         ;

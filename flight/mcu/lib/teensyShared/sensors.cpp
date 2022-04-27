@@ -124,6 +124,7 @@ void gpsTickFunction(SFE_UBLOX_GNSS* gps, DataLogBuffer* data_log_buffer,
 
     uint32_t SIV_count = gps->getSIV();
 
+
     gps_data->timeStamp_GPS = timeStamp_GPS;
     gps_data->latitude = latitude;
     gps_data->longitude = longitude;
