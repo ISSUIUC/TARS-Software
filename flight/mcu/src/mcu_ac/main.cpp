@@ -90,7 +90,7 @@ static THD_FUNCTION(telemetry_THD, arg) {
         tlm.transmit(sensorData);
         pointer_struct->abort = tlm.abort;
         pointer_struct->testing_flaps = tlm.testing;
-        chThdSleepMilliseconds(1);
+        chThdSleepMilliseconds(200);
         //transmit has a sleep in it
     }
 }
@@ -212,7 +212,7 @@ static THD_FUNCTION(gps_THD, arg) {
         Serial.println("### GPS thread exit");
 #endif
 
-        chThdSleepMilliseconds(95);  // Read the gps @ ~10 Hz
+        chThdSleepMilliseconds(190);  // Read the gps @ ~5 Hz
     }
 }
 
@@ -406,7 +406,7 @@ void setup() {
     gps.saveConfigSelective(
         VAL_CFG_SUBSEC_IOPORT);  // Save (only) the communications port settings
                                  // to flash and BBR
-    gps.setNavigationFrequency(10);  // set sampling rate to 10hz
+    gps.setNavigationFrequency(5);  // set sampling rate to 10hz
 
     // SD Card Setup
     if (SD.begin(BUILTIN_SDCARD)) {

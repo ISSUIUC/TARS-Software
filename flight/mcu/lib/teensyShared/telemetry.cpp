@@ -101,7 +101,7 @@ void Telemetry::transmit(const sensorDataStruct_t &sensor_data) {
   
   rf95.send((uint8_t *)&d, sizeof(d));
 
-  chThdSleepMilliseconds(180);
+  chThdSleepMilliseconds(170);
 
   rf95.waitPacketSent();
 

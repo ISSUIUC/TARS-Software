@@ -32,7 +32,7 @@ ActiveControl::ActiveControl(struct pointers* pointer_struct, PWMServo* ccw,
     
     // activeControlServos.servoActuation(180);
     // chThdSleepMilliseconds(1000);
-    activeControlServos.servoActuation(50);
+    // activeControlServos.servoActuation(50);
     // chThdSleepMilliseconds(1000);
     // activeControlServos.servoActuation(180);
 }
@@ -43,13 +43,13 @@ void ActiveControl::acTickFunction() {
     }
     // Serial.println(*ac_test);
     if (*ac_test) {
-        activeControlServos.servoActuation(50);   
+        // activeControlServos.servoActuation(50);   
     } else {
-        activeControlServos.servoActuation(180);
+        // activeControlServos.servoActuation(180);
     }
     
     if (*ac_abort) {
-        activeControlServos.servoActuation(180);    //extend flaps if true? If 180 is retracted
+        // activeControlServos.servoActuation(180);    //extend flaps if true? If 180 is retracted
     }
     return;
 
