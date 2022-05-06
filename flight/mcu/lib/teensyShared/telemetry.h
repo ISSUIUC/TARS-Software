@@ -46,6 +46,7 @@ struct telemetry_data {
   float state_x;
   float state_vx;
   float state_ax;
+  float state_apo;
   
   int FSM_state;
   char sign[8] = "HITHERE";

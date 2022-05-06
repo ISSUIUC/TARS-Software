@@ -15,7 +15,9 @@ void Controller::ctrlTickFunction() {
     // chMtxLock(dataMutex_state_);
     array<float, 2> init = {stateData_->state_x, stateData_->state_vx};
     // chMtxUnlock(dataMutex_state_);
-    float apogee_est = rk4_.sim_apogee(init, 0.1)[0];
+    float apogee_est = rk4_.sim_apogee(init, 0.3)[0];
+
+    stateData_->state_apo = apogee_est;
 
     float u = kp*(apogee_est - apogee_des);
 

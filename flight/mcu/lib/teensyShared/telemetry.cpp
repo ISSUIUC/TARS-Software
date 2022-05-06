@@ -98,6 +98,7 @@ void Telemetry::transmit(const sensorDataStruct_t &sensor_data) {
   d.state_x = sensor_data.state_data.state_x;
   d.state_vx = sensor_data.state_data.state_vx;
   d.state_ax = sensor_data.state_data.state_ax;
+  d.state_apo = sensor_data.state_data.state_apo;
   d.rssi = rf95.lastRssi();
   d.response_ID = last_command_id;
   memcpy(d.sign, callsign, sizeof(callsign));

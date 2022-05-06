@@ -77,29 +77,10 @@ struct BarometerData {
  *
  */
 struct stateData {
-    float state_q0 = 0;
-    float state_q1 = 0;
-    float state_q2 = 0;
-    float state_q3 = 0;
-
     float state_x = 0;
-    float state_y = 0;
-    float state_z = 0;
-
     float state_vx = 0;
-    float state_vy = 0;
-    float state_vz = 0;
-
     float state_ax = 0;
-    float state_ay = 0;
-    float state_az = 0;
-
-    float state_omegax = 0;
-    float state_omegay = 0;
-    float state_omegaz = 0;
-
-    float state_latitude = 0;
-    float state_longitude = 0;
+    float state_apo = 0;
 
     systime_t timeStamp_state = 0;
 };
