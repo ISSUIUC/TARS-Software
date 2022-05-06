@@ -95,6 +95,9 @@ void Telemetry::transmit(const sensorDataStruct_t &sensor_data) {
   d.LSM_IMU_mz = sensor_data.lowG_data.mz;
   d.flap_extension = sensor_data.flap_data.l1;
   d.voltage_battry = sensor_data.voltage_data.v_battery;
+  d.state_x = sensor_data.state_data.state_x;
+  d.state_vx = sensor_data.state_data.state_vx;
+  d.state_ax = sensor_data.state_data.state_ax;
   d.rssi = rf95.lastRssi();
   d.response_ID = last_command_id;
   memcpy(d.sign, callsign, sizeof(callsign));

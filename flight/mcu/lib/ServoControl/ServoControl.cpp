@@ -3,9 +3,6 @@
 
 #include "ServoControl.h"
 #include <cmath>
-#include <iostream>
-#include <fstream>
-#include <string>
 
 /**
  * @brief A function to keep the value sent to the servo between 0 and 180
@@ -51,6 +48,7 @@ void ServoControl::servoActuation(float length) {
     // std::cout << "Written Angle: " << angle << std::endl;
 
     // servo_cs rotates backwards
+    angle = 0;
     servo_->write(angle);
 
 #ifdef SERVO_DEBUG

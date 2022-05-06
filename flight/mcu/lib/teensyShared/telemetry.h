@@ -42,6 +42,10 @@ struct telemetry_data {
 
   float flap_extension;
   float voltage_battry;
+
+  float state_x;
+  float state_vx;
+  float state_ax;
   
   int FSM_state;
   char sign[8] = "HITHERE";
