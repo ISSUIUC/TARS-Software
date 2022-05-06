@@ -184,6 +184,7 @@ class DataLogBuffer {
     MUTEX_DECL(dataMutex_flaps);
     MUTEX_DECL(dataMutex_rocket_state);
     MUTEX_DECL(dataMutex_voltage);
+    MUTEX_DECL(dataMutex_state);
 
 
     sensorDataStruct_t current_data;

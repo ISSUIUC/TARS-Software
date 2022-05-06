@@ -39,7 +39,8 @@ namespace std {
 }
 
 // Include Eigen's Core
-#include <Eigen/Core>
+#include "Eigen/Core"
+#include "Eigen/Dense"
 
 #ifdef NEED_A0_RESTORED
 # define A0 NEED_A0_RESTORED

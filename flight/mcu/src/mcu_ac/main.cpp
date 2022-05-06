@@ -222,14 +222,14 @@ static THD_FUNCTION(gps_THD, arg) {
 static THD_FUNCTION(servo_THD, arg) {
     struct pointers *pointer_struct = (struct pointers *)arg;
 
-    ActiveControl ac(pointer_struct, &servo_ccw, &servo_cw);
+    Controller ac(pointer_struct, &servo_cw);
 
     while (true) {
 #ifdef THREAD_DEBUG
         Serial.println("### Servo thread entrance");
 #endif
 
-        ac.acTickFunction();
+        ac.ctrlTickFunction();
 
         chThdSleepMilliseconds(6);  // FSM runs at 100 Hz
     }

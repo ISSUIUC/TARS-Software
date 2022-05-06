@@ -2,6 +2,10 @@
 #define SERVO_CPP
 
 #include "ServoControl.h"
+#include <cmath>
+#include <iostream>
+#include <fstream>
+#include <string>
 
 /**
  * @brief A function to keep the value sent to the servo between 0 and 180
@@ -9,18 +13,21 @@
  *
  * @param value The value determined by the control algorithm.
  */
-ServoControl::ServoControl(PWMServo* servo_cw, PWMServo* servo_ccw) {
-    servo_cw_ = servo_cw;
-    servo_ccw_ = servo_ccw;
+ServoControl::ServoControl(PWMServo* servo) {
+    servo_ = servo;
 }
 // TODO check values for max
 void ServoControl::roundOffAngle(float& value) {
-    if (value > 140) {
-        value = 140;
+    //Min Extension Angle Value
+    if (value > 135.8075) {
+        value = 136;
     }
-    if (value < 0) {
-        value = 0;
+    //Max Extension Angle Value
+    if (value < 45.4561) {
+        value = 46;
     }
+
+    value = std::round(value);
 }
 
 /**
@@ -32,26 +39,19 @@ void ServoControl::roundOffAngle(float& value) {
  * @param length_two The length of the flap extension for the clockwise flaps.
  *
  */
-void ServoControl::servoActuation(float length_one, float length_two) {
-    // These are correcting factors for finding the angle. We still need to
-    // calculate what these values are. These are placeholders for now. m and
-    // offset should include the radian to degree conversion.
-    // float m = (1.0 / radius) * (180.0 / (3.1415));  // degrees / meter
-    float m = 5624.29696288;  // measured meters/degree
-    float offset = 48.56;
+void ServoControl::servoActuation(float length) {
+    // The angle is found through utilizing a fft and mapping extension/angle values to 
+    // a sine function. len (mm), pass in ang (rad)
 
-    // This is the actual conversion from the inputted length to the angles
-    // desired for the servos.
-    float ccw_angle = (length_one * m + offset);
-    float cw_angle = (length_two * m + offset);
+    // std::cout << "Length: " << length << std::endl;
 
-    roundOffAngle(cw_angle);
-    roundOffAngle(ccw_angle);
+    float angle = (136.050812741891 - 62.3098522547825*asin(0.0553285866373617*(length* 1000) + 0.00390471397714149));
+    roundOffAngle(angle);
+
+    // std::cout << "Written Angle: " << angle << std::endl;
 
     // servo_cs rotates backwards
-    // fix fix TODO fix
-    servo_cw_->write(180 - cw_angle);
-    servo_ccw_->write(ccw_angle);
+    servo_->write(angle);
 
 #ifdef SERVO_DEBUG
     Serial.print("\nclockwise: ");
@@ -61,20 +61,4 @@ void ServoControl::servoActuation(float length_one, float length_two) {
 #endif
 }
 
-// Overload for Mk3 AC stack (only one set of flaps for drag control)
-void ServoControl::servoActuation(float angle) {
-    // float m = (1.0 / radius) * (180.0 / (3.1415));  // degrees / meter
-    // float offset = 0;
-    // float ccw_angle = (length_one * m + offset);
-    roundOffAngle(angle);
-    servo_ccw_->write(angle);
-    #ifdef SERVO_DEBUG
-    Serial.print("\nclockwise: ");
-    Serial.print(cw_angle);
-    Serial.print(" counterclockwise: ");
-    Serial.print(ccw_angle);
-    #endif
-}
-
 #endif
-
