@@ -59,6 +59,8 @@ struct telemetry_data {
   float gps_long;
   float gps_alt;
   float barometer_alt;
+  float barometer_pressure;
+  float barometer_temperature;
   // KX134 (highg) IMU DATA
   float KX_IMU_ax;   // acceleration (in G's)
   float KX_IMU_ay;
@@ -163,10 +165,11 @@ void SerialPrintTelemetryData(const telemetry_data & data, float frequency){
   Serial.print(R"("RSSI":)"); Serial.print(rf95.lastRssi()); Serial.print(',');
   Serial.print(R"("Voltage":)"); Serial.print(data.voltage_battry); Serial.print(',');
   Serial.print(R"("frequency":)"); Serial.print(frequency); Serial.print(',');
-  Serial.print(R"("flap_extension":)"); Serial.print(data.flap_extension); Serial.print("");
-  Serial.print(R"("STE_ALT":)"); Serial.print(data.state_x); Serial.print("");
-  Serial.print(R"("STE_VEL":)"); Serial.print(data.state_vx); Serial.print("");
-  Serial.print(R"("STE_ACC":)"); Serial.print(data.state_ax); Serial.print("");
+  Serial.print(R"("flap_extension":)"); Serial.print(data.flap_extension); Serial.print(",");
+  Serial.print(R"("STE_ALT":)"); Serial.print(data.state_x); Serial.print(",");
+  Serial.print(R"("STE_VEL":)"); Serial.print(data.state_vx); Serial.print(",");
+  Serial.print(R"("STE_ACC":)"); Serial.print(data.state_ax); Serial.print(",");
+  Serial.print(R"("TEMP":)"); Serial.print(data.barometer_temperature); Serial.print(",");
   Serial.print(R"("STE_APO":)"); Serial.print(data.state_apo); Serial.print("");
 
 
