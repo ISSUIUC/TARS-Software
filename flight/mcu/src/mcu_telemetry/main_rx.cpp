@@ -81,6 +81,11 @@ struct telemetry_data {
   float flap_extension;
   float voltage_battry;
   
+  float state_x;
+  float state_vx;
+  float state_ax;
+  float state_apo;
+  
   int FSM_state;
   char sign[8] = "KC1QJA";
   int rssi;
@@ -159,6 +164,12 @@ void SerialPrintTelemetryData(const telemetry_data & data, float frequency){
   Serial.print(R"("Voltage":)"); Serial.print(data.voltage_battry); Serial.print(',');
   Serial.print(R"("frequency":)"); Serial.print(frequency); Serial.print(',');
   Serial.print(R"("flap_extension":)"); Serial.print(data.flap_extension); Serial.print("");
+  Serial.print(R"("STE_ALT":)"); Serial.print(data.state_x); Serial.print("");
+  Serial.print(R"("STE_VEL":)"); Serial.print(data.state_vx); Serial.print("");
+  Serial.print(R"("STE_ACC":)"); Serial.print(data.state_ax); Serial.print("");
+  Serial.print(R"("STE_APO":)"); Serial.print(data.state_apo); Serial.print("");
+
+
 
   Serial.println("}}");
 }
