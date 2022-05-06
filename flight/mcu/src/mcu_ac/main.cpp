@@ -38,6 +38,7 @@
 #include "rocketFSM.h"
 #include "sensors.h"
 #include "telemetry.h"
+#include "kalmanFilter.h"
 
 // DataLogBuffer datalogger_THD_vars;
 
@@ -60,7 +61,6 @@ SFE_UBLOX_GNSS gps;
 MS5611 barometer{MS5611_CS};
 
 PWMServo servo_cw;   // Servo that induces clockwise roll moment
-PWMServo servo_ccw;  // Servo that counterclockwisei roll moment
 
 // Create a struct that holds pointers to all the important objects needed by
 // the threads
@@ -77,6 +77,7 @@ static THD_WORKING_AREA(servo_WA, 8192);
 static THD_WORKING_AREA(dataLogger_WA, 8192);
 static THD_WORKING_AREA(voltage_WA, 8192);
 static THD_WORKING_AREA(telemetry_WA, 8192);
+static THD_WORKING_AREA(kalman_WA, 8192);
 
 /******************************************************************************/
 /* TELEMETRY THREAD                                         */
@@ -216,6 +217,26 @@ static THD_FUNCTION(gps_THD, arg) {
     }
 }
 
+
+
+
+/******************************************************************************/
+/* KALMAN FILTER THREAD                                                       */
+
+static THD_FUNCTION(kalman_THD, arg) {
+    struct pointers *pointer_struct = (struct pointers *)arg;
+    KalmanFilter KF(pointer_struct);
+    KF.Initialize(0.0, 0.0, 0.0);
+
+    while(true){
+        KF.kfTickFunction();
+
+        chThdSleepMilliseconds(10);
+    }
+
+
+}
+
 /******************************************************************************/
 /* SERVO CONTROL THREAD                                                       */
 
@@ -299,6 +320,8 @@ void chSetup() {
                       dataLogger_THD, &sensor_pointers);
     chThdCreateStatic(voltage_WA, sizeof(voltage_WA), NORMALPRIO + 1,
                       voltage_THD, &sensor_pointers);
+    chThdCreateStatic(kalman_WA, sizeof(kalman_WA), NORMALPRIO + 1,
+                      kalman_THD, &sensor_pointers);
 
     while (true)
         ;
@@ -368,7 +391,6 @@ void setup() {
     }
 
     highGimu.setRange(3); // set range to 3 = 64 g range
-
     // lowGimu setup
     if (lowGimu.beginSPI(LSM9DS1_AG_CS, LSM9DS1_M_CS) ==
         false)  // note, we need to sent this our CS pins (defined above)
@@ -386,12 +408,15 @@ void setup() {
     
     
 
-    // // GPS Setup
+
+
+
+    // GPS Setup
     SPI1.begin();
     digitalWrite(LED_RED, HIGH);
+    digitalWrite(LED_ORANGE, HIGH);
+
     if (!gps.begin(SPI1, ZOEM8Q0_CS, 4000000)) {
-        digitalWrite(LED_RED, HIGH);
-        digitalWrite(LED_ORANGE, HIGH);
         Serial.println(
             "Failed to communicate with ZOEM8Q0 gps. Stalling Program");
         while (true)
@@ -399,6 +424,10 @@ void setup() {
     } else {
 
     }
+    digitalWrite(LED_RED, LOW);
+    digitalWrite(LED_ORANGE, LOW);
+
+
 
     gps.setPortOutput(COM_PORT_SPI,
                       COM_TYPE_UBX);  // Set the SPI port to output UBX only
@@ -440,7 +469,6 @@ void setup() {
     digitalWrite(LED_BLUE, HIGH);    
     // Servo Setup
     servo_cw.attach(SERVO_CW_PIN, 770, 2250);
-    servo_ccw.attach(SERVO_CCW_PIN, 770, 2250);
     Serial.println("chibios begin");
     chBegin(chSetup);
     while (true)

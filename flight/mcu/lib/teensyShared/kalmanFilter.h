@@ -17,15 +17,17 @@ class KalmanFilter {
 
     void kfTickFunction();
 
-    // private:
+    private:
 
     float s_dt = 0.006;
 
+    DataLogBuffer* data_logger_;
     mutex_t* mutex_lowG_;
     mutex_t* mutex_highG_;
     mutex_t* dataMutex_barometer_;
     mutex_t* dataMutex_state_;
     stateData* stateData_;
+    FSM_State* current_state_;
     float* b_alt;
     float* gz_L;
     float* gz_H;

@@ -1,10 +1,8 @@
-#include <iostream>
 #include <array>
-#include <chrono>
 #include <cmath>
 #include "rk4.h"
+#include <Arduino.h>
 
-using namespace std::chrono;
 
 using std::array;
 
@@ -63,7 +61,7 @@ array<float, 2> rk4::sim_apogee(array<float, 2> state, float dt) {
     
     // Approximation - use the area of a circle for reference area
     float Sref_a = .007854;
-    
+
     while (state[1] > 0) {
         
         // Define initial flap length at start of control time

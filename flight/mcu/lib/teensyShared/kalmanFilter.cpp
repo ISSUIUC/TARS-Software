@@ -11,11 +11,15 @@ KalmanFilter::KalmanFilter(struct pointers* pointer_struct) {
     dataMutex_barometer_ = &pointer_struct->dataloggerTHDVarsPointer.dataMutex_barometer;
     dataMutex_state_ = &pointer_struct->dataloggerTHDVarsPointer.dataMutex_state;
     stateData_ = &pointer_struct->sensorDataPointer->state_data;
+    data_logger_ = &pointer_struct->dataloggerTHDVarsPointer;
+    current_state_ = &pointer_struct->sensorDataPointer->rocketState_data.rocketState;   
 }
 
 void KalmanFilter::kfTickFunction() {
-    priori();
-    update();
+    if(*current_state_ > STATE_IDLE){
+        priori();
+        update();
+    }
 }
 
 void KalmanFilter::Initialize(float pos_f, float vel_f, float accel_f) {
@@ -102,6 +106,7 @@ void KalmanFilter::priori() {
 }
 
 void KalmanFilter::update() {
+ 
     // Update Kalman Gain
     temp = (((H * P_priori * H.transpose()) + R)).inverse();
     K = (P_priori * H.transpose()) * temp;
@@ -110,11 +115,12 @@ void KalmanFilter::update() {
     chMtxLock(mutex_highG_);
     y_k(1,0) = (*gz_H) * 9.81;
     // Serial.println("HIGH G ACCEL Z: ");
-    // Serial.println(std::to_string((*gz_H)*9.81).c_str());
+    // Serial.println((*gz_H)*9.81);
     chMtxUnlock(mutex_highG_);
 
     chMtxLock(dataMutex_barometer_);
     y_k(0,0) = *b_alt;
+    // Serial.println(y_k(0,0));
     // std::cout<< y_k(0,0) <<std::endl;
     chMtxUnlock(dataMutex_barometer_);
     
@@ -126,7 +132,7 @@ void KalmanFilter::update() {
     stateData_->state_x = x_k(0,0);
     stateData_->state_vx = x_k(1,0);
     stateData_->state_ax = x_k(2,0);
+    stateData_->timeStamp_state = chVTGetSystemTime();
     chMtxUnlock(dataMutex_state_);
-
-    
+    data_logger_->pushStateFifo(stateData_);
 }

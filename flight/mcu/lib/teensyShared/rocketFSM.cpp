@@ -41,7 +41,7 @@ void rocketFSM::tickFSM() {
 
     // get the linear accelration from the lowgimu
     float linear_acceleration =
-        -pointer_struct->sensorDataPointer->lowG_data.ay;
+        pointer_struct->sensorDataPointer->lowG_data.az;
 
     // links to abort for other states
     if (pointer_struct->abort) {

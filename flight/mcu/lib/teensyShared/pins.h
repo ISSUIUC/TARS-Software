@@ -3,9 +3,6 @@
 
 #define SERVO_CW_PIN 14
 
-// This is the one we are using for Mk3
-#define SERVO_CCW_PIN 14
-
 #define HYBRID_PT_1_PIN 20
 #define HYBRID_PT_2_PIN 21
 #define HYBRID_PT_3_PIN 22
