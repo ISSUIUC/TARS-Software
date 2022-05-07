@@ -231,7 +231,7 @@ static THD_FUNCTION(kalman_THD, arg) {
     while(true){
         KF.kfTickFunction();
 
-        chThdSleepMilliseconds(10);
+        chThdSleepMilliseconds(50);
     }
 
 

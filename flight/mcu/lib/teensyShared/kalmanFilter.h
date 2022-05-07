@@ -19,7 +19,7 @@ class KalmanFilter {
 
     private:
 
-    float s_dt = 0.006;
+    float s_dt = 0.050;
 
     DataLogBuffer* data_logger_;
     mutex_t* mutex_lowG_;
