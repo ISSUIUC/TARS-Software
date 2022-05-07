@@ -148,9 +148,9 @@ void SerialPrintTelemetryData(const telemetry_data & data, float frequency){
   Serial.print(R"("KX_IMU_ax":)"); Serial.print(data.KX_IMU_ax); Serial.print(',');
   Serial.print(R"("KX_IMU_ay":)"); Serial.print(data.KX_IMU_ay); Serial.print(',');
   Serial.print(R"("KX_IMU_az":)"); Serial.print(data.KX_IMU_az); Serial.print(',');
-  Serial.print(R"("H3L_IMU_ax":)"); Serial.print(data.H3L_IMU_ax); Serial.print(',');
-  Serial.print(R"("H3L_IMU_ay":)"); Serial.print(data.H3L_IMU_ay); Serial.print(',');
-  Serial.print(R"("H3L_IMU_az":)"); Serial.print(data.H3L_IMU_az); Serial.print(',');
+  // Serial.print(R"("H3L_IMU_ax":)"); Serial.print(data.H3L_IMU_ax); Serial.print(',');
+  // Serial.print(R"("H3L_IMU_ay":)"); Serial.print(data.H3L_IMU_ay); Serial.print(',');
+  // Serial.print(R"("H3L_IMU_az":)"); Serial.print(data.H3L_IMU_az); Serial.print(',');
   Serial.print(R"("LSM_IMU_ax":)"); Serial.print(data.LSM_IMU_ax); Serial.print(',');
   Serial.print(R"("LSM_IMU_ay":)"); Serial.print(data.LSM_IMU_ay); Serial.print(',');
   Serial.print(R"("LSM_IMU_az":)"); Serial.print(data.LSM_IMU_az); Serial.print(',');
