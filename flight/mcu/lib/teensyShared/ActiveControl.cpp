@@ -1,7 +1,4 @@
 #include "ActiveControl.h"
-#include <iostream>
-#include <string>
-#include <fstream>
 
 Controller::Controller(struct pointers* pointer_struct, PWMServo* twisty_boi): activeControlServos(twisty_boi) {
     twisty_boi_ = twisty_boi;
@@ -12,6 +9,13 @@ Controller::Controller(struct pointers* pointer_struct, PWMServo* twisty_boi): a
 }
 
 void Controller::ctrlTickFunction() {
+
+
+
+   
+
+
+
     // chMtxLock(dataMutex_state_);
     array<float, 2> init = {stateData_->state_x, stateData_->state_vx};
     // chMtxUnlock(dataMutex_state_);

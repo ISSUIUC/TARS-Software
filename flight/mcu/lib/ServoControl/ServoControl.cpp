@@ -16,12 +16,12 @@ ServoControl::ServoControl(PWMServo* servo) {
 // TODO check values for max
 void ServoControl::roundOffAngle(float& value) {
     //Min Extension Angle Value
-    if (value > 135.8075) {
-        value = 136;
+    if (value > 130) {
+        value = 130;
     }
     //Max Extension Angle Value
-    if (value < 45.4561) {
-        value = 46;
+    if (value < 0) {
+        value = 0;
     }
 
     value = std::round(value);
@@ -40,17 +40,15 @@ void ServoControl::servoActuation(float length) {
     // The angle is found through utilizing a fft and mapping extension/angle values to 
     // a sine function. len (mm), pass in ang (rad)
 
-    // std::cout << "Length: " << length << std::endl;
+    if(length < 0) length = 0;
+    if(length > 0.018) length = 0.018;
 
-    float angle = (136.050812741891 - 62.3098522547825*asin(0.0553285866373617*(length* 1000) + 0.00390471397714149));
+    float angle = (26+67.309*asin(0.0553*(length*1000)+0.003904));
     roundOffAngle(angle);
 
-    // std::cout << "Written Angle: " << angle << std::endl;
-
-    // servo_cs rotates backwards
-    angle = 0;
     servo_->write(angle);
 
+    // 130 is max
 #ifdef SERVO_DEBUG
     Serial.print("\nclockwise: ");
     Serial.print(cw_angle);

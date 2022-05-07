@@ -21,6 +21,8 @@ struct telemetry_data {
   float gps_long;
   float gps_alt;
   float barometer_alt;
+  float barometer_temp;
+  float barometer_pressure;
   // KX134 (highg) IMU DATA
   float KX_IMU_ax;   // acceleration (in G's)
   float KX_IMU_ay;

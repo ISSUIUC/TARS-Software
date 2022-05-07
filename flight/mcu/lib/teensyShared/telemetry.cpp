@@ -78,6 +78,8 @@ void Telemetry::transmit(const sensorDataStruct_t &sensor_data) {
   d.gps_long = sensor_data.gps_data.longitude;
   d.gps_alt = sensor_data.gps_data.altitude;
   d.barometer_alt = sensor_data.barometer_data.altitude;
+  d.barometer_temp = sensor_data.barometer_data.temperature;
+  d.barometer_pressure = sensor_data.barometer_data.pressure;
   d.KX_IMU_ax = sensor_data.highG_data.hg_ax;
   d.KX_IMU_ay = sensor_data.highG_data.hg_ay;
   d.KX_IMU_az = sensor_data.highG_data.hg_az;
