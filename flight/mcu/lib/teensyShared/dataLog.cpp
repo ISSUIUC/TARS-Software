@@ -143,7 +143,7 @@ void logData(File* dataFile, sensorDataStruct_t* data) {
     dataFile->write((const uint8_t*)data, sizeof(*data));
     // Flush data once for every 1000 writes (this keeps the ring buffer in sync
     // with data collection)
-    if (flush_iterator == 1000) {
+    if (flush_iterator == 50) {
         dataFile->flush();
         flush_iterator = 0;
     } else {

@@ -139,7 +139,7 @@ struct sensorDataStruct_t {
  */
 enum sensors { LOWG_IMU, HIGHG_IMU, BAROMETER, GPS };
 
-#define FIFO_SIZE 1
+#define FIFO_SIZE 1000
 /**
  * @brief A class to hold all info for ring buffers and mutexes used for data.
  *
