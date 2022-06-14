@@ -30,11 +30,14 @@ Telemetry::Telemetry(): rf95(RFM95_CS, RFM95_INT) {
     } 
 
     // Checking if there's a frequency stored in SD file
-    read_file = SD.open("freq.txt", FILE_READ);
+    read_file = SD.open("freq.txt", O_READ);
     if (read_file) {
           Serial.println("READ: Reading data from freq.txt");
           while (read_file.available()) {
             Serial.write(read_file.read());
+            int freq_to_set;
+            memcpy(&freq_to_set, read_file.read(), sizeof(read_file.read()));
+            Serial.println(freq_to_set);
           }
           read_file.close();
         } else {
@@ -70,6 +73,7 @@ void Telemetry::handle_command(const telemetry_command & cmd){
         if (write_file) {
           Serial.println("WRITE: freq to SD card");
           write_file.println(cmd.freq);
+          int freq_to_set;
           write_file.close();
         } else {
           Serial.println("WRITE ERROR: Failed to open freq file");
