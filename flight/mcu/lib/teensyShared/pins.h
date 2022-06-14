@@ -8,9 +8,9 @@
 #define HYBRID_PT_3_PIN 22
 
 #define LED_BLUE 28
-#define LED_RED 29
+#define LED_RED 31
 #define LED_ORANGE 30
-#define LED_GREEN 31
+#define LED_GREEN 29
 
 // define magnetometer chip select pin
 #define LSM9DS1_M_CS 3

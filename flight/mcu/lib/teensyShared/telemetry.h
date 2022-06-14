@@ -5,6 +5,8 @@
 #include "sensors.h"
 #include "pins.h"
 #include <array>
+#include "SD.h"
+
 
 //Make sure to change these pinout depending on wiring
 //Don't forget to change the ini file to build the correct main file
@@ -13,7 +15,7 @@
 #define RF95_FREQ 434.0
 
 #define MAX_CMD_LEN 10
-// Change to 434.0 or other frequency, must match RX's freq!
+
 
 // Data transmitted from rocket to ground station
 struct telemetry_data {

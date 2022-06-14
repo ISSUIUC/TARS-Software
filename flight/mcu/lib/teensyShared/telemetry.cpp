@@ -1,6 +1,7 @@
 #include <telemetry.h>
 
-
+File read_file;
+File write_file;
 Telemetry::Telemetry(): rf95(RFM95_CS, RFM95_INT) {
 
     pinMode(RFM95_RST, OUTPUT);
@@ -26,13 +27,28 @@ Telemetry::Telemetry(): rf95(RFM95_CS, RFM95_INT) {
     if (!rf95.setFrequency(RF95_FREQ)) {
         Serial.println("setFrequency Failed");
         while (1);
-    }    
+    } 
+
+    // Checking if there's a frequency stored in SD file
+    read_file = SD.open("freq.txt", FILE_READ);
+    if (read_file) {
+          Serial.println("READ: Reading data from freq.txt");
+          while (read_file.available()) {
+            Serial.write(read_file.read());
+          }
+          read_file.close();
+        } else {
+          Serial.println("READ ERROR: Failed to open freq file while read");
+        }
+   
     // Defaults after init are 434.0MHz, 13dBm, Bw = 125 kHz, Cr = 4/5, Sf = 128chips/symbol, CRC on
 
     // The default transmitter power is 13dBm, using PA_BOOST.
     // If you are using RFM95/96/97/98 modules which uses the PA_BOOST transmitter pin, then 
     // you can set transmitter powers from 5 to 23 dBm:
     rf95.setTxPower(23, false);
+
+  
 }
 
 void Telemetry::handle_command(const telemetry_command & cmd){
@@ -48,6 +64,16 @@ void Telemetry::handle_command(const telemetry_command & cmd){
         freq_status.should_change = true;
         freq_status.new_freq = cmd.freq;
         // Serial.println("Got freq");  //don't want serial prints in flight code
+
+        // Writing freq to file
+        write_file = SD.open("freq.txt", FILE_WRITE | O_TRUNC);
+        if (write_file) {
+          Serial.println("WRITE: freq to SD card");
+          write_file.println(cmd.freq);
+          write_file.close();
+        } else {
+          Serial.println("WRITE ERROR: Failed to open freq file");
+        }
       } 
 
       if (cmd.command == SET_CALLSIGN) {
