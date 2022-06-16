@@ -139,7 +139,7 @@ void rocketFSM::tickFSM() {
                 chVTGetSystemTime() - rocketTimers.burnout_time;
 
             if (TIME_I2MS(rocketTimers.coast_timer) >
-                coast_to_apogee_time_threash) {
+                coast_to_apogee_time_thresh) {
                 pointer_struct->sensorDataPointer->rocketState_data
                     .rocketState = STATE_APOGEE;
             }
