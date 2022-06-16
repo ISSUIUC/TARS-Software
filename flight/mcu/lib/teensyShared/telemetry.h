@@ -96,6 +96,9 @@ class Telemetry {
         int packetnum;
         telemetry_data d;
         RH_RF95 rf95;
+
+        File read_file;
+        File write_file;
         
         // Initializing command ID
         int last_command_id = -1;
