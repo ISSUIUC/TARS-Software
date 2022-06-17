@@ -97,17 +97,17 @@ void Telemetry::handle_command(const telemetry_command & cmd){
 
         // Writing freq to file
         // Fix this to overwriteHave to overwrite and not truncate? @gautamdayal please test.
-        // write_file = SD.open("freq.txt", FILE_WRITE | O_TRUNC);
-        // if (write_file) {
-        //     Serial.println("[DEBUG] WRITE freq to SD card.");
-        //     write_file.write(& cmd.freq, 4);
-        // } else {
-        //     Serial.println("[ERROR] Failed to open freq file while writing");
-        //     // TODO: possibly add functionality here to create the file
-        //     // and store the default frequency in it.
-        //     // write_file.write(& "434", 4);
-        // }
-        // write_file.close();
+        write_file = SD.open("freq.txt", FILE_WRITE | O_TRUNC);
+        if (write_file) {
+            Serial.println("[DEBUG] WRITE freq to SD card.");
+            write_file.write(& cmd.freq, 4);
+        } else {
+            Serial.println("[ERROR] Failed to open freq file while writing");
+            // TODO: possibly add functionality here to create the file
+            // and store the default frequency in it.
+            // write_file.write(& "434", 4);
+        }
+        write_file.close();
     } 
 
     if (cmd.command == SET_CALLSIGN) {
