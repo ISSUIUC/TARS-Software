@@ -40,22 +40,22 @@ Telemetry::Telemetry(): rf95(RFM95_CS, RFM95_INT) {
      * If successful, the default frequency is 
      * disregarded.
      */
-    read_file = SD.open("freq.txt", O_READ);
-    if (read_file) {
-        Serial.println("[DEBUG]: Reading data from freq.txt");
-        Serial.print("[DEBUG]: Frequency from SD freq.txt file: ");
-        float freq_to_set;
-        read_file.read(& freq_to_set, 4);
-        // memcpy(&freq_to_set, read_file.read(), sizeof(read_file.read()));
-        Serial.println(freq_to_set); 
-        if (!rf95.setFrequency(freq_to_set)) {
-            Serial.println("[WARNING]: Failed to set saved frequency, going back to default frequency.");
-        } 
+    // read_file = SD.open("freq.txt", O_READ);
+    // if (read_file) {
+    //     Serial.println("[DEBUG]: Reading data from freq.txt");
+    //     Serial.print("[DEBUG]: Frequency from SD freq.txt file: ");
+    //     float freq_to_set;
+    //     read_file.read(& freq_to_set, 4);
+    //     // memcpy(&freq_to_set, read_file.read(), sizeof(read_file.read()));
+    //     Serial.println(freq_to_set); 
+    //     if (!rf95.setFrequency(freq_to_set)) {
+    //         Serial.println("[WARNING]: Failed to set saved frequency, going back to default frequency.");
+    //     } 
         
-    } else {
-        Serial.println("[ERROR]: Failed to open freq file while read, using default frequency.");
-    }
-    read_file.close();
+    // } else {
+    //     Serial.println("[ERROR]: Failed to open freq file while read, using default frequency.");
+    // }
+    // read_file.close();
 
     /*
      * The default transmitter power is 13dBm, using PA_BOOST.
@@ -97,17 +97,17 @@ void Telemetry::handle_command(const telemetry_command & cmd){
 
         // Writing freq to file
         // Fix this to overwriteHave to overwrite and not truncate? @gautamdayal please test.
-        write_file = SD.open("freq.txt", FILE_WRITE | O_TRUNC);
-        if (write_file) {
-            Serial.println("[DEBUG] WRITE freq to SD card.");
-            write_file.write(& cmd.freq, 4);
-        } else {
-            Serial.println("[ERROR] Failed to open freq file while writing");
-            // TODO: possibly add functionality here to create the file
-            // and store the default frequency in it.
-            // write_file.write(& "434", 4);
-        }
-        write_file.close();
+        // write_file = SD.open("freq.txt", FILE_WRITE | O_TRUNC);
+        // if (write_file) {
+        //     Serial.println("[DEBUG] WRITE freq to SD card.");
+        //     write_file.write(& cmd.freq, 4);
+        // } else {
+        //     Serial.println("[ERROR] Failed to open freq file while writing");
+        //     // TODO: possibly add functionality here to create the file
+        //     // and store the default frequency in it.
+        //     // write_file.write(& "434", 4);
+        // }
+        // write_file.close();
     } 
 
     if (cmd.command == SET_CALLSIGN) {
