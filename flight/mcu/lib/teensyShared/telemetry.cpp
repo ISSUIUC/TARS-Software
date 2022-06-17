@@ -44,7 +44,7 @@ Telemetry::Telemetry(): rf95(RFM95_CS, RFM95_INT) {
     if (read_file) {
         Serial.println("[DEBUG]: Reading data from freq.txt");
         Serial.print("[DEBUG]: Frequency from SD freq.txt file: ");
-        int freq_to_set;
+        float freq_to_set;
         memcpy(&freq_to_set, read_file.read(), sizeof(read_file.read()));
         Serial.println(freq_to_set); 
         if (!rf95.setFrequency(freq_to_set)) {
@@ -104,7 +104,7 @@ void Telemetry::handle_command(const telemetry_command & cmd){
             Serial.println("[ERROR] Failed to open freq file while writing");
             // TODO: possibly add functionality here to create the file
             // and store the default frequency in it.
-            write_file.write(& "434", 4);
+            // write_file.write(& "434", 4);
         }
         write_file.close();
     } 

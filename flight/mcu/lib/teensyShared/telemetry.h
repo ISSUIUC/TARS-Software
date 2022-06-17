@@ -73,7 +73,7 @@ struct telemetry_command {
   int cmd_id;
   union {
     char callsign[8];
-    int freq;
+    float freq;
     bool do_abort;
   };
   std::array<char, 6> verify;
@@ -81,7 +81,7 @@ struct telemetry_command {
 
 struct command_handler_struct{
   bool should_change{};
-  int new_freq{};
+  float new_freq{};
 };
 
 class Telemetry {
