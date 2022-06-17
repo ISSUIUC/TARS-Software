@@ -6,6 +6,11 @@ Controller::Controller(struct pointers* pointer_struct, PWMServo* twisty_boi): a
     current_state =
         &pointer_struct->sensorDataPointer->rocketState_data.rocketState;
     // dataMutex_state_ = &pointer_struct->dataloggerTHDVarsPointer->dataMutex_state;
+    activeControlServos.servoActuation(100);
+    chThdSleepMilliseconds(1000);
+    activeControlServos.servoActuation(0);
+    chThdSleepMilliseconds(1000);
+    activeControlServos.servoActuation(100);
 }
 
 void Controller::ctrlTickFunction() {
