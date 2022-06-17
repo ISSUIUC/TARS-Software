@@ -102,7 +102,7 @@ struct telemetry_command {
   int id;
   union {
     char callsign[8];
-    int freq;
+    float freq;
     bool do_abort;
   };
   std::array<char, 6> verify = {'A', 'Y', 'B', 'E', 'R', 'K'};
