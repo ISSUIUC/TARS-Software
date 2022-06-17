@@ -57,7 +57,6 @@ struct telemetry_data {
   int rssi;
   float battery_voltage;
   int response_ID;
-  // float flap_extension;
 };
 
 // Commands transmitted from ground station to rocket
