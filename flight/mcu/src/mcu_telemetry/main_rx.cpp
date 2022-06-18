@@ -206,7 +206,7 @@ void SerialInput(const char * key, const char * value){
     command.do_abort = true;
   } else if(strcmp(key, "FREQ") == 0) {
     command.command = CommandType::SET_FREQ;
-    int v = atoi(value);
+    int v = atof(value);
     command.freq = min(max(v, 390), 445);
   } else if(strcmp(key, "CALLSIGN") == 0) {
     command.command = CommandType::SET_CALLSIGN;
