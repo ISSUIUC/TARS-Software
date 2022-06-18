@@ -206,14 +206,14 @@ void SerialInput(const char * key, const char * value){
     command.do_abort = true;
   } else if(strcmp(key, "FREQ") == 0) {
     command.command = CommandType::SET_FREQ;
-    int v = atof(value);
+    float v = atof(value);
     command.freq = min(max(v, 390), 445);
   } else if(strcmp(key, "CALLSIGN") == 0) {
     command.command = CommandType::SET_CALLSIGN;
     memset(command.callsign, ' ', sizeof(command.callsign));
     memcpy(command.callsign, value, min(strlen(value), sizeof(command.callsign)));
   } else if(strcmp(key, "FLOC") == 0){
-    int v = atoi(value);
+    float v = atof(value);
     v = min(max(v, 390), 445);
     set_freq_local_bug_fix(v);
     Serial.println(json_command_success);
