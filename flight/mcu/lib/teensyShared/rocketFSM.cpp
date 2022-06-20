@@ -30,6 +30,8 @@
 #include "pins.h"
 #include "thresholds.h"
 
+// Rocket won't leave boost state until burn_timer has exceeded this limit
+int burn_time_thresh_ms = 10000;
 fsm_struct rocketTimers;
 
 rocketFSM::rocketFSM(pointers *ptr) { pointer_struct = ptr; }
@@ -105,7 +107,7 @@ void rocketFSM::tickFSM() {
             }
             // Keeping rocket in STATE_BOOST if time below a certain value
             // 5000 is an arbitrary value. Change later.
-            if (TIME_I2MS(rocketTimers.burn_timer) < 4000) {
+            if (TIME_I2MS(rocketTimers.burn_timer) < burn_time_thresh_ms) {
                 pointer_struct->sensorDataPointer->rocketState_data
                     .rocketState = STATE_BOOST;
             }
