@@ -226,7 +226,7 @@ static THD_FUNCTION(gps_THD, arg) {
 static THD_FUNCTION(kalman_THD, arg) {
     struct pointers *pointer_struct = (struct pointers *)arg;
     KalmanFilter KF(pointer_struct);
-    KF.Initialize(237.74, 0.0, 0.0);
+    KF.Initialize();
 
     while(true){
         KF.kfTickFunction();

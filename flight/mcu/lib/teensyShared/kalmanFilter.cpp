@@ -22,11 +22,21 @@ void KalmanFilter::kfTickFunction() {
     }
 }
 
-void KalmanFilter::Initialize(float pos_f, float vel_f, float accel_f) {
+void KalmanFilter::Initialize() {
+    float sum = 0;
+    for(int i = 0; i < 30; i++){
+        chMtxLock(dataMutex_barometer_);
+        // std::cout<<baro_data_ptr_->altitude<<std::endl;
+        sum += *b_alt;
+        chMtxUnlock(dataMutex_barometer_);
+        chThdSleepMilliseconds(100);
+    }
+
     // set x_k
-    x_k(0,0) = pos_f;
-    x_k(1,0) = vel_f;
-    x_k(2,0) = accel_f;
+    x_k(0,0) = sum / 30;
+    // x_k(0,0) = 1401;
+    x_k(1,0) = 0;
+    x_k(2,0) = 0;
     
     // set F
     F_mat(0, 1) = s_dt;
@@ -42,12 +52,12 @@ void KalmanFilter::Initialize(float pos_f, float vel_f, float accel_f) {
     H(1,2) = 1;
 
     // set P_k
-    P_k(0,0) = .058;
-    P_k(0,1) = .024;
-    P_k(0,2) = .004;
-    P_k(1,1) = .019;
-    P_k(2,2) = .0086;
-    P_k(1,2) = .007;
+    P_k(0,0) = 0;
+    P_k(0,1) = 0;
+    P_k(0,2) = 0;
+    P_k(1,1) = 0;
+    P_k(2,2) = 0;
+    P_k(1,2) = 0;
     P_k(2,1) = P_k(1,2);
     P_k(1,0) = P_k(0,1);
     P_k(2,0) = P_k(0,2);
@@ -55,7 +65,7 @@ void KalmanFilter::Initialize(float pos_f, float vel_f, float accel_f) {
 
     // set Q
     Q(0,0) = pow(s_dt,5) / 20;
-    Q(0,1) = (pow(s_dt,4) / 8);
+    Q(0,1) = (pow(s_dt,4) / 8 * 80);
     Q(0,2) = pow(s_dt,3) / 6;
     Q(1,1) = pow(s_dt,3) / 8;
     Q(1,2) = pow(s_dt,2) / 2;
@@ -64,15 +74,17 @@ void KalmanFilter::Initialize(float pos_f, float vel_f, float accel_f) {
     Q(2,0) = Q(0,2);
     Q(2,1) = Q(1,2);
 
-    // float scale_fact = 22.19;
-    // float scale_fact = 13.25;
-    // float scale_fact = .00899;
-    float scale_fact = 1;
+    // float scale_fact = 75.19;
+    // float scale_fact = 14.25;
+    float scale_fact = .00999;
+    // float scale_fact = 13;
     Q = Q * scale_fact;
 
     // set R
-    R(0,0) = 2;
-    R(1,1) = 0.01;
+    R(0,0) = 5.;
+    R(1,1) = .0002;
+    // R(0,0) = 2.;
+    // R(1,1) = .01;
 
     // set B
     B(2,0) = -1;

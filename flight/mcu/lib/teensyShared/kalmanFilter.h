@@ -10,7 +10,7 @@ class KalmanFilter {
 
     KalmanFilter(struct pointers* pointer_struct);
     
-    void Initialize(float pos_f, float vel_f, float accel_f);
+    void Initialize();
     void Initialize(float pos_f, float vel_f);
     void priori();
     void update();
