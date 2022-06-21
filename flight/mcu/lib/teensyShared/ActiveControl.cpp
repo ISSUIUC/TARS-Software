@@ -21,6 +21,7 @@ Controller::Controller(struct pointers* pointer_struct, PWMServo* twisty_boi): a
     twisty_boi->write(0);
     chThdSleepMilliseconds(1000);
 
+    setLaunchPadElevation();
 }
 
 void Controller::ctrlTickFunction() {
