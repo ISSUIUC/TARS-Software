@@ -27,4 +27,5 @@ class Controller {
     float flap_width = 35.1 / 1000; // m
     FSM_State* current_state;
     ServoControl activeControlServos;
+    uint32_t* ac_coast_timer;
 };

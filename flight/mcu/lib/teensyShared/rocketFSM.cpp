@@ -30,11 +30,13 @@
 #include "pins.h"
 #include "thresholds.h"
 
+
 // Rocket won't leave boost state until burn_timer has exceeded this limit
-int burn_time_thresh_ms = 8000;
-fsm_struct rocketTimers;
+int burn_time_thresh_ms = 4000;
 
 rocketFSM::rocketFSM(pointers *ptr) { pointer_struct = ptr; }
+
+// fsm_struct rocketTimers;
 
 void rocketFSM::tickFSM() {
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -67,7 +69,7 @@ void rocketFSM::tickFSM() {
 
             // If high acceleration is observed in z direction...
             if (linear_acceleration > launch_linear_acceleration_thresh) {
-                rocketTimers.launch_time = chVTGetSystemTime();
+                pointer_struct->rocketTimers.launch_time = chVTGetSystemTime();
                 pointer_struct->sensorDataPointer->rocketState_data
                     .rocketState = STATE_LAUNCH_DETECT;
             }
@@ -84,11 +86,11 @@ void rocketFSM::tickFSM() {
             }
 
             // measure the length of the burn time (for hysteresis)
-            rocketTimers.burn_timer =
-                chVTGetSystemTime() - rocketTimers.launch_time;
+            pointer_struct->rocketTimers.burn_timer =
+                chVTGetSystemTime() - pointer_struct->rocketTimers.launch_time;
 
             // If the acceleration lasts long enough, boost is detected
-            if (TIME_I2MS(rocketTimers.burn_timer) > launch_time_thresh) {
+            if (TIME_I2MS(pointer_struct->rocketTimers.burn_timer) > launch_time_thresh) {
                 pointer_struct->sensorDataPointer->rocketState_data
                     .rocketState = STATE_BOOST;
                 // digitalWrite(LED_RED, HIGH);
@@ -97,16 +99,16 @@ void rocketFSM::tickFSM() {
             break;
 
         case STATE_BOOST:
-            rocketTimers.burn_timer =
-                chVTGetSystemTime() - rocketTimers.launch_time;
+            pointer_struct->rocketTimers.burn_timer =
+                chVTGetSystemTime() - pointer_struct->rocketTimers.launch_time;
             // If low acceleration in the Z direction...
             if (linear_acceleration < coast_thresh) {
-                rocketTimers.burnout_time = chVTGetSystemTime();
+                pointer_struct->rocketTimers.burnout_time = chVTGetSystemTime();
                 pointer_struct->sensorDataPointer->rocketState_data
                     .rocketState = STATE_BURNOUT_DETECT;
             }
             // Keeping rocket in STATE_BOOST if time below a certain threshold
-            if (TIME_I2MS(rocketTimers.burn_timer) < burn_time_thresh_ms) {
+            if (TIME_I2MS(pointer_struct->rocketTimers.burn_timer) < burn_time_thresh_ms) {
                 pointer_struct->sensorDataPointer->rocketState_data
                     .rocketState = STATE_BOOST;
             }
@@ -123,11 +125,11 @@ void rocketFSM::tickFSM() {
             }
 
             // measure the length of the coast time (for hysteresis)
-            rocketTimers.coast_timer =
-                chVTGetSystemTime() - rocketTimers.burnout_time;
+            pointer_struct->rocketTimers.coast_timer =
+                chVTGetSystemTime() - pointer_struct->rocketTimers.burnout_time;
 
             // If the low acceleration lasts long enough, coast is detected
-            if (TIME_I2MS(rocketTimers.coast_timer) > coast_time_thresh) {
+            if (TIME_I2MS(pointer_struct->rocketTimers.coast_timer) > coast_time_thresh) {
                 pointer_struct->sensorDataPointer->rocketState_data
                     .rocketState = STATE_COAST;
             }
@@ -136,10 +138,10 @@ void rocketFSM::tickFSM() {
 
         case STATE_COAST:
 
-            rocketTimers.coast_timer =
-                chVTGetSystemTime() - rocketTimers.burnout_time;
+            pointer_struct->rocketTimers.coast_timer =
+                chVTGetSystemTime() - pointer_struct->rocketTimers.burnout_time;
 
-            if (TIME_I2MS(rocketTimers.coast_timer) >
+            if (TIME_I2MS(pointer_struct->rocketTimers.coast_timer) >
                 coast_to_apogee_time_thresh) {
                 pointer_struct->sensorDataPointer->rocketState_data
                     .rocketState = STATE_APOGEE;

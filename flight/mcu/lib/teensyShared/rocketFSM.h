@@ -33,4 +33,9 @@ class rocketFSM {
     pointers *pointer_struct;
 };
 
+/**
+ * FSM timers and time data
+ */
+// static fsm_struct *rocketTimers;
+
 #endif

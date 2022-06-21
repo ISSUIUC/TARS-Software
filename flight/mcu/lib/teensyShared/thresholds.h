@@ -14,5 +14,7 @@ static const float launch_time_thresh = 300;
 static const float coast_thresh = 0.5;
 // switch to apogee state after 26 seconds
 static const float coast_to_apogee_time_thresh = 26;
+// For preventing AC from actuating even when in coast state
+static const float coast_ac_delay_thresh = 8000;
 
 #endif

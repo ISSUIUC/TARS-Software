@@ -1,10 +1,13 @@
 #include "ActiveControl.h"
+#include "thresholds.h"
+#include "rocketFSM.h"
 
 Controller::Controller(struct pointers* pointer_struct, PWMServo* twisty_boi): activeControlServos(twisty_boi) {
     twisty_boi_ = twisty_boi;
     stateData_ = &pointer_struct->sensorDataPointer->state_data;
     current_state =
         &pointer_struct->sensorDataPointer->rocketState_data.rocketState;
+    uint32_t* ac_coast_timer  = &pointer_struct->rocketTimers.coast_timer;
     // dataMutex_state_ = &pointer_struct->dataloggerTHDVarsPointer->dataMutex_state;
     // activeControlServos.servoActuation(100);
     // chThdSleepMilliseconds(1000);
@@ -19,12 +22,6 @@ Controller::Controller(struct pointers* pointer_struct, PWMServo* twisty_boi): a
 }
 
 void Controller::ctrlTickFunction() {
-
-
-
-   
-
-
 
     // chMtxLock(dataMutex_state_);
     array<float, 2> init = {stateData_->state_x, stateData_->state_vx};
@@ -92,7 +89,10 @@ bool Controller::ActiveControl_ON() {
             break;
         case STATE_COAST:
             // std::cout << "COAST" << std::endl;
-            active_control_on = true;
+            // This adds a delay to the 
+            if (*ac_coast_timer > coast_ac_delay_thresh) {
+                active_control_on = true;
+            }            
             break;
         case STATE_APOGEE_DETECT:
             // std::cout << "Apogee" << std::endl;
