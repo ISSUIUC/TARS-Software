@@ -43,7 +43,7 @@ void ServoControl::servoActuation(float length) {
     if(length < 0) length = 0;
     if(length > 0.018) length = 0.018;
 
-    float angle = (26+67.309*asin(0.0553*(length*1000)+0.003904));
+    float angle = -0.035 + 1.09*pow(10, 3)*length + 2.98*pow(10, -4)*pow(length, 2) - 1.24*pow(10, -6)*pow(length, 3);
     roundOffAngle(angle);
 
     servo_->write(angle);
