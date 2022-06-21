@@ -12,6 +12,8 @@ class Controller {
     void ctrlTickFunction();
     bool ActiveControl_ON();
     Controller(struct pointers* pointer_struct, PWMServo* twisty_boi);
+
+    void setLaunchPadElevation();
     
     PWMServo* twisty_boi_;
     mutex_t* dataMutex_state_;
@@ -25,6 +27,14 @@ class Controller {
     float prev_u = 0;
     float du_max = 0.01;
     float flap_width = 35.1 / 1000; // m
+
+    float launch_pad_alt;
+    float apogee_des_msl;
+    float apogee_des_agl;
+
+    float* b_alt;
+    mutex_t* dataMutex_barometer_;
+
     FSM_State* current_state;
     ServoControl activeControlServos;
     uint32_t* ac_coast_timer;

@@ -8,6 +8,8 @@ Controller::Controller(struct pointers* pointer_struct, PWMServo* twisty_boi): a
     current_state =
         &pointer_struct->sensorDataPointer->rocketState_data.rocketState;
     uint32_t* ac_coast_timer  = &pointer_struct->rocketTimers.coast_timer;
+    b_alt = &pointer_struct->sensorDataPointer->barometer_data.altitude;
+    dataMutex_barometer_ = &pointer_struct->dataloggerTHDVarsPointer.dataMutex_barometer;
     // dataMutex_state_ = &pointer_struct->dataloggerTHDVarsPointer->dataMutex_state;
     // activeControlServos.servoActuation(100);
     // chThdSleepMilliseconds(1000);
@@ -103,4 +105,16 @@ bool Controller::ActiveControl_ON() {
             break;
     }
     return active_control_on;
+}
+
+void Controller::setLaunchPadElevation(){
+    float sum = 0;
+    for(int i = 0; i < 30; i++){
+        chMtxLock(dataMutex_barometer_);
+        sum += *b_alt;
+        chMtxUnlock(dataMutex_barometer_);
+        // chThdSleepMilliseconds(100);
+    }
+    launch_pad_alt = sum / 30;
+    apogee_des_msl = apogee_des_agl + launch_pad_alt;
 }
