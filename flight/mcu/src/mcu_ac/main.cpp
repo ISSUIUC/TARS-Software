@@ -250,7 +250,7 @@ static THD_FUNCTION(servo_THD, arg) {
         Serial.println("### Servo thread entrance");
 #endif
 
-        ac.ctrlTickFunction();
+        ac.ctrlTickFunction(pointer_struct);
 
         chThdSleepMilliseconds(6);  // FSM runs at 100 Hz
     }

@@ -9,7 +9,7 @@ using std::array;
 
 class Controller {
     public:
-    void ctrlTickFunction();
+    void ctrlTickFunction(pointers* pointer_struct);
     bool ActiveControl_ON();
     Controller(struct pointers* pointer_struct, PWMServo* twisty_boi);
 

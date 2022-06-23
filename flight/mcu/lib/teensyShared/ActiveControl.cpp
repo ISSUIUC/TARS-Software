@@ -19,7 +19,7 @@ Controller::Controller(struct pointers* pointer_struct, PWMServo* twisty_boi): a
     setLaunchPadElevation();
 }
 
-void Controller::ctrlTickFunction() {
+void Controller::ctrlTickFunction(pointers* pointer_struct) {
 
     // chMtxLock(dataMutex_state_);
     array<float, 2> init = {stateData_->state_x, stateData_->state_vx};
@@ -47,16 +47,19 @@ void Controller::ctrlTickFunction() {
 
     //Set flap extension limits
     if (u < min_extension) {
+        pointer_struct->sensorDataPointer->flap_data.l1=u;
         u = min_extension;
     } else if (u > max_extension) {
+        pointer_struct->sensorDataPointer->flap_data.l1=0;
         u = max_extension;
     }
 
     // std::cout << "Controller Flap Extension: " << u << std::endl;
 
-
+    
     if (ActiveControl_ON()) {
         activeControlServos.servoActuation(u);
+        
     } else {
         activeControlServos.servoActuation(0);
     }
