@@ -76,13 +76,13 @@ void KalmanFilter::Initialize() {
 
     // float scale_fact = 75.19;
     // float scale_fact = 14.25;
-    float scale_fact = .00999;
+    float scale_fact = 13.0;
     // float scale_fact = 13;
     Q = Q * scale_fact;
 
     // set R
-    R(0,0) = 5.;
-    R(1,1) = .0002;
+    R(0,0) = 2.0;
+    R(1,1) = 0.01;
     // R(0,0) = 2.;
     // R(1,1) = .01;
 

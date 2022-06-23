@@ -19,8 +19,8 @@ class Controller {
     mutex_t* dataMutex_state_;
     stateData* stateData_;
     rk4 rk4_;
-    float kp = 0.000042;
-    float apogee_des = 4572;
+    float kp = 0.00008;
+    // float apogee_des = 4572;
     float min_extension = 0;
     float max_extension = 17.88 / 1000;
     float dt = .006;
@@ -30,7 +30,7 @@ class Controller {
 
     float launch_pad_alt;
     float apogee_des_msl;
-    float apogee_des_agl;
+    float apogee_des_agl = 9144;
 
     float* b_alt;
     mutex_t* dataMutex_barometer_;
