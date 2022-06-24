@@ -13,7 +13,7 @@ Controller::Controller(struct pointers* pointer_struct, PWMServo* twisty_boi): a
 
     twisty_boi->write(180);
     chThdSleepMilliseconds(1000);
-    twisty_boi->write(0);
+    twisty_boi->write(15);
     chThdSleepMilliseconds(1000);
 
     setLaunchPadElevation();
@@ -61,7 +61,11 @@ void Controller::ctrlTickFunction(pointers* pointer_struct) {
         activeControlServos.servoActuation(u);
         
     } else {
-        activeControlServos.servoActuation(0);
+        if (pointer_struct->sensorDataPointer->rocketState_data.rocketState==STATE_APOGEE) {
+            activeControlServos.servoActuation(0);
+        } else {
+            activeControlServos.servoActuation(15);
+        }
     }
 
 }
