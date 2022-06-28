@@ -16,6 +16,9 @@
  * Ben Olaivar
  * Colin Kinsey
  * Grace Robbins
+ * Nicholas Phillips
+ * Gautam Dayal
+ * Patrick Marschoun
  */
 
 #include <Arduino.h>
