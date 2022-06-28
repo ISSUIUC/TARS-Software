@@ -8,28 +8,26 @@
 #define RASPI_h
 
 #include <bcm2835.h>
-
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
 #include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 typedef unsigned char byte;
 
 #ifndef NULL
-  #define NULL 0
+#define NULL 0
 #endif
 
 #ifndef OUTPUT
-  #define OUTPUT BCM2835_GPIO_FSEL_OUTP
+#define OUTPUT BCM2835_GPIO_FSEL_OUTP
 #endif
 
-class SPIClass
-{
-  public:
+class SPIClass {
+   public:
     static byte transfer(byte _data);
     // SPI Configuration methods
-    static void begin(); // Default
+    static void begin();  // Default
     static void begin(uint16_t, uint8_t, uint8_t);
     static void end();
     static void setBitOrder(uint8_t);
@@ -39,13 +37,12 @@ class SPIClass
 
 extern SPIClass SPI;
 
-class SerialSimulator
-{
-  public:
-    #define DEC 10
-    #define HEX 16
-    #define OCT 8
-    #define BIN 2
+class SerialSimulator {
+   public:
+#define DEC 10
+#define HEX 16
+#define OCT 8
+#define BIN 2
 
     // TODO: move these from being inlined
     static void begin(int baud);
@@ -68,7 +65,7 @@ void digitalWrite(unsigned char pin, unsigned char value);
 
 unsigned long millis();
 
-void delay (unsigned long delay);
+void delay(unsigned long delay);
 
 long random(long min, long max);
 

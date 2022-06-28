@@ -9,6 +9,4 @@ void HighGSensor::readReadings() {
     az = data.zData;
 }
 
-GForce HighGSensor::getGForce() {
-    return {ax, ay, az};
-}
+GForce HighGSensor::getGForce() { return {ax, ay, az}; }

@@ -2,14 +2,13 @@
 #include "ServoControl.h"
 #include "acShared.h"
 #include "dataLog.h"
-#include "sensors.h"
 #include "rk4.h"
+#include "sensors.h"
 
-class KalmanFilter { 
-    public:
-
+class KalmanFilter {
+   public:
     KalmanFilter(struct pointers* pointer_struct);
-    
+
     void Initialize();
     void Initialize(float pos_f, float vel_f);
     void priori();
@@ -17,8 +16,7 @@ class KalmanFilter {
 
     void kfTickFunction();
 
-    private:
-
+   private:
     float s_dt = 0.050;
 
     DataLogBuffer* data_logger_;
@@ -43,7 +41,8 @@ class KalmanFilter {
     Eigen::Matrix<float, 3, 2> K = Eigen::Matrix<float, 3, 2>::Zero();
     Eigen::Matrix<float, 2, 2> temp = Eigen::Matrix<float, 2, 2>::Zero();
     Eigen::Matrix<float, 2, 1> y_k = Eigen::Matrix<float, 2, 1>::Zero();
-    Eigen::Matrix<float, 3, 3> identity = Eigen::Matrix<float, 3, 3>::Identity();
+    Eigen::Matrix<float, 3, 3> identity =
+        Eigen::Matrix<float, 3, 3>::Identity();
 
     Eigen::Matrix<float, 3, 2> B = Eigen::Matrix<float, 3, 2>::Zero();
 };

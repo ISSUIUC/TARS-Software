@@ -1,15 +1,18 @@
 #include "ActiveControl.h"
-#include "thresholds.h"
-#include "rocketFSM.h"
 
-Controller::Controller(struct pointers* pointer_struct, PWMServo* twisty_boi): activeControlServos(twisty_boi) {
+#include "rocketFSM.h"
+#include "thresholds.h"
+
+Controller::Controller(struct pointers* pointer_struct, PWMServo* twisty_boi)
+    : activeControlServos(twisty_boi) {
     twisty_boi_ = twisty_boi;
     stateData_ = &pointer_struct->sensorDataPointer->state_data;
     current_state =
         &pointer_struct->sensorDataPointer->rocketState_data.rocketState;
-    uint32_t* ac_coast_timer  = &pointer_struct->rocketTimers.coast_timer;
+    uint32_t* ac_coast_timer = &pointer_struct->rocketTimers.coast_timer;
     b_alt = &pointer_struct->sensorDataPointer->barometer_data.altitude;
-    dataMutex_barometer_ = &pointer_struct->dataloggerTHDVarsPointer.dataMutex_barometer;
+    dataMutex_barometer_ =
+        &pointer_struct->dataloggerTHDVarsPointer.dataMutex_barometer;
 
     twisty_boi->write(180);
     chThdSleepMilliseconds(1000);
@@ -20,7 +23,6 @@ Controller::Controller(struct pointers* pointer_struct, PWMServo* twisty_boi): a
 }
 
 void Controller::ctrlTickFunction(pointers* pointer_struct) {
-
     // chMtxLock(dataMutex_state_);
     array<float, 2> init = {stateData_->state_x, stateData_->state_vx};
     // chMtxUnlock(dataMutex_state_);
@@ -28,9 +30,9 @@ void Controller::ctrlTickFunction(pointers* pointer_struct) {
 
     stateData_->state_apo = apogee_est;
 
-    float u = kp*(apogee_est - apogee_des_msl);
+    float u = kp * (apogee_est - apogee_des_msl);
 
-    float min = abs(u - prev_u)/dt;
+    float min = abs(u - prev_u) / dt;
 
     if (du_max < min) {
         min = du_max;
@@ -41,37 +43,34 @@ void Controller::ctrlTickFunction(pointers* pointer_struct) {
     if (u - prev_u < 0) {
         sign = -1;
     }
-    u = u + sign*min*dt;
+    u = u + sign * min * dt;
     prev_u = u;
 
-
-    //Set flap extension limits
+    // Set flap extension limits
     if (u < min_extension) {
-        pointer_struct->sensorDataPointer->flap_data.l1=u;
+        pointer_struct->sensorDataPointer->flap_data.l1 = u;
         u = min_extension;
     } else if (u > max_extension) {
-        pointer_struct->sensorDataPointer->flap_data.l1=0;
+        pointer_struct->sensorDataPointer->flap_data.l1 = 0;
         u = max_extension;
     }
 
     // std::cout << "Controller Flap Extension: " << u << std::endl;
 
-    
     if (ActiveControl_ON()) {
         activeControlServos.servoActuation(u);
-        
+
     } else {
-        if (pointer_struct->sensorDataPointer->rocketState_data.rocketState==STATE_APOGEE) {
+        if (pointer_struct->sensorDataPointer->rocketState_data.rocketState ==
+            STATE_APOGEE) {
             activeControlServos.servoActuation(0);
         } else {
             activeControlServos.servoActuation(15);
         }
     }
-
 }
 
 bool Controller::ActiveControl_ON() {
-
     // For some reason, this only sees IDLE through launch.
 
     bool active_control_on = true;
@@ -94,10 +93,10 @@ bool Controller::ActiveControl_ON() {
             break;
         case STATE_COAST:
             // std::cout << "COAST" << std::endl;
-            // This adds a delay to the 
+            // This adds a delay to the
             if (*ac_coast_timer > coast_ac_delay_thresh) {
                 active_control_on = true;
-            }            
+            }
             break;
         case STATE_APOGEE_DETECT:
             // std::cout << "Apogee" << std::endl;
@@ -110,9 +109,9 @@ bool Controller::ActiveControl_ON() {
     return active_control_on;
 }
 
-void Controller::setLaunchPadElevation(){
+void Controller::setLaunchPadElevation() {
     float sum = 0;
-    for(int i = 0; i < 30; i++){
+    for (int i = 0; i < 30; i++) {
         chMtxLock(dataMutex_barometer_);
         sum += *b_alt;
         chMtxUnlock(dataMutex_barometer_);

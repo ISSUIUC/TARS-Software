@@ -38,5 +38,4 @@
 // kx chip select pin
 #define KX134_CS 4
 
-
 #endif

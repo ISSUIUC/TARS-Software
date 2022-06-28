@@ -2,6 +2,7 @@
 #define SERVO_CPP
 
 #include "ServoControl.h"
+
 #include <cmath>
 
 /**
@@ -10,16 +11,14 @@
  *
  * @param value The value determined by the control algorithm.
  */
-ServoControl::ServoControl(PWMServo* servo) {
-    servo_ = servo;
-}
+ServoControl::ServoControl(PWMServo* servo) { servo_ = servo; }
 // TODO check values for max
 void ServoControl::roundOffAngle(float& value) {
-    //Min Extension Angle Value
+    // Min Extension Angle Value
     if (value > 130) {
         value = 130;
     }
-    //Max Extension Angle Value
+    // Max Extension Angle Value
     if (value < 0) {
         value = 0;
     }
@@ -37,14 +36,16 @@ void ServoControl::roundOffAngle(float& value) {
  *
  */
 void ServoControl::servoActuation(float length) {
-    // The angle is found through utilizing a fft and mapping extension/angle values to 
-    // a sine function. len (mm), pass in ang (rad)
+    // The angle is found through utilizing a fft and mapping extension/angle
+    // values to a sine function. len (mm), pass in ang (rad)
 
-    if(length < 0) length = 0;
-    if(length > 0.018) length = 0.018;
+    if (length < 0) length = 0;
+    if (length > 0.018) length = 0.018;
 
     /* Maps the length to an angle based on calibration */
-    float angle = -0.035 + 1.09*pow(10, 3)*length + 2.98*pow(10, -4)*pow(length, 2) - 1.24*pow(10, -6)*pow(length, 3);
+    float angle = -0.035 + 1.09 * pow(10, 3) * length +
+                  2.98 * pow(10, -4) * pow(length, 2) -
+                  1.24 * pow(10, -6) * pow(length, 3);
     roundOffAngle(angle);
 
     servo_->write(angle);

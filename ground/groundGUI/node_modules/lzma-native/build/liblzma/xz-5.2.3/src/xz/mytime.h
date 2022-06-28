@@ -10,7 +10,6 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-
 /// \brief      Number of milliseconds to between LZMA_SYNC_FLUSHes
 ///
 /// If 0, timed flushing is disabled. Otherwise if no more input is available
@@ -20,24 +19,19 @@
 /// the pending data.
 extern uint64_t opt_flush_timeout;
 
-
 /// \brief      True when flushing is needed due to expired timeout
 extern bool flush_needed;
-
 
 /// \brief      Store the time when (de)compression was started
 ///
 /// The start time is also stored as the time of the first flush.
 extern void mytime_set_start_time(void);
 
-
 /// \brief      Get the number of milliseconds since the operation started
 extern uint64_t mytime_get_elapsed(void);
 
-
 /// \brief      Store the time of when compressor was flushed
 extern void mytime_set_flush_time(void);
-
 
 /// \brief      Get the number of milliseconds until the next flush
 ///

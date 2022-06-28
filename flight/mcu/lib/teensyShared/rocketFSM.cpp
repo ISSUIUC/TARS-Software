@@ -30,9 +30,6 @@
 #include "pins.h"
 #include "thresholds.h"
 
-
-
-
 rocketFSM::rocketFSM(pointers *ptr) { pointer_struct = ptr; }
 
 // fsm_struct rocketTimers;
@@ -50,7 +47,7 @@ void rocketFSM::tickFSM() {
     if (pointer_struct->abort) {
         pointer_struct->sensorDataPointer->rocketState_data.rocketState =
             STATE_ABORT;
-            Serial.println("ABORT");
+        Serial.println("ABORT");
     }
 
     switch (pointer_struct->sensorDataPointer->rocketState_data.rocketState) {
@@ -63,7 +60,7 @@ void rocketFSM::tickFSM() {
             Serial.println("INIT");
             pointer_struct->sensorDataPointer->rocketState_data.rocketState =
                 STATE_IDLE;
-            
+
             break;
 
         case STATE_IDLE:
@@ -91,7 +88,8 @@ void rocketFSM::tickFSM() {
                 chVTGetSystemTime() - pointer_struct->rocketTimers.launch_time;
 
             // If the acceleration lasts long enough, boost is detected
-            if (TIME_I2MS(pointer_struct->rocketTimers.burn_timer) > launch_time_thresh) {
+            if (TIME_I2MS(pointer_struct->rocketTimers.burn_timer) >
+                launch_time_thresh) {
                 pointer_struct->sensorDataPointer->rocketState_data
                     .rocketState = STATE_BOOST;
                 // digitalWrite(LED_RED, HIGH);
@@ -113,7 +111,8 @@ void rocketFSM::tickFSM() {
                 break;
             }
             // Keeping rocket in STATE_BOOST if time below a certain threshold
-            if (TIME_I2MS(pointer_struct->rocketTimers.burn_timer) < burn_time_thresh_ms) {
+            if (TIME_I2MS(pointer_struct->rocketTimers.burn_timer) <
+                burn_time_thresh_ms) {
                 pointer_struct->sensorDataPointer->rocketState_data
                     .rocketState = STATE_BOOST;
             }
@@ -141,7 +140,8 @@ void rocketFSM::tickFSM() {
                 chVTGetSystemTime() - pointer_struct->rocketTimers.burnout_time;
 
             // If the low acceleration lasts long enough, coast is detected
-            if (TIME_I2MS(pointer_struct->rocketTimers.coast_timer) > coast_time_thresh) {
+            if (TIME_I2MS(pointer_struct->rocketTimers.coast_timer) >
+                coast_time_thresh) {
                 pointer_struct->sensorDataPointer->rocketState_data
                     .rocketState = STATE_COAST;
             }
@@ -157,8 +157,7 @@ void rocketFSM::tickFSM() {
                 coast_to_apogee_time_thresh) {
                 pointer_struct->sensorDataPointer->rocketState_data
                     .rocketState = STATE_APOGEE;
-            }
-            else {
+            } else {
                 Serial.println("Still in coast");
             }
 
@@ -167,8 +166,6 @@ void rocketFSM::tickFSM() {
             Serial.println("APOGEE");
         default:
             break;
-
-            
     }
     // Update timestamp for when rocket state was polled
     pointer_struct->sensorDataPointer->rocketState_data.timeStamp_RS =

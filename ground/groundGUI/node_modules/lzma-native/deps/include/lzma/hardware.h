@@ -30,9 +30,8 @@
  */
 
 #ifndef LZMA_H_INTERNAL
-#	error Never include this file directly. Use <lzma.h> instead.
+#error Never include this file directly. Use <lzma.h> instead.
 #endif
-
 
 /**
  * \brief       Get the total amount of physical memory (RAM) in bytes
@@ -48,7 +47,6 @@
  *              of RAM on the specific operating system.
  */
 extern LZMA_API(uint64_t) lzma_physmem(void) lzma_nothrow;
-
 
 /**
  * \brief       Get the number of processor cores or threads

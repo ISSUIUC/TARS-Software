@@ -5,12 +5,12 @@
 #include <SD.h>
 #include <stdint.h>
 
-#include "VoltageSensor.h"
 #include "FifoBuffer.h"
-#include "SparkFun_Qwiic_KX13X.h"       //High-G IMU Library
-#include "MS5611.h"           //Barometer Library
-#include "SparkFunLSM9DS1.h"  //Low-G IMU Library
+#include "MS5611.h"                //Barometer Library
+#include "SparkFunLSM9DS1.h"       //Low-G IMU Library
+#include "SparkFun_Qwiic_KX13X.h"  //High-G IMU Library
 #include "SparkFun_u-blox_GNSS_Arduino_Library.h"
+#include "VoltageSensor.h"
 #include "acShared.h"
 #include "dataStructs.h"
 
@@ -155,7 +155,6 @@ class DataLogBuffer {
     FifoBuffer<flapData, FIFO_SIZE> flapFifo{};
     FifoBuffer<VoltageData, FIFO_SIZE> voltageFifo{};
     FifoBuffer<BarometerData, FIFO_SIZE> barometerFifo{};
-    
 
    public:
     MUTEX_DECL(dataMutex_lowG);
@@ -166,7 +165,6 @@ class DataLogBuffer {
     MUTEX_DECL(dataMutex_rocket_state);
     MUTEX_DECL(dataMutex_voltage);
     MUTEX_DECL(dataMutex_state);
-
 
     sensorDataStruct_t current_data;
 

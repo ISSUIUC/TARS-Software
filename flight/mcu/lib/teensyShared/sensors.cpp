@@ -21,6 +21,7 @@
 #include <SD.h>
 #include <SPI.h>
 #include <Wire.h>
+
 #include <cmath>
 
 #include "SparkFun_u-blox_GNSS_Arduino_Library.h"
@@ -45,7 +46,6 @@ void lowGimuTickFunction(LSM9DS1* lsm, DataLogBuffer* data_log_buffer,
     lsm->readGyro();
     lsm->readMag();
     chSysUnlock();
-
 
     // Log timestamp
     lowG_Data->timeStamp_lowG = chVTGetSystemTime();
@@ -123,7 +123,6 @@ void gpsTickFunction(SFE_UBLOX_GNSS* gps, DataLogBuffer* data_log_buffer,
     bool posLock = (fix_type == 3);
 
     uint32_t SIV_count = gps->getSIV();
-
 
     gps_data->timeStamp_GPS = timeStamp_GPS;
     gps_data->latitude = latitude;
@@ -245,7 +244,8 @@ void barometerTickFunction(MS5611* barometer, DataLogBuffer* data_log_buffer,
 #endif
 }
 
-void voltageTickFunction(VoltageSensor* voltage, DataLogBuffer* data_log_buffer, VoltageData* voltage_data){
+void voltageTickFunction(VoltageSensor* voltage, DataLogBuffer* data_log_buffer,
+                         VoltageData* voltage_data) {
     auto data = voltage->read();
     *voltage_data = data;
     data_log_buffer->pushVoltageFifo(&data);

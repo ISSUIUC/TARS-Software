@@ -1,7 +1,7 @@
 #ifndef VOLTAGESENSOR_H
 #define VOLTAGESENSOR_H
 
-#include<Arduino.h>
+#include <Arduino.h>
 
 struct VoltageData {
     float v_battery;
@@ -14,39 +14,37 @@ struct VoltageData {
 };
 
 class VoltageSensor {
-public:
-    VoltageSensor(HardwareSerial& serial): serial(serial){
+   public:
+    VoltageSensor(HardwareSerial& serial) : serial(serial) {
         serial.begin(115200);
         serial.setTimeout(3);
     };
-    VoltageData read(){
-        return {
-            .v_battery = read_voltage('B'),
-            .v_servo1 = read_voltage('1'),
-            .v_servo2 = read_voltage('2'),
-            .v_3_3 = read_voltage('3'),
-            .v_5 = read_voltage('5'),
-            .v_9 = read_voltage('9'),
-            .timestamp = chVTGetSystemTime()
-        };
+    VoltageData read() {
+        return {.v_battery = read_voltage('B'),
+                .v_servo1 = read_voltage('1'),
+                .v_servo2 = read_voltage('2'),
+                .v_3_3 = read_voltage('3'),
+                .v_5 = read_voltage('5'),
+                .v_9 = read_voltage('9'),
+                .timestamp = chVTGetSystemTime()};
     }
 
-private:
-/**
-  * @param voltage_src
-  * '1' = servo1 line
-  * '2' = servo2 line
-  * '3' = 3.3 volt line
-  * '5' = 5 volt line
-  * '9' = 9 volt line
-  * 'B' = battery line
-  */
-    float read_voltage(char voltage_src){
-        if(voltage_src != 'B') return 0;
+   private:
+    /**
+     * @param voltage_src
+     * '1' = servo1 line
+     * '2' = servo2 line
+     * '3' = 3.3 volt line
+     * '5' = 5 volt line
+     * '9' = 9 volt line
+     * 'B' = battery line
+     */
+    float read_voltage(char voltage_src) {
+        if (voltage_src != 'B') return 0;
         serial.print(voltage_src);
         int val = 0;
         int read_num = serial.readBytes((char*)&val, sizeof(val));
-        if(read_num != sizeof(val)) {
+        if (read_num != sizeof(val)) {
             return -1;
         }
 
@@ -57,4 +55,4 @@ private:
     HardwareSerial& serial;
 };
 
-#endif //VOLTAGESENSOR_H
+#endif  // VOLTAGESENSOR_H

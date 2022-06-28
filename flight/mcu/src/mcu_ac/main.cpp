@@ -29,19 +29,19 @@
 #include <Wire.h>
 
 #include "ActiveControl.h"
-#include "SparkFun_Qwiic_KX13X.h"  //High-G IMU Library
-#include "MS5611.h"      //Barometer library
+#include "MS5611.h"  //Barometer library
 #include "ServoControl.h"
 #include "SparkFunLSM9DS1.h"                       //Low-G IMU Library
+#include "SparkFun_Qwiic_KX13X.h"                  //High-G IMU Library
 #include "SparkFun_u-blox_GNSS_Arduino_Library.h"  //GPS Library
 #include "acShared.h"
 #include "dataLog.h"
 #include "hybridShared.h"
+#include "kalmanFilter.h"
 #include "pins.h"
 #include "rocketFSM.h"
 #include "sensors.h"
 #include "telemetry.h"
-#include "kalmanFilter.h"
 
 // DataLogBuffer datalogger_THD_vars;
 
@@ -63,7 +63,7 @@ SFE_UBLOX_GNSS gps;
 
 MS5611 barometer{MS5611_CS};
 
-PWMServo servo_cw;   // Servo that induces clockwise roll moment
+PWMServo servo_cw;  // Servo that induces clockwise roll moment
 
 // Create a struct that holds pointers to all the important objects needed by
 // the threads
@@ -87,15 +87,15 @@ static THD_WORKING_AREA(kalman_WA, 8192);
 
 static THD_FUNCTION(telemetry_THD, arg) {
     struct pointers *pointer_struct = (struct pointers *)arg;
-    
+
     // int packetnum = 0;
     Telemetry tlm;
-    while(true) {
+    while (true) {
         tlm.transmit(sensorData);
         pointer_struct->abort = tlm.abort;
         pointer_struct->testing_flaps = tlm.testing;
         chThdSleepMilliseconds(200);
-        //transmit has a sleep in it
+        // transmit has a sleep in it
     }
 }
 
@@ -112,10 +112,11 @@ static THD_FUNCTION(rocket_FSM, arg) {
         Serial.println("### Rocket FSM thread entrance");
 #endif
 
-        chMtxLock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_rocket_state);
+        chMtxLock(
+            &pointer_struct->dataloggerTHDVarsPointer.dataMutex_rocket_state);
         stateMachine.tickFSM();
-        chMtxUnlock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_rocket_state);
-
+        chMtxUnlock(
+            &pointer_struct->dataloggerTHDVarsPointer.dataMutex_rocket_state);
 
         chThdSleepMilliseconds(6);  // FSM runs at 100 Hz
     }
@@ -165,7 +166,6 @@ static THD_FUNCTION(barometer_THD, arg) {
         barometerTickFunction(barometer, data_log_buffer, barometer_data);
         chMtxUnlock(&data_log_buffer->dataMutex_barometer);
 
-
         chThdSleepMilliseconds(6);
     }
 }
@@ -189,7 +189,7 @@ static THD_FUNCTION(highgIMU_THD, arg) {
         highGimuTickFunction(highG, data_log_buffer, highg_data);
         chMtxUnlock(&data_log_buffer->dataMutex_highG);
 
-        chThdSleepMilliseconds(20); //highg reads at 50 hz
+        chThdSleepMilliseconds(20);  // highg reads at 50 hz
     }
 }
 
@@ -220,9 +220,6 @@ static THD_FUNCTION(gps_THD, arg) {
     }
 }
 
-
-
-
 /******************************************************************************/
 /* KALMAN FILTER THREAD                                                       */
 
@@ -231,13 +228,11 @@ static THD_FUNCTION(kalman_THD, arg) {
     KalmanFilter KF(pointer_struct);
     KF.Initialize();
 
-    while(true){
+    while (true) {
         KF.kfTickFunction();
 
         chThdSleepMilliseconds(50);
     }
-
-
 }
 
 /******************************************************************************/
@@ -317,14 +312,14 @@ void chSetup() {
                       barometer_THD, &sensor_pointers);
     chThdCreateStatic(highgIMU_WA, sizeof(highgIMU_WA), NORMALPRIO + 1,
                       highgIMU_THD, &sensor_pointers);
-    chThdCreateStatic(servo_WA, sizeof(servo_WA), NORMALPRIO + 1, 
-                      servo_THD, &sensor_pointers);
+    chThdCreateStatic(servo_WA, sizeof(servo_WA), NORMALPRIO + 1, servo_THD,
+                      &sensor_pointers);
     chThdCreateStatic(dataLogger_WA, sizeof(dataLogger_WA), NORMALPRIO + 1,
                       dataLogger_THD, &sensor_pointers);
     chThdCreateStatic(voltage_WA, sizeof(voltage_WA), NORMALPRIO + 1,
                       voltage_THD, &sensor_pointers);
-    chThdCreateStatic(kalman_WA, sizeof(kalman_WA), NORMALPRIO + 1,
-                      kalman_THD, &sensor_pointers);
+    chThdCreateStatic(kalman_WA, sizeof(kalman_WA), NORMALPRIO + 1, kalman_THD,
+                      &sensor_pointers);
 
     while (true)
         ;
@@ -378,27 +373,25 @@ void setup() {
     SPI.begin();
     SPI1.setMISO(39);
 
-    if(!highGimu.beginSPICore(KX134_CS, 1000000, SPI)){
+    if (!highGimu.beginSPICore(KX134_CS, 1000000, SPI)) {
         Serial.println("Failed to communicate with KX134. Stalling Program");
         digitalWrite(LED_RED, HIGH);
         while (true)
             ;
-        
     }
 
-    if(!highGimu.initialize(DEFAULT_SETTINGS)){
+    if (!highGimu.initialize(DEFAULT_SETTINGS)) {
         Serial.println("Could not initialize KX134. Stalling Program");
         digitalWrite(LED_BLUE, HIGH);
         while (true)
             ;
     }
 
-    highGimu.setRange(3); // set range to 3 = 64 g range
+    highGimu.setRange(3);  // set range to 3 = 64 g range
     // lowGimu setup
     if (lowGimu.beginSPI(LSM9DS1_AG_CS, LSM9DS1_M_CS) ==
         false)  // note, we need to sent this our CS pins (defined above)
     {
-
         digitalWrite(LED_ORANGE, HIGH);
         Serial.println("Failed to communicate with LSM9DS1. Stalling Program");
         while (true)
@@ -407,12 +400,6 @@ void setup() {
 
     // Initialize barometer
     barometer.init();
-
-    
-    
-
-
-
 
     // GPS Setup
     SPI1.begin();
@@ -425,12 +412,9 @@ void setup() {
         while (true)
             ;
     } else {
-
     }
     digitalWrite(LED_RED, LOW);
     digitalWrite(LED_ORANGE, LOW);
-
-
 
     gps.setPortOutput(COM_PORT_SPI,
                       COM_TYPE_UBX);  // Set the SPI port to output UBX only
@@ -469,7 +453,7 @@ void setup() {
     }
 
     digitalWrite(LED_ORANGE, HIGH);
-    digitalWrite(LED_BLUE, HIGH);    
+    digitalWrite(LED_BLUE, HIGH);
     // Servo Setup
     servo_cw.attach(SERVO_CW_PIN, 770, 2250);
     Serial.println("chibios begin");

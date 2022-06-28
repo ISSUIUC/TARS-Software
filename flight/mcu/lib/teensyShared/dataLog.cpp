@@ -51,7 +51,7 @@ void dataLoggerTickFunction(pointers* pointer_struct) {
         current_data.has_flap_data =
             buffers.popFlapsFifo(&current_data.flap_data);
 
-        current_data.has_voltage_data = 
+        current_data.has_voltage_data =
             buffers.popVoltageFifo(&current_data.voltage_data);
 
         // check if any buffers have data
@@ -167,9 +167,13 @@ bool DataLogBuffer::popHighGFifo(HighGData* highG_Data) {
     return highGFifo.pop(highG_Data);
 }
 
-bool DataLogBuffer::pushGpsFifo(GpsData* gps_Data) { return gpsFifo.push(*gps_Data); }
+bool DataLogBuffer::pushGpsFifo(GpsData* gps_Data) {
+    return gpsFifo.push(*gps_Data);
+}
 
-bool DataLogBuffer::popGpsFifo(GpsData* gps_Data) { return gpsFifo.pop(gps_Data); }
+bool DataLogBuffer::popGpsFifo(GpsData* gps_Data) {
+    return gpsFifo.pop(gps_Data);
+}
 
 bool DataLogBuffer::pushStateFifo(stateData* state_data) {
     return stateFifo.push(*state_data);
@@ -195,19 +199,19 @@ bool DataLogBuffer::popRocketStateFifo(rocketStateData* rocket_data) {
     return rocketStateFifo.pop(rocket_data);
 }
 
-bool DataLogBuffer::pushFlapsFifo(flapData* flap_data){
+bool DataLogBuffer::pushFlapsFifo(flapData* flap_data) {
     return flapFifo.push(*flap_data);
 }
 
-bool DataLogBuffer::popFlapsFifo(flapData* flap_data){
+bool DataLogBuffer::popFlapsFifo(flapData* flap_data) {
     return flapFifo.pop(flap_data);
 }
 
-bool DataLogBuffer::pushVoltageFifo(VoltageData* voltage_data){
+bool DataLogBuffer::pushVoltageFifo(VoltageData* voltage_data) {
     return voltageFifo.push(*voltage_data);
 }
 
-bool DataLogBuffer::popVoltageFifo(VoltageData* voltage_data){
+bool DataLogBuffer::popVoltageFifo(VoltageData* voltage_data) {
     return voltageFifo.pop(voltage_data);
 }
 

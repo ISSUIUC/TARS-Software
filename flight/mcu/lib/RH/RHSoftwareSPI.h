@@ -12,9 +12,9 @@
 /// \class RHSoftwareSPI RHSoftwareSPI.h <RHSoftwareSPI.h>
 /// \brief Encapsulate a software SPI interface
 ///
-/// This concrete subclass of RHGenericSPI enapsulates a bit-banged software SPI interface.
-/// Caution: this software SPI interface will be much slower than hardware SPI on most
-/// platforms.
+/// This concrete subclass of RHGenericSPI enapsulates a bit-banged software SPI
+/// interface. Caution: this software SPI interface will be much slower than
+/// hardware SPI on most platforms.
 ///
 /// \par Usage
 ///
@@ -32,23 +32,25 @@
 ///    ....
 /// }
 /// \endcode
-class RHSoftwareSPI : public RHGenericSPI 
-{
-public:
-
+class RHSoftwareSPI : public RHGenericSPI {
+   public:
     /// Constructor
     /// Creates an instance of a bit-banged software SPI interface.
-    /// Sets the SPI pins to the defaults of 
-    /// MISO = 12, MOSI = 11, SCK = 13. If you need other assigments, call setPins() before
-    /// calling manager.init() or driver.init().
-    /// \param[in] frequency One of RHGenericSPI::Frequency to select the SPI bus frequency. The frequency
-    /// is mapped to the closest available bus frequency on the platform. CAUTION: the achieved
-    /// frequency will almost certainly be very much slower on most platforms. eg on Arduino Uno, the
+    /// Sets the SPI pins to the defaults of
+    /// MISO = 12, MOSI = 11, SCK = 13. If you need other assigments, call
+    /// setPins() before calling manager.init() or driver.init(). \param[in]
+    /// frequency One of RHGenericSPI::Frequency to select the SPI bus
+    /// frequency. The frequency is mapped to the closest available bus
+    /// frequency on the platform. CAUTION: the achieved frequency will almost
+    /// certainly be very much slower on most platforms. eg on Arduino Uno, the
     /// the clock rate is likely to be at best around 46kHz.
-    /// \param[in] bitOrder Select the SPI bus bit order, one of RHGenericSPI::BitOrderMSBFirst or 
-    /// RHGenericSPI::BitOrderLSBFirst.
-    /// \param[in] dataMode Selects the SPI bus data mode. One of RHGenericSPI::DataMode
-    RHSoftwareSPI(Frequency frequency = Frequency1MHz, BitOrder bitOrder = BitOrderMSBFirst, DataMode dataMode = DataMode0);
+    /// \param[in] bitOrder Select the SPI bus bit order, one of
+    /// RHGenericSPI::BitOrderMSBFirst or RHGenericSPI::BitOrderLSBFirst.
+    /// \param[in] dataMode Selects the SPI bus data mode. One of
+    /// RHGenericSPI::DataMode
+    RHSoftwareSPI(Frequency frequency = Frequency1MHz,
+                  BitOrder bitOrder = BitOrderMSBFirst,
+                  DataMode dataMode = DataMode0);
 
     /// Transfer a single octet to and from the SPI interface
     /// \param[in] data The octet to send
@@ -56,8 +58,9 @@ public:
     uint8_t transfer(uint8_t data);
 
     /// Initialise the software SPI library
-    /// Call this after configuring the SPI interface and before using it to transfer data.
-    /// Initializes the SPI bus by setting SCK, MOSI, and SS to outputs, pulling SCK and MOSI low, and SS high. 
+    /// Call this after configuring the SPI interface and before using it to
+    /// transfer data. Initializes the SPI bus by setting SCK, MOSI, and SS to
+    /// outputs, pulling SCK and MOSI low, and SS high.
     void begin();
 
     /// Disables the SPI bus usually, in this case
@@ -71,12 +74,11 @@ public:
     /// \param[in] sck clock pin used
     void setPins(uint8_t miso = 12, uint8_t mosi = 11, uint8_t sck = 13);
 
-private:
-
+   private:
     /// Delay routine for bus timing.
     void delayPeriod();
 
-private:
+   private:
     uint8_t _miso;
     uint8_t _mosi;
     uint8_t _sck;
