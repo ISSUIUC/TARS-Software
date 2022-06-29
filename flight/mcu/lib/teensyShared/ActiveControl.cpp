@@ -48,10 +48,8 @@ void Controller::ctrlTickFunction(pointers* pointer_struct) {
 
     // Set flap extension limits
     if (u < min_extension) {
-        pointer_struct->sensorDataPointer->flap_data.l1 = u;
         u = min_extension;
     } else if (u > max_extension) {
-        pointer_struct->sensorDataPointer->flap_data.l1 = 0;
         u = max_extension;
     }
 
@@ -59,13 +57,16 @@ void Controller::ctrlTickFunction(pointers* pointer_struct) {
 
     if (ActiveControl_ON()) {
         activeControlServos.servoActuation(u);
+        pointer_struct->sensorDataPointer->flap_data.l1 = u;
 
     } else {
         if (pointer_struct->sensorDataPointer->rocketState_data.rocketState ==
             STATE_APOGEE) {
             activeControlServos.servoActuation(0);
+            pointer_struct->sensorDataPointer->flap_data.l1 = 0;
         } else {
             activeControlServos.servoActuation(15);
+            pointer_struct->sensorDataPointer->flap_data.l1 = 15;
         }
     }
 }
