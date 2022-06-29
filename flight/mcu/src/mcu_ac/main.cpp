@@ -420,7 +420,7 @@ void setup() {
     gps.saveConfigSelective(
         VAL_CFG_SUBSEC_IOPORT);  // Save (only) the communications port settings
                                  // to flash and BBR
-    gps.setNavigationFrequency(5);  // set sampling rate to 10hz
+    gps.setNavigationFrequency(5);  // set sampling rate to 5hz
 
     // SD Card Setup
     if (SD.begin(BUILTIN_SDCARD)) {
