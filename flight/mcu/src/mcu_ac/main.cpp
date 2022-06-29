@@ -63,7 +63,7 @@ SFE_UBLOX_GNSS gps;
 
 MS5611 barometer{MS5611_CS};
 
-PWMServo servo_cw;  // Servo that induces clockwise roll moment
+PWMServo ac_servo;  // Servo that induces clockwise roll moment
 
 // Create a struct that holds pointers to all the important objects needed by
 // the threads
@@ -241,7 +241,7 @@ static THD_FUNCTION(kalman_THD, arg) {
 static THD_FUNCTION(servo_THD, arg) {
     struct pointers *pointer_struct = (struct pointers *)arg;
 
-    Controller ac(pointer_struct, &servo_cw);
+    Controller ac(pointer_struct, &ac_servo);
 
     while (true) {
 #ifdef THREAD_DEBUG
@@ -455,7 +455,7 @@ void setup() {
     digitalWrite(LED_ORANGE, HIGH);
     digitalWrite(LED_BLUE, HIGH);
     // Servo Setup
-    servo_cw.attach(SERVO_CW_PIN, 770, 2250);
+    ac_servo.attach(AC_SERVO_PIN, 770, 2250);
     Serial.println("chibios begin");
     chBegin(chSetup);
     while (true)

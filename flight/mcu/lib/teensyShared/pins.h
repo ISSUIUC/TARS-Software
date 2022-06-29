@@ -1,7 +1,7 @@
 #ifndef PINS_H
 #define PINS_H
 
-#define SERVO_CW_PIN 14
+#define AC_SERVO_PIN 14
 
 #define HYBRID_PT_1_PIN 20
 #define HYBRID_PT_2_PIN 21
