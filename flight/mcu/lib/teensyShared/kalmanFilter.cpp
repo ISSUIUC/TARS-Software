@@ -122,7 +122,10 @@ void KalmanFilter::priori() {
 
 void KalmanFilter::update() {
     // Update Kalman Gain
+    
+    Eigen::Matrix<float, 2, 2> temp = Eigen::Matrix<float, 2, 2>::Zero();
     temp = (((H * P_priori * H.transpose()) + R)).inverse();
+    Eigen::Matrix<float, 3, 3> identity = Eigen::Matrix<float, 3, 3>::Identity();
     K = (P_priori * H.transpose()) * temp;
 
     // Sensor Measurements

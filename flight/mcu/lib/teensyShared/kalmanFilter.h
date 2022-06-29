@@ -39,10 +39,7 @@ class KalmanFilter {
     Eigen::Matrix<float, 3, 3> P_priori = Eigen::Matrix<float, 3, 3>::Zero();
     Eigen::Matrix<float, 3, 1> x_priori = Eigen::Matrix<float, 3, 1>::Zero();
     Eigen::Matrix<float, 3, 2> K = Eigen::Matrix<float, 3, 2>::Zero();
-    Eigen::Matrix<float, 2, 2> temp = Eigen::Matrix<float, 2, 2>::Zero();
     Eigen::Matrix<float, 2, 1> y_k = Eigen::Matrix<float, 2, 1>::Zero();
-    Eigen::Matrix<float, 3, 3> identity =
-        Eigen::Matrix<float, 3, 3>::Identity();
 
     Eigen::Matrix<float, 3, 2> B = Eigen::Matrix<float, 3, 2>::Zero();
 };
