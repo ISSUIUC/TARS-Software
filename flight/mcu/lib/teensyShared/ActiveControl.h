@@ -13,11 +13,11 @@ class Controller {
    public:
     void ctrlTickFunction(pointers* pointer_struct);
     bool ActiveControl_ON();
-    Controller(struct pointers* pointer_struct, PWMServo* twisty_boi);
+    Controller(struct pointers* pointer_struct, PWMServo* controller_servo);
 
     void setLaunchPadElevation();
 
-    PWMServo* twisty_boi_;
+    PWMServo* controller_servo_;
     mutex_t* dataMutex_state_;
     stateData* stateData_;
     rk4 rk4_;

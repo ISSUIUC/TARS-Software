@@ -3,9 +3,9 @@
 #include "rocketFSM.h"
 #include "thresholds.h"
 
-Controller::Controller(struct pointers* pointer_struct, PWMServo* twisty_boi)
-    : activeControlServos(twisty_boi) {
-    twisty_boi_ = twisty_boi;
+Controller::Controller(struct pointers* pointer_struct, PWMServo* controller_servo)
+    : activeControlServos(controller_servo) {
+    controller_servo_ = controller_servo;
     stateData_ = &pointer_struct->sensorDataPointer->state_data;
     current_state =
         &pointer_struct->sensorDataPointer->rocketState_data.rocketState;
@@ -14,9 +14,9 @@ Controller::Controller(struct pointers* pointer_struct, PWMServo* twisty_boi)
     dataMutex_barometer_ =
         &pointer_struct->dataloggerTHDVarsPointer.dataMutex_barometer;
 
-    twisty_boi->write(180);
+    controller_servo_->write(180);
     chThdSleepMilliseconds(1000);
-    twisty_boi->write(15);
+    controller_servo_->write(15);
     chThdSleepMilliseconds(1000);
 
     setLaunchPadElevation();
