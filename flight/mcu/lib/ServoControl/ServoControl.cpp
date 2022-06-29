@@ -12,7 +12,7 @@
  * @param value The value determined by the control algorithm.
  */
 ServoControl::ServoControl(PWMServo* servo) { servo_ = servo; }
-// TODO check values for max
+
 void ServoControl::roundOffAngle(float& value) {
     // Min Extension Angle Value
     if (value > 130) {

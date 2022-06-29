@@ -21,7 +21,6 @@ class ServoControl {
     void servoActuation(float length_one);
 
    private:
-    float radius = 0.0127;  // pitch radius of gear
     PWMServo* servo_;
 
     /**
