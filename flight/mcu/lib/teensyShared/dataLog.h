@@ -206,7 +206,6 @@ struct pointers {
 
     DataLogBuffer dataloggerTHDVarsPointer;
     bool abort;
-    bool testing_flaps;
 
     fsm_struct rocketTimers;
 };

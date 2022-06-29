@@ -2,6 +2,7 @@
 #define VOLTAGESENSOR_H
 
 #include <Arduino.h>
+#include <ChRt.h>
 
 struct VoltageData {
     float v_battery;

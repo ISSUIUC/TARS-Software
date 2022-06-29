@@ -128,10 +128,6 @@ void Telemetry::handle_command(const telemetry_command &cmd) {
         Serial.println("[DEBUG]: Got abort");
     }
 
-    if (cmd.command == TEST_FLAPS) {
-        Serial.println("[DEBUG]: Got test flaps");
-        testing = !testing;
-    }
 }
 
 /**

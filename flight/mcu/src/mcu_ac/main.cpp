@@ -93,7 +93,6 @@ static THD_FUNCTION(telemetry_THD, arg) {
     while (true) {
         tlm.transmit(sensorData);
         pointer_struct->abort = tlm.abort;
-        pointer_struct->testing_flaps = tlm.testing;
         chThdSleepMilliseconds(200);
         // transmit has a sleep in it
     }
@@ -368,7 +367,6 @@ void setup() {
     sensor_pointers.GPSPointer = &gps;
     sensor_pointers.sensorDataPointer = &sensorData;
     sensor_pointers.abort = false;
-    sensor_pointers.testing_flaps = false;
 
     SPI.begin();
     SPI1.setMISO(39);

@@ -84,7 +84,6 @@ class Telemetry {
     void transmit(const sensorDataStruct_t&);
     void handle_command(const telemetry_command& cmd);
     bool abort = false;
-    bool testing = false;
 
    private:
     int packetnum;
