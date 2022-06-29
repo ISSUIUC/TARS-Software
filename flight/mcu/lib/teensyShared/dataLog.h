@@ -55,9 +55,8 @@ struct GpsData {
     bool posLock;
     systime_t timeStamp_GPS;
 };
-struct flapData {
-    float l1;
-    float l2;
+struct FlapData {
+    float extension;
     systime_t timeStamp_flaps;
 };
 
@@ -126,7 +125,7 @@ struct sensorDataStruct_t {
 
     // Flap state
     bool has_flap_data;
-    flapData flap_data;
+    FlapData flap_data;
 
     // Voltage state
     bool has_voltage_data;
@@ -152,7 +151,7 @@ class DataLogBuffer {
     FifoBuffer<GpsData, FIFO_SIZE> gpsFifo{};
     FifoBuffer<stateData, FIFO_SIZE> stateFifo{};
     FifoBuffer<rocketStateData, FIFO_SIZE> rocketStateFifo{};
-    FifoBuffer<flapData, FIFO_SIZE> flapFifo{};
+    FifoBuffer<FlapData, FIFO_SIZE> flapFifo{};
     FifoBuffer<VoltageData, FIFO_SIZE> voltageFifo{};
     FifoBuffer<BarometerData, FIFO_SIZE> barometerFifo{};
 
@@ -188,8 +187,8 @@ class DataLogBuffer {
     bool pushBarometerFifo(BarometerData* barometer_data);
     bool popBarometerFifo(BarometerData* barometer_data);
 
-    bool pushFlapsFifo(flapData* flap_data);
-    bool popFlapsFifo(flapData* flap_data);
+    bool pushFlapsFifo(FlapData* flap_data);
+    bool popFlapsFifo(FlapData* flap_data);
 
     bool pushVoltageFifo(VoltageData* voltage_data);
     bool popVoltageFifo(VoltageData* voltage_data);

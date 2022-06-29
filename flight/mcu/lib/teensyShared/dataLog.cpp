@@ -199,11 +199,11 @@ bool DataLogBuffer::popRocketStateFifo(rocketStateData* rocket_data) {
     return rocketStateFifo.pop(rocket_data);
 }
 
-bool DataLogBuffer::pushFlapsFifo(flapData* flap_data) {
+bool DataLogBuffer::pushFlapsFifo(FlapData* flap_data) {
     return flapFifo.push(*flap_data);
 }
 
-bool DataLogBuffer::popFlapsFifo(flapData* flap_data) {
+bool DataLogBuffer::popFlapsFifo(FlapData* flap_data) {
     return flapFifo.pop(flap_data);
 }
 

@@ -62,16 +62,16 @@ void Controller::ctrlTickFunction(pointers* pointer_struct) {
      **/
     if (ActiveControl_ON()) {
         activeControlServos.servoActuation(u);
-        pointer_struct->sensorDataPointer->flap_data.l1 = u;
+        pointer_struct->sensorDataPointer->flap_data.extension = u;
 
     } else {
         if (pointer_struct->sensorDataPointer->rocketState_data.rocketState ==
             STATE_APOGEE) {
             activeControlServos.servoActuation(0);
-            pointer_struct->sensorDataPointer->flap_data.l1 = 0;
+            pointer_struct->sensorDataPointer->flap_data.extension = 0;
         } else {
             activeControlServos.servoActuation(15);
-            pointer_struct->sensorDataPointer->flap_data.l1 = 15;
+            pointer_struct->sensorDataPointer->flap_data.extension = 15;
         }
     }
 }
