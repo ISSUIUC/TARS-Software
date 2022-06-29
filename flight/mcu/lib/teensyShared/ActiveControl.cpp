@@ -53,6 +53,13 @@ void Controller::ctrlTickFunction(pointers* pointer_struct) {
         u = max_extension;
     }
 
+    /** 
+     * When in COAST state, we set the flap extension to whatever the AC algorithm calculates
+     * If not in COAST, we keep the servos at 15 degrees. This was experimentally determined to
+     * be the position where the flaps were perfectly flush with the airframe. After APOGEE is detected,
+     * we set the servos to 0 degrees so that the avionics bay can be removed from the airframe with ease 
+     * on the ground
+     **/
     if (ActiveControl_ON()) {
         activeControlServos.servoActuation(u);
         pointer_struct->sensorDataPointer->flap_data.l1 = u;
