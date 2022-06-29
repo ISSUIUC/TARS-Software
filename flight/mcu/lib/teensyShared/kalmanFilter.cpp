@@ -29,7 +29,6 @@ void KalmanFilter::Initialize() {
     float sum = 0;
     for (int i = 0; i < 30; i++) {
         chMtxLock(dataMutex_barometer_);
-        // std::cout<<baro_data_ptr_->altitude<<std::endl;
         sum += *b_alt;
         chMtxUnlock(dataMutex_barometer_);
         chThdSleepMilliseconds(100);
@@ -135,8 +134,6 @@ void KalmanFilter::update() {
 
     chMtxLock(dataMutex_barometer_);
     y_k(0, 0) = *b_alt;
-    // Serial.println(y_k(0,0));
-    // std::cout<< y_k(0,0) <<std::endl;
     chMtxUnlock(dataMutex_barometer_);
 
     // # Posteriori Update
