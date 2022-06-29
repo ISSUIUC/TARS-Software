@@ -53,8 +53,6 @@ void Controller::ctrlTickFunction(pointers* pointer_struct) {
         u = max_extension;
     }
 
-    // std::cout << "Controller Flap Extension: " << u << std::endl;
-
     if (ActiveControl_ON()) {
         activeControlServos.servoActuation(u);
         pointer_struct->sensorDataPointer->flap_data.l1 = u;
@@ -72,35 +70,28 @@ void Controller::ctrlTickFunction(pointers* pointer_struct) {
 }
 
 bool Controller::ActiveControl_ON() {
-    // For some reason, this only sees IDLE through launch.
 
     bool active_control_on = true;
     switch (*current_state) {
         case STATE_INIT:
-            // std::cout << "INIT" << std::endl;
             active_control_on = false;
             break;
         case STATE_IDLE:
-            // std::cout << "IDLE" << std::endl;
             active_control_on = false;
             break;
         case STATE_LAUNCH_DETECT:
-            // std::cout << "Launch Detect" << std::endl;
             active_control_on = false;
             break;
         case STATE_BOOST:
-            // std::cout << "BOOST" << std::endl;
             active_control_on = false;
             break;
         case STATE_COAST:
-            // std::cout << "COAST" << std::endl;
-            // This adds a delay to the
+            // This adds a delay to the coast state so that we don't deploy flaps too quickly
             if (*ac_coast_timer > coast_ac_delay_thresh) {
                 active_control_on = true;
             }
             break;
-        case STATE_APOGEE_DETECT:
-            // std::cout << "Apogee" << std::endl;
+        case STATE_APOGEE_DETECT:\
             active_control_on = false;
             break;
         default:
