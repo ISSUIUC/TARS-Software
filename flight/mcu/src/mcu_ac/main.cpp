@@ -19,6 +19,9 @@
  * Nicholas Phillips
  * Gautam Dayal
  * Patrick Marschoun
+ * Parth Shrotri
+ * Jeffery Zhou
+ * Karnap Patel
  */
 
 #include <Arduino.h>

@@ -26,6 +26,15 @@ void KalmanFilter::kfTickFunction() {
 }
 
 void KalmanFilter::Initialize() {
+    /** The following for loop takes a series of barometer measurements on start up and takes the average of them in order 
+     * to initialize the kalman filter to the correct initial barometric altitude. This is done so that the kalman filter
+    * takes minimal time to converge to an accurate state estimate. This process is significantly faster than allowing the
+    * state as letting the filter to converge to the correct state can take up to 3 min. This specific process was used because
+    * the barometric altitude will change depending on the weather and thus, the initial state estimate cannot be hard coded. 
+    * A GPS altitude may be used instead but due to GPS losses during high speed/high altitude flight, it is inadvisable 
+    * with the current hardware to use this as a solution. Reference frames should also be kept consistent 
+    * (do not mix GPS altitude and barometric).
+    */
     float sum = 0;
     for (int i = 0; i < 30; i++) {
         chMtxLock(dataMutex_barometer_);

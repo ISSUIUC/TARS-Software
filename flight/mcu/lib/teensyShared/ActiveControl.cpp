@@ -108,8 +108,13 @@ bool Controller::ActiveControl_ON() {
     return active_control_on;
 }
 
+/* This method takes a series of barometer measurements on start up and takes the average of them in order to
+* initialize the target altitude to a set value above ground level. Hard coding a launch pad elevation is not 
+*a viable solution to this problem as the Kalman filter which is the data input to the controller uses barometric 
+*altitude as its reference frame. This is equivalent to determining the barometric pressure at an airport and using 
+*it to calibrate an aircraft's onboard altimeter.
+*/
 void Controller::setLaunchPadElevation() {
-    float sum = 0;
     for (int i = 0; i < 30; i++) {
         chMtxLock(dataMutex_barometer_);
         sum += *b_alt;
