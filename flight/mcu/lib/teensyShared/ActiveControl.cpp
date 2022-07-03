@@ -115,6 +115,7 @@ bool Controller::ActiveControl_ON() {
 *it to calibrate an aircraft's onboard altimeter.
 */
 void Controller::setLaunchPadElevation() {
+    float sum = 0;
     for (int i = 0; i < 30; i++) {
         chMtxLock(dataMutex_barometer_);
         sum += *b_alt;
