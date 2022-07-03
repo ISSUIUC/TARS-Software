@@ -17,19 +17,7 @@ class rk4 {
     array<float, 2> sim_apogee(array<float, 2> state, float dt);
 
     float cd(float alt, float vel);
-
-    
-
-   private:
-    Atmosphere atmo_;
-    array<float, 2> y1{{0, 0}};
-    array<float, 2> y2{{0, 0}};
-    array<float, 2> y3{{0, 0}};
-    array<float, 2> y4{{0, 0}};
-    array<float, 2> rk4_kp1{{0, 0}};
-};
-
-array<double, 151> poly = {
+    array<double, 151> poly = {
         {0.00000000000000000000000000000000000000000000000001,
          0,
          0,
@@ -181,3 +169,15 @@ array<double, 151> poly = {
          -109.45988611012040792047628201544284820556640625000000,
          3.55595509400277709488591426634229719638824462890625,
          0.53874991700259822202667692181421443819999694824219}};
+
+    
+
+   private:
+    Atmosphere atmo_;
+    array<float, 2> y1{{0, 0}};
+    array<float, 2> y2{{0, 0}};
+    array<float, 2> y3{{0, 0}};
+    array<float, 2> y4{{0, 0}};
+    array<float, 2> rk4_kp1{{0, 0}};
+};
+
