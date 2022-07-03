@@ -4,7 +4,11 @@
  * computer and the ground station.
  *
  * Spaceshot Avionics 2021-22
- * Illinois Space Society
+ * Illinois Space Society - Telemetry Team
+ * Gautam Dayal
+ * Nicholas Phillips
+ * Patrick Marschoun
+ * Peter Giannetos
  */
 
 #include <telemetry.h>

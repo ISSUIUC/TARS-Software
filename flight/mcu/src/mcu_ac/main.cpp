@@ -6,7 +6,7 @@
  *
  * Active Control Program
  *
- * Illinois Space Society - Avioinics Team
+ * Illinois Space Society - Software + Active Controls + Telemetry
  *
  * Anshuk Chigullapalli
  * Josh Blustein
