@@ -3,10 +3,6 @@
 
 #define AC_SERVO_PIN 14
 
-#define HYBRID_PT_1_PIN 20
-#define HYBRID_PT_2_PIN 21
-#define HYBRID_PT_3_PIN 22
-
 #define LED_BLUE 28
 #define LED_RED 31
 #define LED_ORANGE 30
