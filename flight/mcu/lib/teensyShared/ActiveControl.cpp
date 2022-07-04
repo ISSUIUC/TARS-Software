@@ -9,7 +9,7 @@ Controller::Controller(struct pointers* pointer_struct, PWMServo* controller_ser
     stateData_ = &pointer_struct->sensorDataPointer->state_data;
     current_state =
         &pointer_struct->sensorDataPointer->rocketState_data.rocketState;
-    uint32_t* ac_coast_timer = &pointer_struct->rocketTimers.coast_timer;
+    ac_coast_timer = &pointer_struct->rocketTimers.coast_timer;
     b_alt = &pointer_struct->sensorDataPointer->barometer_data.altitude;
     dataMutex_barometer_ =
         &pointer_struct->dataloggerTHDVarsPointer.dataMutex_barometer;
