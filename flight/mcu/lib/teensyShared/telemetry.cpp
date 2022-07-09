@@ -131,7 +131,6 @@ void Telemetry::handle_command(const telemetry_command &cmd) {
         }
         Serial.println("[DEBUG]: Got abort");
     }
-
 }
 
 /**

@@ -73,9 +73,7 @@ array<float, 2> rk4::rk4_step(array<float, 2> state, float dt, float rho) {
 }
 
 array<float, 2> rk4::sim_apogee(array<float, 2> state, float dt) {
-
     for (int iters = 0; iters < 120 && state[1] > 0; iters++) {
-
         // grabbing the current states
         float pos_f = state[0];
         float vel_f = state[1];

@@ -3,7 +3,8 @@
 #include "rocketFSM.h"
 #include "thresholds.h"
 
-Controller::Controller(struct pointers* pointer_struct, PWMServo* controller_servo)
+Controller::Controller(struct pointers* pointer_struct,
+                       PWMServo* controller_servo)
     : activeControlServos(controller_servo) {
     controller_servo_ = controller_servo;
     stateData_ = &pointer_struct->sensorDataPointer->state_data;
@@ -53,12 +54,13 @@ void Controller::ctrlTickFunction(pointers* pointer_struct) {
         u = max_extension;
     }
 
-    /** 
-     * When in COAST state, we set the flap extension to whatever the AC algorithm calculates
-     * If not in COAST, we keep the servos at 15 degrees. This was experimentally determined to
-     * be the position where the flaps were perfectly flush with the airframe. After APOGEE is detected,
-     * we set the servos to 0 degrees so that the avionics bay can be removed from the airframe with ease 
-     * on the ground
+    /**
+     * When in COAST state, we set the flap extension to whatever the AC
+     *algorithm calculates If not in COAST, we keep the servos at 15 degrees.
+     *This was experimentally determined to be the position where the flaps were
+     *perfectly flush with the airframe. After APOGEE is detected, we set the
+     *servos to 0 degrees so that the avionics bay can be removed from the
+     *airframe with ease on the ground
      **/
     if (ActiveControl_ON()) {
         activeControlServos.servoActuation(u);
@@ -77,7 +79,6 @@ void Controller::ctrlTickFunction(pointers* pointer_struct) {
 }
 
 bool Controller::ActiveControl_ON() {
-
     bool active_control_on = true;
     switch (*current_state) {
         case STATE_INIT:
@@ -93,12 +94,13 @@ bool Controller::ActiveControl_ON() {
             active_control_on = false;
             break;
         case STATE_COAST:
-            // This adds a delay to the coast state so that we don't deploy flaps too quickly
+            // This adds a delay to the coast state so that we don't deploy
+            // flaps too quickly
             if (*ac_coast_timer > coast_ac_delay_thresh) {
                 active_control_on = true;
             }
             break;
-        case STATE_APOGEE_DETECT:\
+        case STATE_APOGEE_DETECT:
             active_control_on = false;
             break;
         default:
@@ -108,12 +110,14 @@ bool Controller::ActiveControl_ON() {
     return active_control_on;
 }
 
-/* This method takes a series of barometer measurements on start up and takes the average of them in order to
-* initialize the target altitude to a set value above ground level. Hard coding a launch pad elevation is not 
-* a viable solution to this problem as the Kalman filter which is the data input to the controller uses barometric 
-* altitude as its reference frame. This is equivalent to determining the barometric pressure at an airport and using 
-* it to calibrate an aircraft's onboard altimeter.
-*/
+/* This method takes a series of barometer measurements on start up and takes
+ * the average of them in order to initialize the target altitude to a set value
+ * above ground level. Hard coding a launch pad elevation is not a viable
+ * solution to this problem as the Kalman filter which is the data input to the
+ * controller uses barometric altitude as its reference frame. This is
+ * equivalent to determining the barometric pressure at an airport and using it
+ * to calibrate an aircraft's onboard altimeter.
+ */
 void Controller::setLaunchPadElevation() {
     float sum = 0;
     for (int i = 0; i < 30; i++) {
