@@ -1,6 +1,7 @@
-/* kalmanFilter.cpp
+/**
+ * @file kalmanFilter.cpp
  *
- * Implementation of the AC team's Kalman Filter
+ * @brief Implementation of the AC team's Kalman Filter
  */ 
 
 #include "kalmanFilter.h"

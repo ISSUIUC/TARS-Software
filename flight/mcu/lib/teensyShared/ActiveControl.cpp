@@ -1,6 +1,7 @@
-/* ActiveControl.cpp
+/** 
+ * @file ActiveControl.cpp
  * 
- * Contains the C++ implementation of the active controls math, 
+ * @brief Contains the C++ implementation of the active controls math, 
  * logic to tell controls that it's safe to actuate based on FSM, and
  * functionality to set the launch pad elevation at startup.
  */ 
@@ -67,14 +68,14 @@ void Controller::ctrlTickFunction(pointers* pointer_struct) {
         u = max_extension;
     }
 
-    /**
+    /*
      * When in COAST state, we set the flap extension to whatever the AC
-     *algorithm calculates If not in COAST, we keep the servos at 15 degrees.
-     *This was experimentally determined to be the position where the flaps were
-     *perfectly flush with the airframe. After APOGEE is detected, we set the
-     *servos to 0 degrees so that the avionics bay can be removed from the
-     *airframe with ease on the ground
-     **/
+     * algorithm calculates If not in COAST, we keep the servos at 15 degrees.
+     * This was experimentally determined to be the position where the flaps were
+     * perfectly flush with the airframe. After APOGEE is detected, we set the
+     * servos to 0 degrees so that the avionics bay can be removed from the
+     * airframe with ease on the ground
+     */
     if (ActiveControl_ON()) {
         activeControlServos.servoActuation(u);
         pointer_struct->sensorDataPointer->flap_data.extension = u;
@@ -91,6 +92,11 @@ void Controller::ctrlTickFunction(pointers* pointer_struct) {
     }
 }
 
+/**
+ * @brief Determines whether it's safe for flaps to actuate. Does this
+ * based on FSM state and a timer within COAST
+ * @returns boolean depending on whether flaps should actuate or not
+ */ 
 bool Controller::ActiveControl_ON() {
     bool active_control_on = true;
     switch (*current_state) {

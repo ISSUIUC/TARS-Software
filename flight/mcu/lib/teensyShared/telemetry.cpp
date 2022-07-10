@@ -1,6 +1,7 @@
-/* telemetry.cpp
+/**
+ * @file telemetry.cpp
  *
- * This file defines the telemetry class used to facilitate
+ * @brief This file defines the telemetry class used to facilitate
  * telemetry commands and data transfer between the on-board flight
  * computer and the ground station.
  *
@@ -75,7 +76,7 @@ Telemetry::Telemetry() : rf95(RFM95_CS, RFM95_INT) {
 }
 
 /**
- * This function handles commands sent from the ground station
+ * @brief  This function handles commands sent from the ground station
  * to TARS. The effects of this function depend on the command
  * sent.
  *
@@ -103,8 +104,6 @@ void Telemetry::handle_command(const telemetry_command &cmd) {
     if (cmd.command == SET_FREQ) {
         freq_status.should_change = true;
         freq_status.new_freq = cmd.freq;
-        // Serial.println("Got freq");  //don't want serial prints in flight
-        // code
 
         // Writing freq to file
         // Fix this to overwriteHave to overwrite and not truncate? @gautamdayal
@@ -135,7 +134,7 @@ void Telemetry::handle_command(const telemetry_command &cmd) {
 }
 
 /**
- * This function transmits data from the struct provided as
+ * @brief This function transmits data from the struct provided as
  * the parameter (data collected from sensor suite) to the
  * ground station. The function also switches to a new commanded
  * frequency based on a previously received command and waits for
