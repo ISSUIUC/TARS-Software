@@ -72,8 +72,6 @@ PWMServo ac_servo;  // Servo that induces clockwise roll moment
 // the threads
 pointers sensor_pointers;
 
-uint8_t mpu_data[71];
-
 static THD_WORKING_AREA(barometer_WA, 8192);
 static THD_WORKING_AREA(gps_WA, 8192);
 static THD_WORKING_AREA(rocket_FSM_WA, 8192);
