@@ -115,7 +115,7 @@ bool Controller::ActiveControl_ON() {
 }
 
 /**
- * @brief Initializes launchpad elevation through barometer measurement
+ * @brief Initializes launchpad elevation through barometer measurement. 
  * 
  * This method takes a series of barometer measurements on start up and takes
  * the average of them in order to initialize the target altitude to a set value
@@ -124,6 +124,8 @@ bool Controller::ActiveControl_ON() {
  * controller uses barometric altitude as its reference frame. This is
  * equivalent to determining the barometric pressure at an airport and using it
  * to calibrate an aircraft's onboard altimeter.
+ * 
+ * The function takes an average of 30 measurements, each made 100 ms apart
  */
 void Controller::setLaunchPadElevation() {
     float sum = 0;
