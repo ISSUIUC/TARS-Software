@@ -5,15 +5,9 @@
 
 #include "acShared.h"
 
-/**
- * @brief A struct containing pointers to objects needed for the servo_THD.
- *
- */
-
 class ServoControl {
    public:
     ServoControl(PWMServo* servo);
-    // ServoControl& operator==(const ServoControl&) = default;
     void servoActuation(float length);
 
    private:

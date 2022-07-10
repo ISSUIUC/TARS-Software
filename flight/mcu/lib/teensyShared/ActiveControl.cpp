@@ -22,6 +22,12 @@ Controller::Controller(struct pointers* pointer_struct,
     dataMutex_barometer_ =
         &pointer_struct->dataloggerTHDVarsPointer.dataMutex_barometer;
 
+    /* 
+     * Startup sequence
+     * 15 degrees written to servo since this was
+     * experimentally determined to be the position in which
+     * the flaps are perfectly flush with the airframe.
+     */
     controller_servo_->write(180);
     chThdSleepMilliseconds(1000);
     controller_servo_->write(15);
