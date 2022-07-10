@@ -14,20 +14,10 @@ class ServoControl {
    public:
     ServoControl(PWMServo* servo);
     // ServoControl& operator==(const ServoControl&) = default;
-    /**
-     * @brief actuats servos based on State Estimation.
-     * runs during servo thread
-     */
-    void servoActuation(float length_one);
+    void servoActuation(float length);
 
    private:
     PWMServo* servo_;
-
-    /**
-     * @brief ensures angle written to servo is between 0 and 180
-     *
-     * @param takes an angle as a float
-     */
     void roundOffAngle(float& value);
 };
 

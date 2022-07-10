@@ -20,7 +20,7 @@ ServoControl::ServoControl(PWMServo* servo) { servo_ = servo; }
  * @brief A function to keep the value sent to the servo between 0 and 130
  * degrees.
  *
- * @param value The value determined by the control algorithm.
+ * @param value The angle value determined by the control algorithm.
  */
 void ServoControl::roundOffAngle(float& value) {
     // Min Extension Angle Value
@@ -39,10 +39,7 @@ void ServoControl::roundOffAngle(float& value) {
  * @brief Takes the length of the flap extension and converts to angles for the
  * servo.
  *
- * @param length_one The length of the flap extension for the counterclockwise
- * flaps.
- * @param length_two The length of the flap extension for the clockwise flaps.
- *
+ * @param length Desired flap extension
  */
 void ServoControl::servoActuation(float length) {
     // The angle is found through utilizing a fft and mapping extension/angle
