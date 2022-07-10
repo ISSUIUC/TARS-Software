@@ -114,7 +114,10 @@ bool Controller::ActiveControl_ON() {
     return active_control_on;
 }
 
-/* This method takes a series of barometer measurements on start up and takes
+/**
+ * @brief Initializes launchpad elevation through barometer measurement
+ * 
+ * This method takes a series of barometer measurements on start up and takes
  * the average of them in order to initialize the target altitude to a set value
  * above ground level. Hard coding a launch pad elevation is not a viable
  * solution to this problem as the Kalman filter which is the data input to the

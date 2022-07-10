@@ -4,7 +4,7 @@
  *   / /   / __ |  / , _/ _\ \
  *  /_/   /_/ |_| /_/|_| /___/
  *
- * Active Control Program
+ * Rocket Flight Code
  *
  * Illinois Space Society - Software + Active Controls + Telemetry
  *
