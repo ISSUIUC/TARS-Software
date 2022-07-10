@@ -18,7 +18,7 @@ class rk4 {
 
     float cd(float alt, float vel);
     array<double, 151> poly = {
-        {0.00000000000000000000000000000000000000000000000001,
+        {0,
          0,
          0,
          0,
