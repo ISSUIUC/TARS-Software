@@ -1,7 +1,7 @@
 /**
  * @file dataLog.cpp
  * 
- * @brief Contains the code to handle FIFO buffers for sensors,
+ * Contains the code to handle FIFO buffers for sensors,
  * work with the SD card library. The header file also contains 
  * important data structs. 
  */ 

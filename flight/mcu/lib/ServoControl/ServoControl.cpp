@@ -2,7 +2,9 @@
  * @file ServoControl.cpp
  * 
  * @brief An interface between flight software and our servo
- * library. Provides functionality to write length values
+ * library. 
+ * 
+ * Provides functionality to write length values
  * directly to the servos instead of raw angles, and helps
  * keep calculated angles within reasonable input margins
  */ 

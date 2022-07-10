@@ -1,6 +1,6 @@
-/* thresholds.h
+/** @file thresholds.h
  *
- * Contains thresholds for time and acceleration that
+ * @brief Contains thresholds for time and acceleration that
  * are used to determine changes in FSM state.
  */ 
 

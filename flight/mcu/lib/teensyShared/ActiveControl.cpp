@@ -98,29 +98,14 @@ void Controller::ctrlTickFunction(pointers* pointer_struct) {
  * @returns boolean depending on whether flaps should actuate or not
  */ 
 bool Controller::ActiveControl_ON() {
-    bool active_control_on = true;
+    bool active_control_on = false;
     switch (*current_state) {
-        case STATE_INIT:
-            active_control_on = false;
-            break;
-        case STATE_IDLE:
-            active_control_on = false;
-            break;
-        case STATE_LAUNCH_DETECT:
-            active_control_on = false;
-            break;
-        case STATE_BOOST:
-            active_control_on = false;
-            break;
         case STATE_COAST:
             // This adds a delay to the coast state so that we don't deploy
             // flaps too quickly
             if (*ac_coast_timer > coast_ac_delay_thresh) {
                 active_control_on = true;
             }
-            break;
-        case STATE_APOGEE_DETECT:
-            active_control_on = false;
             break;
         default:
             active_control_on = false;
