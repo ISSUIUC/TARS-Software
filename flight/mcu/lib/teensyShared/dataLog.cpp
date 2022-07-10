@@ -149,8 +149,9 @@ int32_t flush_iterator = 0;
 void logData(File* dataFile, sensorDataStruct_t* data) {
     // Write raw bytes to SD card.
     dataFile->write((const uint8_t*)data, sizeof(*data));
-    // Flush data once for every 1000 writes (this keeps the ring buffer in sync
-    // with data collection)
+    // Flush data once for every 50 writes
+    // Flushing data is the step that actually writes to the card
+    // Flushing more frequently incurs more of a latency penalty, but less potential data loss
     if (flush_iterator == 50) {
         dataFile->flush();
         flush_iterator = 0;

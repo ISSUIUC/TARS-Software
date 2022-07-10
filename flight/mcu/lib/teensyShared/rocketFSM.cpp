@@ -35,7 +35,7 @@ rocketFSM::rocketFSM(pointers *ptr) { pointer_struct = ptr; }
 void rocketFSM::tickFSM() {
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     // Lock mutexes for data used in switch
-    chMtxLock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_lowG);
+    chMtxLock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_highG);
 
     // get the linear accelration from the lowgimu
     float linear_acceleration =
@@ -173,5 +173,5 @@ void rocketFSM::tickFSM() {
         &pointer_struct->sensorDataPointer->rocketState_data);
 
     // Unlock mutexes used during the switch statement
-    chMtxUnlock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_lowG);
+    chMtxUnlock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_highG);
 }

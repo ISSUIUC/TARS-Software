@@ -38,9 +38,9 @@ Controller::Controller(struct pointers* pointer_struct,
 }
 
 void Controller::ctrlTickFunction(pointers* pointer_struct) {
-    // chMtxLock(dataMutex_state_);
+    chMtxLock(dataMutex_state_);
     array<float, 2> init = {stateData_->state_x, stateData_->state_vx};
-    // chMtxUnlock(dataMutex_state_);
+    chMtxUnlock(dataMutex_state_);
     float apogee_est = rk4_.sim_apogee(init, 0.3)[0];
 
     stateData_->state_apo = apogee_est;

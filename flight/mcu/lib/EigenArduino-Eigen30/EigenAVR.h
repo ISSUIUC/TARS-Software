@@ -40,6 +40,7 @@ namespace std {
 
 // Include Eigen's Core
 #include "Eigen/Core"
+// Include Eigen dense matrix, used for ac matrix math
 #include "Eigen/Dense"
 
 #ifdef NEED_A0_RESTORED
