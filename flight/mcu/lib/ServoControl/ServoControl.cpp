@@ -13,14 +13,15 @@
 
 #include <cmath>
 
+
+ServoControl::ServoControl(PWMServo* servo) { servo_ = servo; }
+
 /**
- * @brief A function to keep the value sent to the servo between 0 and 180
+ * @brief A function to keep the value sent to the servo between 0 and 130
  * degrees.
  *
  * @param value The value determined by the control algorithm.
  */
-ServoControl::ServoControl(PWMServo* servo) { servo_ = servo; }
-
 void ServoControl::roundOffAngle(float& value) {
     // Min Extension Angle Value
     if (value > 130) {

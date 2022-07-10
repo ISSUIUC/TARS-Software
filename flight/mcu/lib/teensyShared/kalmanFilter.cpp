@@ -1,3 +1,7 @@
+/* kalmanFilter.cpp
+ *
+ * Implementation of the AC team's Kalman Filter
+ */ 
 
 #include "kalmanFilter.h"
 #define EIGEN_MATRIX_PLUGIN "MatrixAddons.h"

@@ -1,4 +1,5 @@
-/*
+/* telemetry.cpp
+ *
  * This file defines the telemetry class used to facilitate
  * telemetry commands and data transfer between the on-board flight
  * computer and the ground station.

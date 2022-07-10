@@ -1,3 +1,10 @@
+/* ActiveControl.cpp
+ * 
+ * Contains the C++ implementation of the active controls math, 
+ * logic to tell controls that it's safe to actuate based on FSM, and
+ * functionality to set the launch pad elevation at startup.
+ */ 
+
 #include "ActiveControl.h"
 
 #include "rocketFSM.h"

@@ -1,3 +1,10 @@
+/* dataLog.cpp
+ * 
+ * Contains the code to handle FIFO buffers for sensors,
+ * work with the SD card library. The header file also contains 
+ * important data structs. 
+ */ 
+
 #ifndef DATALOG_CPP
 #define DATALOG_CPP
 
