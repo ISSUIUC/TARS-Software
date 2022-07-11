@@ -33,7 +33,6 @@
 rocketFSM::rocketFSM(pointers *ptr) { pointer_struct = ptr; }
 
 void rocketFSM::tickFSM() {
-    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     // Lock mutexes for data used in switch
     chMtxLock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_highG);
 
