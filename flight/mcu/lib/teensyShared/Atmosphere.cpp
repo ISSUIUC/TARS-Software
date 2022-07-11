@@ -8,6 +8,7 @@
  *
  * The classes defined here represent atmosphere components. These
  * objects will represent the atmosphere model used for simulation.
+ * All data was taken from http://www.braeunig.us/space/atmmodel.htm
  *
  */
 
