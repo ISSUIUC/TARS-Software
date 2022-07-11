@@ -5,6 +5,7 @@
 #include <array>
 #include <cmath>
 
+// TODO: make a typedef for array<float, 2>
 // using std::array;
 
 rk4::rk4() {
