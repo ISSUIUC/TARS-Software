@@ -5,7 +5,7 @@
 #include <array>
 #include <cmath>
 
-using std::array;
+// using std::array;
 
 rk4::rk4() {
     Atmosphere atmo;
@@ -14,13 +14,7 @@ rk4::rk4() {
 
 float rk4::cd(float alt, float vel) {
     float mach = vel / (atmo_.get_speed_of_sound(alt));
-    // double cd = 0;
-    // for(int i = 0; i < 151; i++) {
-    //     cd += poly[i]*std::pow(mach, 150-i);
-    // }
-    // return float(cd);
 
-    // more efficent implementation
     double cd = 0;
 
     double mach_power = 1;
@@ -37,7 +31,6 @@ array<float, 2> rk4::accel(array<float, 2> u, float rho) {
 
     // Approximation - use the area of a circle for reference area
     float Sref_a = .007854;
-    // Cd_total = rasaero.drag_lookup_1dof(pos_f,vel_f,RASaero,dic["CD"])
     float Cd_total = cd(r1, v1);
 
     float F_a = -((rho * (v1 * v1) * Sref_a * Cd_total) / 2);

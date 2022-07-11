@@ -23,6 +23,10 @@ KalmanFilter::KalmanFilter(struct pointers* pointer_struct) {
         &pointer_struct->sensorDataPointer->rocketState_data.rocketState;
 }
 
+/**
+ * @brief Run Kalman filter calculations as long as FSM has passed IDLE
+ * 
+ */ 
 void KalmanFilter::kfTickFunction() {
     if (*current_state_ > STATE_IDLE) {
         priori();
@@ -158,8 +162,6 @@ void KalmanFilter::update() {
     // Sensor Measurements
     chMtxLock(mutex_highG_);
     y_k(1, 0) = (*gz_H) * 9.81;
-    // Serial.println("HIGH G ACCEL Z: ");
-    // Serial.println((*gz_H)*9.81);
     chMtxUnlock(mutex_highG_);
 
     chMtxLock(dataMutex_barometer_);
