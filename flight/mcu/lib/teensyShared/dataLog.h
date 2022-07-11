@@ -55,6 +55,11 @@ struct GpsData {
     bool posLock;
     systime_t timeStamp_GPS;
 };
+
+/**
+ * @brief Structure for values relevant to active control flaps
+ * 
+ */
 struct FlapData {
     float extension;
     systime_t timeStamp_flaps;
