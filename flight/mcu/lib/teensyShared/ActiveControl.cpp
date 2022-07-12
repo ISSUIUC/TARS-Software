@@ -47,12 +47,14 @@ void Controller::ctrlTickFunction(pointers* pointer_struct) {
 
     float u = kp * (apogee_est - apogee_des_msl);
 
+    // Limit rate of the servo so that it does not command a large change in a short period of time
     float min = abs(u - prev_u) / dt;
 
     if (du_max < min) {
         min = du_max;
     }
 
+    // Update servo input with rate limited value
     float sign = 1;
 
     if (u - prev_u < 0) {
