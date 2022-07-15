@@ -57,8 +57,6 @@
 // Create a data struct to hold data from the sensors
 sensorDataStruct_t sensorData;
 
-FSM_State rocketState = STATE_INIT;
-
 QwiicKX134 highGimu;
 LSM9DS1 lowGimu;
 bool gps_connected;
