@@ -31,7 +31,7 @@
 // static THD_WORKING_AREA(typed_pushThreadWorkingArea3, 128);
 
 // /******************************************************************************/
-// /* SIMPLE PUSHING IN THREAD TEST TYPED                                        */
+// /* SIMPLE PUSHING IN THREAD TEST TYPED */
 
 // SEMAPHORE_DECL(typed_start_thread, 0);
 // SEMAPHORE_DECL(typed_thread_done, 0);
@@ -56,7 +56,7 @@
 // }
 
 // /******************************************************************************/
-// /* PRODUCER-CONSUMER THREAD TEST TYPED                                        */
+// /* PRODUCER-CONSUMER THREAD TEST TYPED */
 
 // SEMAPHORE_DECL(typed_start_producerThread1, 0);
 // SEMAPHORE_DECL(typed_done_producerThread1, 0);
@@ -107,7 +107,7 @@
 // }
 
 // /******************************************************************************/
-// /* THREAD POP FAILING TEST TYPED                                              */
+// /* THREAD POP FAILING TEST TYPED */
 
 // SEMAPHORE_DECL(typed_start_popThread1, 0);
 // SEMAPHORE_DECL(typed_done_popThread1, 0);
@@ -153,7 +153,7 @@
 // }
 
 // /******************************************************************************/
-// /* THREAD PUSH FAILING TEST TYPED                                             */
+// /* THREAD PUSH FAILING TEST TYPED */
 
 // SEMAPHORE_DECL(typed_start_pushThread2, 0);
 // SEMAPHORE_DECL(typed_done_pushThread2, 0);
@@ -194,7 +194,7 @@
 // }
 
 // /******************************************************************************/
-// /* SIMPLE PUSHING IN THREAD TEST                                              */
+// /* SIMPLE PUSHING IN THREAD TEST */
 
 // SEMAPHORE_DECL(start_thread, 0);
 // SEMAPHORE_DECL(thread_done, 0);
@@ -220,7 +220,7 @@
 // }
 
 // /******************************************************************************/
-// /* PRODUCER-CONSUMER THREAD TEST                                              */
+// /* PRODUCER-CONSUMER THREAD TEST */
 
 // SEMAPHORE_DECL(start_producerThread1, 0);
 // SEMAPHORE_DECL(done_producerThread1, 0);
@@ -269,7 +269,7 @@
 // }
 
 // /******************************************************************************/
-// /* THREAD POP FAILING TEST                                                    */
+// /* THREAD POP FAILING TEST */
 
 // SEMAPHORE_DECL(start_popThread1, 0);
 // SEMAPHORE_DECL(done_popThread1, 0);
@@ -316,7 +316,7 @@
 // }
 
 // /******************************************************************************/
-// /* THREAD PUSH FAILING TEST                                                   */
+// /* THREAD PUSH FAILING TEST */
 
 // SEMAPHORE_DECL(start_pushThread2, 0);
 // SEMAPHORE_DECL(done_pushThread2, 0);
@@ -358,7 +358,7 @@
 // }
 
 // /******************************************************************************/
-// /* RUN THREADED TEST CASES                                                    */
+// /* RUN THREADED TEST CASES */
 
 // void run_threaded_test_cases() {
 //     chThdCreateStatic(myThreadWorkingArea, sizeof(myThreadWorkingArea),

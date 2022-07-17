@@ -58,7 +58,7 @@ struct GpsData {
 
 /**
  * @brief Structure for values relevant to active control flaps
- * 
+ *
  */
 struct FlapData {
     float extension;
@@ -85,7 +85,7 @@ struct stateData {
     float state_vx = 0;
     float state_ax = 0;
     float state_apo = 0;
-    // float state_q0 = 0; 
+    // float state_q0 = 0;
 
     systime_t timeStamp_state = 0;
 };

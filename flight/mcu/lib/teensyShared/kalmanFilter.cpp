@@ -2,7 +2,7 @@
  * @file kalmanFilter.cpp
  *
  * @brief Implementation of the AC team's Kalman Filter
- */ 
+ */
 
 #include "kalmanFilter.h"
 #define EIGEN_MATRIX_PLUGIN "MatrixAddons.h"
@@ -25,17 +25,18 @@ KalmanFilter::KalmanFilter(struct pointers* pointer_struct) {
 
 /**
  * @brief Run Kalman filter calculations as long as FSM has passed IDLE
- * 
- */ 
+ *
+ */
 void KalmanFilter::kfTickFunction() {
     if (*current_state_ > STATE_IDLE) {
         priori();
         update();
     }
 }
-/** 
- * @brief Sets altitude by averaging 30 barometer measurements taken 100 ms apart
- * 
+/**
+ * @brief Sets altitude by averaging 30 barometer measurements taken 100 ms
+ * apart
+ *
  * The following for loop takes a series of barometer measurements on start
  * up and takes the average of them in order to initialize the kalman filter
  * to the correct initial barometric altitude. This is done so that the
@@ -48,10 +49,11 @@ void KalmanFilter::kfTickFunction() {
  * losses during high speed/high altitude flight, it is inadvisable with the
  * current hardware to use this as a solution. Reference frames should also
  * be kept consistent (do not mix GPS altitude and barometric).
- * 
+ *
  */
 void KalmanFilter::Initialize() {
-    // TODO: The altitude initialization is the same code as setLaunchPadElevation() in AC. Maybe use the same one?
+    // TODO: The altitude initialization is the same code as
+    // setLaunchPadElevation() in AC. Maybe use the same one?
     float sum = 0;
     for (int i = 0; i < 30; i++) {
         chMtxLock(dataMutex_barometer_);
@@ -148,11 +150,9 @@ void KalmanFilter::priori() {
 
 /**
  * @brief Update Kalman Gain
- * 
- */ 
+ *
+ */
 void KalmanFilter::update() {
-    
-
     Eigen::Matrix<float, 2, 2> temp = Eigen::Matrix<float, 2, 2>::Zero();
     temp = (((H * P_priori * H.transpose()) + R)).inverse();
     Eigen::Matrix<float, 3, 3> identity =

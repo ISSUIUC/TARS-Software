@@ -41,8 +41,8 @@ class VoltageSensor {
      * 'B' = battery line
      */
     float read_voltage(char voltage_src) {
-
-        // reading the voltage actually takes a long time, so skip reading voltages we don't really need
+        // reading the voltage actually takes a long time, so skip reading
+        // voltages we don't really need
         if (voltage_src != 'B') return 0;
         serial.print(voltage_src);
         int val = 0;

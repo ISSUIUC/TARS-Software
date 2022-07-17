@@ -274,7 +274,8 @@
 //     auto elapsed_time_ms = (end - begin) * tick_time * 1000;
 //     Serial.printf("PERF: 10000 pushes in %f ms\n", elapsed_time_ms);
 
-//     // test that the throughput was higher than 50000 ints over 5 buffers in 100
+//     // test that the throughput was higher than 50000 ints over 5 buffers in
+//     100
 //     // ms
 //     TEST_ASSERT_LESS_THAN(100, elapsed_time_ms);
 // }
@@ -382,13 +383,14 @@
 //     auto elapsed_time_ms = (end - begin) * tick_time * 1000;
 //     Serial.printf("PERF: 10000 pushes in %f ms\n", elapsed_time_ms);
 
-//     // test that the throughput was higher than 50000 ints over 5 buffers in 100
+//     // test that the throughput was higher than 50000 ints over 5 buffers in
+//     100
 //     // ms
 //     TEST_ASSERT_LESS_THAN(100, elapsed_time_ms);
 // }
 
 // /******************************************************************************/
-// /* RUN THREADED TEST CASES                                                    */
+// /* RUN THREADED TEST CASES */
 
 // void run_performance_test_cases() {
 //     RUN_TEST(test_producer_performance_perf);
