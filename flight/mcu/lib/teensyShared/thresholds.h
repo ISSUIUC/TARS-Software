@@ -2,7 +2,7 @@
  *
  * @brief Contains thresholds for time and acceleration that
  * are used to determine changes in FSM state.
- */
+ */ 
 
 #ifndef THRESHOLDS_H
 #define THRESHOLDS_H

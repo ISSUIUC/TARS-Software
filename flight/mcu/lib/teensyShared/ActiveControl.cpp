@@ -1,10 +1,10 @@
-/**
+/** 
  * @file ActiveControl.cpp
- *
- * @brief Contains the C++ implementation of the active controls math,
+ * 
+ * @brief Contains the C++ implementation of the active controls math, 
  * logic to tell controls that it's safe to actuate based on FSM, and
  * functionality to set the launch pad elevation at startup.
- */
+ */ 
 
 #include "ActiveControl.h"
 
@@ -23,7 +23,7 @@ Controller::Controller(struct pointers* pointer_struct,
     dataMutex_barometer_ =
         &pointer_struct->dataloggerTHDVarsPointer.dataMutex_barometer;
 
-    /*
+    /* 
      * Startup sequence
      * 15 degrees written to servo since this was
      * experimentally determined to be the position in which
@@ -47,8 +47,7 @@ void Controller::ctrlTickFunction(pointers* pointer_struct) {
 
     float u = kp * (apogee_est - apogee_des_msl);
 
-    // Limit rate of the servo so that it does not command a large change in a
-    // short period of time
+    // Limit rate of the servo so that it does not command a large change in a short period of time
     float min = abs(u - prev_u) / dt;
 
     if (du_max < min) {
@@ -74,9 +73,9 @@ void Controller::ctrlTickFunction(pointers* pointer_struct) {
     /*
      * When in COAST state, we set the flap extension to whatever the AC
      * algorithm calculates If not in COAST, we keep the servos at 15 degrees.
-     * This was experimentally determined to be the position where the flaps
-     * were perfectly flush with the airframe. After APOGEE is detected, we set
-     * the servos to 0 degrees so that the avionics bay can be removed from the
+     * This was experimentally determined to be the position where the flaps were
+     * perfectly flush with the airframe. After APOGEE is detected, we set the
+     * servos to 0 degrees so that the avionics bay can be removed from the
      * airframe with ease on the ground
      */
     if (ActiveControl_ON()) {
@@ -99,7 +98,7 @@ void Controller::ctrlTickFunction(pointers* pointer_struct) {
  * @brief Determines whether it's safe for flaps to actuate. Does this
  * based on FSM state and a timer within COAST
  * @returns boolean depending on whether flaps should actuate or not
- */
+ */ 
 bool Controller::ActiveControl_ON() {
     bool active_control_on = false;
     switch (*current_state) {
@@ -118,8 +117,8 @@ bool Controller::ActiveControl_ON() {
 }
 
 /**
- * @brief Initializes launchpad elevation through barometer measurement.
- *
+ * @brief Initializes launchpad elevation through barometer measurement. 
+ * 
  * This method takes a series of barometer measurements on start up and takes
  * the average of them in order to initialize the target altitude to a set value
  * above ground level. Hard coding a launch pad elevation is not a viable
@@ -127,7 +126,7 @@ bool Controller::ActiveControl_ON() {
  * controller uses barometric altitude as its reference frame. This is
  * equivalent to determining the barometric pressure at an airport and using it
  * to calibrate an aircraft's onboard altimeter.
- *
+ * 
  * The function takes an average of 30 measurements, each made 100 ms apart
  */
 void Controller::setLaunchPadElevation() {

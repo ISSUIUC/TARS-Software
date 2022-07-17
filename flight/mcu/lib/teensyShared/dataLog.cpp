@@ -1,10 +1,10 @@
 /**
  * @file dataLog.cpp
- *
+ * 
  * Contains the code to handle FIFO buffers for sensors,
- * work with the SD card library. The header file also contains
- * important data structs.
- */
+ * work with the SD card library. The header file also contains 
+ * important data structs. 
+ */ 
 
 #ifndef DATALOG_CPP
 #define DATALOG_CPP
@@ -151,8 +151,7 @@ void logData(File* dataFile, sensorDataStruct_t* data) {
     dataFile->write((const uint8_t*)data, sizeof(*data));
     // Flush data once for every 50 writes
     // Flushing data is the step that actually writes to the card
-    // Flushing more frequently incurs more of a latency penalty, but less
-    // potential data loss
+    // Flushing more frequently incurs more of a latency penalty, but less potential data loss
     if (flush_iterator == 50) {
         dataFile->flush();
         flush_iterator = 0;
