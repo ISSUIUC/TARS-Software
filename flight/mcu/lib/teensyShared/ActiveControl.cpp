@@ -1,95 +1,143 @@
+/**
+ * @file ActiveControl.cpp
+ *
+ * @brief Contains the C++ implementation of the active controls math,
+ * logic to tell controls that it's safe to actuate based on FSM, and
+ * functionality to set the launch pad elevation at startup.
+ */
+
 #include "ActiveControl.h"
 
-#include "PWMServo.h"
-#include "ServoControl.h"
-#include "acShared.h"
-#include "dataLog.h"
-#include "sensors.h"
+#include "rocketFSM.h"
+#include "thresholds.h"
 
-ActiveControl::ActiveControl(struct pointers* pointer_struct, PWMServo* ccw,
-                             PWMServo* cw)
-    : activeControlServos(ccw, cw) {
-    gy = &pointer_struct->sensorDataPointer->lowG_data.gy;
+Controller::Controller(struct pointers* pointer_struct,
+                       PWMServo* controller_servo)
+    : activeControlServos(controller_servo) {
+    controller_servo_ = controller_servo;
+    stateData_ = &pointer_struct->sensorDataPointer->state_data;
     current_state =
         &pointer_struct->sensorDataPointer->rocketState_data.rocketState;
-    mutex_lowG_ = &pointer_struct->dataloggerTHDVarsPointer.dataMutex_lowG;
+    ac_coast_timer = &pointer_struct->rocketTimers.coast_timer;
+    b_alt = &pointer_struct->sensorDataPointer->barometer_data.altitude;
+    dataMutex_barometer_ =
+        &pointer_struct->dataloggerTHDVarsPointer.dataMutex_barometer;
 
-    // Flaps go in and out upon initializing for testing purposes
-    activeControlServos.servoActuation(0, 0);
+    /*
+     * Startup sequence
+     * 15 degrees written to servo since this was
+     * experimentally determined to be the position in which
+     * the flaps are perfectly flush with the airframe.
+     */
+    controller_servo_->write(180);
     chThdSleepMilliseconds(1000);
-    activeControlServos.servoActuation(1, 1);
+    controller_servo_->write(15);
     chThdSleepMilliseconds(1000);
-    activeControlServos.servoActuation(0, 0);
+
+    setLaunchPadElevation();
 }
 
-void ActiveControl::acTickFunction() {
-    chMtxLock(mutex_lowG_);  // Locking only for gy because we use local
-                             // variables for everything else
-    float e = omega_goal + *gy;
-    chMtxUnlock(mutex_lowG_);
+void Controller::ctrlTickFunction(pointers* pointer_struct) {
+    chMtxLock(dataMutex_state_);
+    array<float, 2> init = {stateData_->state_x, stateData_->state_vx};
+    chMtxUnlock(dataMutex_state_);
+    float apogee_est = rk4_.sim_apogee(init, 0.3)[0];
 
-    if (true) {
-        e_sum += e * .006;
-    }
-    float dedt = e - e_prev;
-    Eigen::Matrix<float, 2, 1> u = (k_p * e) + (k_i * e_sum) + (k_d * dedt);
-    float l1 = u(0, 0);
-    float l2 = u(1, 0);
-    float l1_cmd = 0;
-    float l2_cmd = 0;
+    stateData_->state_apo = apogee_est;
 
-    if (l1 != 0) {
-        int sign = ((l1 - l1_prev) / dt) / abs((l1 - l1_prev) / dt);
-        l1_cmd = l1 + sign * min(abs((l1 - l1_prev) / dt), du_max);
-    }
-    if (l2 != 0) {
-        int sign = ((l2 - l2_prev) / dt) / abs((l2 - l2_prev) / dt);
-        l2_cmd = l2 + sign * min(abs((l2 - l2_prev) / dt), du_max);
+    float u = kp * (apogee_est - apogee_des_msl);
+
+    // Limit rate of the servo so that it does not command a large change in a
+    // short period of time
+    float min = abs(u - prev_u) / dt;
+
+    if (du_max < min) {
+        min = du_max;
     }
 
-    // low pass filter
-    if (l1_cmd < 0.002794) {
-        l1_cmd = 0;
+    // Update servo input with rate limited value
+    float sign = 1;
+
+    if (u - prev_u < 0) {
+        sign = -1;
     }
-    if (l2_cmd < 0.002794) {
-        l2_cmd = 0;
+    u = u + sign * min * dt;
+    prev_u = u;
+
+    // Set flap extension limits
+    if (u < min_extension) {
+        u = min_extension;
+    } else if (u > max_extension) {
+        u = max_extension;
     }
 
+    /*
+     * When in COAST state, we set the flap extension to whatever the AC
+     * algorithm calculates If not in COAST, we keep the servos at 15 degrees.
+     * This was experimentally determined to be the position where the flaps
+     * were perfectly flush with the airframe. After APOGEE is detected, we set
+     * the servos to 0 degrees so that the avionics bay can be removed from the
+     * airframe with ease on the ground
+     */
     if (ActiveControl_ON()) {
-        activeControlServos.servoActuation(l1_cmd, l2_cmd);
-    } else {
-        activeControlServos.servoActuation(0, 0);
-    }
+        activeControlServos.servoActuation(u);
+        pointer_struct->sensorDataPointer->flap_data.extension = u;
 
-    e_prev = e;
-    l1_prev = l1_cmd;
-    l2_prev = l2_cmd;
+    } else {
+        if (pointer_struct->sensorDataPointer->rocketState_data.rocketState ==
+            STATE_APOGEE) {
+            activeControlServos.servoActuation(0);
+            pointer_struct->sensorDataPointer->flap_data.extension = 0;
+        } else {
+            activeControlServos.servoActuation(15);
+            pointer_struct->sensorDataPointer->flap_data.extension = 15;
+        }
+    }
 }
 
-bool ActiveControl::ActiveControl_ON() {
+/**
+ * @brief Determines whether it's safe for flaps to actuate. Does this
+ * based on FSM state and a timer within COAST
+ * @returns boolean depending on whether flaps should actuate or not
+ */
+bool Controller::ActiveControl_ON() {
     bool active_control_on = false;
     switch (*current_state) {
-        case STATE_INIT:
-            active_control_on = false;
-            break;
-        case STATE_IDLE:
-            active_control_on = false;
-            break;
-        case STATE_LAUNCH_DETECT:
-            active_control_on = false;
-            break;
-        case STATE_BOOST:
-            active_control_on = false;
-            break;
         case STATE_COAST:
-            active_control_on = true;
-            break;
-        case STATE_APOGEE_DETECT:
-            active_control_on = false;
+            // This adds a delay to the coast state so that we don't deploy
+            // flaps too quickly
+            if (*ac_coast_timer > coast_ac_delay_thresh) {
+                active_control_on = true;
+            }
             break;
         default:
             active_control_on = false;
             break;
     }
     return active_control_on;
+}
+
+/**
+ * @brief Initializes launchpad elevation through barometer measurement.
+ *
+ * This method takes a series of barometer measurements on start up and takes
+ * the average of them in order to initialize the target altitude to a set value
+ * above ground level. Hard coding a launch pad elevation is not a viable
+ * solution to this problem as the Kalman filter which is the data input to the
+ * controller uses barometric altitude as its reference frame. This is
+ * equivalent to determining the barometric pressure at an airport and using it
+ * to calibrate an aircraft's onboard altimeter.
+ *
+ * The function takes an average of 30 measurements, each made 100 ms apart
+ */
+void Controller::setLaunchPadElevation() {
+    float sum = 0;
+    for (int i = 0; i < 30; i++) {
+        chMtxLock(dataMutex_barometer_);
+        sum += *b_alt;
+        chMtxUnlock(dataMutex_barometer_);
+        chThdSleepMilliseconds(100);
+    }
+    launch_pad_alt = sum / 30;
+    apogee_des_msl = apogee_des_agl + launch_pad_alt;
 }

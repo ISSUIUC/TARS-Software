@@ -42,3 +42,6 @@
 # Vim Crap
 *.swp
 **/*.swp
+
+# Mac stuff
+.DS_Store

@@ -1,39 +1,42 @@
-#include "Eigen30.h"
+#include <PWMServo.h>
+#include <math.h>
+#include <rk4.h>
+
+#include <array>
+
 #include "ServoControl.h"
-#include "acShared.h"
 #include "dataLog.h"
-#include "sensors.h"
 
-class ActiveControl {
+using std::array;
+
+class Controller {
    public:
-    ActiveControl(struct pointers* pointer_struct, PWMServo* ccw, PWMServo* cw);
-
+    void ctrlTickFunction(pointers* pointer_struct);
     bool ActiveControl_ON();
+    Controller(struct pointers* pointer_struct, PWMServo* controller_servo);
 
-    // Frequency should match output of sensor ready (angular velocity)
-    // AV_X is x angular acceleration (roll) from LOWG IMU
-    void acTickFunction();
+    void setLaunchPadElevation();
 
-   private:
-    mutex_t* mutex_lowG_;
+    PWMServo* controller_servo_;
+    mutex_t* dataMutex_state_;
+    stateData* stateData_;
+    rk4 rk4_;
+    float kp = 0.00008;
 
-    // These matrices are solely for October launch, only roll control
-    Eigen::Matrix<float, 2, 1> k_p{0.003, -0.003};
+    float min_extension = 0;
+    float max_extension = 17.88 / 1000;
+    float dt = .006;
+    float prev_u = 0;
+    float du_max = 0.01;
 
-    Eigen::Matrix<float, 2, 1> k_i{.0000007, -.0000007};
+    float launch_pad_alt;
+    float apogee_des_msl;
+    float apogee_des_agl = 9144;
 
-    Eigen::Matrix<float, 2, 1> k_d{.0000007, -.0000007};
+    float* b_alt;
+    mutex_t* dataMutex_barometer_;
 
-    float l1_prev = 0;
-    float l2_prev = 0;
-    float* gy;
-    float du_max = .0001;  // TODO test value
-    float dt = .006;       // seconds
-
-    // goals
-    float omega_goal = 0;
-    float e_sum = 0;
-    float e_prev = 0;
     FSM_State* current_state;
     ServoControl activeControlServos;
+    uint32_t* ac_coast_timer;
 };

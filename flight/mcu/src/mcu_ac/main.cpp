@@ -4,9 +4,9 @@
  *   / /   / __ |  / , _/ _\ \
  *  /_/   /_/ |_| /_/|_| /___/
  *
- * Active Control Program
+ * Rocket Flight Code
  *
- * Illinois Space Society - Avioinics Team
+ * Illinois Space Society - Software + Active Controls + Telemetry
  *
  * Anshuk Chigullapalli
  * Josh Blustein
@@ -16,6 +16,12 @@
  * Ben Olaivar
  * Colin Kinsey
  * Grace Robbins
+ * Nicholas Phillips
+ * Gautam Dayal
+ * Patrick Marschoun
+ * Parth Shrotri
+ * Jeffery Zhou
+ * Karnap Patel
  */
 
 #include <Arduino.h>
@@ -26,21 +32,23 @@
 #include <Wire.h>
 
 #include "ActiveControl.h"
-#include "KX134-1211.h"  //High-G IMU Library
-#include "MS5611.h"      //Barometer library
+#include "MS5611.h"  //Barometer library
 #include "ServoControl.h"
 #include "SparkFunLSM9DS1.h"                       //Low-G IMU Library
+#include "SparkFun_Qwiic_KX13X.h"                  //High-G IMU Library
 #include "SparkFun_u-blox_GNSS_Arduino_Library.h"  //GPS Library
 #include "acShared.h"
 #include "dataLog.h"
 #include "hybridShared.h"
+#include "kalmanFilter.h"
 #include "pins.h"
 #include "rocketFSM.h"
 #include "sensors.h"
+#include "telemetry.h"
 
 // DataLogBuffer datalogger_THD_vars;
 
-//#define THREAD_DEBUG
+// #define THREAD_DEBUG
 //#define LOWGIMU_DEBUG
 //#define HIGHGIMU_DEBUG
 //#define GPS_DEBUG
@@ -49,22 +57,18 @@
 // Create a data struct to hold data from the sensors
 sensorDataStruct_t sensorData;
 
-FSM_State rocketState = STATE_INIT;
-
-KX134 highGimu;
+QwiicKX134 highGimu;
 LSM9DS1 lowGimu;
+bool gps_connected;
 SFE_UBLOX_GNSS gps;
 
 MS5611 barometer{MS5611_CS};
 
-PWMServo servo_cw;   // Servo that induces clockwise roll moment
-PWMServo servo_ccw;  // Servo that counterclockwisei roll moment
+PWMServo ac_servo;  // Servo that induces clockwise roll moment
 
 // Create a struct that holds pointers to all the important objects needed by
 // the threads
 pointers sensor_pointers;
-
-uint8_t mpu_data[71];
 
 static THD_WORKING_AREA(barometer_WA, 8192);
 static THD_WORKING_AREA(gps_WA, 8192);
@@ -73,7 +77,25 @@ static THD_WORKING_AREA(lowgIMU_WA, 8192);
 static THD_WORKING_AREA(highgIMU_WA, 8192);
 static THD_WORKING_AREA(servo_WA, 8192);
 static THD_WORKING_AREA(dataLogger_WA, 8192);
-static THD_WORKING_AREA(mpuComm_WA, 8192);
+static THD_WORKING_AREA(voltage_WA, 8192);
+static THD_WORKING_AREA(telemetry_WA, 8192);
+static THD_WORKING_AREA(kalman_WA, 8192);
+
+/******************************************************************************/
+/* TELEMETRY THREAD                                         */
+
+static THD_FUNCTION(telemetry_THD, arg) {
+    struct pointers *pointer_struct = (struct pointers *)arg;
+
+    // int packetnum = 0;
+    Telemetry tlm;
+    while (true) {
+        tlm.transmit(sensorData);
+        pointer_struct->abort = tlm.abort;
+        chThdSleepMilliseconds(200);
+        // transmit has a sleep in it
+    }
+}
 
 /******************************************************************************/
 /* ROCKET FINITE STATE MACHINE THREAD                                         */
@@ -88,7 +110,11 @@ static THD_FUNCTION(rocket_FSM, arg) {
         Serial.println("### Rocket FSM thread entrance");
 #endif
 
+        chMtxLock(
+            &pointer_struct->dataloggerTHDVarsPointer.dataMutex_rocket_state);
         stateMachine.tickFSM();
+        chMtxUnlock(
+            &pointer_struct->dataloggerTHDVarsPointer.dataMutex_rocket_state);
 
         chThdSleepMilliseconds(6);  // FSM runs at 100 Hz
     }
@@ -109,7 +135,9 @@ static THD_FUNCTION(lowgIMU_THD, arg) {
         Serial.println("### Low G IMU thread entrance");
 #endif
 
+        chMtxLock(&data_log_buffer->dataMutex_lowG);
         lowGimuTickFunction(lsm, data_log_buffer, lowG_Data);
+        chMtxUnlock(&data_log_buffer->dataMutex_lowG);
 
         chThdSleepMilliseconds(6);
     }
@@ -132,8 +160,9 @@ static THD_FUNCTION(barometer_THD, arg) {
         Serial.println("### Barometer thread entrance");
 #endif
 
-        // barometerTickFunction(pointer_struct);
+        chMtxLock(&data_log_buffer->dataMutex_barometer);
         barometerTickFunction(barometer, data_log_buffer, barometer_data);
+        chMtxUnlock(&data_log_buffer->dataMutex_barometer);
 
         chThdSleepMilliseconds(6);
     }
@@ -146,7 +175,7 @@ static THD_FUNCTION(highgIMU_THD, arg) {
     // Load outside variables into the function
     struct pointers *pointer_struct = (struct pointers *)arg;
 
-    KX134 *highG = pointer_struct->highGimuPointer;
+    QwiicKX134 *highG = pointer_struct->highGimuPointer;
     DataLogBuffer *data_log_buffer = &pointer_struct->dataloggerTHDVarsPointer;
     HighGData *highg_data = &pointer_struct->sensorDataPointer->highG_data;
 
@@ -154,10 +183,11 @@ static THD_FUNCTION(highgIMU_THD, arg) {
 #ifdef THREAD_DEBUG
         Serial.println("### High G IMU thread entrance");
 #endif
-
+        chMtxLock(&data_log_buffer->dataMutex_highG);
         highGimuTickFunction(highG, data_log_buffer, highg_data);
+        chMtxUnlock(&data_log_buffer->dataMutex_highG);
 
-        chThdSleepMilliseconds(6);
+        chThdSleepMilliseconds(20);  // highg reads at 50 hz
     }
 }
 
@@ -176,14 +206,30 @@ static THD_FUNCTION(gps_THD, arg) {
 #ifdef THREAD_DEBUG
         Serial.println("### GPS thread entrance");
 #endif
-
+        chMtxLock(&data_log_buffer->dataMutex_GPS);
         gpsTickFunction(gps, data_log_buffer, gps_data);
+        chMtxUnlock(&data_log_buffer->dataMutex_GPS);
 
 #ifdef THREAD_DEBUG
         Serial.println("### GPS thread exit");
 #endif
 
-        chThdSleepMilliseconds(80);  // Read the gps @ ~10 Hz
+        chThdSleepMilliseconds(190);  // Read the gps @ ~5 Hz
+    }
+}
+
+/******************************************************************************/
+/* KALMAN FILTER THREAD                                                       */
+
+static THD_FUNCTION(kalman_THD, arg) {
+    struct pointers *pointer_struct = (struct pointers *)arg;
+    KalmanFilter KF(pointer_struct);
+    KF.Initialize();
+
+    while (true) {
+        KF.kfTickFunction();
+
+        chThdSleepMilliseconds(50);
     }
 }
 
@@ -193,14 +239,14 @@ static THD_FUNCTION(gps_THD, arg) {
 static THD_FUNCTION(servo_THD, arg) {
     struct pointers *pointer_struct = (struct pointers *)arg;
 
-    ActiveControl ac(pointer_struct, &servo_ccw, &servo_cw);
+    Controller ac(pointer_struct, &ac_servo);
 
     while (true) {
 #ifdef THREAD_DEBUG
         Serial.println("### Servo thread entrance");
 #endif
 
-        ac.acTickFunction();
+        ac.ctrlTickFunction(pointer_struct);
 
         chThdSleepMilliseconds(6);  // FSM runs at 100 Hz
     }
@@ -209,52 +255,21 @@ static THD_FUNCTION(servo_THD, arg) {
 /******************************************************************************/
 /* MPU COMMUNICATION THREAD                                                   */
 
-static THD_FUNCTION(mpuComm_THD, arg) {
-    // first 3 bytes of packet need to be iss
-    (void)arg;
+static THD_FUNCTION(voltage_THD, arg) {
+    struct pointers *pointer_struct = (struct pointers *)arg;
 
-    Serial1.begin(115200);  // Serial interface between MPU and MCU
+    DataLogBuffer *data_log_buffer = &pointer_struct->dataloggerTHDVarsPointer;
+    VoltageData *volt_data = &pointer_struct->sensorDataPointer->voltage_data;
+
+    VoltageSensor volt_sensor{Serial1};
 
     while (true) {
 #ifdef THREAD_DEBUG
-        Serial.println("### mpuComm thread entrance");
+        Serial.println("### voltage thread entrance");
 #endif
-
-        //! locking data from sensorData struct
-        chMtxLock(&sensor_pointers.dataloggerTHDVarsPointer.dataMutex_lowG);
-
-        digitalWrite(LED_WHITE, HIGH);
-
-        // write transmission code here
-        unsigned i = 3;  // because the first 3 indices are already set to be
-                         // ISS
-
-        uint8_t *data =
-            (uint8_t *)&sensor_pointers.sensorDataPointer->lowG_data;
-
-        //! Unlocking &dataMutex
-        chMtxUnlock(&sensor_pointers.dataloggerTHDVarsPointer.dataMutex_lowG);
-
-        mpu_data[0] = 0x49;
-        mpu_data[1] = 0x53;
-        mpu_data[2] = 0x53;
-
-        for (; i < 3 + sizeof(data); i++) {
-            mpu_data[i] = *data;  // de-references to match data types, not sure
-                                  // if correct, might send only the first byte
-            data++;
-        }
-
-        // TODO: Send rocket state too? Is there a mutex for rocket state?
-
-        Serial1.write(mpu_data, sizeof(mpu_data));
-
-        digitalWrite(LED_WHITE, LOW);
-
-        /* for (uint8_t i = 0; i < sizeof(mpu_data); ++i) {
-                      Serial.printf("0x%.2X\t", mpu_data[i]);
-              }
-              Serial.printf("\n\n"); */
+        chMtxLock(&data_log_buffer->dataMutex_voltage);
+        voltageTickFunction(&volt_sensor, data_log_buffer, volt_data);
+        chMtxUnlock(&data_log_buffer->dataMutex_voltage);
 
         chThdSleepMilliseconds(
             6);  // Set equal sleep time as the other threads, can change
@@ -283,23 +298,26 @@ static THD_FUNCTION(dataLogger_THD, arg) {
  *
  */
 void chSetup() {
-    // added play_THD for creation
+    chThdCreateStatic(telemetry_WA, sizeof(telemetry_WA), NORMALPRIO + 1,
+                      telemetry_THD, &sensor_pointers);
     chThdCreateStatic(rocket_FSM_WA, sizeof(rocket_FSM_WA), NORMALPRIO + 1,
                       rocket_FSM, &sensor_pointers);
     chThdCreateStatic(gps_WA, sizeof(gps_WA), NORMALPRIO + 1, gps_THD,
                       &sensor_pointers);
-    chThdCreateStatic(barometer_WA, sizeof(barometer_WA), NORMALPRIO + 1,
-                      barometer_THD, &sensor_pointers);
     chThdCreateStatic(lowgIMU_WA, sizeof(lowgIMU_WA), NORMALPRIO + 1,
                       lowgIMU_THD, &sensor_pointers);
+    chThdCreateStatic(barometer_WA, sizeof(barometer_WA), NORMALPRIO + 1,
+                      barometer_THD, &sensor_pointers);
     chThdCreateStatic(highgIMU_WA, sizeof(highgIMU_WA), NORMALPRIO + 1,
                       highgIMU_THD, &sensor_pointers);
     chThdCreateStatic(servo_WA, sizeof(servo_WA), NORMALPRIO + 1, servo_THD,
                       &sensor_pointers);
     chThdCreateStatic(dataLogger_WA, sizeof(dataLogger_WA), NORMALPRIO + 1,
                       dataLogger_THD, &sensor_pointers);
-    chThdCreateStatic(mpuComm_WA, sizeof(mpuComm_WA), NORMALPRIO + 1,
-                      mpuComm_THD, NULL);
+    chThdCreateStatic(voltage_WA, sizeof(voltage_WA), NORMALPRIO + 1,
+                      voltage_THD, &sensor_pointers);
+    chThdCreateStatic(kalman_WA, sizeof(kalman_WA), NORMALPRIO + 1, kalman_THD,
+                      &sensor_pointers);
 
     while (true)
         ;
@@ -311,25 +329,36 @@ void chSetup() {
  */
 
 void setup() {
-    int32_t temperature;
-
-#if defined(THREAD_DEBUG) || defined(LOWGIMU_DEBUG) ||     \
-    defined(BAROMETER_DEBUG) || defined(HIGHGIMU_DEBUG) || \
-    defined(GPS_DEBUG) || defined(SERVO_DEBUG)
-    Serial.begin(115200);
-    while (!Serial) {
-    }
-#endif
+    Serial.begin(9600);
     pinMode(LED_BLUE, OUTPUT);
     pinMode(LED_RED, OUTPUT);
     pinMode(LED_ORANGE, OUTPUT);
-    pinMode(LED_WHITE, OUTPUT);
+    pinMode(LED_GREEN, OUTPUT);
 
-    digitalWrite(LED_BLUE, HIGH);
-    digitalWrite(LED_ORANGE, HIGH);
+    pinMode(LSM9DS1_AG_CS, OUTPUT);
+    digitalWrite(LSM9DS1_AG_CS, HIGH);
+    pinMode(LSM9DS1_M_CS, OUTPUT);
+    digitalWrite(LSM9DS1_M_CS, HIGH);
+    pinMode(ZOEM8Q0_CS, OUTPUT);
+    digitalWrite(ZOEM8Q0_CS, HIGH);
+    pinMode(MS5611_CS, OUTPUT);
+    digitalWrite(MS5611_CS, HIGH);
+    pinMode(KX134_CS, OUTPUT);
+    digitalWrite(KX134_CS, HIGH);
+    pinMode(H3LIS331DL_CS, OUTPUT);
+    digitalWrite(H3LIS331DL_CS, HIGH);
+    pinMode(RFM95_CS, OUTPUT);
+    digitalWrite(RFM95_CS, HIGH);
 
-    // TODO: Don't forget this
-    Serial.println("------------------------------------------------");
+    pinMode(LSM9DS1_AG_CS, OUTPUT);
+    pinMode(LSM9DS1_M_CS, OUTPUT);
+    pinMode(ZOEM8Q0_CS, OUTPUT);
+    pinMode(MS5611_CS, OUTPUT);
+
+    digitalWrite(LSM9DS1_AG_CS, HIGH);
+    digitalWrite(LSM9DS1_M_CS, HIGH);
+    digitalWrite(ZOEM8Q0_CS, HIGH);
+    digitalWrite(MS5611_CS, HIGH);
 
     sensor_pointers.lowGimuPointer = &lowGimu;
     sensor_pointers.highGimuPointer = &highGimu;
@@ -339,37 +368,58 @@ void setup() {
     sensor_pointers.abort = false;
 
     SPI.begin();
+    SPI1.setMISO(39);
 
-    // Initialize barometer
-    barometer.init();
+    if (!highGimu.beginSPICore(KX134_CS, 1000000, SPI)) {
+        Serial.println("Failed to communicate with KX134. Stalling Program");
+        digitalWrite(LED_RED, HIGH);
+        while (true)
+            ;
+    }
 
+    if (!highGimu.initialize(DEFAULT_SETTINGS)) {
+        Serial.println("Could not initialize KX134. Stalling Program");
+        digitalWrite(LED_BLUE, HIGH);
+        while (true)
+            ;
+    }
+
+    highGimu.setRange(3);  // set range to 3 = 64 g range
     // lowGimu setup
     if (lowGimu.beginSPI(LSM9DS1_AG_CS, LSM9DS1_M_CS) ==
         false)  // note, we need to sent this our CS pins (defined above)
     {
-        digitalWrite(LED_RED, HIGH);
+        digitalWrite(LED_ORANGE, HIGH);
         Serial.println("Failed to communicate with LSM9DS1. Stalling Program");
         while (true)
             ;
     }
 
-    lowGimu.setAccelScale(16);
+    // Initialize barometer
+    barometer.init();
 
     // GPS Setup
-    if (!gps.begin(SPI, ZOEM8Q0_CS, 4000000)) {
-        digitalWrite(LED_RED, HIGH);
+    SPI1.begin();
+    digitalWrite(LED_RED, HIGH);
+    digitalWrite(LED_ORANGE, HIGH);
+
+    if (!gps.begin(SPI1, ZOEM8Q0_CS, 4000000)) {
         Serial.println(
             "Failed to communicate with ZOEM8Q0 gps. Stalling Program");
         while (true)
             ;
+    } else {
     }
+    digitalWrite(LED_RED, LOW);
+    digitalWrite(LED_ORANGE, LOW);
+
     gps.setPortOutput(COM_PORT_SPI,
                       COM_TYPE_UBX);  // Set the SPI port to output UBX only
                                       // (turn off NMEA noise)
     gps.saveConfigSelective(
         VAL_CFG_SUBSEC_IOPORT);  // Save (only) the communications port settings
                                  // to flash and BBR
-    gps.setNavigationFrequency(10);  // set sampling rate to 10hz
+    gps.setNavigationFrequency(5);  // set sampling rate to 5hz
 
     // SD Card Setup
     if (SD.begin(BUILTIN_SDCARD)) {
@@ -383,28 +433,27 @@ void setup() {
         // print header to file on sd card that lists each variable that is
         // logged
         sensor_pointers.dataloggerTHDVarsPointer.dataFile.println(
-            "ax,ay,az,gx,gy,gz,mx,my,mz,ts_lowg,"
-            "hg_ax,hg_ay,hg_az,ts_highg,"
-            "latitude,longitude,altitude,GPS Lock,ts_gps,"
-            "state_q0,state_q1,state_q2,state_q3,state_x,state_y,state_z,state_"
-            "vx,state_vy,state_vz,"
-            "state_ax,state_ay,state_az,state_omegax,state_omegay,state_omegaz,"
-            "state_latitude,state_longitude,ts_state,"
-            "rocketState,ts_RS");
+            "binary logging of sensor_data_t");
         sensor_pointers.dataloggerTHDVarsPointer.dataFile.flush();
-        // Serial.println(lowg_datalogger_THD_vars.dataFile.name());
+        // Serial.println(sensor_pointers.dataloggerTHDVarsPointer.dataFile.name());
     } else {
         digitalWrite(LED_RED, HIGH);
+        digitalWrite(LED_ORANGE, HIGH);
+        digitalWrite(LED_BLUE, HIGH);
         Serial.println("SD Begin Failed. Stalling Program");
-        while (true)
-            ;
+        while (true) {
+            digitalWrite(LED_RED, HIGH);
+            delay(100);
+            digitalWrite(LED_RED, LOW);
+            delay(100);
+        }
     }
 
+    digitalWrite(LED_ORANGE, HIGH);
+    digitalWrite(LED_BLUE, HIGH);
     // Servo Setup
-    servo_cw.attach(SERVO_CW_PIN, 770, 2250);
-    servo_ccw.attach(SERVO_CCW_PIN, 770, 2250);
-
-    Serial.println("Starting ChibiOS");
+    ac_servo.attach(AC_SERVO_PIN, 770, 2250);
+    Serial.println("chibios begin");
     chBegin(chSetup);
     while (true)
         ;

@@ -6,4 +6,14 @@
 
 ./flight/mcu/lib/EigenArduino-Eigen30/*
 
+./flight/mcu/lib/MS5611/*
+
+.flight/mcu/lib/RH/*
+
+./flight/mcu/lib/SparkFun_KX13X_Arduino_Library-1.0.7/*
+
+./flight/mcu/lib/SparkFun_u-blox_GNSS_Arduino_Library-main/*
+
+./flight/mcu/lib/RadioHead/*
+
 ./misc/*

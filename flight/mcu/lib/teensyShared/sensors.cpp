@@ -22,6 +22,8 @@
 #include <SPI.h>
 #include <Wire.h>
 
+#include <cmath>
+
 #include "SparkFun_u-blox_GNSS_Arduino_Library.h"
 #include "acShared.h"
 #include "dataLog.h"
@@ -39,15 +41,11 @@
  */
 void lowGimuTickFunction(LSM9DS1* lsm, DataLogBuffer* data_log_buffer,
                          LowGData* lowG_Data) {
-    // Reads data from the low g IMU
     chSysLock();
     lsm->readAccel();
     lsm->readGyro();
     lsm->readMag();
     chSysUnlock();
-
-    // Lock low g mutex
-    chMtxLock(&data_log_buffer->dataMutex_lowG);
 
     // Log timestamp
     lowG_Data->timeStamp_lowG = chVTGetSystemTime();
@@ -55,20 +53,19 @@ void lowGimuTickFunction(LSM9DS1* lsm, DataLogBuffer* data_log_buffer,
     // Log acceleration in Gs
     lowG_Data->ax = lsm->calcAccel(lsm->ax);
     lowG_Data->ay = lsm->calcAccel(lsm->ay);
-    lowG_Data->az = lsm->calcAccel(lsm->az);  // There was a minus here. We
-                                              // don't know why that did that
+    lowG_Data->az = lsm->calcAccel(lsm->az);
+
     // Log rotational speed in degrees per second
     lowG_Data->gx = lsm->calcGyro(lsm->gx);
     lowG_Data->gy = lsm->calcGyro(lsm->gy);
     lowG_Data->gz = lsm->calcGyro(lsm->gz);
+
     // Log magnetometer data in gauss
     lowG_Data->mx = lsm->calcMag(lsm->mx);
     lowG_Data->my = lsm->calcMag(lsm->my);
     lowG_Data->mz = lsm->calcMag(lsm->mz);
-    //! Unlocking &dataMutex for low g
 
     data_log_buffer->pushLowGFifo(lowG_Data);
-    chMtxUnlock(&data_log_buffer->dataMutex_lowG);
 
 #ifdef LOWGIMU_DEBUG
     Serial.println("------------- LOW-G THREAD ---------------");
@@ -127,10 +124,6 @@ void gpsTickFunction(SFE_UBLOX_GNSS* gps, DataLogBuffer* data_log_buffer,
 
     uint32_t SIV_count = gps->getSIV();
 
-    mutex_t& gps_mutex = data_log_buffer->dataMutex_GPS;
-    // Lock gps mutex
-    chMtxLock(&gps_mutex);
-
     gps_data->timeStamp_GPS = timeStamp_GPS;
     gps_data->latitude = latitude;
     gps_data->longitude = longitude;
@@ -140,16 +133,6 @@ void gpsTickFunction(SFE_UBLOX_GNSS* gps, DataLogBuffer* data_log_buffer,
     gps_data->siv_count = SIV_count;
 
     data_log_buffer->pushGpsFifo(gps_data);
-
-    //! Unlocking &dataMutex
-    chMtxUnlock(&gps_mutex);
-
-    // Toggle the LED to show if the gps has position lock
-    if (posLock == true) {
-        digitalWrite(LED_ORANGE, HIGH);
-    } else {
-        digitalWrite(LED_ORANGE, LOW);
-    }
 
 #ifdef GPS_DEBUG
     bool position_lock = pointer_struct->gps->get_position_lock();
@@ -182,29 +165,22 @@ void gpsTickFunction(SFE_UBLOX_GNSS* gps, DataLogBuffer* data_log_buffer,
  * @param arg Contains pointers to the various objects needed by the high-g IMU.
  *
  */
-void highGimuTickFunction(KX134* highG, DataLogBuffer* data_log_buffer,
+void highGimuTickFunction(QwiicKX134* highG, DataLogBuffer* data_log_buffer,
                           HighGData* highg_data) {
     // Read data from high g IMU
     chSysLock();
-    highG->update_data();
+    auto data = highG->getAccelData();
     chSysUnlock();
-
-    // Lock high g mutex
-    chMtxLock(&data_log_buffer->dataMutex_highG);
 
     // Log high g timestamp
     highg_data->timeStamp_highG = chVTGetSystemTime();
 
     // Log accelerations highg_data
-    highg_data->hg_ax = highG->get_x_gforce();
-    highg_data->hg_ay = highG->get_y_gforce();
-    highg_data->hg_az = highG->get_z_gforce();
-
-    // Unlock high g mutex
+    highg_data->hg_ax = data.xData;
+    highg_data->hg_ay = data.yData;
+    highg_data->hg_az = data.zData;
 
     data_log_buffer->pushHighGFifo(highg_data);
-
-    chMtxUnlock(&data_log_buffer->dataMutex_highG);
 
 #ifdef HIGHGIMU_DEBUG
     Serial.println("------------- HIGH-G THREAD ---------------");
@@ -228,12 +204,7 @@ void highGimuTickFunction(KX134* highG, DataLogBuffer* data_log_buffer,
 void barometerTickFunction(MS5611* barometer, DataLogBuffer* data_log_buffer,
                            BarometerData* barometer_data) {
     // Reads data from the barometer
-    // chSysLock();
     barometer->read(12);
-    // chSysUnlock();
-
-    // Lock barometer mutex
-    chMtxLock(&data_log_buffer->dataMutex_barometer);
 
     // Log timestamp
     barometer_data->timeStamp_barometer = chVTGetSystemTime();
@@ -262,8 +233,6 @@ void barometerTickFunction(MS5611* barometer, DataLogBuffer* data_log_buffer,
                                (barometer_data->temperature + 273.15) * 29.254;
 
     data_log_buffer->pushBarometerFifo(barometer_data);
-    //! Unlocking &dataMutex for barometer
-    chMtxUnlock(&data_log_buffer->dataMutex_barometer);
 
 #ifdef BAROMETER_DEBUG
     Serial.println("------------- BAROMETER THREAD ---------------");
@@ -273,6 +242,13 @@ void barometerTickFunction(MS5611* barometer, DataLogBuffer* data_log_buffer,
     Serial.print(", ");
     Serial.print(barometer_data->altitude);
 #endif
+}
+
+void voltageTickFunction(VoltageSensor* voltage, DataLogBuffer* data_log_buffer,
+                         VoltageData* voltage_data) {
+    auto data = voltage->read();
+    *voltage_data = data;
+    data_log_buffer->pushVoltageFifo(&data);
 }
 
 #endif
