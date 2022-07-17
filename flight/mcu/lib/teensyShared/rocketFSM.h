@@ -14,5 +14,4 @@ class rocketFSM {
     pointers *pointer_struct;
 };
 
-
 #endif
