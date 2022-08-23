@@ -19,7 +19,7 @@ deploy:
     github-token: $GITHUB_TOKEN
     keep-history: true
     on:
-        branch: master
+        branch: testing-docs
     local-dir: documentation
     repo: ISSUIUC/flightcode-docs
     target-branch: master
