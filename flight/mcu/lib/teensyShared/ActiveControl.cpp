@@ -3,7 +3,7 @@
  *
  * @brief Contains the C++ implementation of the active controls math,
  * logic to tell controls that it's safe to actuate based on FSM, and
- * functionality to set the launch pad elevation at startup.
+ * functionality to set the launch pad elevation at startup
  */
 
 #include "ActiveControl.h"
@@ -24,7 +24,7 @@ Controller::Controller(struct pointers* pointer_struct,
         &pointer_struct->dataloggerTHDVarsPointer.dataMutex_barometer;
 
     /*
-     * Startup sequence
+     * Startup sequence blah
      * 15 degrees written to servo since this was
      * experimentally determined to be the position in which
      * the flaps are perfectly flush with the airframe.
