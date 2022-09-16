@@ -65,8 +65,7 @@ void rocketFSM::tickFSM() {
             // If high acceleration is observed in z direction...
             if (linear_acceleration > launch_linear_acceleration_thresh) {
                 pointer_struct->rocketTimers.launch_time = chVTGetSystemTime();
-                pointer_struct->sensorDataPointer->rocketState_data
-                    .rocketState = STATE_LAUNCH_DETECT;
+                pointer_struct->sensorDataPointer->rocketState_data.rocketState = STATE_LAUNCH_DETECT;
             }
 
             break;
@@ -75,8 +74,7 @@ void rocketFSM::tickFSM() {
             // Serial.println("\n LAUNCH DETECTED \n");
             // If the acceleration was too brief, go back to IDLE
             if (linear_acceleration < launch_linear_acceleration_thresh) {
-                pointer_struct->sensorDataPointer->rocketState_data
-                    .rocketState = STATE_IDLE;
+                pointer_struct->sensorDataPointer->rocketState_data.rocketState = STATE_IDLE;
                 break;
             }
 
@@ -87,8 +85,7 @@ void rocketFSM::tickFSM() {
             // If the acceleration lasts long enough, boost is detected
             if (TIME_I2MS(pointer_struct->rocketTimers.burn_timer) >
                 launch_time_thresh) {
-                pointer_struct->sensorDataPointer->rocketState_data
-                    .rocketState = STATE_BOOST;
+                pointer_struct->sensorDataPointer->rocketState_data.rocketState = STATE_BOOST;
                 // digitalWrite(LED_RED, HIGH);
             }
 
@@ -103,20 +100,17 @@ void rocketFSM::tickFSM() {
             if (linear_acceleration < coast_thresh) {
                 // Serial.println("Acceleration below thresh");
                 pointer_struct->rocketTimers.burnout_time = chVTGetSystemTime();
-                pointer_struct->sensorDataPointer->rocketState_data
-                    .rocketState = STATE_BURNOUT_DETECT;
+                pointer_struct->sensorDataPointer->rocketState_data.rocketState = STATE_BURNOUT_DETECT;
                 break;
             }
             // Keeping rocket in STATE_BOOST if time below a certain threshold
             if (TIME_I2MS(pointer_struct->rocketTimers.burn_timer) <
                 burn_time_thresh_ms) {
-                pointer_struct->sensorDataPointer->rocketState_data
-                    .rocketState = STATE_BOOST;
+                pointer_struct->sensorDataPointer->rocketState_data.rocketState = STATE_BOOST;
             }
             // Forcing rocket to go to STATE_COAST if threshold crossed
             else {
-                pointer_struct->sensorDataPointer->rocketState_data
-                    .rocketState = STATE_COAST;
+                pointer_struct->sensorDataPointer->rocketState_data.rocketState = STATE_COAST;
                 // Setting burnout time because we don't otherwise
                 pointer_struct->rocketTimers.burnout_time = chVTGetSystemTime();
             }
@@ -127,8 +121,7 @@ void rocketFSM::tickFSM() {
             // Serial.println("\n BURNOUT DETECTED \n");
             // If the 0 acceleration was too brief, go back to BOOST
             if (linear_acceleration > coast_thresh) {
-                pointer_struct->sensorDataPointer->rocketState_data
-                    .rocketState = STATE_BOOST;
+                pointer_struct->sensorDataPointer->rocketState_data.rocketState = STATE_BOOST;
                 break;
             }
 
@@ -139,8 +132,7 @@ void rocketFSM::tickFSM() {
             // If the low acceleration lasts long enough, coast is detected
             if (TIME_I2MS(pointer_struct->rocketTimers.coast_timer) >
                 coast_time_thresh) {
-                pointer_struct->sensorDataPointer->rocketState_data
-                    .rocketState = STATE_COAST;
+                pointer_struct->sensorDataPointer->rocketState_data.rocketState = STATE_COAST;
             }
 
             break;
@@ -152,8 +144,7 @@ void rocketFSM::tickFSM() {
 
             if (TIME_I2MS(pointer_struct->rocketTimers.coast_timer) >
                 coast_to_apogee_time_thresh) {
-                pointer_struct->sensorDataPointer->rocketState_data
-                    .rocketState = STATE_APOGEE;
+                pointer_struct->sensorDataPointer->rocketState_data.rocketState = STATE_APOGEE;
             } else {
                 // Serial.println("Still in coast");
             }
