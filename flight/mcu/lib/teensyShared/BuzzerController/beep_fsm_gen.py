@@ -16,7 +16,7 @@ class Item:
 
     @property
     def enum_entry(self) -> str:
-        return f"{self.sequence.name}__STATE_{self.index}"
+        return f"{self.sequence.name}_STATE_{self.index}"
 
     @property
     def table_entry(self) -> str:

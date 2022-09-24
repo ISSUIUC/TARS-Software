@@ -30,13 +30,32 @@ void BuzzerController::tickBuzzer() {
     if (rocket_fsm_state != last_rocket_fsm_state) {
         switch (rocket_fsm_state) {
             case STATE_IDLE:
+                last_rocket_fsm_state = rocket_fsm_state;
+                setBuzzerState(BuzzerState::BUZZ_IDLE_STATE_0);
+                break;
             case STATE_BOOST:
+                last_rocket_fsm_state = rocket_fsm_state;
+                break;
             case STATE_COAST:
+                last_rocket_fsm_state = rocket_fsm_state;
+                break;
             case STATE_APOGEE:
+                last_rocket_fsm_state = rocket_fsm_state;
+                break;
             case STATE_DROGUE:
+                last_rocket_fsm_state = rocket_fsm_state;
+                break;
             case STATE_MAIN:
+                last_rocket_fsm_state = rocket_fsm_state;
+                break;
             case STATE_LANDED:
+                last_rocket_fsm_state = rocket_fsm_state;
+                break;
             case STATE_ABORT:
+                last_rocket_fsm_state = rocket_fsm_state;
+                break;
+            default:
+                break;
         }
     }
 
