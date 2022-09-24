@@ -27,6 +27,19 @@ void BuzzerController::tickBuzzer() {
     auto rocket_fsm_state = rocket_state->sensorDataPointer->rocketState_data.rocketState;
     chMtxUnlock(&rocket_state->dataloggerTHDVarsPointer.dataMutex_rocket_state);
 
+    if (rocket_fsm_state != last_rocket_fsm_state) {
+        switch (rocket_fsm_state) {
+            case STATE_IDLE:
+            case STATE_BOOST:
+            case STATE_COAST:
+            case STATE_APOGEE:
+            case STATE_DROGUE:
+            case STATE_MAIN:
+            case STATE_LANDED:
+            case STATE_ABORT:
+        }
+    }
+
     unsigned long curr_time = millis();
     unsigned long elapsed = curr_time - time_since_state_start;
 
