@@ -38,12 +38,12 @@ void rocketFSM::tickFSM() {
 
     // get the linear accelration from the lowgimu
     float linear_acceleration =
-        pointer_struct->sensorDataPointer->highG_data.hg_az;
+        pointer_struct->sensorDataPointer->highG_data.hg_az; // could put this in the constructor
 
     // links to abort for other states
     if (pointer_struct->abort) {
         pointer_struct->sensorDataPointer->rocketState_data.rocketState =
-            STATE_ABORT;
+            STATE_ABORT; // definitely put rocket state in constructor
         // Serial.println("ABORT");
     }
 
