@@ -12,6 +12,14 @@ class rocketFSM {
 
    private:
     pointers *pointer_struct;
+    float linear_acceleration;
+    FSM_State rocket_state;
+    uint32_t launch_time;
+    uint32_t burn_timer;
+    uint32_t burnout_time;
+    uint32_t coast_timer;
+
+
 };
 
 #endif
