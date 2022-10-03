@@ -1,5 +1,5 @@
 //
-// Created by 16182 on 10/5/2021.
+// Created by Connor Flynn on 09/23/2022
 //
 #include <algorithm>
 #include <iostream>
@@ -28,31 +28,19 @@
 #define SENSITIVITY_MAGNETOMETER_12 0.00043
 #define SENSITIVITY_MAGNETOMETER_16 0.00058
 
-extern CpuStateContext *global_context;
-// context.system_time
 
-void chMtxLock(mutex_t *mtx) { mtx->lock(); }
+void hilsim_data_parser() {
+    // serial open here?
+    // make a buffer
+    // Serial read
+    // take a string
 
-void chMtxUnlock(mutex_t *mtx) { mtx->unlock(); }
+}
+
 
 uint32_t chVTGetSystemTime() {
     return global_context->system_time * CH_CFG_ST_FREQUENCY;
 }
-void chThdSleepMilliseconds(uint32_t ms) {
-    throw std::runtime_error(
-        "chThdSleepMilliseconds needs to be replaced to run within the "
-        "simulator");
-}
-void chBegin(void (*mainThread)()) { mainThread(); }
-void chSysUnlock() {}
-void chSysLock() {}
-
-void SerialClass::println(const char *str) { puts(str); }
-void SerialClass::begin(uint32_t frequency) {}
-void SerialClass::write(void *data, uint32_t size) {}
-bool SerialClass::operator!() { return false; }
-SerialClass::operator bool() { return true; }
-
 void digitalWrite(uint8_t pin, uint8_t val) {}
 void pinMode(uint8_t pin, uint8_t mode) {}
 void delay(uint32_t ms) {
@@ -63,7 +51,8 @@ void delay(uint32_t ms) {
 KX134::KX134() {}
 void KX134::update_data() {
     Eigen::Vector3d data;
-    global_context->accelerometer_pointer->get_data(data);
+    // global_context->accelerometer_pointer->get_data(data);
+
 
     Eigen::Vector3d scaled = (data / 9.81) * 1024;
     x_accel = scaled.x();
@@ -135,7 +124,7 @@ void LSM9DS1::calibrateMag(bool loadIn) {}
 void LSM9DS1::magOffset(uint8_t axis, int16_t offset) {}
 void LSM9DS1::readGyro() {
     Eigen::Vector3d data;
-    global_context->gyroscope_pointer->get_data(data);
+    // global_context->gyroscope_pointer->get_data(data);
     float gScale = 0.00875;
 
     Eigen::Vector3d scaled = data / gScale;
@@ -145,26 +134,28 @@ void LSM9DS1::readGyro() {
 }
 void LSM9DS1::readAccel() {
     Eigen::Vector3d data;
-    global_context->accelerometer_pointer->get_data(data);
+    // global_context->accelerometer_pointer->get_data(data);
 
-    double clamp_val = 0;
-    if (aRes == SENSITIVITY_ACCELEROMETER_2) {
-        clamp_val = 2;
-    } else if (aRes == SENSITIVITY_ACCELEROMETER_4) {
-        clamp_val = 4;
-    } else if (aRes == SENSITIVITY_ACCELEROMETER_8) {
-        clamp_val = 8;
-    } else if (aRes == SENSITIVITY_ACCELEROMETER_16) {
-        clamp_val = 16;
-    } else {
-        clamp_val = 16;
-    }
+    // double clamp_val = 0;
+    // if (aRes == SENSITIVITY_ACCELEROMETER_2) {
+    //     clamp_val = 2;
+    // } else if (aRes == SENSITIVITY_ACCELEROMETER_4) {
+    //     clamp_val = 4;
+    // } else if (aRes == SENSITIVITY_ACCELEROMETER_8) {
+    //     clamp_val = 8;
+    // } else if (aRes == SENSITIVITY_ACCELEROMETER_16) {
+    //     clamp_val = 16;
+    // } else {
+    //     clamp_val = 16;
+    // }
 
-    data.x() = std::clamp(data.x(), -clamp_val, clamp_val);
-    data.y() = std::clamp(data.y(), -clamp_val, clamp_val);
-    data.z() = std::clamp(data.z(), -clamp_val, clamp_val);
+    // data.x() = std::clamp(data.x(), -clamp_val, clamp_val);
+    // data.y() = std::clamp(data.y(), -clamp_val, clamp_val);
+    // data.z() = std::clamp(data.z(), -clamp_val, clamp_val);
 
-    Eigen::Vector3d scaled = data / aRes;
+    // Eigen::Vector3d scaled = data / aRes;
+
+    // Serial.read() <-- // reads data from SILSIM over serial port
 
     ax = scaled.x();
     ay = scaled.y();
@@ -214,8 +205,9 @@ void LSM9DS1::setGyroScale(uint16_t gScl) {
 
 void LSM9DS1::readMag() {
     Eigen::Vector3d data;
-    global_context->magnetometer_pointer->get_data(data);
+    // global_context->magnetometer_pointer->get_data(data);
 
+    // Serial.read <-- 
     Eigen::Vector3d scaled = data / mRes;
     mx = scaled.x();
     my = scaled.y();
@@ -226,13 +218,13 @@ float LSM9DS1::calcMag(int16_t mag) { return mag * mRes; }
 MS5611::MS5611(uint8_t pin) {}
 void MS5611::init() {}
 int MS5611::read(uint8_t bits) {
-    double tempKelvins = global_context->thermometer_pointer
+    // double tempKelvins = global_context->thermometer_pointer
                              ->get_data();      // init data is in Kelvins
     double tempCelsius = tempKelvins - 273.15;  // first convert to celsius
     _temperature =
         tempCelsius *
         100;  // finally convert celsius to hundreths of degrees celsius
-    _pressure = global_context->barometer_pointer->get_data();
+    // _pressure = global_context->barometer_pointer->get_data();
     return 0;
 }
 uint32_t MS5611::getPressure() const { return _pressure; }
@@ -244,7 +236,7 @@ void SPIClass::begin() {}
 
 bool SFE_UBLOX_GNSS::getPVT(uint16_t maxWait) {
     Eigen::Vector3d data;
-    global_context->gps_pointer->get_data(data);
+    // global_context->gps_pointer->get_data(data);
 
     double BigLatDegrees =
         data.x() / 111036.53;  // converted meters to 'rough' degrees @ 40.1164
