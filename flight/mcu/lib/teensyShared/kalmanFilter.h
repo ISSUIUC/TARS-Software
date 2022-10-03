@@ -15,7 +15,7 @@ class KalmanFilter {
     void update();
 
     void kfTickFunction();
-
+    void tickBuffer();
    private:
     float s_dt = 0.050;
 
