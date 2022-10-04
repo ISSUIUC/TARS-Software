@@ -4,7 +4,7 @@
 #include "dataLog.h"
 #include "rk4.h"
 #include "sensors.h"
-
+#include <deque>
 class KalmanFilter {
    public:
     KalmanFilter(struct pointers* pointer_struct);
@@ -19,6 +19,7 @@ class KalmanFilter {
    private:
     float s_dt = 0.050;
 
+    std::deque<float> b_alt_buffer;
     DataLogBuffer* data_logger_;
     mutex_t* mutex_lowG_;
     mutex_t* mutex_highG_;
