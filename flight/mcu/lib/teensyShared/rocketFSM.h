@@ -2,24 +2,11 @@
 #ifndef ROCKET_FSM_H
 #define ROCKET_FSM_H
 
-#include "sensors.h"
+// #include "sensors.h"
 #include <stdint.h>
 
-class rocketFSM {
-   public:
-    rocketFSM(pointers *);
-
-    void tickFSM();
-
-   private:
-    pointers *pointer_struct;
-    float linear_acceleration;
-    FSM_State rocket_state;
-    uint32_t launch_time;
-    uint32_t burn_timer;
-    uint32_t burnout_time;
-    uint32_t coast_timer;
-};
+// forward declare pointers
+struct pointers;
 
 // Enum for FSM States
 enum FSM_State {
@@ -39,6 +26,22 @@ enum FSM_State {
     STATE_LANDED,
     STATE_ABORT
 };
+class rocketFSM {
+   public:
+    rocketFSM(pointers *);
+
+    void tickFSM();
+
+   private:
+    pointers *pointer_struct;
+    float linear_acceleration;
+    FSM_State rocket_state;
+    uint32_t launch_time;
+    uint32_t burn_timer;
+    uint32_t burnout_time;
+    uint32_t coast_timer;
+};
+
 
 // Stores time the rocket state is reached as well as timers used to confirm
 // measurements
