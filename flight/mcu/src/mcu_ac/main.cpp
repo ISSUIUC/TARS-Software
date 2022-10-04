@@ -37,9 +37,7 @@
 #include "SparkFunLSM9DS1.h"                       //Low-G IMU Library
 #include "SparkFun_Qwiic_KX13X.h"                  //High-G IMU Library
 #include "SparkFun_u-blox_GNSS_Arduino_Library.h"  //GPS Library
-#include "acShared.h"
 #include "dataLog.h"
-#include "hybridShared.h"
 #include "kalmanFilter.h"
 #include "pins.h"
 #include "rocketFSM.h"

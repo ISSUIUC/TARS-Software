@@ -3,7 +3,6 @@
 
 #include <PWMServo.h>
 
-#include "acShared.h"
 
 class ServoControl {
    public:
