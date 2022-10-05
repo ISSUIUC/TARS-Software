@@ -32,13 +32,13 @@
 rocketFSM::rocketFSM(pointers *ptr) {
     pointer_struct = ptr;
     // get the linear accelration from the lowgimu
-    float linear_acceleration = pointer_struct->sensorDataPointer->highG_data.hg_az;
+    linear_acceleration_ptr_ = &pointer_struct->sensorDataPointer->highG_data.hg_az;
     // storing pointer_struct variables locally for use
-    FSM_State rocket_state = pointer_struct->sensorDataPointer->rocketState_data.rocketState;
-    uint32_t launch_time = pointer_struct->rocketTimers.launch_time;
-    uint32_t burn_timer = pointer_struct->rocketTimers.burn_timer;
-    uint32_t burnout_time = pointer_struct->rocketTimers.burnout_time;
-    uint32_t coast_timer = pointer_struct->rocketTimers.coast_timer;
+    rocket_state_ptr_ = &pointer_struct->sensorDataPointer->rocketState_data.rocketState;
+    launch_time_ptr_ = &pointer_struct->rocketTimers.launch_time;
+    burn_timer_ptr_ = &pointer_struct->rocketTimers.burn_timer;
+    burnout_time_ptr_ = &pointer_struct->rocketTimers.burnout_time;
+    coast_timer_ptr_ = &pointer_struct->rocketTimers.coast_timer;
 }
 
 void rocketFSM::tickFSM() {
@@ -47,12 +47,12 @@ void rocketFSM::tickFSM() {
 
     // links to abort for other states
     if (pointer_struct->abort) {
-        rocket_state =
+        *rocket_state_ptr_ =
             STATE_ABORT; // definitely put rocket state in constructor
         // Serial.println("ABORT");
     }
 
-    switch (rocket_state) {
+    switch (*rocket_state_ptr_) {
         case STATE_ABORT:
             // if true, always stay in abort
             break;
@@ -60,7 +60,7 @@ void rocketFSM::tickFSM() {
         case STATE_INIT:
             // go to state idle regardless of gps lock
             // Serial.println("INIT");
-            rocket_state =
+            *rocket_state_ptr_ =
                 STATE_IDLE;
 
             break;
@@ -68,9 +68,9 @@ void rocketFSM::tickFSM() {
         case STATE_IDLE:
             // Serial.println("IDLE");
             // If high acceleration is observed in z direction...
-            if (linear_acceleration > launch_linear_acceleration_thresh) {
-                launch_time = chVTGetSystemTime();
-                rocket_state = STATE_LAUNCH_DETECT;
+            if (*linear_acceleration_ptr_ > launch_linear_acceleration_thresh) {
+                *launch_time_ptr_ = chVTGetSystemTime();
+                *rocket_state_ptr_ = STATE_LAUNCH_DETECT;
             }
 
             break;
@@ -78,18 +78,18 @@ void rocketFSM::tickFSM() {
         case STATE_LAUNCH_DETECT:
             // Serial.println("\n LAUNCH DETECTED \n");
             // If the acceleration was too brief, go back to IDLE
-            if (linear_acceleration < launch_linear_acceleration_thresh) {
-                rocket_state = STATE_IDLE;
+            if (*linear_acceleration_ptr_ < launch_linear_acceleration_thresh) {
+                *rocket_state_ptr_ = STATE_IDLE;
                 break;
             }
 
             // measure the length of the burn time (for hysteresis)
-            burn_timer = chVTGetSystemTime() - launch_time;
+            *burn_timer_ptr_ = chVTGetSystemTime() - *launch_time_ptr_;
 
             // If the acceleration lasts long enough, boost is detected
-            if (TIME_I2MS(burn_timer) >
+            if (TIME_I2MS(*burn_timer_ptr_) >
                 launch_time_thresh) {
-                rocket_state = STATE_BOOST;
+                *rocket_state_ptr_ = STATE_BOOST;
                 // digitalWrite(LED_RED, HIGH);
             }
 
@@ -97,26 +97,26 @@ void rocketFSM::tickFSM() {
 
         case STATE_BOOST:
             // Serial.println("BOOST");
-            Serial.println(linear_acceleration);
-            burn_timer =
-                chVTGetSystemTime() - launch_time;;
+            Serial.println(*linear_acceleration_ptr_);
+            *burn_timer_ptr_ =
+                chVTGetSystemTime() - *launch_time_ptr_;
             // If low acceleration in the Z direction...
-            if (linear_acceleration < coast_thresh) {
+            if (*linear_acceleration_ptr_ < coast_thresh) {
                 // Serial.println("Acceleration below thresh");
-                burnout_time = chVTGetSystemTime();
-                rocket_state = STATE_BURNOUT_DETECT;
+                *burnout_time_ptr_ = chVTGetSystemTime();
+                *rocket_state_ptr_ = STATE_BURNOUT_DETECT;
                 break;
             }
             // Keeping rocket in STATE_BOOST if time below a certain threshold
-            if (TIME_I2MS(burn_timer) <
+            if (TIME_I2MS(*burn_timer_ptr_) <
                 burn_time_thresh_ms) {
-                rocket_state = STATE_BOOST;
+                *rocket_state_ptr_ = STATE_BOOST;
             }
             // Forcing rocket to go to STATE_COAST if threshold crossed
             else {
-                rocket_state = STATE_COAST;
+                *rocket_state_ptr_ = STATE_COAST;
                 // Setting burnout time because we don't otherwise
-                burnout_time = chVTGetSystemTime();
+                *burnout_time_ptr_ = chVTGetSystemTime();
             }
 
             break;
@@ -124,29 +124,29 @@ void rocketFSM::tickFSM() {
         case STATE_BURNOUT_DETECT:
             // Serial.println("\n BURNOUT DETECTED \n");
             // If the 0 acceleration was too brief, go back to BOOST
-            if (linear_acceleration > coast_thresh) {
-                rocket_state = STATE_BOOST;
+            if (*linear_acceleration_ptr_ > coast_thresh) {
+                *rocket_state_ptr_ = STATE_BOOST;
                 break;
             }
 
             // measure the length of the coast time (for hysteresis)
-            coast_timer = chVTGetSystemTime() - burnout_time;
+            *coast_timer_ptr_ = chVTGetSystemTime() - *burnout_time_ptr_;
 
             // If the low acceleration lasts long enough, coast is detected
-            if (TIME_I2MS(coast_timer) >
+            if (TIME_I2MS(*coast_timer_ptr_) >
                 coast_time_thresh) {
-                rocket_state = STATE_COAST;
+                *rocket_state_ptr_ = STATE_COAST;
             }
 
             break;
 
         case STATE_COAST:
             // Serial.println("COAST");
-            coast_timer = chVTGetSystemTime() - burnout_time;
+            *coast_timer_ptr_ = chVTGetSystemTime() - *burnout_time_ptr_;
 
-            if (TIME_I2MS(coast_timer) >
+            if (TIME_I2MS(*coast_timer_ptr_) >
                 coast_to_apogee_time_thresh) {
-                rocket_state = STATE_APOGEE;
+                *rocket_state_ptr_ = STATE_APOGEE;
             } else {
                 // Serial.println("Still in coast");
             }

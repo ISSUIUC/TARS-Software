@@ -33,13 +33,16 @@ class rocketFSM {
     void tickFSM();
 
    private:
+   
     pointers *pointer_struct;
-    float linear_acceleration;
-    FSM_State rocket_state;
-    uint32_t launch_time;
-    uint32_t burn_timer;
-    uint32_t burnout_time;
-    uint32_t coast_timer;
+    
+    float* linear_acceleration_ptr_;
+    FSM_State* rocket_state_ptr_;
+    uint32_t* launch_time_ptr_;
+    uint32_t* burn_timer_ptr_;
+    uint32_t* burnout_time_ptr_;
+    uint32_t* coast_timer_ptr_;
+    
 };
 
 
