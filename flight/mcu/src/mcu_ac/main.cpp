@@ -41,6 +41,7 @@
 #include "dataLog.h"
 #include "hybridShared.h"
 #include "kalmanFilter.h"
+#include "BuzzerController/BuzzerControl.hpp"
 #include "pins.h"
 #include "rocketFSM.h"
 #include "sensors.h"
@@ -80,6 +81,7 @@ static THD_WORKING_AREA(dataLogger_WA, 8192);
 static THD_WORKING_AREA(voltage_WA, 8192);
 static THD_WORKING_AREA(telemetry_WA, 8192);
 static THD_WORKING_AREA(kalman_WA, 8192);
+static THD_WORKING_AREA(buzzer_WA, 8192);
 
 /******************************************************************************/
 /* TELEMETRY THREAD                                         */
@@ -117,6 +119,25 @@ static THD_FUNCTION(rocket_FSM, arg) {
             &pointer_struct->dataloggerTHDVarsPointer.dataMutex_rocket_state);
 
         chThdSleepMilliseconds(6);  // FSM runs at 100 Hz
+    }
+}
+
+/******************************************************************************/
+/* Buzzer THREAD                                         */
+
+static THD_FUNCTION(buzzer_THD, arg) {
+    struct pointers *pointer_struct = (struct pointers *)arg;
+
+    static BuzzerController buzzer(pointer_struct);
+
+    while (true) {
+#ifdef THREAD_DEBUG
+        Serial.println("### Buzzer thread entrance");
+#endif
+
+        buzzer.tickBuzzer();
+
+        chThdSleepMilliseconds(6);  // Buzzer runs at 100 Hz
     }
 }
 

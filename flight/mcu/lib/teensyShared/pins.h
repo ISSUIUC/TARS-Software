@@ -34,4 +34,7 @@
 // kx chip select pin
 #define KX134_CS 4
 
+// pin for buzzer
+#define BUZZER_PORT 11
+
 #endif
