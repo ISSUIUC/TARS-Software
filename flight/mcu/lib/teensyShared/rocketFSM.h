@@ -8,7 +8,9 @@
 // forward declare pointers
 struct pointers;
 
-// Enum for FSM States
+/** 
+ * @brief Labels for each FSM state
+ */ 
 enum FSM_State {
     STATE_INIT,
     STATE_IDLE,
@@ -46,27 +48,31 @@ class rocketFSM {
 };
 
 
-// Stores time the rocket state is reached as well as timers used to confirm
-// measurements
+/**
+ * @brief Struct to store event timestamps and timers since each event happened
+ * 
+ * Times stored as ChibiOS systime_t and timers stored as sysinterval_t. Both of these
+ * are typedefs for the C++ uint32_t type, but are good for readability and clarity. 
+ */ 
 struct fsm_struct {
-    uint32_t launch_time;  // First time acceleration above threshold is
+    systime_t launch_time;  // First time acceleration above threshold is
                            // detected
-    uint32_t burn_timer;
+    sysinterval_t burn_timer;
 
-    uint32_t burnout_time;
-    uint32_t coast_timer;
+    systime_t burnout_time;
+    sysinterval_t coast_timer;
 
-    uint32_t apogee_timer;
-    uint32_t apogee_time;
+    systime_t apogee_time;
+    sysinterval_t apogee_timer;
+    
+    systime_t drogue_time;
+    sysinterval_t drogue_timer;
 
-    uint32_t drogue_time;
-    uint32_t drogue_timer;
+    systime_t main_time;
+    sysinterval_t main_timer;
 
-    uint32_t main_time;
-    uint32_t main_timer;
-
-    uint32_t landing_time;
-    uint32_t landing_timer;
+    systime_t landing_time;
+    sysinterval_t landing_timer;
 };
 
 #endif
