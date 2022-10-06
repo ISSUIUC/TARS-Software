@@ -38,10 +38,10 @@ class rocketFSM {
     
     float* linear_acceleration_ptr_;
     FSM_State* rocket_state_ptr_;
-    uint32_t* launch_time_ptr_;
-    uint32_t* burn_timer_ptr_;
-    uint32_t* burnout_time_ptr_;
-    uint32_t* coast_timer_ptr_;
+    systime_t* launch_time_ptr_;
+    sysinterval_t* burn_timer_ptr_;
+    systime_t* burnout_time_ptr_;
+    sysinterval_t* coast_timer_ptr_;
     
 };
 
