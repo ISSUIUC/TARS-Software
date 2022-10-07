@@ -425,6 +425,12 @@ enum BuzzerControlState {
     SENDING_FSM_STATE
 };
 
+/**
+ * @brief Holds the state of the Buzzer and uses data from the rocket FSM and the battery to control beeps.
+ *
+ * The BuzzerController class holds all the necessary data that it needs to control the buzzer. In the context of
+ * Arduino,
+ */
 class BuzzerController {
 public:
     explicit BuzzerController(pointers *);
@@ -433,6 +439,9 @@ public:
     void setBuzzerState(BuzzerState state);
 
 private:
+    static BuzzerState getNewStateFromBattery(float battery_voltage);
+    static BuzzerState getNewStateFromRocket(FSM_State rocket_state);
+
     BuzzerControlState control_state;
 
     BuzzerState curr_state;

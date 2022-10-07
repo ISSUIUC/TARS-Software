@@ -20,45 +20,64 @@ void BuzzerController::setBuzzerState(BuzzerState new_state) {
     curr_state = new_state;
 }
 
+
+BuzzerState BuzzerController::getNewStateFromBattery(float battery_voltage) {
+    switch ((int) (battery_voltage / 3.3 * 10.0)) {
+        case 0:
+            return BuzzerState::BATTERY_ZERO_STATE_0;
+        case 1:
+            return BuzzerState::BATTERY_ONE_STATE_0;
+        case 2:
+            return BuzzerState::BATTERY_TWO_STATE_0;
+        case 3:
+            return BuzzerState::BATTERY_THREE_STATE_0;
+        case 4:
+            return BuzzerState::BATTERY_FOUR_STATE_0;
+        case 5:
+            return BuzzerState::BATTERY_FIVE_STATE_0;
+        case 6:
+            return BuzzerState::BATTERY_SIX_STATE_0;
+        case 7:
+            return BuzzerState::BATTERY_SEVEN_STATE_0;
+        case 8:
+            return BuzzerState::BATTERY_EIGHT_STATE_0;
+        case 9:
+            return BuzzerState::BATTERY_NINE_STATE_0;
+        default:
+            return BuzzerState::INITIAL;
+    }
+}
+
+
+BuzzerState BuzzerController::getNewStateFromRocket(FSM_State rocket_state) {
+    switch (rocket_state) {
+        case STATE_IDLE:
+            return BuzzerState::BUZZ_IDLE_STATE_0;
+        case STATE_BOOST:
+            return BuzzerState::BUZZ_BOOST_STATE_0;
+        case STATE_COAST:
+            return BuzzerState::BUZZ_COAST_STATE_0;
+        case STATE_APOGEE:
+            return BuzzerState::BUZZ_APOGEE_STATE_0;
+        case STATE_DROGUE:
+            return BuzzerState::BUZZ_DROGUE_STATE_0;
+        case STATE_MAIN:
+            return BuzzerState::BUZZ_MAIN_STATE_0;
+        case STATE_LANDED:
+            return BuzzerState::BUZZ_LANDED_STATE_0;
+        case STATE_ABORT:
+            return BuzzerState::BUZZ_ABORT_STATE_0;
+        default:
+            return BuzzerState::INITIAL;
+    }
+}
+
 void BuzzerController::tickBuzzer() {
     switch (control_state) {
         case WAITING_FOR_BATTERY:
             if (rocket_state->sensorDataPointer->has_voltage_data) {
+                setBuzzerState(getNewStateFromBattery(rocket_state->sensorDataPointer->voltage_data.v_battery));
                 control_state = SENDING_BATTERY;
-                BuzzerState state = BuzzerState::INITIAL;
-                switch ((int) (rocket_state->sensorDataPointer->voltage_data.v_battery / 3.3 * 10.0)) {
-                    case 0:
-                        state = BuzzerState::BATTERY_ZERO_STATE_0;
-                        break;
-                    case 1:
-                        state = BuzzerState::BATTERY_ONE_STATE_0;
-                        break;
-                    case 2:
-                        state = BuzzerState::BATTERY_TWO_STATE_0;
-                        break;
-                    case 3:
-                        state = BuzzerState::BATTERY_THREE_STATE_0;
-                        break;
-                    case 4:
-                        state = BuzzerState::BATTERY_FOUR_STATE_0;
-                        break;
-                    case 5:
-                        state = BuzzerState::BATTERY_FIVE_STATE_0;
-                        break;
-                    case 6:
-                        state = BuzzerState::BATTERY_SIX_STATE_0;
-                        break;
-                    case 7:
-                        state = BuzzerState::BATTERY_SEVEN_STATE_0;
-                        break;
-                    case 8:
-                        state = BuzzerState::BATTERY_EIGHT_STATE_0;
-                        break;
-                    case 9:
-                        state = BuzzerState::BATTERY_NINE_STATE_0;
-                        break;
-                }
-                setBuzzerState(state);
             }
             break;
         case SENDING_BATTERY:
@@ -68,57 +87,26 @@ void BuzzerController::tickBuzzer() {
             break;
         case SENDING_FSM_STATE:
             chMtxLock(&rocket_state->dataloggerTHDVarsPointer.dataMutex_rocket_state);
-            auto rocket_fsm_state = rocket_state->sensorDataPointer->rocketState_data.rocketState;
+            FSM_State rocket_fsm_state = rocket_state->sensorDataPointer->rocketState_data.rocketState;
             chMtxUnlock(&rocket_state->dataloggerTHDVarsPointer.dataMutex_rocket_state);
 
             if (rocket_fsm_state != last_rocket_fsm_state) {
-                switch (rocket_fsm_state) {
-                    case STATE_IDLE:
-                        last_rocket_fsm_state = rocket_fsm_state;
-                        setBuzzerState(BuzzerState::BUZZ_IDLE_STATE_0);
-                        break;
-                    case STATE_BOOST:
-                        last_rocket_fsm_state = rocket_fsm_state;
-                        setBuzzerState(BuzzerState::BUZZ_BOOST_STATE_0);
-                        break;
-                    case STATE_COAST:
-                        last_rocket_fsm_state = rocket_fsm_state;
-                        setBuzzerState(BuzzerState::BUZZ_COAST_STATE_0);
-                        break;
-                    case STATE_APOGEE:
-                        last_rocket_fsm_state = rocket_fsm_state;
-                        setBuzzerState(BuzzerState::BUZZ_APOGEE_STATE_0);
-                        break;
-                    case STATE_DROGUE:
-                        last_rocket_fsm_state = rocket_fsm_state;
-                        setBuzzerState(BuzzerState::BUZZ_DROGUE_STATE_0);
-                        break;
-                    case STATE_MAIN:
-                        last_rocket_fsm_state = rocket_fsm_state;
-                        setBuzzerState(BuzzerState::BUZZ_MAIN_STATE_0);
-                        break;
-                    case STATE_LANDED:
-                        last_rocket_fsm_state = rocket_fsm_state;
-                        setBuzzerState(BuzzerState::BUZZ_LANDED_STATE_0);
-                        break;
-                    case STATE_ABORT:
-                        last_rocket_fsm_state = rocket_fsm_state;
-                        setBuzzerState(BuzzerState::BUZZ_ABORT_STATE_0);
-                        break;
-                    default:
-                        break;
+                BuzzerState new_state = getNewStateFromRocket(rocket_fsm_state);
+                if (new_state != BuzzerState::INITIAL) {
+                    last_rocket_fsm_state = rocket_fsm_state;
+                    setBuzzerState(new_state);
                 }
             }
-
-            unsigned int* state_info = BuzzerStates[curr_state];
-
-            unsigned long curr_time = millis();
-            unsigned long elapsed = curr_time - time_since_state_start;
-
-            if (elapsed >= state_info[1]) {
-                auto new_state = static_cast<BuzzerState>(state_info[2]);
-                setBuzzerState(new_state);
-            }
             break;
+    }
+
+    unsigned int* state_info = BuzzerStates[curr_state];
+
+    unsigned long curr_time = millis();
+    unsigned long elapsed = curr_time - time_since_state_start;
+
+    if (elapsed >= state_info[1]) {
+        auto new_state = static_cast<BuzzerState>(state_info[2]);
+        setBuzzerState(new_state);
     }
 }

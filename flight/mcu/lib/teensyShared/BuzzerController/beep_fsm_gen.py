@@ -79,8 +79,8 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("file", type=Path)
 
-    source_file = parser.parse_args().file
-    data = json.loads(source_file.read_text())
+    source_file: Path = parser.parse_args().file
+    data: list = json.loads(source_file.read_text())
 
     sequence_infos: list[Sequence] = []
 
