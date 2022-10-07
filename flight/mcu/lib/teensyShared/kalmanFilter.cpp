@@ -8,13 +8,14 @@
 #define EIGEN_MATRIX_PLUGIN "MatrixAddons.h"
 
 void KalmanFilter::tickBuffer(){ 
-    if(b_alt_buffer.size() < 10){
-        b_alt_buffer.push_back(*b_alt);
-    }else{
-        b_alt_buffer.pop_front();
-        b_alt_buffer.push_back(*b_alt);
-    }
+    // if(b_alt_buffer.size() < 10){
+    //     b_alt_buffer.push(*b_alt);
+    // }else{
+        b_alt_buffer.pop();
+        b_alt_buffer.push(*b_alt);
+    // }
 }
+
 
 KalmanFilter::KalmanFilter(struct pointers* pointer_struct) {
     gz_L = &pointer_struct->sensorDataPointer->lowG_data.gz;
