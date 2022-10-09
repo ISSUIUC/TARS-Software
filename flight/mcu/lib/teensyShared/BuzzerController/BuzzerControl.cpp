@@ -3,11 +3,11 @@
 
 
 BuzzerController::BuzzerController(pointers* rocket_state) :
-    control_state(WAITING_FOR_BATTERY),
-    curr_state(INITIAL),
-    time_since_state_start(0),
-    rocket_state(rocket_state),
-    last_rocket_fsm_state(STATE_INIT) {
+        control_state(WAITING_FOR_BATTERY),
+        curr_state(INITIAL),
+        state_start_time(0),
+        rocket_state(rocket_state),
+        last_rocket_fsm_state(STATE_INIT) {
 }
 
 void BuzzerController::setBuzzerState(BuzzerState new_state) {
@@ -16,7 +16,7 @@ void BuzzerController::setBuzzerState(BuzzerState new_state) {
     if (new_pitch) {
         tone(BUZZER_PORT, new_pitch);
     }
-    time_since_state_start = millis();
+    state_start_time = millis();
     curr_state = new_state;
 }
 
@@ -50,6 +50,7 @@ BuzzerState BuzzerController::getNewStateFromBattery(float battery_voltage) {
 
 
 BuzzerState BuzzerController::getNewStateFromRocket(FSM_State rocket_state) {
+    // Notably, not all stages have a beep sequence, so the default case happens pretty often
     switch (rocket_state) {
         case STATE_IDLE:
             return BuzzerState::BUZZ_IDLE_STATE_0;
@@ -73,19 +74,23 @@ BuzzerState BuzzerController::getNewStateFromRocket(FSM_State rocket_state) {
 }
 
 void BuzzerController::tickBuzzer() {
+    // The main purpose of the control state is to allow the battery voltage to be beeped out before the FSM state gets beeped out
     switch (control_state) {
         case WAITING_FOR_BATTERY:
+            // This state waits for some battery voltage to be read in
             if (rocket_state->sensorDataPointer->has_voltage_data) {
                 setBuzzerState(getNewStateFromBattery(rocket_state->sensorDataPointer->voltage_data.v_battery));
                 control_state = SENDING_BATTERY;
             }
             break;
         case SENDING_BATTERY:
+            // This state waits for the battery voltage to finished being read out
             if (curr_state == INITIAL) {
                 control_state = SENDING_FSM_STATE;
             }
             break;
         case SENDING_FSM_STATE:
+            // This is the core state, waits for the FSM state to change and sets the buzzer state accordingly
             chMtxLock(&rocket_state->dataloggerTHDVarsPointer.dataMutex_rocket_state);
             FSM_State rocket_fsm_state = rocket_state->sensorDataPointer->rocketState_data.rocketState;
             chMtxUnlock(&rocket_state->dataloggerTHDVarsPointer.dataMutex_rocket_state);
@@ -100,10 +105,11 @@ void BuzzerController::tickBuzzer() {
             break;
     }
 
+    // This is the part of the code which advances the buzzer FSM when needed
     unsigned int* state_info = BuzzerStates[curr_state];
 
     unsigned long curr_time = millis();
-    unsigned long elapsed = curr_time - time_since_state_start;
+    unsigned long elapsed = curr_time - state_start_time;
 
     if (elapsed >= state_info[1]) {
         auto new_state = static_cast<BuzzerState>(state_info[2]);
