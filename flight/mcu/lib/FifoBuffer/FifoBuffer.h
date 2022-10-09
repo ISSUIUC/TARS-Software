@@ -1,67 +1,106 @@
-//
-// Created by 16182 on 9/27/2021.
-//
-
 #ifndef TARS_SOFTWARE_FIFO_H
 #define TARS_SOFTWARE_FIFO_H
 
 #include <cstdint>
 #include <cstring>
-
-#ifdef COMPILE_LOCAL
-#include <mutex>
-#endif
-
-#ifdef COMPILE_TARGET
-#include <ChRt.h>
-#endif
-
-// only works with types that can be copied with memcpy
-class GenericFifoBuffer {
-   public:
-    // buff_size = size of array in elements
-    // data_size = size of array element in bytes
-    GenericFifoBuffer(void* arr, uint16_t buff_size, uint16_t data_size) {
-        capacity_ = buff_size;
-        cur_length_ = 0;
-        head_idx_ = 0;
-        tail_idx_ = 0;
-        data_size_ = data_size;
-        arr_ = arr;
-    }
-
-    bool push(void* element);
-
-    // returns false on failure
-    bool pop(void* out);
-
-   private:
-    uint16_t capacity_, cur_length_, head_idx_, tail_idx_, data_size_;
-    void* arr_;
-
-#ifdef COMPILE_LOCAL
-    std::mutex lock_;
-#endif
-
-#ifdef COMPILE_TARGET
-    mutex_t lock_;
-#endif
-};
+#include "ChRt.h"
 
 template <typename T, size_t max_size>
 class FifoBuffer {
-    // static_assert(std::is_trivially_copyable<T>::value, "Only trivially
-    // copyable types are allowed");
-   public:
-    FifoBuffer() : buffer(arr, max_size, sizeof(T)) {}
+public:
+    struct FifoIterator {
+    public:
+        using iterator_category = std::input_iterator_tag;
+        using difference_type = int64_t;
+        using value_type = T;
+        using pointer_type = T*;
+        using reference_type = T&;
 
-    bool push(T element) { return buffer.push(&element); }
+        FifoIterator(T* buf, size_t idx) : buf(buf), idx(idx) {}
 
-    bool pop(T* out) { return buffer.pop(out); }
+        T& operator*() const {
+            return buf[idx];
+        }
+        T* operator->() {
+            return &buf[idx];
+        }
+        FifoIterator& operator++() {
+            idx = (idx + 1) % max_size;
+            return *this;
+        }
+        FifoIterator operator++(int) {
+            FifoIterator tmp = *this;
+            ++(*this);
+            return tmp;
+        }
+        friend bool operator== (const FifoIterator& a, const FifoIterator& b) {
+            return a.buf == b.buf && a.idx == b.idx;
+        }
+        friend bool operator!= (const FifoIterator& a, const FifoIterator& b) {
+            return a.buf != b.buf || a.idx != b.idx;
+        }
 
-   private:
-    GenericFifoBuffer buffer;
-    T arr[max_size]{};
+    private:
+        T* buf;
+        size_t idx;
+    };
+
+
+    FifoBuffer() : length(0), head_idx(0), tail_idx(0) {}
+
+    bool push(T element) {
+        lock();
+        if (length == max_size) {
+            // if length == max_size, then head_idx == tail_idx
+            memmove(&arr[tail_idx], &element, sizeof(T));
+            head_idx = tail_idx = (head_idx + 1) % max_size;
+        } else {
+            memmove(&arr[tail_idx], &element, sizeof(T));
+            tail_idx = (tail_idx + 1) % max_size;
+            length++;
+        }
+        unlock();
+        return true;
+    }
+
+    bool pop(T* out) {
+        lock();
+        if (length == 0) {
+            unlock();
+            return false;
+        } else {
+            memmove(out, &arr[head_idx], sizeof(T));
+            head_idx = (head_idx + 1) % max_size;
+            length--;
+            unlock();
+            return true;
+        }
+    }
+
+    void lock() {
+        chMtxLock(&lock_);
+    }
+
+    void unlock() {
+        chMtxUnlock(&lock_);
+    }
+
+    FifoIterator begin() {
+        return FifoIterator { arr, head_idx };
+    }
+
+    FifoIterator end() {
+        return FifoIterator { arr, tail_idx };
+    }
+
+private:
+    size_t length;
+    size_t head_idx;
+    size_t tail_idx;
+    T arr[max_size];
+
+    MUTEX_DECL(lock_);
 };
+
 
 #endif  // TARS_SOFTWARE_FIFO_H
