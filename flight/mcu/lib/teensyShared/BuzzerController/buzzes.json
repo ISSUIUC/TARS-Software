@@ -9,9 +9,9 @@
       [500, 0.25],
       [null, 0.5],
       [500, 0.75],
-      [null, 0.5],
-      null
-    ]
+      [null, 0.5]
+    ],
+    "loop": false
   },
   {
     "name": "BUZZ_BOOST",
@@ -23,9 +23,9 @@
       [500, 0.75],
       [null, 0.5],
       [500, 0.25],
-      [null, 0.5],
-      null
-    ]
+      [null, 0.5]
+    ],
+    "loop": false
   },
   {
     "name": "BUZZ_COAST",
@@ -37,9 +37,9 @@
       [500, 0.75],
       [null, 0.5],
       [500, 0.75],
-      [null, 0.5],
-      null
-    ]
+      [null, 0.5]
+    ],
+    "loop": false
   },
   {
     "name": "BUZZ_APOGEE",
@@ -51,9 +51,9 @@
       [500, 0.25],
       [null, 0.5],
       [500, 0.25],
-      [null, 0.5],
-      null
-    ]
+      [null, 0.5]
+    ],
+    "loop": false
   },
   {
     "name": "BUZZ_DROGUE",
@@ -65,9 +65,9 @@
       [500, 0.25],
       [null, 0.5],
       [500, 0.75],
-      [null, 0.5],
-      null
-    ]
+      [null, 0.5]
+    ],
+    "loop": false
   },
   {
     "name": "BUZZ_MAIN",
@@ -79,9 +79,9 @@
       [500, 0.75],
       [null, 0.5],
       [500, 0.25],
-      [null, 0.5],
-      null
-    ]
+      [null, 0.5]
+    ],
+    "loop": false
   },
   {
     "name": "BUZZ_LANDED",
@@ -93,9 +93,9 @@
       [500, 0.75],
       [null, 0.5],
       [500, 0.75],
-      [null, 0.5],
-      null
-    ]
+      [null, 0.5]
+    ],
+    "loop": false
   },
   {
     "name": "BUZZ_ABORT",
@@ -107,9 +107,9 @@
       [500, 0.25],
       [null, 0.5],
       [500, 0.25],
-      [null, 0.5],
-      null
-    ]
+      [null, 0.5]
+    ],
+    "loop": false
   },
   {
     "name": "BATTERY_ZERO",
@@ -135,9 +135,9 @@
       [1500, 0.75],
       [null, 0.5],
       [1500, 0.75],
-      [null, 0.5],
-      null
-    ]
+      [null, 0.5]
+    ],
+    "loop": false
   },
   {
     "name": "BATTERY_ONE",
@@ -145,9 +145,9 @@
       [1000, 0.25],
       [null, 0.5],
       [1500, 0.75],
-      [null, 0.5],
-      null
-    ]
+      [null, 0.5]
+    ],
+    "loop": false
   },
   {
     "name": "BATTERY_TWO",
@@ -157,9 +157,9 @@
       [1500, 0.75],
       [null, 0.5],
       [1500, 0.75],
-      [null, 0.5],
-      null
-    ]
+      [null, 0.5]
+    ],
+    "loop": false
   },
   {
     "name": "BATTERY_THREE",
@@ -171,9 +171,9 @@
       [1500, 0.75],
       [null, 0.5],
       [1500, 0.75],
-      [null, 0.5],
-      null
-    ]
+      [null, 0.5]
+    ],
+    "loop": false
   },
   {
     "name": "BATTERY_FOUR",
@@ -187,9 +187,9 @@
       [1500, 0.75],
       [null, 0.5],
       [1500, 0.75],
-      [null, 0.5],
-      null
-    ]
+      [null, 0.5]
+    ],
+    "loop": false
   },
   {
     "name": "BATTERY_FIVE",
@@ -205,9 +205,9 @@
       [1500, 0.75],
       [null, 0.5],
       [1500, 0.75],
-      [null, 0.5],
-      null
-    ]
+      [null, 0.5]
+    ],
+    "loop": false
   },
   {
     "name": "BATTERY_SIX",
@@ -227,9 +227,9 @@
       [1500, 0.75],
       [null, 0.5],
       [1500, 0.75],
-      [null, 0.5],
-      null
-    ]
+      [null, 0.5]
+    ],
+    "loop": false
   },
   {
     "name": "BATTERY_SEVEN",
@@ -253,9 +253,9 @@
       [1500, 0.75],
       [null, 0.5],
       [1500, 0.75],
-      [null, 0.5],
-      null
-    ]
+      [null, 0.5]
+    ],
+    "loop": false
   },
   {
     "name": "BATTERY_EIGHT",
@@ -277,9 +277,9 @@
       [1500, 0.75],
       [null, 0.5],
       [1500, 0.75],
-      [null, 0.5],
-      null
-    ]
+      [null, 0.5]
+    ],
+    "loop": false
   },
   {
     "name": "BATTERY_NINE",
@@ -303,8 +303,8 @@
       [1500, 0.75],
       [null, 0.5],
       [1500, 0.75],
-      [null, 0.5],
-      null
-    ]
+      [null, 0.5]
+    ],
+    "loop": false
   }
 ]

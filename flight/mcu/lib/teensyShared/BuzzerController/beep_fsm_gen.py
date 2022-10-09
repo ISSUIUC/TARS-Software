@@ -1,3 +1,9 @@
+"""
+See the from_json method for a description of the JSON format this script expects.
+
+To use, simply invoke this script with the path of the buzzes json file you want to input as a command line argument
+"""
+
 from __future__ import annotations
 
 import clipboard
@@ -21,16 +27,10 @@ class Item:
 
     @property
     def enum_entry(self) -> str:
-        """
-        :return: The name of this item in the BuzzerState enum.
-        """
         return f"{self.sequence.name}_STATE_{self.index}"
 
     @property
     def table_entry(self) -> str:
-        """
-        :return: The table entry for this item in the BuzzerStates table, with a helpful comment at the start.
-        """
         if self.pitch is None:
             pitch = "0"
         else:
@@ -50,31 +50,38 @@ class Sequence:
     """
     def __init__(self, name: str):
         self.name: str = name
-        """The name of this sequence, which is prepended to each item"""
 
         self._items: list[Item] = []
-        """A list of items in this sequence"""
 
     @classmethod
     def from_json(cls, json_structure) -> Sequence:
         """
         Constructs a Sequence from some preparsed json, which is expected to follow the following format:
 
+        At the top level, the json must be a list of sequence-describing objects.
+        A sequence-describing object must have these three properties:
+            - The "name" property must be a string containing a valid C++ identifier, which is the name of this sequence.
+            - The "loop" property must be a boolean. If true, the sequence will automatically loop, otherwise, it returns
+              to the initial state
+            - The "sequence" property must a list of item lists.
+                - Each item list must have exactly two items in it:
+                    - The first item can be either a number or a null. If it's null, this item is silent. Otherwise, it's
+                        a beep with the pitch of that number. Specifically, the pitch corresponds to the frequency of the
+                        note in Hertz.
+                    - The second item is the duration of this item in seconds as a number.
+
         :param json_structure: Parsed JSON. Nulls should be None, Objects are dicts, lists are lists, numbers are floats
         :return: A sequence from the JSON
         """
+        # TODO use JSON schema to validate the inputted json
+
         name = json_structure["name"]
         obj = cls(name)
 
-        for item in json_structure["sequence"]:
-            if item is not None:
-                pitch, length = item
-                obj._add_item(pitch, int(length * 1000))
-            else:
-                break
-        else:
-            # in python, an "else" branch on an "if" is only called whenever the loop DID NOT exit with a break
-            # thus, this code only runs if the sequence doesn't have a "null" in it
+        for pitch, length in json_structure["sequence"]:
+            obj._add_item(pitch, int(length * 1000))
+
+        if json_structure["loop"]:
             obj._create_loop()
 
         return obj
