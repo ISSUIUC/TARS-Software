@@ -233,7 +233,7 @@ static THD_FUNCTION(kalman_THD, arg) {
             *KF = *KF2;
             KF2 = KalmanFilter(pointer_struct);
 
-            KF2.Initialize(); /// TODO: Initialize with the most recent sensor readings of position and velocity
+            KF2.Initialize(KF2->bufferAverage(), 0.0); /// TODO: Initialize with the most recent sensor readings of position and velocity
             switch_time = chVTGetSystemTime();
         }
         KF -> kfTickFunction();

@@ -43,6 +43,22 @@ void KalmanFilter::kfTickFunction() {
         update();
     }
 }
+
+/**
+ * @brief Returns the average of the barometer measurements in the buffer
+ */
+
+float KalmanFilter::bufferAverage() {
+    float total = 0;
+    int count = 0;
+    float current = 0.0;
+    while (b_alt_buffer.pop(&current)) {
+        total += current;
+        count++;
+    }
+    return total / count;
+}
+
 /**
  * @brief Sets altitude by averaging 30 barometer measurements taken 100 ms
  * apart
