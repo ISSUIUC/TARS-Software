@@ -68,13 +68,23 @@ bool test_barometer(){
 
     float temp = barometer.getTemperature() *
         0.01;
+    float pressure = barometer.getPressure()*0.01;
     bool did_change = false;
     for(int i = 0; i < 20; i++){
         barometer.read(12);
         float temp_new = barometer.getTemperature() *
             0.01;
-        if(temp_new != temp) did_change = true;
-        Serial.print("Temperature: "); Serial.println(temp_new);
+        float pressure_new = barometer.getPressure()*0.01;
+        if(temp_new != temp) {
+            Serial.print("Temperature: "); 
+            Serial.println(temp_new);
+            did_change = true;
+        }
+        if (pressure != pressure_new) {
+            Serial.print("Pressure: ");
+            Serial.println(pressure_new);
+        }
+        
         delay(100);
     }
     
