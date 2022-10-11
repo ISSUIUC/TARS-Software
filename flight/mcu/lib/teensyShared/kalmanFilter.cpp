@@ -11,7 +11,8 @@ void KalmanFilter::tickBuffer(){
     // if(b_alt_buffer.size() < 10){
     //     b_alt_buffer.push(*b_alt);
     // }else{
-        b_alt_buffer.pop();
+        float current = 0.0;
+        b_alt_buffer.pop(&current);
         b_alt_buffer.push(*b_alt);
     // }
 }

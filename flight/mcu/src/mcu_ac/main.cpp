@@ -223,21 +223,24 @@ static THD_FUNCTION(gps_THD, arg) {
 
 static THD_FUNCTION(kalman_THD, arg) {
     struct pointers *pointer_struct = (struct pointers *)arg;
-    KalmanFilter* KF(pointer_struct), KF2(pointer_struct);
+    KalmanFilter KF(pointer_struct);
+    KalmanFilter KF2(pointer_struct);
     KF.Initialize();
-    bool is_idle = rocketState_data.rocketState == FSM_State::STATE_IDLE;
+    bool is_idle = sensorData.rocketState_data.rocketState == FSM_State::STATE_IDLE;
     systime_t switch_time = chVTGetSystemTime();
     systime_t buffer_time = 120000; // 2min in ms 
     while (true) {
+        is_idle = sensorData.rocketState_data.rocketState == FSM_State::STATE_IDLE;
         if (is_idle && chVTGetSystemTime() - switch_time >= buffer_time) {
-            *KF = *KF2;
+            KF = KF2;
             KF2 = KalmanFilter(pointer_struct);
 
-            KF2.Initialize(KF2->bufferAverage(), 0.0); /// TODO: Initialize with the most recent sensor readings of position and velocity
+            KF2.Initialize(KF2.bufferAverage(), 0.0);
             switch_time = chVTGetSystemTime();
         }
-        KF -> kfTickFunction();
-        KF2 -> kfTickFunction();
+        KF.kfTickFunction();
+        KF2.kfTickFunction();
+        //Serial::println("KF2: " + String(KF.)); FIX THIS
         chThdSleepMilliseconds(50);
     }
 }
