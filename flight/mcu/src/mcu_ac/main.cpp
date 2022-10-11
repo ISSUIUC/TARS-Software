@@ -240,6 +240,7 @@ static THD_FUNCTION(kalman_THD, arg) {
         }
         KF.kfTickFunction();
         KF2.kfTickFunction();
+        KF2.tickBuffer();
         //Serial::println("KF2: " + String(KF.)); FIX THIS
         chThdSleepMilliseconds(50);
     }
