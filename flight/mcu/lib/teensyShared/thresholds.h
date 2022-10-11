@@ -14,16 +14,16 @@ static const float coast_time_thresh = 300;
 static const float launch_linear_acceleration_thresh = 2;
 
 // Required time of detected acceleration to switch to boost
-static const float launch_time_thresh = 300;
+static const float launch_time_thresh = 20;
 
 // If we observe less than 0.5 g of accel, transition to coast
 static const float coast_thresh = 0.5;
 
 // Switch to apogee state after 40 seconds
-static const float coast_to_apogee_time_thresh = 40000;
+static const float coast_to_apogee_time_thresh = 5000;
 
 // For preventing AC from actuating even when in coast state
-static const float coast_ac_delay_thresh = 15000;
+static const float coast_ac_delay_thresh = 1000;
 
 // Rocket won't leave boost state until burn_timer has exceeded this limit
 static const int burn_time_thresh_ms = 5000;

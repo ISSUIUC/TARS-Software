@@ -22,7 +22,6 @@
 #include "rocketFSM.h"
 
 #include <Arduino.h>
-#include <ChRt.h>
 #include <SPI.h>
 #include <Wire.h>
 
@@ -69,16 +68,19 @@ void rocketFSM::tickFSM() {
     switch (*rocket_state_ptr_) {
         case STATE_ABORT:
             // If true, always stay in abort
+            Serial.println("ABORT");
             break;
 
         case STATE_INIT:
             // Go to state idle regardless of gps lock
+            Serial.println("INIT");
             *rocket_state_ptr_ =
                 STATE_IDLE;
-
+                       
             break;
 
         case STATE_IDLE:
+            Serial.println("IDLE");
             // If high acceleration is observed in z direction...
             if (*linear_acceleration_ptr_ > launch_linear_acceleration_thresh) {
                 *launch_time_ptr_ = chVTGetSystemTime();
@@ -89,6 +91,7 @@ void rocketFSM::tickFSM() {
 
         case STATE_LAUNCH_DETECT:
             // If the acceleration was too brief, go back to IDLE
+            Serial.println("LAUNCH_DETECT");
             if (*linear_acceleration_ptr_ < launch_linear_acceleration_thresh) {
                 *rocket_state_ptr_ = STATE_IDLE;
                 break;
@@ -106,6 +109,7 @@ void rocketFSM::tickFSM() {
             break;
 
         case STATE_BOOST:
+            Serial.println("BOOST");
             Serial.println(*linear_acceleration_ptr_);
             *burn_timer_ptr_ =
                 chVTGetSystemTime() - *launch_time_ptr_;
@@ -132,6 +136,7 @@ void rocketFSM::tickFSM() {
 
         case STATE_BURNOUT_DETECT:
             // If the 0 acceleration was too brief, go back to BOOST
+            Serial.println("BURNOUT_DETECT");
             if (*linear_acceleration_ptr_ > coast_thresh) {
                 *rocket_state_ptr_ = STATE_BOOST;
                 break;
@@ -149,6 +154,7 @@ void rocketFSM::tickFSM() {
             break;
 
         case STATE_COAST:
+            Serial.println("COAST");
             *coast_timer_ptr_ = chVTGetSystemTime() - *burnout_time_ptr_;
 
             if (TIME_I2MS(*coast_timer_ptr_) >
@@ -160,6 +166,7 @@ void rocketFSM::tickFSM() {
 
             break;
         case STATE_APOGEE:
+        Serial.println("APOGEE");
         default:
             break;
     }
