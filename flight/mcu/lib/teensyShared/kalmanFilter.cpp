@@ -207,3 +207,7 @@ void KalmanFilter::update() {
     chMtxUnlock(dataMutex_state_);
     data_logger_->pushStateFifo(stateData_);
 }
+
+stateData* KalmanFilter::getStateData() const{
+    return stateData_;
+}

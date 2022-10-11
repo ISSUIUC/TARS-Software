@@ -18,6 +18,7 @@ class KalmanFilter {
     void tickBuffer();
 
     float bufferAverage();
+    stateData* getStateData() const;
    private:
     float s_dt = 0.050;
 
