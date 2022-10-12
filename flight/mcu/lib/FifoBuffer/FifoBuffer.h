@@ -3,7 +3,7 @@
 
 #include <cstdint>
 #include <cstring>
-#include "ChRt.h"
+#include <ChRt.h>
 
 template <typename T, size_t max_size>
 class FifoBuffer {
