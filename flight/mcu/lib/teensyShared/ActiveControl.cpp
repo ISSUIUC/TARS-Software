@@ -22,7 +22,8 @@ Controller::Controller(struct pointers* pointer_struct,
     b_alt = &pointer_struct->sensorDataPointer->barometer_data.altitude;
     dataMutex_barometer_ =
         &pointer_struct->dataloggerTHDVarsPointer.dataMutex_barometer;
-    dataMutex_state_ = &pointer_struct->dataloggerTHDVarsPointer.dataMutex_state;
+    dataMutex_state_ =
+        &pointer_struct->dataloggerTHDVarsPointer.dataMutex_state;
 
     /*
      * Startup sequence

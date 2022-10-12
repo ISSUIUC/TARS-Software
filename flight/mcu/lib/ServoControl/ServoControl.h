@@ -3,7 +3,6 @@
 
 #include <PWMServo.h>
 
-
 class ServoControl {
    public:
     ServoControl(PWMServo* servo);

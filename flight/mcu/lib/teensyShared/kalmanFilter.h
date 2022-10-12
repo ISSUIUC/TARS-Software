@@ -1,8 +1,8 @@
 #include "../EigenArduino-Eigen30/Eigen30.h"
 #include "ServoControl.h"
-#include "rocketFSM.h"
 #include "dataLog.h"
 #include "rk4.h"
+#include "rocketFSM.h"
 #include "sensors.h"
 
 class KalmanFilter {
