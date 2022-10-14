@@ -16,6 +16,7 @@
 #include "SerialParser.h"
 #include <queue>
 #include <array>
+#include <numeric>
 
 /* Pins for feather*/
 // // Ensure to change depending on wiring
@@ -108,7 +109,7 @@ struct telemetry_command {
     float freq;
     bool do_abort;
   };
-  std::array<char, 6> verify = {'A', 'Y', 'B', 'E', 'R', 'K'};
+  std::array<char, 6> verify = {{'A', 'Y', 'B', 'E', 'R', 'K'}};
 };
 
 struct TelemetryCommandQueueElement {
@@ -129,6 +130,14 @@ constexpr int max_command_retries = 5;
 
 float current_freq = RF95_FREQ;
 
+void printFloat(float f, int precision=5){
+  if(isinf(f) || isnan(f)){
+    Serial.print(-1);
+  } else {
+    Serial.print(f, precision);
+  }
+}
+
 void SerialPrintTelemetryData(const telemetry_data & data, float frequency){
   //add null ternimator to sign
   char sign[9]{};
@@ -136,37 +145,37 @@ void SerialPrintTelemetryData(const telemetry_data & data, float frequency){
 
   Serial.print(R"({"type": "data", "value": {)");
   Serial.print(R"("response_ID":)"); Serial.print(data.response_ID); Serial.print(',');
-  Serial.print(R"("gps_lat":)"); Serial.print(data.gps_lat, 5); Serial.print(',');
-  Serial.print(R"("gps_long":)"); Serial.print(data.gps_long, 5); Serial.print(',');
-  Serial.print(R"("gps_alt":)"); Serial.print(data.gps_alt, 5); Serial.print(',');
-  Serial.print(R"("barometer_alt":)"); Serial.print(data.barometer_alt, 5); Serial.print(',');
-  Serial.print(R"("KX_IMU_ax":)"); Serial.print(data.KX_IMU_ax, 5); Serial.print(',');
-  Serial.print(R"("KX_IMU_ay":)"); Serial.print(data.KX_IMU_ay, 5); Serial.print(',');
-  Serial.print(R"("KX_IMU_az":)"); Serial.print(data.KX_IMU_az, 5); Serial.print(',');
+  Serial.print(R"("gps_lat":)"); printFloat(data.gps_lat); Serial.print(',');
+  Serial.print(R"("gps_long":)"); printFloat(data.gps_long); Serial.print(',');
+  Serial.print(R"("gps_alt":)"); printFloat(data.gps_alt); Serial.print(',');
+  Serial.print(R"("barometer_alt":)"); printFloat(data.barometer_alt); Serial.print(',');
+  Serial.print(R"("KX_IMU_ax":)"); printFloat(data.KX_IMU_ax); Serial.print(',');
+  Serial.print(R"("KX_IMU_ay":)"); printFloat(data.KX_IMU_ay); Serial.print(',');
+  Serial.print(R"("KX_IMU_az":)"); printFloat(data.KX_IMU_az); Serial.print(',');
   // Serial.print(R"("H3L_IMU_ax":)"); Serial.print(data.H3L_IMU_ax); Serial.print(',');
   // Serial.print(R"("H3L_IMU_ay":)"); Serial.print(data.H3L_IMU_ay); Serial.print(',');
   // Serial.print(R"("H3L_IMU_az":)"); Serial.print(data.H3L_IMU_az); Serial.print(',');
-  Serial.print(R"("LSM_IMU_ax":)"); Serial.print(data.LSM_IMU_ax, 5); Serial.print(',');
-  Serial.print(R"("LSM_IMU_ay":)"); Serial.print(data.LSM_IMU_ay, 5); Serial.print(',');
-  Serial.print(R"("LSM_IMU_az":)"); Serial.print(data.LSM_IMU_az, 5); Serial.print(',');
-  Serial.print(R"("LSM_IMU_gx":)"); Serial.print(data.LSM_IMU_gx, 5); Serial.print(',');
-  Serial.print(R"("LSM_IMU_gy":)"); Serial.print(data.LSM_IMU_gy, 5); Serial.print(',');
-  Serial.print(R"("LSM_IMU_gz":)"); Serial.print(data.LSM_IMU_gz, 5); Serial.print(',');
-  Serial.print(R"("LSM_IMU_mx":)"); Serial.print(data.LSM_IMU_mx, 5); Serial.print(',');
-  Serial.print(R"("LSM_IMU_my":)"); Serial.print(data.LSM_IMU_my, 5); Serial.print(',');
-  Serial.print(R"("LSM_IMU_mz":)"); Serial.print(data.LSM_IMU_mz, 5); Serial.print(',');
+  Serial.print(R"("LSM_IMU_ax":)"); printFloat(data.LSM_IMU_ax); Serial.print(',');
+  Serial.print(R"("LSM_IMU_ay":)"); printFloat(data.LSM_IMU_ay); Serial.print(',');
+  Serial.print(R"("LSM_IMU_az":)"); printFloat(data.LSM_IMU_az); Serial.print(',');
+  Serial.print(R"("LSM_IMU_gx":)"); printFloat(data.LSM_IMU_gx); Serial.print(',');
+  Serial.print(R"("LSM_IMU_gy":)"); printFloat(data.LSM_IMU_gy); Serial.print(',');
+  Serial.print(R"("LSM_IMU_gz":)"); printFloat(data.LSM_IMU_gz); Serial.print(',');
+  Serial.print(R"("LSM_IMU_mx":)"); printFloat(data.LSM_IMU_mx); Serial.print(',');
+  Serial.print(R"("LSM_IMU_my":)"); printFloat(data.LSM_IMU_my); Serial.print(',');
+  Serial.print(R"("LSM_IMU_mz":)"); printFloat(data.LSM_IMU_mz); Serial.print(',');
   Serial.print(R"("FSM_state":)"); Serial.print(data.FSM_state); Serial.print(',');
   Serial.print(R"("sign":")"); Serial.print(sign); Serial.print("\",");
   Serial.print(R"("RSSI":)"); Serial.print(rf95.lastRssi()); Serial.print(',');
-  Serial.print(R"("Voltage":)"); Serial.print(data.voltage_battry, 5); Serial.print(',');
+  Serial.print(R"("Voltage":)"); printFloat(data.voltage_battry); Serial.print(',');
   Serial.print(R"("frequency":)"); Serial.print(frequency); Serial.print(',');
-  Serial.print(R"("flap_extension":)"); Serial.print(data.flap_extension, 5); Serial.print(",");
-  Serial.print(R"("STE_ALT":)"); Serial.print(data.state_x, 5); Serial.print(",");
-  Serial.print(R"("STE_VEL":)"); Serial.print(data.state_vx, 5); Serial.print(",");
-  Serial.print(R"("STE_ACC":)"); Serial.print(data.state_ax, 5); Serial.print(",");
-  Serial.print(R"("TEMP":)"); Serial.print(data.barometer_temperature, 5); Serial.print(",");
-  Serial.print(R"("pressure":)"); Serial.print(data.barometer_pressure, 5); Serial.print(",");
-  Serial.print(R"("STE_APO":)"); Serial.print(data.state_apo, 5); Serial.print("");
+  Serial.print(R"("flap_extension":)"); printFloat(data.flap_extension); Serial.print(",");
+  Serial.print(R"("STE_ALT":)"); printFloat(data.state_x); Serial.print(",");
+  Serial.print(R"("STE_VEL":)"); printFloat(data.state_vx); Serial.print(",");
+  Serial.print(R"("STE_ACC":)"); printFloat(data.state_ax); Serial.print(",");
+  Serial.print(R"("TEMP":)"); printFloat(data.barometer_temperature); Serial.print(",");
+  Serial.print(R"("pressure":)"); printFloat(data.barometer_pressure); Serial.print(",");
+  Serial.print(R"("STE_APO":)"); printFloat(data.state_apo); Serial.print("");
 
 
 
