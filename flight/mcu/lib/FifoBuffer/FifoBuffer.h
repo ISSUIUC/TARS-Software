@@ -87,6 +87,7 @@ public:
         chMtxUnlock(&lock_);
     }
 
+    // before iterating, make sure to lock (and don't do pushes or pops while iterating)
     FifoIterator begin() {
         return FifoIterator { arr, head_idx };
     }
@@ -94,20 +95,24 @@ public:
     FifoIterator end() {
         return FifoIterator { arr, tail_idx };
     }
-
-    std::vector<T> recentN(size_t n) {
-        std::vector<T> recent;
-        recent.reserve(n);
-        size_t pushed = 0;
+    /**
+     * @brief Reads the most recent N items into a passed array (can be larger than the actual count of items).
+     *
+     * @param write_to An array of at least n items to write to
+     * @param n How many items to read from the FIFO buffer
+     * @return How many items were actually read
+     */
+    size_t recentN(T write_to[], size_t n) {
+        size_t i = 0;
         if (n != 0) {
             lock();
             for (T& item : this) {
-                recent.push_back(item);
-                if (pushed++ == n) break;
+                write_to[i];
+                if (i++ == n) break;
             }
             unlock();
         }
-        return recent;
+        return i;
     }
 
 private:
