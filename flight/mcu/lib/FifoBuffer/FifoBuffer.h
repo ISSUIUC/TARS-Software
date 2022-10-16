@@ -95,14 +95,18 @@ public:
         return FifoIterator { arr, tail_idx };
     }
 
-    std::vector<T> recentN(ssize_t n) {
-        lock();
+    std::vector<T> recentN(size_t n) {
         std::vector<T> recent;
-        for (T& item : this) {
-            recent.push_back(item);
-            if (n-- < 0) break;
+        recent.reserve(n);
+        size_t pushed = 0;
+        if (n != 0) {
+            lock();
+            for (T& item : this) {
+                recent.push_back(item);
+                if (pushed++ == n) break;
+            }
+            unlock();
         }
-        unlock();
         return recent;
     }
 
