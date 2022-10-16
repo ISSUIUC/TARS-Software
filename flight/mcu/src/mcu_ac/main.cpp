@@ -54,6 +54,8 @@
 //#define GPS_DEBUG
 //#define SERVO_DEBUG
 
+#define HILSIM_MODE
+
 // Create a data struct to hold data from the sensors
 sensorDataStruct_t sensorData;
 
@@ -127,6 +129,7 @@ static THD_FUNCTION(lowgIMU_THD, arg) {
     // Load outside variables into the function
     struct pointers *pointer_struct = (struct pointers *)arg;
     LSM9DS1 *lsm = pointer_struct->lowGimuPointer;
+    HILSIM *hilsim = pointer_struct->hilsimPointer;
     DataLogBuffer *data_log_buffer = &pointer_struct->dataloggerTHDVarsPointer;
     LowGData *lowG_Data = &pointer_struct->sensorDataPointer->lowG_data;
 
@@ -136,7 +139,14 @@ static THD_FUNCTION(lowgIMU_THD, arg) {
 #endif
 
         chMtxLock(&data_log_buffer->dataMutex_lowG);
+        #ifndef HILSIM_MODE
         lowGimuTickFunction(lsm, data_log_buffer, lowG_Data);
+        #endif
+
+        #ifdef HILSIM_MODE
+        lowGimuTickFunction(hilsim, lsm, data_log_buffer, lowG_Data);
+        #endif
+
         chMtxUnlock(&data_log_buffer->dataMutex_lowG);
 
         chThdSleepMilliseconds(6);
@@ -152,6 +162,7 @@ static THD_FUNCTION(barometer_THD, arg) {
 
     MS5611 *barometer = pointer_struct->barometerPointer;
     DataLogBuffer *data_log_buffer = &pointer_struct->dataloggerTHDVarsPointer;
+    HILSIM *hilsim = pointer_struct->hilsimPointer;
     BarometerData *barometer_data =
         &pointer_struct->sensorDataPointer->barometer_data;
 
@@ -161,7 +172,13 @@ static THD_FUNCTION(barometer_THD, arg) {
 #endif
 
         chMtxLock(&data_log_buffer->dataMutex_barometer);
+        #ifndef HILSIM_MODE
         barometerTickFunction(barometer, data_log_buffer, barometer_data);
+        #endif 
+        
+        #ifdef HILSIM_MODE
+        barometerTickFunction(hilsim, barometer, data_log_buffer, barometer_data);
+        #endif
         chMtxUnlock(&data_log_buffer->dataMutex_barometer);
 
         chThdSleepMilliseconds(6);
@@ -177,6 +194,7 @@ static THD_FUNCTION(highgIMU_THD, arg) {
 
     QwiicKX134 *highG = pointer_struct->highGimuPointer;
     DataLogBuffer *data_log_buffer = &pointer_struct->dataloggerTHDVarsPointer;
+    HILSIM *hilsim = pointer_struct->hilsimPointer;
     HighGData *highg_data = &pointer_struct->sensorDataPointer->highG_data;
 
     while (true) {
@@ -184,7 +202,13 @@ static THD_FUNCTION(highgIMU_THD, arg) {
         Serial.println("### High G IMU thread entrance");
 #endif
         chMtxLock(&data_log_buffer->dataMutex_highG);
+        #ifndef HILSIM_MODE
         highGimuTickFunction(highG, data_log_buffer, highg_data);
+        #endif
+
+        #ifdef HILSIM_MODE
+        highGimuTickFunction(hilsim, highG, data_log_buffer, highg_data);
+        #endif
         chMtxUnlock(&data_log_buffer->dataMutex_highG);
 
         chThdSleepMilliseconds(20);  // highg reads at 50 hz
@@ -200,6 +224,7 @@ static THD_FUNCTION(gps_THD, arg) {
 
     SFE_UBLOX_GNSS *gps = pointer_struct->GPSPointer;
     DataLogBuffer *data_log_buffer = &pointer_struct->dataloggerTHDVarsPointer;
+    HILSIM *hilsim = pointer_struct->hilsimPointer;
     GpsData *gps_data = &pointer_struct->sensorDataPointer->gps_data;
 
     while (true) {
@@ -207,7 +232,14 @@ static THD_FUNCTION(gps_THD, arg) {
         Serial.println("### GPS thread entrance");
 #endif
         chMtxLock(&data_log_buffer->dataMutex_GPS);
+        #ifndef HILSIM_MODE
         gpsTickFunction(gps, data_log_buffer, gps_data);
+        #endif
+
+        #ifdef HILSIM_MODE
+        gpsTickFunction(hilsim, gps, data_log_buffer, gps_data);
+        #endif
+        
         chMtxUnlock(&data_log_buffer->dataMutex_GPS);
 
 #ifdef THREAD_DEBUG

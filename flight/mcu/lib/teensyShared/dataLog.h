@@ -13,6 +13,7 @@
 #include "VoltageSensor.h"
 #include "acShared.h"
 #include "dataStructs.h"
+#include "hilsim.h"
 
 /**
  * @brief Structure for all values collected from the low g sensor
@@ -210,9 +211,12 @@ struct pointers {
     sensorDataStruct_t* sensorDataPointer;
 
     DataLogBuffer dataloggerTHDVarsPointer;
+
     bool abort;
 
     fsm_struct rocketTimers;
+
+    HILSIM* hilsimPointer;
 };
 
 void dataLoggerTickFunction(pointers*);
