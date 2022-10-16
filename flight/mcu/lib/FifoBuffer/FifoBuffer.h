@@ -4,7 +4,6 @@
 #include <cstdint>
 #include <cstring>
 #include <ChRt.h>
-#include <vector>
 #include <iterator>
 
 template <typename T, size_t max_size>
