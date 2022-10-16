@@ -4,6 +4,8 @@
 #include <cstdint>
 #include <cstring>
 #include <ChRt.h>
+#include <vector>
+#include <iterator>
 
 template <typename T, size_t max_size>
 class FifoBuffer {
@@ -48,14 +50,14 @@ public:
 
     FifoBuffer() : length(0), head_idx(0), tail_idx(0) {}
 
-    bool push(T element) {
+    bool push(T& element) {
         lock();
         if (length == max_size) {
             // if length == max_size, then head_idx == tail_idx
-            memmove(&arr[tail_idx], &element, sizeof(T));
+            arr[tail_idx] = element;
             head_idx = tail_idx = (head_idx + 1) % max_size;
         } else {
-            memmove(&arr[tail_idx], &element, sizeof(T));
+            arr[tail_idx] = element;
             tail_idx = (tail_idx + 1) % max_size;
             length++;
         }
@@ -69,7 +71,7 @@ public:
             unlock();
             return false;
         } else {
-            memmove(out, &arr[head_idx], sizeof(T));
+            *out = arr[head_idx];
             head_idx = (head_idx + 1) % max_size;
             length--;
             unlock();
@@ -96,7 +98,7 @@ public:
     std::vector<T> recentN(ssize_t n) {
         lock();
         std::vector<T> recent;
-        for (T item : this) {
+        for (T& item : this) {
             recent.push_back(item);
             if (n-- < 0) break;
         }
