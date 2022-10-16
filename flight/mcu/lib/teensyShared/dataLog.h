@@ -11,8 +11,9 @@
 #include "SparkFun_Qwiic_KX13X.h"  //High-G IMU Library
 #include "SparkFun_u-blox_GNSS_Arduino_Library.h"
 #include "VoltageSensor.h"
-#include "acShared.h"
-#include "dataStructs.h"
+#include "rocketFSM.h"
+// #include "acShared.h"
+// #include "dataStructs.h"
 
 /**
  * @brief Structure for all values collected from the low g sensor

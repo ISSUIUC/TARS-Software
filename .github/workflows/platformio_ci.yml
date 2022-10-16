@@ -31,4 +31,4 @@ jobs:
       run: |
         cd flight/mcu/
         pio platform install native
-        pio test -e desktop
+        pio test -e mcu_ac
