@@ -19,8 +19,8 @@ static const float launch_time_thresh = 300;
 // If we observe less than 0.5 g of accel, transition to coast
 static const float coast_thresh = 0.5;
 
-// Switch to apogee state after 40 seconds
-static const float coast_to_apogee_time_thresh = 40000;
+// Switch to apogee state after 26.3 seconds
+static const float coast_to_apogee_time_thresh = 26300;
 
 // For preventing AC from actuating even when in coast state
 static const float coast_ac_delay_thresh = 15000;
