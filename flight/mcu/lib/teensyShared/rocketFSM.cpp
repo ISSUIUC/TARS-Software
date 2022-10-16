@@ -54,14 +54,14 @@ void rocketFSM::tickFSM() {
 
         case STATE_INIT:
             // go to state idle regardless of gps lock
-            // Serial.println("INIT");
+            Serial.println("INIT");
             pointer_struct->sensorDataPointer->rocketState_data.rocketState =
                 STATE_IDLE;
 
             break;
 
         case STATE_IDLE:
-            // Serial.println("IDLE");
+            Serial.println("IDLE");
             // If high acceleration is observed in z direction...
             if (linear_acceleration > launch_linear_acceleration_thresh) {
                 pointer_struct->rocketTimers.launch_time = chVTGetSystemTime();
@@ -72,7 +72,7 @@ void rocketFSM::tickFSM() {
             break;
 
         case STATE_LAUNCH_DETECT:
-            // Serial.println("\n LAUNCH DETECTED \n");
+            Serial.println("\n LAUNCH DETECTED \n");
             // If the acceleration was too brief, go back to IDLE
             if (linear_acceleration < launch_linear_acceleration_thresh) {
                 pointer_struct->sensorDataPointer->rocketState_data
@@ -95,7 +95,7 @@ void rocketFSM::tickFSM() {
             break;
 
         case STATE_BOOST:
-            // Serial.println("BOOST");
+            Serial.println("BOOST");
             Serial.println(linear_acceleration);
             pointer_struct->rocketTimers.burn_timer =
                 chVTGetSystemTime() - pointer_struct->rocketTimers.launch_time;
@@ -124,7 +124,7 @@ void rocketFSM::tickFSM() {
             break;
 
         case STATE_BURNOUT_DETECT:
-            // Serial.println("\n BURNOUT DETECTED \n");
+            Serial.println("\n BURNOUT DETECTED \n");
             // If the 0 acceleration was too brief, go back to BOOST
             if (linear_acceleration > coast_thresh) {
                 pointer_struct->sensorDataPointer->rocketState_data
@@ -146,7 +146,7 @@ void rocketFSM::tickFSM() {
             break;
 
         case STATE_COAST:
-            // Serial.println("COAST");
+            Serial.println("COAST");
             pointer_struct->rocketTimers.coast_timer =
                 chVTGetSystemTime() - pointer_struct->rocketTimers.burnout_time;
 
@@ -160,7 +160,7 @@ void rocketFSM::tickFSM() {
 
             break;
         case STATE_APOGEE:
-            // Serial.println("APOGEE");
+            Serial.println("APOGEE");
         default:
             break;
     }
