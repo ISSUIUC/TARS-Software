@@ -225,6 +225,8 @@ static THD_FUNCTION(kalman_THD, arg) {
     struct pointers *pointer_struct = (struct pointers *)arg;
     KalmanFilter KF(pointer_struct);
     KalmanFilter KF2(pointer_struct);
+    KalmanFilter* KFp = &KF;
+    KalmanFilter* KF2p = &KF2;
     KF.Initialize();
     bool is_idle = sensorData.rocketState_data.rocketState == FSM_State::STATE_IDLE;
     systime_t switch_time = chVTGetSystemTime();
@@ -232,16 +234,16 @@ static THD_FUNCTION(kalman_THD, arg) {
     while (true) {
         is_idle = sensorData.rocketState_data.rocketState == FSM_State::STATE_IDLE;
         if (is_idle && chVTGetSystemTime() - switch_time >= buffer_time) {
-            KF = KF2;
-            KF2 = KalmanFilter(pointer_struct);
+            KFp = KF2p;
+            *KF2p = KalmanFilter(pointer_struct);
 
-            KF2.Initialize(KF2.bufferAverage(), 0.0);
+            KF2p->Initialize(KFp->bufferAverage(), 0.0);
             switch_time = chVTGetSystemTime();
         }
-        KF.kfTickFunction();
         KF2.kfTickFunction();
-        KF2.tickBuffer();
-        Serial.println("KF2: " + String(KF.getStateData()->state_x));
+        KF.kfTickFunction();
+        KF.tickBuffer();
+        Serial.println(KF.getStateData()[0]);
         chThdSleepMilliseconds(50);
     }
 }
@@ -311,8 +313,8 @@ static THD_FUNCTION(dataLogger_THD, arg) {
  *
  */
 void chSetup() {
-    chThdCreateStatic(telemetry_WA, sizeof(telemetry_WA), NORMALPRIO + 1,
-                      telemetry_THD, &sensor_pointers);
+    // chThdCreateStatic(telemetry_WA, sizeof(telemetry_WA), NORMALPRIO + 1,
+    //                   telemetry_THD, &sensor_pointers);
     chThdCreateStatic(rocket_FSM_WA, sizeof(rocket_FSM_WA), NORMALPRIO + 1,
                       rocket_FSM, &sensor_pointers);
     chThdCreateStatic(gps_WA, sizeof(gps_WA), NORMALPRIO + 1, gps_THD,
