@@ -19,14 +19,11 @@ class KalmanFilter {
     void tickBuffer();
 
     float bufferAverage();
-    stateData* getStateData() const;
-
+    Eigen::Matrix<float, 3, 1> getStateData();
    private:
     float s_dt = 0.050;
 
-    FifoBuffer<float, 2400>
-        b_alt_buffer;  // 2400 is the max number of samples in 2min given a 50ms
-                       // delay between samples
+    FifoBuffer<float, 15> b_alt_buffer; //2400 is the max number of samples in 2min given a 50ms delay between samples
     DataLogBuffer* data_logger_;
     mutex_t* mutex_lowG_;
     mutex_t* mutex_highG_;

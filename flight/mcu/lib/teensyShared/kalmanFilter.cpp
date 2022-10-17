@@ -17,6 +17,13 @@ void KalmanFilter::tickBuffer() {
     // }
 }
 
+<<<<<<< HEAD
+=======
+Eigen::Matrix<float, 3, 1> KalmanFilter::getStateData() {
+    return x_k;
+}
+
+>>>>>>> e6637ec92321171adf6977320c2ad8e6c96ef67c
 KalmanFilter::KalmanFilter(struct pointers* pointer_struct) {
     gz_L = &pointer_struct->sensorDataPointer->lowG_data.gz;
     gz_H = &pointer_struct->sensorDataPointer->highG_data.hg_az;
@@ -38,7 +45,7 @@ KalmanFilter::KalmanFilter(struct pointers* pointer_struct) {
  *
  */
 void KalmanFilter::kfTickFunction() {
-    if (*current_state_ > STATE_IDLE) {
+    if (*current_state_ >= STATE_IDLE) {
         priori();
         update();
     }
@@ -138,7 +145,7 @@ void KalmanFilter::Initialize() {
 
     // set R
     R(0, 0) = 2.0;
-    R(1, 1) = 0.01;
+    R(1, 1) = 0.1;
     // R(0,0) = 2.;
     // R(1,1) = .01;
 
@@ -187,7 +194,7 @@ void KalmanFilter::update() {
 
     // Sensor Measurements
     chMtxLock(mutex_highG_);
-    y_k(1, 0) = (*gz_H) * 9.81;
+    y_k(1, 0) = (*gz_H) * 9.81 - 9.81 - .545;
     chMtxUnlock(mutex_highG_);
 
     chMtxLock(dataMutex_barometer_);
@@ -206,5 +213,3 @@ void KalmanFilter::update() {
     chMtxUnlock(dataMutex_state_);
     data_logger_->pushStateFifo(stateData_);
 }
-
-stateData* KalmanFilter::getStateData() const { return stateData_; }
