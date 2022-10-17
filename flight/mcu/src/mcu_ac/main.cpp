@@ -225,8 +225,8 @@ static THD_FUNCTION(kalman_THD, arg) {
     struct pointers *pointer_struct = (struct pointers *)arg;
     KalmanFilter KF(pointer_struct);
     KalmanFilter KF2(pointer_struct);
-    KalmanFilter* KFp = &KF;
-    KalmanFilter* KF2p = &KF2;
+    KalmanFilter *KFp = &KF;
+    KalmanFilter *KF2p = &KF2;
     KF.Initialize();
     bool is_idle =
         sensorData.rocketState_data.rocketState == FSM_State::STATE_IDLE;

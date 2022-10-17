@@ -19,9 +19,7 @@ void KalmanFilter::tickBuffer() {
 
 <<<<<<< HEAD
 =======
-Eigen::Matrix<float, 3, 1> KalmanFilter::getStateData() {
-    return x_k;
-}
+Eigen::Matrix<float, 3, 1> KalmanFilter::getStateData() { return x_k; }
 
 >>>>>>> e6637ec92321171adf6977320c2ad8e6c96ef67c
 KalmanFilter::KalmanFilter(struct pointers* pointer_struct) {
