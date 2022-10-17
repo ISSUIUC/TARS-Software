@@ -1,10 +1,11 @@
+#include <deque>
+
 #include "../EigenArduino-Eigen30/Eigen30.h"
 #include "ServoControl.h"
 #include "acShared.h"
 #include "dataLog.h"
 #include "rk4.h"
 #include "sensors.h"
-#include <deque>
 class KalmanFilter {
    public:
     KalmanFilter(struct pointers* pointer_struct);
@@ -19,10 +20,13 @@ class KalmanFilter {
 
     float bufferAverage();
     stateData* getStateData() const;
+
    private:
     float s_dt = 0.050;
 
-    FifoBuffer<float, 2400> b_alt_buffer; //2400 is the max number of samples in 2min given a 50ms delay between samples
+    FifoBuffer<float, 2400>
+        b_alt_buffer;  // 2400 is the max number of samples in 2min given a 50ms
+                       // delay between samples
     DataLogBuffer* data_logger_;
     mutex_t* mutex_lowG_;
     mutex_t* mutex_highG_;

@@ -7,16 +7,15 @@
 #include "kalmanFilter.h"
 #define EIGEN_MATRIX_PLUGIN "MatrixAddons.h"
 
-void KalmanFilter::tickBuffer(){ 
+void KalmanFilter::tickBuffer() {
     // if(b_alt_buffer.size() < 10){
     //     b_alt_buffer.push(*b_alt);
     // }else{
-        float current = 0.0;
-        b_alt_buffer.pop(&current);
-        b_alt_buffer.push(*b_alt);
+    float current = 0.0;
+    b_alt_buffer.pop(&current);
+    b_alt_buffer.push(*b_alt);
     // }
 }
-
 
 KalmanFilter::KalmanFilter(struct pointers* pointer_struct) {
     gz_L = &pointer_struct->sensorDataPointer->lowG_data.gz;
@@ -208,6 +207,4 @@ void KalmanFilter::update() {
     data_logger_->pushStateFifo(stateData_);
 }
 
-stateData* KalmanFilter::getStateData() const{
-    return stateData_;
-}
+stateData* KalmanFilter::getStateData() const { return stateData_; }

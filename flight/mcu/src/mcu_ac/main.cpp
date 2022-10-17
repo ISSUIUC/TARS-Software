@@ -226,11 +226,13 @@ static THD_FUNCTION(kalman_THD, arg) {
     KalmanFilter KF(pointer_struct);
     KalmanFilter KF2(pointer_struct);
     KF.Initialize();
-    bool is_idle = sensorData.rocketState_data.rocketState == FSM_State::STATE_IDLE;
+    bool is_idle =
+        sensorData.rocketState_data.rocketState == FSM_State::STATE_IDLE;
     systime_t switch_time = chVTGetSystemTime();
-    systime_t buffer_time = 120000; // 2min in ms 
+    systime_t buffer_time = 120000;  // 2min in ms
     while (true) {
-        is_idle = sensorData.rocketState_data.rocketState == FSM_State::STATE_IDLE;
+        is_idle =
+            sensorData.rocketState_data.rocketState == FSM_State::STATE_IDLE;
         if (is_idle && chVTGetSystemTime() - switch_time >= buffer_time) {
             KF = KF2;
             KF2 = KalmanFilter(pointer_struct);
