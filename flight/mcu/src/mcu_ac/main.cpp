@@ -32,19 +32,19 @@
 #include <Wire.h>
 
 #include "ActiveControl.h"
+#include "FSMCollection.h"
 #include "MS5611.h"  //Barometer library
 #include "ServoControl.h"
 #include "SparkFunLSM9DS1.h"                       //Low-G IMU Library
 #include "SparkFun_Qwiic_KX13X.h"                  //High-G IMU Library
 #include "SparkFun_u-blox_GNSS_Arduino_Library.h"  //GPS Library
+#include "TimerFSM.h"
 #include "dataLog.h"
 #include "kalmanFilter.h"
 #include "pins.h"
 #include "rocketFSM.h"
-#include "TimerFSM.h"
 #include "sensors.h"
 #include "telemetry.h"
-#include "FSMCollection.h"
 
 // DataLogBuffer datalogger_THD_vars;
 
@@ -105,7 +105,7 @@ static THD_FUNCTION(rocket_FSM, arg) {
 
     TimerFSM stateMachine(pointer_struct);
 
-    RocketFSM* fsm_array[] = {&stateMachine};
+    RocketFSM *fsm_array[] = {&stateMachine};
 
     FSMCollection fsms(fsm_array, 1);
 
@@ -118,7 +118,6 @@ static THD_FUNCTION(rocket_FSM, arg) {
             &pointer_struct->dataloggerTHDVarsPointer.dataMutex_rocket_state);
 
         fsms.tick();
-        
 
         chMtxUnlock(
             &pointer_struct->dataloggerTHDVarsPointer.dataMutex_rocket_state);
@@ -127,8 +126,9 @@ static THD_FUNCTION(rocket_FSM, arg) {
         fsms.getStates(&fsm_state);
         Serial.println((int)fsm_state.rocketState);
         pointer_struct->sensorDataPointer->rocketState_data = fsm_state;
-        pointer_struct->dataloggerTHDVarsPointer.pushRocketStateFifo(&fsm_state);
-        
+        pointer_struct->dataloggerTHDVarsPointer.pushRocketStateFifo(
+            &fsm_state);
+
         chThdSleepMilliseconds(6);  // FSM runs at 100 Hz
     }
 }

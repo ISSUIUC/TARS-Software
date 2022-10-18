@@ -55,7 +55,6 @@ TimerFSM::TimerFSM(pointers *ptr) {
  * changes for each timestep of the rocket's flight.
  */
 void TimerFSM::tickFSM() {
-
     // Lock mutexes for data used in switch
     chMtxLock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_highG);
 
@@ -115,11 +114,13 @@ void TimerFSM::tickFSM() {
                 rocket_state_ = FSM_State::STATE_BURNOUT_DETECT;
                 break;
             }
-            // Keeping rocket in FSM_State::STATE_BOOST if time below a certain threshold
+            // Keeping rocket in FSM_State::STATE_BOOST if time below a certain
+            // threshold
             if (TIME_I2MS(burn_timer_) < burn_time_thresh_ms) {
                 rocket_state_ = FSM_State::STATE_BOOST;
             }
-            // Forcing rocket to go to FSM_State::STATE_COAST if threshold crossed
+            // Forcing rocket to go to FSM_State::STATE_COAST if threshold
+            // crossed
             else {
                 rocket_state_ = FSM_State::STATE_COAST_PREGNC;
                 // Setting burnout time because we don't otherwise

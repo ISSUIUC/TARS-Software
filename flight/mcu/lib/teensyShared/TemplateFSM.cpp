@@ -1,9 +1,5 @@
 #include "TemplateFSM.h"
 
-TemplateFSM::TemplateFSM(pointers *ptr) {
+TemplateFSM::TemplateFSM(pointers *ptr) {}
 
-}
-
-void TemplateFSM::tickFSM() {
-
-}
+void TemplateFSM::tickFSM() {}

@@ -11,7 +11,7 @@ struct pointers;
 
 class RocketFSM {
    public:
-   /**
+    /**
      * @brief Labels for each FSM state
      */
     enum class FSM_State {
@@ -35,15 +35,11 @@ class RocketFSM {
 
     virtual void tickFSM() = 0;
 
-    FSM_State getFSMState() const {
-        return rocket_state_;
-    }
+    FSM_State getFSMState() const { return rocket_state_; }
 
-    protected:
-     FSM_State rocket_state_ = FSM_State::STATE_INIT;
+   protected:
+    FSM_State rocket_state_ = FSM_State::STATE_INIT;
 };
-
-
 
 /**
  * @brief Structure for all values related to rocket state
@@ -53,7 +49,5 @@ struct rocketStateData {
     RocketFSM::FSM_State rocketState = RocketFSM::FSM_State::STATE_INIT;
     systime_t timeStamp_RS = 0;
 };
-
-
 
 #endif

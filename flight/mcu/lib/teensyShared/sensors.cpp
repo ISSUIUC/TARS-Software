@@ -208,7 +208,9 @@ void barometerTickFunction(MS5611* barometer, DataLogBuffer* data_log_buffer,
     barometer_data->timeStamp_barometer = chVTGetSystemTime();
 
     // Log pressure and temperature
-    barometer_data->pressure = (barometer->getPressure() * 0.01) + 26.03;  // Converting both of them into correct unit (in mbar)
+    barometer_data->pressure =
+        (barometer->getPressure() * 0.01) +
+        26.03;  // Converting both of them into correct unit (in mbar)
     // also the barometer was 26.03 mbar off, so we add that on.
     barometer_data->temperature =
         barometer->getTemperature() *
