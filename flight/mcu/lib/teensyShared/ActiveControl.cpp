@@ -99,24 +99,11 @@ void Controller::ctrlTickFunction(pointers* pointer_struct) {
 
 /**
  * @brief Determines whether it's safe for flaps to actuate. Does this
- * based on FSM state and a timer within COAST
+ * based on FSM state
  * @returns boolean depending on whether flaps should actuate or not
  */
 bool Controller::ActiveControl_ON() {
-    bool active_control_on = false;
-    switch (*current_state) {
-        case rocketFSM::FSM_State::STATE_COAST:
-            // This adds a delay to the coast state so that we don't deploy
-            // flaps too quickly
-            if (*ac_coast_timer > coast_ac_delay_thresh) {
-                active_control_on = true;
-            }
-            break;
-        default:
-            active_control_on = false;
-            break;
-    }
-    return active_control_on;
+    return *current_state == rocketFSM::FSM_State::STATE_COAST;
 }
 
 /**
