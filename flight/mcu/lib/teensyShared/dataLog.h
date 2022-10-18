@@ -92,15 +92,6 @@ struct stateData {
 };
 
 /**
- * @brief Structure for all values related to rocket state
- *
- */
-struct rocketStateData {
-    RocketFSM::FSM_State rocketState = RocketFSM::FSM_State::STATE_INIT;
-    systime_t timeStamp_RS = 0;
-};
-
-/**
  * @brief A struct to hold all of the data that could come from any of the
  * sensors
  *

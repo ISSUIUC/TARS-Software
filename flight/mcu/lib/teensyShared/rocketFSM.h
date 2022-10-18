@@ -9,7 +9,6 @@
 // forward declare pointers
 struct pointers;
 
-
 class RocketFSM {
    public:
    /**
@@ -41,6 +40,20 @@ class RocketFSM {
     }
 
     protected:
-     FSM_State rocket_state_;
+     FSM_State rocket_state_ = FSM_State::STATE_INIT;
 };
+
+
+
+/**
+ * @brief Structure for all values related to rocket state
+ *
+ */
+struct rocketStateData {
+    RocketFSM::FSM_State rocketState = RocketFSM::FSM_State::STATE_INIT;
+    systime_t timeStamp_RS = 0;
+};
+
+
+
 #endif

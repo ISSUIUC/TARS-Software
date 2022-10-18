@@ -107,7 +107,6 @@ void TimerFSM::tickFSM() {
 
         case FSM_State::STATE_BOOST:
             // Serial.println("BOOST");
-            Serial.println(*linear_acceleration_ptr_);
             burn_timer_ = chVTGetSystemTime() - launch_time_;
             // If low acceleration in the Z direction...
             if (*linear_acceleration_ptr_ < coast_thresh) {

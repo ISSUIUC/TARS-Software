@@ -101,9 +101,13 @@ static THD_FUNCTION(telemetry_THD, arg) {
 /* ROCKET FINITE STATE MACHINE THREAD                                         */
 
 static THD_FUNCTION(rocket_FSM, arg) {
-    struct pointers *pointer_struct = (struct pointers *)arg;
+    pointers *pointer_struct = (struct pointers *)arg;
 
-    static TimerFSM stateMachine(pointer_struct);
+    TimerFSM stateMachine(pointer_struct);
+
+    RocketFSM* fsm_array[] = {&stateMachine};
+
+    FSMCollection fsms(fsm_array, 1);
 
     while (true) {
 #ifdef THREAD_DEBUG
@@ -112,15 +116,19 @@ static THD_FUNCTION(rocket_FSM, arg) {
 
         chMtxLock(
             &pointer_struct->dataloggerTHDVarsPointer.dataMutex_rocket_state);
-        stateMachine.tickFSM();
 
-        pointer_struct->sensorDataPointer->rocketState_data.rocketState = stateMachine.getFSMState();
-        pointer_struct->sensorDataPointer->rocketState_data.timeStamp_RS = chVTGetSystemTime();
-        pointer_struct->dataloggerTHDVarsPointer.pushRocketStateFifo(&pointer_struct->sensorDataPointer->rocketState_data);
+        fsms.tick();
+        
 
         chMtxUnlock(
             &pointer_struct->dataloggerTHDVarsPointer.dataMutex_rocket_state);
 
+        rocketStateData fsm_state;
+        fsms.getStates(&fsm_state);
+        Serial.println((int)fsm_state.rocketState);
+        pointer_struct->sensorDataPointer->rocketState_data = fsm_state;
+        pointer_struct->dataloggerTHDVarsPointer.pushRocketStateFifo(&fsm_state);
+        
         chThdSleepMilliseconds(6);  // FSM runs at 100 Hz
     }
 }
