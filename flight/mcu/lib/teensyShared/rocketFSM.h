@@ -9,7 +9,7 @@
 // forward declare pointers
 struct pointers;
 
-class rocketFSM {
+class RocketFSM {
    public:
    /**
      * @brief Labels for each FSM state
@@ -32,7 +32,7 @@ class rocketFSM {
         STATE_ABORT
     };
 
-    rocketFSM(pointers*);
+    RocketFSM(pointers*);
 
     void tickFSM();
 
@@ -51,34 +51,6 @@ class rocketFSM {
     sysinterval_t burn_timer_;
     systime_t burnout_time_;
     sysinterval_t coast_timer_;
-};
-
-/**
- * @brief Struct to store event timestamps and timers since each event happened
- *
- * Times stored as ChibiOS systime_t and timers stored as sysinterval_t. Both of
- * these are typedefs for the C++ uint32_t type, but are good for readability
- * and clarity.
- */
-struct fsm_struct {
-    systime_t launch_time;  // First time acceleration above threshold is
-                            // detected
-    sysinterval_t burn_timer;
-
-    systime_t burnout_time;
-    sysinterval_t coast_timer;
-
-    systime_t apogee_time;
-    sysinterval_t apogee_timer;
-
-    systime_t drogue_time;
-    sysinterval_t drogue_timer;
-
-    systime_t main_time;
-    sysinterval_t main_timer;
-
-    systime_t landing_time;
-    sysinterval_t landing_timer;
 };
 
 #endif

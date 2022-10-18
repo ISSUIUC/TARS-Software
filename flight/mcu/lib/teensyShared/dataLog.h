@@ -96,7 +96,7 @@ struct stateData {
  *
  */
 struct rocketStateData {
-    rocketFSM::FSM_State rocketState = rocketFSM::FSM_State::STATE_INIT;
+    RocketFSM::FSM_State rocketState = RocketFSM::FSM_State::STATE_INIT;
     systime_t timeStamp_RS = 0;
 };
 
@@ -212,8 +212,6 @@ struct pointers {
 
     DataLogBuffer dataloggerTHDVarsPointer;
     bool abort;
-
-    fsm_struct rocketTimers;
 };
 
 void dataLoggerTickFunction(pointers*);

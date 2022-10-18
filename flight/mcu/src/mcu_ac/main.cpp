@@ -101,7 +101,7 @@ static THD_FUNCTION(telemetry_THD, arg) {
 static THD_FUNCTION(rocket_FSM, arg) {
     struct pointers *pointer_struct = (struct pointers *)arg;
 
-    static rocketFSM stateMachine(pointer_struct);
+    static RocketFSM stateMachine(pointer_struct);
 
     while (true) {
 #ifdef THREAD_DEBUG
@@ -114,6 +114,8 @@ static THD_FUNCTION(rocket_FSM, arg) {
 
         pointer_struct->sensorDataPointer->rocketState_data.rocketState = stateMachine.getFSMState();
         pointer_struct->sensorDataPointer->rocketState_data.timeStamp_RS = chVTGetSystemTime();
+        pointer_struct->dataloggerTHDVarsPointer.pushRocketStateFifo(
+        &pointer_struct->sensorDataPointer->rocketState_data);
 
         chMtxUnlock(
             &pointer_struct->dataloggerTHDVarsPointer.dataMutex_rocket_state);

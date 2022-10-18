@@ -38,7 +38,7 @@
  * also allowing the rocketFSM class to modify values in the global pointer
  * struct.
  */
-rocketFSM::rocketFSM(pointers *ptr) {
+RocketFSM::RocketFSM(pointers *ptr) {
     pointer_struct = ptr;
     // Get the linear accelration from the High-G IMU
     linear_acceleration_ptr_ =
@@ -58,7 +58,7 @@ rocketFSM::rocketFSM(pointers *ptr) {
  * Uses a combination of linear acceleration and timers to govern FSM state
  * changes for each timestep of the rocket's flight.
  */
-void rocketFSM::tickFSM() {
+void RocketFSM::tickFSM() {
 
     // Lock mutexes for data used in switch
     chMtxLock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_highG);
@@ -167,13 +167,7 @@ void rocketFSM::tickFSM() {
         default:
             break;
     }
-    // Update timestamp for when rocket state was polled
-    pointer_struct->sensorDataPointer->rocketState_data.timeStamp_RS =
-        chVTGetSystemTime();
-
-    pointer_struct->dataloggerTHDVarsPointer.pushRocketStateFifo(
-        &pointer_struct->sensorDataPointer->rocketState_data);
-
+    
     // Unlock mutexes used during the switch statement
     chMtxUnlock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_highG);
 }

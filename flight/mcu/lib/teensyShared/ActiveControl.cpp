@@ -18,7 +18,6 @@ Controller::Controller(struct pointers* pointer_struct,
     stateData_ = &pointer_struct->sensorDataPointer->state_data;
     current_state =
         &pointer_struct->sensorDataPointer->rocketState_data.rocketState;
-    ac_coast_timer = &pointer_struct->rocketTimers.coast_timer;
     b_alt = &pointer_struct->sensorDataPointer->barometer_data.altitude;
     dataMutex_barometer_ =
         &pointer_struct->dataloggerTHDVarsPointer.dataMutex_barometer;
@@ -87,7 +86,7 @@ void Controller::ctrlTickFunction(pointers* pointer_struct) {
 
     } else {
         if (pointer_struct->sensorDataPointer->rocketState_data.rocketState ==
-            rocketFSM::FSM_State::STATE_APOGEE) {
+            RocketFSM::FSM_State::STATE_APOGEE) {
             activeControlServos.servoActuation(0);
             pointer_struct->sensorDataPointer->flap_data.extension = 0;
         } else {
@@ -103,7 +102,7 @@ void Controller::ctrlTickFunction(pointers* pointer_struct) {
  * @returns boolean depending on whether flaps should actuate or not
  */
 bool Controller::ActiveControl_ON() {
-    return *current_state == rocketFSM::FSM_State::STATE_COAST;
+    return *current_state == RocketFSM::FSM_State::STATE_COAST;
 }
 
 /**
