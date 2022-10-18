@@ -9,6 +9,7 @@
 // forward declare pointers
 struct pointers;
 
+
 class RocketFSM {
    public:
    /**
@@ -33,25 +34,13 @@ class RocketFSM {
         STATE_ABORT
     };
 
-    RocketFSM(pointers*);
-
-    void tickFSM();
+    virtual void tickFSM() = 0;
 
     FSM_State getFSMState() const {
         return rocket_state_;
     }
 
-    
-
-   private:
-    pointers* pointer_struct;
-
-    float* linear_acceleration_ptr_;
-    FSM_State rocket_state_;
-    systime_t launch_time_;
-    sysinterval_t burn_timer_;
-    systime_t burnout_time_;
-    sysinterval_t coast_timer_;
+    protected:
+     FSM_State rocket_state_;
 };
-
 #endif

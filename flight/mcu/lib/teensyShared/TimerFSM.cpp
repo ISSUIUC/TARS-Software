@@ -19,11 +19,7 @@
  *
  */
 
-#include "rocketFSM.h"
-
-#include <Arduino.h>
-#include <SPI.h>
-#include <Wire.h>
+#include "TimerFSM.h"
 
 #include "dataLog.h"
 #include "pins.h"
@@ -38,7 +34,7 @@
  * also allowing the rocketFSM class to modify values in the global pointer
  * struct.
  */
-RocketFSM::RocketFSM(pointers *ptr) {
+TimerFSM::TimerFSM(pointers *ptr) {
     pointer_struct = ptr;
     // Get the linear accelration from the High-G IMU
     linear_acceleration_ptr_ =
@@ -58,7 +54,7 @@ RocketFSM::RocketFSM(pointers *ptr) {
  * Uses a combination of linear acceleration and timers to govern FSM state
  * changes for each timestep of the rocket's flight.
  */
-void RocketFSM::tickFSM() {
+void TimerFSM::tickFSM() {
 
     // Lock mutexes for data used in switch
     chMtxLock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_highG);

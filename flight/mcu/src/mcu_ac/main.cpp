@@ -41,6 +41,7 @@
 #include "kalmanFilter.h"
 #include "pins.h"
 #include "rocketFSM.h"
+#include "TimerFSM.h"
 #include "sensors.h"
 #include "telemetry.h"
 
@@ -101,7 +102,7 @@ static THD_FUNCTION(telemetry_THD, arg) {
 static THD_FUNCTION(rocket_FSM, arg) {
     struct pointers *pointer_struct = (struct pointers *)arg;
 
-    static RocketFSM stateMachine(pointer_struct);
+    static TimerFSM stateMachine(pointer_struct);
 
     while (true) {
 #ifdef THREAD_DEBUG
