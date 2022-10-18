@@ -126,7 +126,7 @@ void RocketFSM::tickFSM() {
             }
             // Forcing rocket to go to FSM_State::STATE_COAST if threshold crossed
             else {
-                rocket_state_ = FSM_State::STATE_COAST;
+                rocket_state_ = FSM_State::STATE_COAST_PREGNC;
                 // Setting burnout time because we don't otherwise
                 burnout_time_ = chVTGetSystemTime();
             }
@@ -177,7 +177,7 @@ void RocketFSM::tickFSM() {
         default:
             break;
     }
-    
+
     // Unlock mutexes used during the switch statement
     chMtxUnlock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_highG);
 }

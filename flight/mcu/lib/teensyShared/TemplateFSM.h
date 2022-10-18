@@ -4,7 +4,7 @@
 
 struct pointers;
 
-class templateFSM {
+class TemplateFSM {
    public:
     enum class FSM_State {
         STATE_INIT,
@@ -24,12 +24,12 @@ class templateFSM {
         STATE_ABORT
     };
 
-    templateFSM(pointers *ptr);
+    TemplateFSM(pointers *ptr);
     void tickFSM();
     FSM_State getFSMState() const { return rocket_state_; }
 
     private:
     FSM_State rocket_state_;
-}
+};
 
 #endif

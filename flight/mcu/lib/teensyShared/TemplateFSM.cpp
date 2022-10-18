@@ -1,6 +1,6 @@
 #include "TemplateFSM.h"
 
-TemplateFSM::templateFSM(pointers *ptr) {
+TemplateFSM::TemplateFSM(pointers *ptr) {
 
 }
 
