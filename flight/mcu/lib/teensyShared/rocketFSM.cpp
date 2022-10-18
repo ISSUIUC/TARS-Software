@@ -146,12 +146,22 @@ void rocketFSM::tickFSM() {
 
             // If the low acceleration lasts long enough, coast is detected
             if (TIME_I2MS(coast_timer_) > coast_time_thresh) {
-                rocket_state_ = FSM_State::STATE_COAST;
+                rocket_state_ = FSM_State::STATE_COAST_PREGNC;
             }
 
             break;
 
-        case FSM_State::STATE_COAST:
+        case FSM_State::STATE_COAST_PREGNC:
+            // Serial.println("COAST_PREGNC");
+            // If high acceleration is observed in z direction...
+            coast_timer_ = chVTGetSystemTime() - burnout_time_;
+            if (TIME_I2MS(coast_timer_) > coast_ac_delay_thresh) {
+                rocket_state_ = FSM_State::STATE_COAST_GNC;
+            }
+
+            break;
+
+        case FSM_State::STATE_COAST_GNC:
             // Serial.println("COAST");
             coast_timer_ = chVTGetSystemTime() - burnout_time_;
 
