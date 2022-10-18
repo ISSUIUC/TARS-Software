@@ -36,7 +36,7 @@ class Controller {
     float* b_alt;
     mutex_t* dataMutex_barometer_;
 
-    FSM_State* current_state;
+    rocketFSM::FSM_State* current_state;
     ServoControl activeControlServos;
     uint32_t* ac_coast_timer;
 };

@@ -87,7 +87,7 @@ void Controller::ctrlTickFunction(pointers* pointer_struct) {
 
     } else {
         if (pointer_struct->sensorDataPointer->rocketState_data.rocketState ==
-            STATE_APOGEE) {
+            rocketFSM::FSM_State::STATE_APOGEE) {
             activeControlServos.servoActuation(0);
             pointer_struct->sensorDataPointer->flap_data.extension = 0;
         } else {
@@ -105,7 +105,7 @@ void Controller::ctrlTickFunction(pointers* pointer_struct) {
 bool Controller::ActiveControl_ON() {
     bool active_control_on = false;
     switch (*current_state) {
-        case STATE_COAST:
+        case rocketFSM::FSM_State::STATE_COAST:
             // This adds a delay to the coast state so that we don't deploy
             // flaps too quickly
             if (*ac_coast_timer > coast_ac_delay_thresh) {

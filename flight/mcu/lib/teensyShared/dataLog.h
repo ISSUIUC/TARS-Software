@@ -96,7 +96,7 @@ struct stateData {
  *
  */
 struct rocketStateData {
-    FSM_State rocketState = STATE_INIT;
+    rocketFSM::FSM_State rocketState = rocketFSM::FSM_State::STATE_INIT;
     systime_t timeStamp_RS = 0;
 };
 

@@ -9,41 +9,48 @@
 // forward declare pointers
 struct pointers;
 
-/**
- * @brief Labels for each FSM state
- */
-enum FSM_State {
-    STATE_INIT,
-    STATE_IDLE,
-    STATE_LAUNCH_DETECT,
-    STATE_BOOST,
-    STATE_BURNOUT_DETECT,
-    STATE_COAST,
-    STATE_APOGEE_DETECT,
-    STATE_APOGEE,
-    STATE_DROGUE_DETECT,
-    STATE_DROGUE,
-    STATE_MAIN_DETECT,
-    STATE_MAIN,
-    STATE_LANDED_DETECT,
-    STATE_LANDED,
-    STATE_ABORT
-};
 class rocketFSM {
    public:
+   /**
+     * @brief Labels for each FSM state
+     */
+    enum class FSM_State {
+        STATE_INIT,
+        STATE_IDLE,
+        STATE_LAUNCH_DETECT,
+        STATE_BOOST,
+        STATE_BURNOUT_DETECT,
+        STATE_COAST,
+        STATE_APOGEE_DETECT,
+        STATE_APOGEE,
+        STATE_DROGUE_DETECT,
+        STATE_DROGUE,
+        STATE_MAIN_DETECT,
+        STATE_MAIN,
+        STATE_LANDED_DETECT,
+        STATE_LANDED,
+        STATE_ABORT
+    };
+
     rocketFSM(pointers*);
 
     void tickFSM();
+
+    FSM_State getFSMState() const {
+        return rocket_state_;
+    }
+
+    
 
    private:
     pointers* pointer_struct;
 
     float* linear_acceleration_ptr_;
-    FSM_State* rocket_state_ptr_;
-    systime_t* launch_time_ptr_;
-    sysinterval_t* burn_timer_ptr_;
-    systime_t* burnout_time_ptr_;
-    sysinterval_t* coast_timer_ptr_;
+    FSM_State rocket_state_;
+    systime_t launch_time_;
+    sysinterval_t burn_timer_;
+    systime_t burnout_time_;
+    sysinterval_t coast_timer_;
 };
 
 /**

@@ -111,6 +111,10 @@ static THD_FUNCTION(rocket_FSM, arg) {
         chMtxLock(
             &pointer_struct->dataloggerTHDVarsPointer.dataMutex_rocket_state);
         stateMachine.tickFSM();
+
+        pointer_struct->sensorDataPointer->rocketState_data.rocketState = stateMachine.getFSMState();
+        pointer_struct->sensorDataPointer->rocketState_data.timeStamp_RS = chVTGetSystemTime();
+
         chMtxUnlock(
             &pointer_struct->dataloggerTHDVarsPointer.dataMutex_rocket_state);
 
