@@ -102,7 +102,7 @@ void Controller::ctrlTickFunction(pointers* pointer_struct) {
  * @returns boolean depending on whether flaps should actuate or not
  */
 bool Controller::ActiveControl_ON() {
-    return *current_state == RocketFSM::FSM_State::STATE_COAST;
+    return *current_state == RocketFSM::FSM_State::STATE_COAST_GNC;
 }
 
 /**
