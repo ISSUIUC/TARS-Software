@@ -43,6 +43,7 @@
 #include "rocketFSM.h"
 #include "sensors.h"
 #include "telemetry.h"
+#include "FSMCollection.h"
 
 // DataLogBuffer datalogger_THD_vars;
 
@@ -114,8 +115,7 @@ static THD_FUNCTION(rocket_FSM, arg) {
 
         pointer_struct->sensorDataPointer->rocketState_data.rocketState = stateMachine.getFSMState();
         pointer_struct->sensorDataPointer->rocketState_data.timeStamp_RS = chVTGetSystemTime();
-        pointer_struct->dataloggerTHDVarsPointer.pushRocketStateFifo(
-        &pointer_struct->sensorDataPointer->rocketState_data);
+        pointer_struct->dataloggerTHDVarsPointer.pushRocketStateFifo(&pointer_struct->sensorDataPointer->rocketState_data);
 
         chMtxUnlock(
             &pointer_struct->dataloggerTHDVarsPointer.dataMutex_rocket_state);
