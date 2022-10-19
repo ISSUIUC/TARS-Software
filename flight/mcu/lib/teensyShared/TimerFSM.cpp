@@ -14,7 +14,7 @@
  * The TimerFSM class encapsulates the finite state machine that dictates which
  * state the rocket is in throughout the mission. The class implements the logic
  * necessary to reliably transition between states along with hysteresis to
- * avoid premature state transitions. 
+ * avoid premature state transitions.
  *
  * This is a highly critical software module and should be tested throughly in
  * simulation and on hardware targets.:
@@ -149,7 +149,7 @@ void TimerFSM::tickFSM() {
 
             if (TIME_I2MS(coast_timer_) > coast_to_apogee_time_thresh) {
                 rocket_state_ = FSM_State::STATE_APOGEE;
-            } 
+            }
 
             break;
         case FSM_State::STATE_APOGEE:

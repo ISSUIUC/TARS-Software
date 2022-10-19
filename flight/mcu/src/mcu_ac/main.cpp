@@ -453,7 +453,8 @@ void setup() {
             "binary logging of sensor_data_t");
         sensor_pointers.dataloggerTHDVarsPointer.dataFile.flush();
         //
-        Serial.println(sensor_pointers.dataloggerTHDVarsPointer.dataFile.name());
+        Serial.println(
+            sensor_pointers.dataloggerTHDVarsPointer.dataFile.name());
     } else {
         digitalWrite(LED_RED, HIGH);
         digitalWrite(LED_ORANGE, HIGH);

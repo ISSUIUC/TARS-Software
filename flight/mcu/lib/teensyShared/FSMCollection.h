@@ -5,7 +5,7 @@
 
 /**
  * @brief Manager for all FSMs in the rocket
- * 
+ *
  * @param FSMs Array of pointers to all FSMs which implement RocketFSM
  * @param count Number of FSMs in FSMs array
  */
@@ -32,6 +32,6 @@ class FSMCollection {
     }
 
    private:
-    RocketFSM** FSMs_; // array of pointers to FSMs
-    size_t count_;     // number of FSMs
+    RocketFSM** FSMs_;  // array of pointers to FSMs
+    size_t count_;      // number of FSMs
 };
