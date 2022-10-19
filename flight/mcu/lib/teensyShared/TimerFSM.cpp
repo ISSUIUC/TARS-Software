@@ -66,18 +66,15 @@ void TimerFSM::tickFSM() {
     switch (rocket_state_) {
         case FSM_State::STATE_ABORT:
             // If true, always stay in abort
-            // Serial.println("ABORT");
             break;
 
         case FSM_State::STATE_INIT:
             // Go to state idle regardless of gps lock
-            // Serial.println("INIT");
             rocket_state_ = FSM_State::STATE_IDLE;
 
             break;
 
         case FSM_State::STATE_IDLE:
-            // Serial.println("IDLE");
             // If high acceleration is observed in z direction...
             if (*linear_acceleration_ptr_ > launch_linear_acceleration_thresh) {
                 launch_time_ = chVTGetSystemTime();
@@ -88,7 +85,6 @@ void TimerFSM::tickFSM() {
 
         case FSM_State::STATE_LAUNCH_DETECT:
             // If the acceleration was too brief, go back to IDLE
-            // Serial.println("LAUNCH_DETECT");
             if (*linear_acceleration_ptr_ < launch_linear_acceleration_thresh) {
                 rocket_state_ = FSM_State::STATE_IDLE;
                 break;
@@ -105,7 +101,6 @@ void TimerFSM::tickFSM() {
             break;
 
         case FSM_State::STATE_BOOST:
-            // Serial.println("BOOST");
             burn_timer_ = chVTGetSystemTime() - launch_time_;
             // If low acceleration in the Z direction...
             if (*linear_acceleration_ptr_ < coast_thresh) {
@@ -131,7 +126,6 @@ void TimerFSM::tickFSM() {
 
         case FSM_State::STATE_BURNOUT_DETECT:
             // If the 0 acceleration was too brief, go back to BOOST
-            // Serial.println("BURNOUT_DETECT");
             if (*linear_acceleration_ptr_ > coast_thresh) {
                 rocket_state_ = FSM_State::STATE_BOOST;
                 break;
@@ -148,8 +142,6 @@ void TimerFSM::tickFSM() {
             break;
 
         case FSM_State::STATE_COAST_PREGNC:
-            // Serial.println("COAST_PREGNC");
-            // If high acceleration is observed in z direction...
             coast_timer_ = chVTGetSystemTime() - burnout_time_;
             if (TIME_I2MS(coast_timer_) > coast_ac_delay_thresh) {
                 rocket_state_ = FSM_State::STATE_COAST_GNC;
@@ -158,18 +150,15 @@ void TimerFSM::tickFSM() {
             break;
 
         case FSM_State::STATE_COAST_GNC:
-            // Serial.println("COAST");
             coast_timer_ = chVTGetSystemTime() - burnout_time_;
 
             if (TIME_I2MS(coast_timer_) > coast_to_apogee_time_thresh) {
                 rocket_state_ = FSM_State::STATE_APOGEE;
-            } else {
-                // Serial.println("Still in coast");
-            }
+            } 
 
             break;
         case FSM_State::STATE_APOGEE:
-        // Serial.println("APOGEE");
+
         default:
             break;
     }
