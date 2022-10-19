@@ -92,15 +92,6 @@ struct stateData {
 };
 
 /**
- * @brief Structure for all values related to rocket state
- *
- */
-struct rocketStateData {
-    FSM_State rocketState = STATE_INIT;
-    systime_t timeStamp_RS = 0;
-};
-
-/**
  * @brief A struct to hold all of the data that could come from any of the
  * sensors
  *
@@ -212,8 +203,6 @@ struct pointers {
 
     DataLogBuffer dataloggerTHDVarsPointer;
     bool abort;
-
-    fsm_struct rocketTimers;
 };
 
 void dataLoggerTickFunction(pointers*);

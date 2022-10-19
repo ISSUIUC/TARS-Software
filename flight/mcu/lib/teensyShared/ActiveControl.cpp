@@ -18,7 +18,6 @@ Controller::Controller(struct pointers* pointer_struct,
     stateData_ = &pointer_struct->sensorDataPointer->state_data;
     current_state =
         &pointer_struct->sensorDataPointer->rocketState_data.rocketState;
-    ac_coast_timer = &pointer_struct->rocketTimers.coast_timer;
     b_alt = &pointer_struct->sensorDataPointer->barometer_data.altitude;
     dataMutex_barometer_ =
         &pointer_struct->dataloggerTHDVarsPointer.dataMutex_barometer;
@@ -87,7 +86,7 @@ void Controller::ctrlTickFunction(pointers* pointer_struct) {
 
     } else {
         if (pointer_struct->sensorDataPointer->rocketState_data.rocketState ==
-            STATE_APOGEE) {
+            RocketFSM::FSM_State::STATE_APOGEE) {
             activeControlServos.servoActuation(0);
             pointer_struct->sensorDataPointer->flap_data.extension = 0;
         } else {
@@ -99,24 +98,11 @@ void Controller::ctrlTickFunction(pointers* pointer_struct) {
 
 /**
  * @brief Determines whether it's safe for flaps to actuate. Does this
- * based on FSM state and a timer within COAST
+ * based on FSM state
  * @returns boolean depending on whether flaps should actuate or not
  */
 bool Controller::ActiveControl_ON() {
-    bool active_control_on = false;
-    switch (*current_state) {
-        case STATE_COAST:
-            // This adds a delay to the coast state so that we don't deploy
-            // flaps too quickly
-            if (*ac_coast_timer > coast_ac_delay_thresh) {
-                active_control_on = true;
-            }
-            break;
-        default:
-            active_control_on = false;
-            break;
-    }
-    return active_control_on;
+    return *current_state == RocketFSM::FSM_State::STATE_COAST_GNC;
 }
 
 /**
