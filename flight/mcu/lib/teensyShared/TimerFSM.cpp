@@ -1,18 +1,20 @@
 /**
- * @file        rocketFSM.cpp
+ * @file        TimerFSM.cpp
  * @authors     Anshuk Chigullapalli
  * 		        Ayberk Yaraneri
  * 		        Colin Kinsey
  *              Gautam Dayal
  *              Jusjeev Singh Bhurjee
+ *              Rithvik Bhogavilli
+ *              Nicholas Phillips
  *
  * @brief      The implementation of the finite state machine class that governs
  * state transitions.
  *
- * The rocketFSM class encapsulates the finite state machine that dictates which
+ * The TimerFSM class encapsulates the finite state machine that dictates which
  * state the rocket is in throughout the mission. The class implements the logic
  * necessary to reliably transition between states along with hysteresis to
- * avoid premature state transitions.
+ * avoid premature state transitions. 
  *
  * This is a highly critical software module and should be tested throughly in
  * simulation and on hardware targets.:
@@ -26,7 +28,7 @@
 #include "thresholds.h"
 
 /**
- * @brief Constructor for rocketFSM class
+ * @brief Constructor for TimerFSM class
  * @param pointers
  *
  * Taking the pointer struct as an input, we define member variables that point
@@ -39,17 +41,10 @@ TimerFSM::TimerFSM(pointers *ptr) {
     // Get the linear accelration from the High-G IMU
     linear_acceleration_ptr_ =
         &pointer_struct->sensorDataPointer->highG_data.hg_az;
-    // Storing pointer_struct data as members for readability
-    // rocket_state_ptr_ =
-    //     &pointer_struct->sensorDataPointer->rocketState_data.rocketState;
-    // launch_time_ptr_ = &pointer_struct->rocketTimers.launch_time;
-    // burn_timer_ptr_ = &pointer_struct->rocketTimers.burn_timer;
-    // burnout_time_ptr_ = &pointer_struct->rocketTimers.burnout_time;
-    // coast_timer_ptr_ = &pointer_struct->rocketTimers.coast_timer;
 }
 
 /**
- * @brief rocketFSM tick function
+ * @brief TimerFSM tick function
  *
  * Uses a combination of linear acceleration and timers to govern FSM state
  * changes for each timestep of the rocket's flight.
