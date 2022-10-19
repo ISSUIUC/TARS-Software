@@ -103,10 +103,14 @@ static THD_FUNCTION(telemetry_THD, arg) {
 static THD_FUNCTION(rocket_FSM, arg) {
     pointers *pointer_struct = (struct pointers *)arg;
 
+    // Implement RocketFSM class and instantiate it here
+    // Refer to TemplateFSM for an example
     TimerFSM stateMachine(pointer_struct);
 
+    // Add FSM pointer to array of FSMs to be updated
     RocketFSM *fsm_array[] = {&stateMachine};
 
+    // Pass array of FSMs to FSMCollection along with number of FSMs in use
     FSMCollection fsms(fsm_array, 1);
 
     while (true) {
