@@ -96,7 +96,7 @@ void rocketFSM::tickFSM() {
 
         case STATE_BOOST:
             // Serial.println("BOOST");
-            Serial.println(linear_acceleration);
+            // Serial.println(linear_acceleration);
             pointer_struct->rocketTimers.burn_timer =
                 chVTGetSystemTime() - pointer_struct->rocketTimers.launch_time;
             // If low acceleration in the Z direction...
