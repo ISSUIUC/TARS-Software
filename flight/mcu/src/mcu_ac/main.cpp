@@ -224,9 +224,9 @@ static THD_FUNCTION(gps_THD, arg) {
 static THD_FUNCTION(kalman_THD, arg) {
     struct pointers *pointer_struct = (struct pointers *)arg;
     KalmanFilter KF(pointer_struct);
-    KalmanFilter KF2(pointer_struct);
+    // KalmanFilter KF2(pointer_struct);
     KalmanFilter *KFp = &KF;
-    KalmanFilter *KF2p = &KF2;
+    // KalmanFilter *KF2p = &KF2;
     KF.Initialize();
     bool is_idle =
         sensorData.rocketState_data.rocketState == FSM_State::STATE_IDLE;
@@ -236,13 +236,15 @@ static THD_FUNCTION(kalman_THD, arg) {
         is_idle =
             sensorData.rocketState_data.rocketState == FSM_State::STATE_IDLE;
         if (is_idle && chVTGetSystemTime() - switch_time >= buffer_time) {
-            KFp = KF2p;
-            *KF2p = KalmanFilter(pointer_struct);
+            // KFp = KF2p;
+            // *KF2p = KalmanFilter(pointer_struct);
 
-            KF2p->Initialize(KFp->bufferAverage(), 0.0);
+            // KF2p->Initialize(KFp->bufferAverage(), 0.0);
+
+            KF.setStateData(Eigen::Vector3f(KF.bufferAverage(), 0.0, 0.0));
             switch_time = chVTGetSystemTime();
         }
-        KF2.kfTickFunction();
+        // KF2.kfTickFunction();
         KF.kfTickFunction();
         KF.tickBuffer();
         Serial.println(KF.getStateData()[0]);

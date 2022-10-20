@@ -20,6 +20,7 @@ class KalmanFilter {
 
     float bufferAverage();
     Eigen::Matrix<float, 3, 1> getStateData();
+    void setStateData(Eigen::Matrix<float, 3, 1> state_data);
 
    private:
     float s_dt = 0.050;
