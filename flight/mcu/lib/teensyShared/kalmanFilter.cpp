@@ -17,11 +17,8 @@ void KalmanFilter::tickBuffer() {
     // }
 }
 
-<<<<<<< HEAD
-=======
 Eigen::Matrix<float, 3, 1> KalmanFilter::getStateData() { return x_k; }
 
->>>>>>> e6637ec92321171adf6977320c2ad8e6c96ef67c
 KalmanFilter::KalmanFilter(struct pointers* pointer_struct) {
     gz_L = &pointer_struct->sensorDataPointer->lowG_data.gz;
     gz_H = &pointer_struct->sensorDataPointer->highG_data.hg_az;
@@ -210,4 +207,7 @@ void KalmanFilter::update() {
     stateData_->timeStamp_state = chVTGetSystemTime();
     chMtxUnlock(dataMutex_state_);
     data_logger_->pushStateFifo(stateData_);
+
+    std::vector<float> temp_vec;
+    Eigen::Quaterniond q = Eigen::Quaterniond::setFromTwoVectors
 }
