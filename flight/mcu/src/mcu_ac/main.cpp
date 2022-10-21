@@ -242,10 +242,11 @@ static THD_FUNCTION(kalman_THD, arg) {
     struct pointers *pointer_struct = (struct pointers *)arg;
     KalmanFilter KF(pointer_struct);
     KF.Initialize();
-
+    float start_time = TIME_I2MS(chVTGetSystemTime());
+    float spectral_density = 13.0;
     while (true) {
-        KF.kfTickFunction();
-
+        KF.kfTickFunction((TIME_I2MS(chVTGetSystemTime()) - start_time) / 1000.0, spectral_density);
+        start_time = TIME_I2MS(chVTGetSystemTime());
         chThdSleepMilliseconds(50);
     }
 }

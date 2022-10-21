@@ -11,10 +11,12 @@ class KalmanFilter {
 
     void Initialize();
     void Initialize(float pos_f, float vel_f);
-    void priori();
+    void UpdateF(float dt);
+    void UpdateQ(float dt, float spectral_density);
+    void priori(float dt, float spectral_density);
     void update();
 
-    void kfTickFunction();
+    void kfTickFunction(float dt, float spectral_density);
 
    private:
     float s_dt = 0.050;

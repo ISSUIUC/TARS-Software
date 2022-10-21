@@ -27,12 +27,38 @@ KalmanFilter::KalmanFilter(struct pointers* pointer_struct) {
  * @brief Run Kalman filter calculations as long as FSM has passed IDLE
  *
  */
-void KalmanFilter::kfTickFunction() {
+void KalmanFilter::kfTickFunction(float dt, float spectral_density) {
     if (*current_state_ > RocketFSM::FSM_State::STATE_IDLE) {
-        priori();
+        priori(dt, spectral_density);
         update();
     }
 }
+
+void KalmanFilter::UpdateQ(float dt, float spectral_density) {
+    // set Q
+    Q(0, 0) = pow(dt, 5) / 20;
+    Q(0, 1) = (pow(dt, 4) / 8 * 80);
+    Q(0, 2) = pow(dt, 3) / 6;
+    Q(1, 1) = pow(dt, 3) / 8;
+    Q(1, 2) = pow(dt, 2) / 2;
+    Q(2, 2) = dt;
+    Q(1, 0) = Q(0, 1);
+    Q(2, 0) = Q(0, 2);
+    Q(2, 1) = Q(1, 2);
+
+    Q *= spectral_density;
+}
+
+void KalmanFilter::UpdateF(float dt) {
+    F_mat(0, 1) = dt;
+    F_mat(0, 2) = (dt * dt) / 2;
+    F_mat(1, 2) = dt;
+
+    F_mat(0, 0) = 1;
+    F_mat(1, 1) = 1;
+    F_mat(2, 2) = 1;
+}
+
 /**
  * @brief Sets altitude by averaging 30 barometer measurements taken 100 ms
  * apart
@@ -69,13 +95,15 @@ void KalmanFilter::Initialize() {
     x_k(2, 0) = 0;
 
     // set F
-    F_mat(0, 1) = s_dt;
-    F_mat(0, 2) = (s_dt * s_dt) / 2;
-    F_mat(1, 2) = s_dt;
+    // F_mat(0, 1) = s_dt;
+    // F_mat(0, 2) = (s_dt * s_dt) / 2;
+    // F_mat(1, 2) = s_dt;
 
-    F_mat(0, 0) = 1;
-    F_mat(1, 1) = 1;
-    F_mat(2, 2) = 1;
+    // F_mat(0, 0) = 1;
+    // F_mat(1, 1) = 1;
+    // F_mat(2, 2) = 1;
+    UpdateF(s_dt);
+
 
     // set H
     H(0, 0) = 1;
@@ -93,16 +121,17 @@ void KalmanFilter::Initialize() {
     P_k(2, 0) = P_k(0, 2);
     P_k(1, 0) = P_k(0, 1);
 
-    // set Q
-    Q(0, 0) = pow(s_dt, 5) / 20;
-    Q(0, 1) = (pow(s_dt, 4) / 8 * 80);
-    Q(0, 2) = pow(s_dt, 3) / 6;
-    Q(1, 1) = pow(s_dt, 3) / 8;
-    Q(1, 2) = pow(s_dt, 2) / 2;
-    Q(2, 2) = s_dt;
-    Q(1, 0) = Q(0, 1);
-    Q(2, 0) = Q(0, 2);
-    Q(2, 1) = Q(1, 2);
+    // // set Q
+    // Q(0, 0) = pow(s_dt, 5) / 20;
+    // Q(0, 1) = (pow(s_dt, 4) / 8 * 80);
+    // Q(0, 2) = pow(s_dt, 3) / 6;
+    // Q(1, 1) = pow(s_dt, 3) / 8;
+    // Q(1, 2) = pow(s_dt, 2) / 2;
+    // Q(2, 2) = s_dt;
+    // Q(1, 0) = Q(0, 1);
+    // Q(2, 0) = Q(0, 2);
+    // Q(2, 1) = Q(1, 2);
+    UpdateQ(s_dt, 0.1);
 
     // float scale_fact = 75.19;
     // float scale_fact = 14.25;
@@ -141,9 +170,12 @@ void KalmanFilter::Initialize(float pos_f, float vel_f) {
     B(2, 0) = -1;
 }
 
-void KalmanFilter::priori() {
+void KalmanFilter::priori(float dt, float spectral_density) {
     // x_priori = (F @ x_k) + ((B @ u).T) #* For some reason doesnt work when B
     // or u is = 0
+    UpdateF(dt);
+    UpdateQ(dt, spectral_density);
+
     x_priori = (F_mat * x_k);
     P_priori = (F_mat * P_k * F_mat.transpose()) + Q;
 }
