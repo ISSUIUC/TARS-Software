@@ -170,6 +170,8 @@ bool DataLogBuffer::popLowGFifo(LowGData* lowG_Data) {
 }
 
 bool DataLogBuffer::pushHighGFifo(HighGData* highG_Data) {
+    // Also push a copy to the IMU acceleration history fifo buffer:
+    IMU_acceleration_history.push(highG_Data->hg_az, highG_Data->timeStamp_highG);
     return highGFifo.push(*highG_Data);
 }
 
@@ -194,6 +196,8 @@ bool DataLogBuffer::popStateFifo(stateData* state_data) {
 }
 
 bool DataLogBuffer::pushBarometerFifo(BarometerData* barometer_data) {
+    // Also push a copy to the alititude history fifo buffer:
+    altitude_history.push(barometer_data->altitude, barometer_data->timeStamp_barometer);
     return barometerFifo.push(*barometer_data);
 }
 

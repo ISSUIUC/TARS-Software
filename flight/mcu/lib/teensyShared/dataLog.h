@@ -12,6 +12,7 @@
 #include "SparkFun_u-blox_GNSS_Arduino_Library.h"
 #include "VoltageSensor.h"
 #include "rocketFSM.h"
+#include "HistoryBuffer.h"
 // #include "acShared.h"
 // #include "dataStructs.h"
 
@@ -162,6 +163,9 @@ class DataLogBuffer {
     MUTEX_DECL(dataMutex_rocket_state);
     MUTEX_DECL(dataMutex_voltage);
     MUTEX_DECL(dataMutex_state);
+
+    HistoryBuffer altitude_history = HistoryBuffer();
+    HistoryBuffer IMU_acceleration_history = HistoryBuffer();
 
     sensorDataStruct_t current_data;
 
