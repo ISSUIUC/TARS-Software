@@ -179,7 +179,8 @@ void HistoryBufferFSM::tickFSM() {
                     apogee_time_ = chVTGetSystemTime();
                     break;
             }
-
+            float changevelo = (fabs((*altitude_history_ptr_).getCurrentAverage() - (*altitude_history_ptr_).getPastAverage()))/0.3;
+            coast_to_apogee_time_thresh = changevelo
             if (TIME_I2MS(coast_timer_) < coast_to_apogee_time_thresh) {
                 rocket_state_ = FSM_State::STATE_COAST_GNC;
             }
