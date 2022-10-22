@@ -13,7 +13,7 @@
  * Peter Giannetos
  */
 
-#define SERIAL_PLOTTING
+// #define SERIAL_PLOTTING
 
 #include <telemetry.h>
 
