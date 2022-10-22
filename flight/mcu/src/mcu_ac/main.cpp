@@ -1,4 +1,4 @@
-/* main.cpp
+/** @file main.cpp
  *   ______  ___     ___    ____
  *  /_  __/ / _ |   / _ \  / __/
  *   / /   / __ |  / , _/ _\ \
@@ -32,14 +32,14 @@
 #include <Wire.h>
 
 #include "ActiveControl.h"
+#include "FSMCollection.h"
 #include "MS5611.h"  //Barometer library
 #include "ServoControl.h"
 #include "SparkFunLSM9DS1.h"                       //Low-G IMU Library
 #include "SparkFun_Qwiic_KX13X.h"                  //High-G IMU Library
 #include "SparkFun_u-blox_GNSS_Arduino_Library.h"  //GPS Library
-#include "acShared.h"
+#include "TimerFSM.h"
 #include "dataLog.h"
-#include "hybridShared.h"
 #include "kalmanFilter.h"
 #include "pins.h"
 #include "rocketFSM.h"
@@ -101,9 +101,17 @@ static THD_FUNCTION(telemetry_THD, arg) {
 /* ROCKET FINITE STATE MACHINE THREAD                                         */
 
 static THD_FUNCTION(rocket_FSM, arg) {
-    struct pointers *pointer_struct = (struct pointers *)arg;
+    pointers *pointer_struct = (struct pointers *)arg;
 
-    static rocketFSM stateMachine(pointer_struct);
+    // Implement RocketFSM class and instantiate it here
+    // Refer to TemplateFSM for an example
+    TimerFSM stateMachine(pointer_struct);
+
+    // Add FSM pointer to array of FSMs to be updated
+    RocketFSM *fsm_array[] = {&stateMachine};
+
+    // Pass array of FSMs to FSMCollection along with number of FSMs in use
+    FSMCollection fsms(fsm_array, 1);
 
     while (true) {
 #ifdef THREAD_DEBUG
@@ -112,9 +120,18 @@ static THD_FUNCTION(rocket_FSM, arg) {
 
         chMtxLock(
             &pointer_struct->dataloggerTHDVarsPointer.dataMutex_rocket_state);
-        stateMachine.tickFSM();
+
+        fsms.tick();
+
         chMtxUnlock(
             &pointer_struct->dataloggerTHDVarsPointer.dataMutex_rocket_state);
+
+        rocketStateData fsm_state;
+        fsms.getStates(&fsm_state);
+        Serial.println((int)fsm_state.rocketState);
+        pointer_struct->sensorDataPointer->rocketState_data = fsm_state;
+        pointer_struct->dataloggerTHDVarsPointer.pushRocketStateFifo(
+            &fsm_state);
 
         chThdSleepMilliseconds(6);  // FSM runs at 100 Hz
     }
@@ -228,13 +245,15 @@ static THD_FUNCTION(kalman_THD, arg) {
     KalmanFilter *KFp = &KF;
     // KalmanFilter *KF2p = &KF2;
     KF.Initialize();
-    bool is_idle =
-        sensorData.rocketState_data.rocketState == FSM_State::STATE_IDLE;
+    bool is_idle = sensorData.rocketState_data.rocketState ==
+                   RocketFSM::FSM_State::STATE_IDLE;
+    float start_time = TIME_I2MS(chVTGetSystemTime());
     systime_t switch_time = chVTGetSystemTime();
+    float spectral_density = 13.0;
     systime_t buffer_time = 120000;  // 2min in ms
     while (true) {
-        is_idle =
-            sensorData.rocketState_data.rocketState == FSM_State::STATE_IDLE;
+        is_idle = sensorData.rocketState_data.rocketState ==
+                  RocketFSM::FSM_State::STATE_IDLE;
         if (is_idle && chVTGetSystemTime() - switch_time >= buffer_time) {
             // KFp = KF2p;
             // *KF2p = KalmanFilter(pointer_struct);
@@ -245,9 +264,12 @@ static THD_FUNCTION(kalman_THD, arg) {
             switch_time = chVTGetSystemTime();
         }
         // KF2.kfTickFunction();
-        KF.kfTickFunction();
+        KF.kfTickFunction(
+            (TIME_I2MS(chVTGetSystemTime()) - start_time) / 1000.0,
+            spectral_density);
         KF.tickBuffer();
-        Serial.println(KF.getStateData()[0]);
+        // Serial.println(KF.getStateData()[0]);
+        start_time = TIME_I2MS(chVTGetSystemTime());
         chThdSleepMilliseconds(50);
     }
 }
@@ -454,7 +476,9 @@ void setup() {
         sensor_pointers.dataloggerTHDVarsPointer.dataFile.println(
             "binary logging of sensor_data_t");
         sensor_pointers.dataloggerTHDVarsPointer.dataFile.flush();
-        // Serial.println(sensor_pointers.dataloggerTHDVarsPointer.dataFile.name());
+        //
+        Serial.println(
+            sensor_pointers.dataloggerTHDVarsPointer.dataFile.name());
     } else {
         digitalWrite(LED_RED, HIGH);
         digitalWrite(LED_ORANGE, HIGH);

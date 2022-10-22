@@ -2,9 +2,9 @@
 
 #include "../EigenArduino-Eigen30/Eigen30.h"
 #include "ServoControl.h"
-#include "acShared.h"
 #include "dataLog.h"
 #include "rk4.h"
+#include "rocketFSM.h"
 #include "sensors.h"
 class KalmanFilter {
    public:
@@ -12,10 +12,12 @@ class KalmanFilter {
 
     void Initialize();
     void Initialize(float pos_f, float vel_f);
-    void priori();
+    void UpdateF(float dt);
+    void UpdateQ(float dt, float spectral_density);
+    void priori(float dt, float spectral_density);
     void update();
 
-    void kfTickFunction();
+    void kfTickFunction(float dt, float spectral_density);
     void tickBuffer();
 
     float bufferAverage();
@@ -34,7 +36,7 @@ class KalmanFilter {
     mutex_t* dataMutex_barometer_;
     mutex_t* dataMutex_state_;
     stateData* stateData_;
-    FSM_State* current_state_;
+    RocketFSM::FSM_State* current_state_;
     float* b_alt;
     float* gz_L;
     float* gz_H;

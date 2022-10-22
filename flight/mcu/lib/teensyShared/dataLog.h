@@ -11,8 +11,9 @@
 #include "SparkFun_Qwiic_KX13X.h"  //High-G IMU Library
 #include "SparkFun_u-blox_GNSS_Arduino_Library.h"
 #include "VoltageSensor.h"
-#include "acShared.h"
-#include "dataStructs.h"
+#include "rocketFSM.h"
+// #include "acShared.h"
+// #include "dataStructs.h"
 
 /**
  * @brief Structure for all values collected from the low g sensor
@@ -88,15 +89,6 @@ struct stateData {
     // float state_q0 = 0;
 
     systime_t timeStamp_state = 0;
-};
-
-/**
- * @brief Structure for all values related to rocket state
- *
- */
-struct rocketStateData {
-    FSM_State rocketState = STATE_INIT;
-    systime_t timeStamp_RS = 0;
 };
 
 /**
@@ -211,8 +203,6 @@ struct pointers {
 
     DataLogBuffer dataloggerTHDVarsPointer;
     bool abort;
-
-    fsm_struct rocketTimers;
 };
 
 void dataLoggerTickFunction(pointers*);
