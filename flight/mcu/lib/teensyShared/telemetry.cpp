@@ -13,7 +13,7 @@
  * Peter Giannetos
  */
 
-// #define SERIAL_PLOTTING
+#define SERIAL_PLOTTING
 
 #include <telemetry.h>
 
@@ -252,7 +252,7 @@ void Telemetry::transmit(const sensorDataStruct_t &sensor_data) {
     Serial.print(d.FSM_state);
     Serial.print(',');
     Serial.print(R"("sign":")");
-    Serial.print(sign);
+    Serial.print("SIGN");
     Serial.print("\",");
     Serial.print(R"("RSSI":)");
     Serial.print(rf95.lastRssi());
@@ -261,7 +261,7 @@ void Telemetry::transmit(const sensorDataStruct_t &sensor_data) {
     Serial.print(d.voltage_battry, 5);
     Serial.print(',');
     Serial.print(R"("frequency":)");
-    Serial.print(frequency);
+    Serial.print(RF95_FREQ);
     Serial.print(',');
     Serial.print(R"("flap_extension":)");
     Serial.print(d.flap_extension, 5);
@@ -276,7 +276,7 @@ void Telemetry::transmit(const sensorDataStruct_t &sensor_data) {
     Serial.print(d.state_ax, 5);
     Serial.print(",");
     Serial.print(R"("TEMP":)");
-    Serial.print(d.barometer_temperature, 5);
+    Serial.print(d.barometer_temp);
     Serial.print(",");
     Serial.print(R"("pressure":)");
     Serial.print(d.barometer_pressure, 5);
