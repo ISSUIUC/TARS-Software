@@ -164,8 +164,14 @@ class DataLogBuffer {
     MUTEX_DECL(dataMutex_voltage);
     MUTEX_DECL(dataMutex_state);
 
-    HistoryBuffer altitude_history = HistoryBuffer();
-    HistoryBuffer IMU_acceleration_history = HistoryBuffer();
+    HistoryBuffer<50> altitude_history_50 = HistoryBuffer<50>();
+    HistoryBuffer<50> IMU_acceleration_history_50 = HistoryBuffer<50>();
+
+    HistoryBuffer<6> altitude_history_6 = HistoryBuffer<6>();
+    HistoryBuffer<6> IMU_acceleration_history_6 = HistoryBuffer<6>();
+
+    HistoryBuffer<6> gnc_altitude_history_6 = HistoryBuffer<6>();
+    HistoryBuffer<6> gnc_IMU_acceleration_history_6 = HistoryBuffer<6>();
 
     sensorDataStruct_t current_data;
 

@@ -1,5 +1,5 @@
 /**
- * @file        HistoryBufferFSM.cpp
+ * @file        HistoryBufferFSM6.cpp
  * @authors     Anshuk Chigullapalli
  * 		        Ayberk Yaraneri
  * 		        Colin Kinsey
@@ -16,7 +16,7 @@
  * @brief      The implementation of the finite state machine class that governs
  * state transitions.
  *
- * The HistoryBufferFSM class encapsulates the finite state machine that dictates which
+ * The HistoryBufferFSM6 class encapsulates the finite state machine that dictates which
  * state the rocket is in throughout the mission. The class implements the logic
  * necessary to reliably transition between states along with hysteresis to
  * avoid premature state transitions.
@@ -26,7 +26,7 @@
  *
  */
 
-#include "HistoryBufferFSM.h"
+#include "HistoryBufferFSM6.h"
 
 #include "dataLog.h"
 #include "pins.h"
@@ -50,7 +50,7 @@ std::map<int, String> state_map = { {0, "STATE_INIT"}, {1, "STATE_IDLE"},
 {13, "STATE_LANDED"},
 {14, "STATE_ABORT"}};
 /**
- * @brief Constructor for HistoryBufferFSM class
+ * @brief Constructor for HistoryBufferFSM6 class
  * @param pointers
  *
  * Taking the pointer struct as an input, we define member variables that point
@@ -58,23 +58,23 @@ std::map<int, String> state_map = { {0, "STATE_INIT"}, {1, "STATE_IDLE"},
  * also allowing the rocketFSM class to modify values in the global pointer
  * struct.
  */
-HistoryBufferFSM::HistoryBufferFSM(pointers *ptr) {
+HistoryBufferFSM6::HistoryBufferFSM6(pointers *ptr) {
     pointer_struct = ptr;
     // Get the linear accelration from the High-G IMU
     linear_acceleration_ptr_ =
         &pointer_struct->sensorDataPointer->highG_data.hg_az;
 
-    altitude_history_ptr_ = &pointer_struct->dataloggerTHDVarsPointer.altitude_history;
-    IMU_acceleration_history_ptr_ = &pointer_struct->dataloggerTHDVarsPointer.IMU_acceleration_history;
+    altitude_history_ptr_ = &pointer_struct->dataloggerTHDVarsPointer.altitude_history_6;
+    IMU_acceleration_history_ptr_ = &pointer_struct->dataloggerTHDVarsPointer.IMU_acceleration_history_6;
 }
 
 /**
- * @brief HistoryBufferFSM tick function
+ * @brief HistoryBufferFSM6 tick function
  *
  * Uses a combination of linear acceleration and timers to govern FSM state
  * changes for each timestep of the rocket's flight.
  */
-void HistoryBufferFSM::tickFSM() {
+void HistoryBufferFSM6::tickFSM() {
     // Lock mutexes for data used in switch
     chMtxLock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_highG);
 

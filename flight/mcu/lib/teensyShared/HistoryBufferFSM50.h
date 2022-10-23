@@ -3,9 +3,9 @@
 #include "rocketFSM.h"
 #include "HistoryBuffer.h"
 
-class HistoryBufferFSM : public RocketFSM {
+class HistoryBufferFSM50 : public RocketFSM {
    public:
-    HistoryBufferFSM(pointers*);
+    HistoryBufferFSM50(pointers*);
     virtual void tickFSM() override;
 
    private:
@@ -30,6 +30,6 @@ class HistoryBufferFSM : public RocketFSM {
     sysinterval_t landing_timer;
     
 
-    HistoryBuffer* altitude_history_ptr_;
-    HistoryBuffer* IMU_acceleration_history_ptr_;
+    HistoryBuffer<50>* altitude_history_ptr_;
+    HistoryBuffer<50>* IMU_acceleration_history_ptr_;
 };
