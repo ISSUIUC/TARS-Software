@@ -214,6 +214,7 @@ TelemetmryPacket Telemetry::make_packet(){
     TelemetmryPacket packet;
     TelemetryData2 data;
     for(int i = 0; i < 4 && buffered_data.pop(&data); i++){
+        Serial.println(data.timestamp);
         packet.datapoints[i] = data;
         packet.datapoint_count = i;
     }
@@ -236,7 +237,7 @@ void Telemetry::buffer_data(const sensorDataStruct_t &sensor_data){
     data.FSM_State = sensor_data.rocketState_data.rocketState;
     data.rssi = rf95.lastRssi();
     data.response_ID = last_command_id;
-    data.timestamp = chVTGetSystemTime();
+    data.timestamp = TIME_I2MS(chVTGetSystemTime());
 
     buffered_data.push(data);
 }
