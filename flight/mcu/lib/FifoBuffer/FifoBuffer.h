@@ -106,7 +106,7 @@ public:
         if (n != 0) {
             lock();
             for (T& item : this) {
-                write_to[i];
+                write_to[i] = item;
                 if (i++ == n) break;
             }
             unlock();
