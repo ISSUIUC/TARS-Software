@@ -85,6 +85,8 @@ static THD_WORKING_AREA(kalman_WA, 8192);
 static THD_FUNCTION(telemetry_buffering_THD, arg) {
     struct pointers *pointer_struct = (struct pointers *)arg;
 
+    while(pointer_struct->telemetry == nullptr) chThdSleepMilliseconds(50);
+
     Telemetry& tlm = *pointer_struct->telemetry;
     while (true) {
         tlm.buffer_data(sensorData);
@@ -98,7 +100,9 @@ static THD_FUNCTION(telemetry_buffering_THD, arg) {
 static THD_FUNCTION(telemetry_sending_THD, arg) {
     struct pointers *pointer_struct = (struct pointers *)arg;
 
-    Telemetry& tlm = *pointer_struct->telemetry;
+    // Telemetry& tlm = *pointer_struct->telemetry;
+    Telemetry tlm;
+    pointer_struct->telemetry = &tlm;
     while (true) {
         tlm.transmit();
         pointer_struct->abort = tlm.abort;
@@ -433,8 +437,8 @@ void setup() {
                                  // to flash and BBR
     gps.setNavigationFrequency(5);  // set sampling rate to 5hz
 
-    Telemetry tlm;
-    sensor_pointers.telemetry = &tlm;   
+    // Telemetry tlm;
+    // sensor_pointers.telemetry = &tlm;   
     // SD Card Setup
     if (SD.begin(BUILTIN_SDCARD)) {
         char file_extension[6] = ".dat";

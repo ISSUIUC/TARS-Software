@@ -149,9 +149,11 @@ void Telemetry::transmit() {
     static bool blue_state = false;
     digitalWrite(LED_BLUE, blue_state);
     blue_state = !blue_state;
-    // telemetry_data d{};
+    // telemetry_data packet{};
 
     TelemetmryPacket packet = make_packet();
+    Serial.println(packet.datapoints[0].timestamp);
+    Serial.println(sizeof(packet));
     rf95.send((uint8_t *)&packet, sizeof(packet));
 
 
@@ -214,7 +216,6 @@ TelemetmryPacket Telemetry::make_packet(){
     TelemetmryPacket packet;
     TelemetryData2 data;
     for(int i = 0; i < 4 && buffered_data.pop(&data); i++){
-        Serial.println(data.timestamp);
         packet.datapoints[i] = data;
         packet.datapoint_count = i;
     }

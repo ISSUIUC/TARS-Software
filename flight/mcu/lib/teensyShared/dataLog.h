@@ -205,13 +205,13 @@ class DataLogBuffer {
 struct Telemetry;
 // TODO: Re-think this struct
 struct pointers {
-    LSM9DS1* lowGimuPointer;
-    QwiicKX134* highGimuPointer;
-    MS5611* barometerPointer;
-    SFE_UBLOX_GNSS* GPSPointer;
-    Telemetry* telemetry;
+    LSM9DS1* lowGimuPointer{};
+    QwiicKX134* highGimuPointer{};
+    MS5611* barometerPointer{};
+    SFE_UBLOX_GNSS* GPSPointer{};
+    Telemetry* telemetry{};
 
-    sensorDataStruct_t* sensorDataPointer;
+    sensorDataStruct_t* sensorDataPointer{};
 
     DataLogBuffer dataloggerTHDVarsPointer;
     bool abort;
