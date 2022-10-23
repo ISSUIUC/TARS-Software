@@ -39,6 +39,7 @@
 #include "SparkFun_Qwiic_KX13X.h"                  //High-G IMU Library
 #include "SparkFun_u-blox_GNSS_Arduino_Library.h"  //GPS Library
 #include "TimerFSM.h"
+#include "HistoryBufferFSM.h"
 #include "dataLog.h"
 #include "kalmanFilter.h"
 #include "pins.h"
@@ -106,6 +107,7 @@ static THD_FUNCTION(rocket_FSM, arg) {
     // Implement RocketFSM class and instantiate it here
     // Refer to TemplateFSM for an example
     TimerFSM stateMachine(pointer_struct);
+    HistoryBufferFSM stateMachine(pointer_struct);
 
     // Add FSM pointer to array of FSMs to be updated
     RocketFSM *fsm_array[] = {&stateMachine};
