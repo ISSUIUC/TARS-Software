@@ -10,6 +10,8 @@
 // Transition from boost to coast if low accleration detected for 300 ms
 static const float coast_time_thresh = 300;
 
+static const float apogee_time_thresh = 300;
+
 // 2 gs for launch detect
 static const float launch_linear_acceleration_thresh = 2;
 

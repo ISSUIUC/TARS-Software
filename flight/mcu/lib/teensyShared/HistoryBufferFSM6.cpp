@@ -160,7 +160,7 @@ void HistoryBufferFSM6::tickFSM() {
             coast_timer_ = chVTGetSystemTime() - burnout_time_;
 
             if (fabs((*altitude_history_ptr_).getCurrentAverage() - (*altitude_history_ptr_).getPastAverage()) < apogee_altimeter_threshold) {
-                    rocket_state_ = FSM_State::STATE_APOGEE;
+                    rocket_state_ = FSM_State::STATE_APOGEE_DETECT;
                     apogee_time_ = chVTGetSystemTime();
                     break;
             }
@@ -177,9 +177,28 @@ void HistoryBufferFSM6::tickFSM() {
 
 
             break;
+        
+        case FSM_State::STATE_APOGEE_DETECT:
+            // If the 0 velocity was too brief, go back to BOOST
+            if (fabs((*altitude_history_ptr_).getCurrentAverage() - (*altitude_history_ptr_).getPastAverage()) > apogee_altimeter_threshold) {
+                rocket_state_ = FSM_State::STATE_COAST_GNC;
+                break;
+            }
+
+            // Measure the length of the apogee time (for hysteresis)
+            apogee_timer_ = chVTGetSystemTime() - apogee_time_;
+
+            // If the low acceleration lasts long enough, apogee is detected
+            if (TIME_I2MS(apogee_timer_) > apogee_time_thresh) {
+                rocket_state_ = FSM_State::STATE_APOGEE;
+            }
+
+            break;
+
 
 
         case FSM_State::STATE_APOGEE:
+            apogee_timer_ = chVTGetSystemTime() - apogee_time_;
             if (fabs((*IMU_acceleration_history_ptr_).getCurrentAverage() - (*IMU_acceleration_history_ptr_).getPastAverage()) > drogue_acceleration_change_threshold_imu) {
                     rocket_state_= FSM_State::STATE_DROGUE_DETECT;
                     break;
