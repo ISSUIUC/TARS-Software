@@ -5,6 +5,7 @@
 // #include "sensors.h"
 #include <ChRt.h>
 #include <stdint.h>
+#include <map>
 
 // forward declare pointers
 struct pointers;
@@ -32,6 +33,22 @@ class RocketFSM {
         STATE_LANDED,
         STATE_ABORT
     };
+
+    std::map<int, String> state_map = { {0, "STATE_INIT"}, {1, "STATE_IDLE"},
+    {2, "STATE_LAUNCH_DETECT"},
+    {3, "STATE_BOOST"},
+    {4, "STATE_BURNOUT_DETECT"},
+    {5, "STATE_COAST_PREGNC"},
+    {6, "STATE_COAST_GNC"},
+    {7, "STATE_APOGEE_DETECT"},
+    {8, "STATE_APOGEE"},
+    {9, "STATE_DROGUE_DETECT"},
+    {10, "STATE_DROGUE"},
+    {11,"STATE_MAIN_DETECT"},
+    {12, "STATE_MAIN"},
+    {13, "STATE_LANDED_DETECT"},
+    {14, "STATE_LANDED"},
+    {15, "STATE_ABORT"}};
 
     virtual void tickFSM() = 0;
 
