@@ -8,6 +8,7 @@
 #include "SD.h"
 #include "pins.h"
 #include "sensors.h"
+#include "FifoBuffer.h"
 
 // Make sure to change these pinout depending on wiring
 // Don't forget to change the ini file to build the correct main file
@@ -16,6 +17,29 @@
 #define RF95_FREQ 434.0
 
 #define MAX_CMD_LEN 10
+
+struct TelemetryData2 {
+    float gps_lat;
+    float gps_long;
+    float gps_alt;
+    float barometer_pressure;
+    float barometer_temp;
+    float highG_ax;
+    float highG_ay;
+    float highG_az;
+
+    int8_t flap_extension;
+    int8_t voltage_battery;
+    int8_t FSM_State;
+    int8_t rssi;
+    int response_ID;
+    systime_t timestamp;
+};
+
+struct TelemetmryPacket {
+    TelemetryData2 datapoints[4];
+    int datapoint_count;
+};
 
 // Data transmitted from rocket to ground station
 struct telemetry_data {
@@ -81,11 +105,13 @@ struct command_handler_struct {
 class Telemetry {
    public:
     Telemetry();
-    void transmit(const sensorDataStruct_t&);
+    void transmit();
     void handle_command(const telemetry_command& cmd);
     bool abort = false;
+    void buffer_data(const sensorDataStruct_t&);
 
    private:
+    FifoBuffer<TelemetryData2, 4> buffered_data;
     int packetnum;
     telemetry_data d;
     RH_RF95 rf95;
@@ -99,4 +125,6 @@ class Telemetry {
     // Initializing callsign
     char callsign[8] = "NO SIGN";
     command_handler_struct freq_status = {};
+
+    TelemetmryPacket make_packet();
 };

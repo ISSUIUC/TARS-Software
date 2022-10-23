@@ -145,45 +145,49 @@ void Telemetry::handle_command(const telemetry_command &cmd) {
  *
  * @return void
  */
-void Telemetry::transmit(const sensorDataStruct_t &sensor_data) {
+void Telemetry::transmit() {
     static bool blue_state = false;
     digitalWrite(LED_BLUE, blue_state);
     blue_state = !blue_state;
-    telemetry_data d{};
+    // telemetry_data d{};
 
-    d.gps_lat = sensor_data.gps_data.latitude;
-    d.gps_long = sensor_data.gps_data.longitude;
-    d.gps_alt = sensor_data.gps_data.altitude;
-    d.barometer_alt = sensor_data.barometer_data.altitude;
-    d.barometer_temp = sensor_data.barometer_data.temperature;
-    d.barometer_pressure = sensor_data.barometer_data.pressure;
-    d.KX_IMU_ax = sensor_data.highG_data.hg_ax;
-    d.KX_IMU_ay = sensor_data.highG_data.hg_ay;
-    d.KX_IMU_az = sensor_data.highG_data.hg_az;
-    d.H3L_IMU_ax = sensor_data.highG_data.hg_ax;
-    d.H3L_IMU_ay = sensor_data.highG_data.hg_ay;
-    d.H3L_IMU_az = sensor_data.highG_data.hg_az;
-    d.LSM_IMU_ax = sensor_data.lowG_data.ax;
-    d.LSM_IMU_ay = sensor_data.lowG_data.ay;
-    d.LSM_IMU_az = sensor_data.lowG_data.az;
-    d.LSM_IMU_gx = sensor_data.lowG_data.gx;
-    d.LSM_IMU_gy = sensor_data.lowG_data.gy;
-    d.LSM_IMU_gz = sensor_data.lowG_data.gz;
-    d.LSM_IMU_mx = sensor_data.lowG_data.mx;
-    d.LSM_IMU_my = sensor_data.lowG_data.my;
-    d.LSM_IMU_mz = sensor_data.lowG_data.mz;
-    d.flap_extension = sensor_data.flap_data.extension;
-    d.voltage_battry = sensor_data.voltage_data.v_battery;
-    d.state_x = sensor_data.state_data.state_x;
-    d.state_vx = sensor_data.state_data.state_vx;
-    d.state_ax = sensor_data.state_data.state_ax;
-    d.state_apo = sensor_data.state_data.state_apo;
-    d.rssi = rf95.lastRssi();
-    d.response_ID = last_command_id;
-    d.FSM_state = sensor_data.rocketState_data.rocketState;
-    memcpy(d.sign, callsign, sizeof(callsign));
+    TelemetmryPacket packet = make_packet();
+    rf95.send((uint8_t *)&packet, sizeof(packet));
 
-    rf95.send((uint8_t *)&d, sizeof(d));
+
+    // d.gps_lat = sensor_data.gps_data.latitude;
+    // d.gps_long = sensor_data.gps_data.longitude;
+    // d.gps_alt = sensor_data.gps_data.altitude;
+    // d.barometer_alt = sensor_data.barometer_data.altitude;
+    // d.barometer_temp = sensor_data.barometer_data.temperature;
+    // d.barometer_pressure = sensor_data.barometer_data.pressure;
+    // d.KX_IMU_ax = sensor_data.highG_data.hg_ax;
+    // d.KX_IMU_ay = sensor_data.highG_data.hg_ay;
+    // d.KX_IMU_az = sensor_data.highG_data.hg_az;
+    // d.H3L_IMU_ax = sensor_data.highG_data.hg_ax;
+    // d.H3L_IMU_ay = sensor_data.highG_data.hg_ay;
+    // d.H3L_IMU_az = sensor_data.highG_data.hg_az;
+    // d.LSM_IMU_ax = sensor_data.lowG_data.ax;
+    // d.LSM_IMU_ay = sensor_data.lowG_data.ay;
+    // d.LSM_IMU_az = sensor_data.lowG_data.az;
+    // d.LSM_IMU_gx = sensor_data.lowG_data.gx;
+    // d.LSM_IMU_gy = sensor_data.lowG_data.gy;
+    // d.LSM_IMU_gz = sensor_data.lowG_data.gz;
+    // d.LSM_IMU_mx = sensor_data.lowG_data.mx;
+    // d.LSM_IMU_my = sensor_data.lowG_data.my;
+    // d.LSM_IMU_mz = sensor_data.lowG_data.mz;
+    // d.flap_extension = sensor_data.flap_data.extension;
+    // d.voltage_battry = sensor_data.voltage_data.v_battery;
+    // d.state_x = sensor_data.state_data.state_x;
+    // d.state_vx = sensor_data.state_data.state_vx;
+    // d.state_ax = sensor_data.state_data.state_ax;
+    // d.state_apo = sensor_data.state_data.state_apo;
+    // d.rssi = rf95.lastRssi();
+    // d.response_ID = last_command_id;
+    // d.FSM_state = sensor_data.rocketState_data.rocketState;
+    // memcpy(d.sign, callsign, sizeof(callsign));
+
+    // rf95.send((uint8_t *)&d, sizeof(d));
 
     chThdSleepMilliseconds(170);
 
@@ -204,4 +208,35 @@ void Telemetry::transmit(const sensorDataStruct_t &sensor_data) {
 
         handle_command(received);
     }
+}
+
+TelemetmryPacket Telemetry::make_packet(){
+    TelemetmryPacket packet;
+    TelemetryData2 data;
+    for(int i = 0; i < 4 && buffered_data.pop(&data); i++){
+        packet.datapoints[i] = data;
+        packet.datapoint_count = i;
+    }
+    return packet;
+}
+
+void Telemetry::buffer_data(const sensorDataStruct_t &sensor_data){
+    TelemetryData2 data;
+    data.gps_lat = sensor_data.gps_data.latitude;
+    data.gps_long = sensor_data.gps_data.longitude;
+    data.gps_alt = sensor_data.gps_data.altitude;
+    data.barometer_pressure = sensor_data.barometer_data.pressure;
+    data.barometer_temp = sensor_data.barometer_data.temperature;
+    data.highG_ax = sensor_data.highG_data.hg_ax;
+    data.highG_ay = sensor_data.highG_data.hg_ay;
+    data.highG_az = sensor_data.highG_data.hg_az;
+
+    data.flap_extension = sensor_data.flap_data.extension;
+    data.voltage_battery = sensor_data.voltage_data.v_battery;
+    data.FSM_State = sensor_data.rocketState_data.rocketState;
+    data.rssi = rf95.lastRssi();
+    data.response_ID = last_command_id;
+    data.timestamp = chVTGetSystemTime();
+
+    buffered_data.push(data);
 }

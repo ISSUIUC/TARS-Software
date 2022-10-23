@@ -76,19 +76,31 @@ static THD_WORKING_AREA(highgIMU_WA, 8192);
 static THD_WORKING_AREA(servo_WA, 8192);
 static THD_WORKING_AREA(dataLogger_WA, 8192);
 static THD_WORKING_AREA(voltage_WA, 8192);
-static THD_WORKING_AREA(telemetry_WA, 8192);
+static THD_WORKING_AREA(telemetry_sending_WA, 8192);
+static THD_WORKING_AREA(telemetry_buffering_WA, 8192);
 static THD_WORKING_AREA(kalman_WA, 8192);
+/******************************************************************************/
+/* TELEMETRY THREAD                                         */
+
+static THD_FUNCTION(telemetry_buffering_THD, arg) {
+    struct pointers *pointer_struct = (struct pointers *)arg;
+
+    Telemetry& tlm = *pointer_struct->telemetry;
+    while (true) {
+        tlm.buffer_data(sensorData);
+        chThdSleepMilliseconds(60);
+    }
+}
 
 /******************************************************************************/
 /* TELEMETRY THREAD                                         */
 
-static THD_FUNCTION(telemetry_THD, arg) {
+static THD_FUNCTION(telemetry_sending_THD, arg) {
     struct pointers *pointer_struct = (struct pointers *)arg;
 
-    // int packetnum = 0;
-    Telemetry tlm;
+    Telemetry& tlm = *pointer_struct->telemetry;
     while (true) {
-        tlm.transmit(sensorData);
+        tlm.transmit();
         pointer_struct->abort = tlm.abort;
         chThdSleepMilliseconds(200);
         // transmit has a sleep in it
@@ -296,8 +308,10 @@ static THD_FUNCTION(dataLogger_THD, arg) {
  *
  */
 void chSetup() {
-    // chThdCreateStatic(telemetry_WA, sizeof(telemetry_WA), NORMALPRIO + 1,
-    //                   telemetry_THD, &sensor_pointers);
+    chThdCreateStatic(telemetry_sending_WA, sizeof(telemetry_sending_WA), NORMALPRIO + 1,
+                      telemetry_sending_THD, &sensor_pointers);
+    chThdCreateStatic(telemetry_buffering_WA, sizeof(telemetry_buffering_WA), NORMALPRIO + 1,
+                    telemetry_buffering_THD, &sensor_pointers);                
     chThdCreateStatic(rocket_FSM_WA, sizeof(rocket_FSM_WA), NORMALPRIO + 1,
                       rocket_FSM, &sensor_pointers);
     chThdCreateStatic(gps_WA, sizeof(gps_WA), NORMALPRIO + 1, gps_THD,
@@ -358,6 +372,8 @@ void setup() {
     digitalWrite(ZOEM8Q0_CS, HIGH);
     digitalWrite(MS5611_CS, HIGH);
 
+    Telemetry tlm;
+    sensor_pointers.telemetry = &tlm;   
     sensor_pointers.lowGimuPointer = &lowGimu;
     sensor_pointers.highGimuPointer = &highGimu;
     sensor_pointers.barometerPointer = &barometer;
@@ -419,6 +435,7 @@ void setup() {
                                  // to flash and BBR
     gps.setNavigationFrequency(5);  // set sampling rate to 5hz
 
+    
     // SD Card Setup
     // if (SD.begin(BUILTIN_SDCARD)) {
     //     char file_extension[6] = ".dat";
