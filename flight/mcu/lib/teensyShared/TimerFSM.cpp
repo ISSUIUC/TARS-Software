@@ -54,7 +54,7 @@ void TimerFSM::tickFSM() {
     // Lock mutexes for data used in switch
     chMtxLock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_highG);
 
-    Serial.println("Timer: " + state_map[(int)rocket_state_]);
+    // Serial.println("Timer: " + state_map[(int)rocket_state_]);
 
     // Links to abort for other states
     if (pointer_struct->abort) {
