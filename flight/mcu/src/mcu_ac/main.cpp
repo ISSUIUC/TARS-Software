@@ -314,8 +314,8 @@ static THD_FUNCTION(dataLogger_THD, arg) {
 void chSetup() {
     chThdCreateStatic(telemetry_sending_WA, sizeof(telemetry_sending_WA), NORMALPRIO + 1,
                       telemetry_sending_THD, &sensor_pointers);
-    chThdCreateStatic(telemetry_buffering_WA, sizeof(telemetry_buffering_WA), NORMALPRIO + 1,
-                    telemetry_buffering_THD, &sensor_pointers);                
+    // chThdCreateStatic(telemetry_buffering_WA, sizeof(telemetry_buffering_WA), NORMALPRIO + 1,
+    //                 telemetry_buffering_THD, &sensor_pointers);                
     chThdCreateStatic(rocket_FSM_WA, sizeof(rocket_FSM_WA), NORMALPRIO + 1,
                       rocket_FSM, &sensor_pointers);
     chThdCreateStatic(gps_WA, sizeof(gps_WA), NORMALPRIO + 1, gps_THD,

@@ -104,20 +104,6 @@ void Telemetry::handle_command(const telemetry_command &cmd) {
     if (cmd.command == SET_FREQ) {
         freq_status.should_change = true;
         freq_status.new_freq = cmd.freq;
-
-        // Writing freq to file
-        // Fix this to overwriteHave to overwrite and not truncate? @gautamdayal
-        // please test. write_file = SD.open("freq.txt", FILE_WRITE | O_TRUNC);
-        // if (write_file) {
-        //     Serial.println("[DEBUG] WRITE freq to SD card.");
-        //     write_file.write(& cmd.freq, 4);
-        // } else {
-        //     Serial.println("[ERROR] Failed to open freq file while writing");
-        //     // TODO: possibly add functionality here to create the file
-        //     // and store the default frequency in it.
-        //     // write_file.write(& "434", 4);
-        // }
-        // write_file.close();
     }
 
     if (cmd.command == SET_CALLSIGN) {
@@ -149,47 +135,9 @@ void Telemetry::transmit() {
     static bool blue_state = false;
     digitalWrite(LED_BLUE, blue_state);
     blue_state = !blue_state;
-    // telemetry_data packet{};
 
     TelemetmryPacket packet = make_packet();
-    Serial.println(packet.datapoints[0].timestamp);
-    Serial.println(sizeof(packet));
     rf95.send((uint8_t *)&packet, sizeof(packet));
-
-
-    // d.gps_lat = sensor_data.gps_data.latitude;
-    // d.gps_long = sensor_data.gps_data.longitude;
-    // d.gps_alt = sensor_data.gps_data.altitude;
-    // d.barometer_alt = sensor_data.barometer_data.altitude;
-    // d.barometer_temp = sensor_data.barometer_data.temperature;
-    // d.barometer_pressure = sensor_data.barometer_data.pressure;
-    // d.KX_IMU_ax = sensor_data.highG_data.hg_ax;
-    // d.KX_IMU_ay = sensor_data.highG_data.hg_ay;
-    // d.KX_IMU_az = sensor_data.highG_data.hg_az;
-    // d.H3L_IMU_ax = sensor_data.highG_data.hg_ax;
-    // d.H3L_IMU_ay = sensor_data.highG_data.hg_ay;
-    // d.H3L_IMU_az = sensor_data.highG_data.hg_az;
-    // d.LSM_IMU_ax = sensor_data.lowG_data.ax;
-    // d.LSM_IMU_ay = sensor_data.lowG_data.ay;
-    // d.LSM_IMU_az = sensor_data.lowG_data.az;
-    // d.LSM_IMU_gx = sensor_data.lowG_data.gx;
-    // d.LSM_IMU_gy = sensor_data.lowG_data.gy;
-    // d.LSM_IMU_gz = sensor_data.lowG_data.gz;
-    // d.LSM_IMU_mx = sensor_data.lowG_data.mx;
-    // d.LSM_IMU_my = sensor_data.lowG_data.my;
-    // d.LSM_IMU_mz = sensor_data.lowG_data.mz;
-    // d.flap_extension = sensor_data.flap_data.extension;
-    // d.voltage_battry = sensor_data.voltage_data.v_battery;
-    // d.state_x = sensor_data.state_data.state_x;
-    // d.state_vx = sensor_data.state_data.state_vx;
-    // d.state_ax = sensor_data.state_data.state_ax;
-    // d.state_apo = sensor_data.state_data.state_apo;
-    // d.rssi = rf95.lastRssi();
-    // d.response_ID = last_command_id;
-    // d.FSM_state = sensor_data.rocketState_data.rocketState;
-    // memcpy(d.sign, callsign, sizeof(callsign));
-
-    // rf95.send((uint8_t *)&d, sizeof(d));
 
     chThdSleepMilliseconds(170);
 
