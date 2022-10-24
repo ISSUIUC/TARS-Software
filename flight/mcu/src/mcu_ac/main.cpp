@@ -106,14 +106,14 @@ static THD_FUNCTION(rocket_FSM, arg) {
 
     // Implement RocketFSM class and instantiate it here
     // Refer to TemplateFSM for an example
-    TimerFSM stateMachine(pointer_struct);
-    HistoryBufferFSM stateMachine(pointer_struct);
+    TimerFSM timer_fsm(pointer_struct);
+    HistoryBufferFSM history_fsm(pointer_struct);
 
     // Add FSM pointer to array of FSMs to be updated
-    RocketFSM *fsm_array[] = {&stateMachine};
+    RocketFSM *fsm_array[] = {&timer_fsm, &history_fsm};
 
     // Pass array of FSMs to FSMCollection along with number of FSMs in use
-    FSMCollection fsms(fsm_array, 1);
+    FSMCollection fsms(fsm_array, 2);
 
     while (true) {
 #ifdef THREAD_DEBUG
@@ -130,7 +130,7 @@ static THD_FUNCTION(rocket_FSM, arg) {
 
         rocketStateData fsm_state;
         fsms.getStates(&fsm_state);
-        Serial.println((int)fsm_state.rocketState);
+        // Serial.println((int)fsm_state.rocketState);
         pointer_struct->sensorDataPointer->rocketState_data = fsm_state;
         pointer_struct->dataloggerTHDVarsPointer.pushRocketStateFifo(
             &fsm_state);
