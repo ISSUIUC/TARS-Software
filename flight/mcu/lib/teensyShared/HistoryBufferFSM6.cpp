@@ -63,7 +63,7 @@ void HistoryBufferFSM6::tickFSM() {
     // Lock mutexes for data used in switch
     chMtxLock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_highG);
 
-    Serial.println("HistoryBuffer: " + state_map[(int)rocket_state_]);
+    //Serial.println("HistoryBuffer: " + state_map[(int)rocket_state_]);
 
     // Links to abort for other states
     if (pointer_struct->abort) {
@@ -175,11 +175,10 @@ void HistoryBufferFSM6::tickFSM() {
                 apogee_time_ = chVTGetSystemTime();
             }
 
-
             break;
         
         case FSM_State::STATE_APOGEE_DETECT:
-            // If the 0 velocity was too brief, go back to BOOST
+            // If the 0 velocity was too brief, go back to coast
             if (fabs((*altitude_history_ptr_).getCurrentAverage() - (*altitude_history_ptr_).getPastAverage()) > apogee_altimeter_threshold) {
                 rocket_state_ = FSM_State::STATE_COAST_GNC;
                 break;
@@ -188,14 +187,12 @@ void HistoryBufferFSM6::tickFSM() {
             // Measure the length of the apogee time (for hysteresis)
             apogee_timer_ = chVTGetSystemTime() - apogee_time_;
 
-            // If the low acceleration lasts long enough, apogee is detected
+            // If the low velocity lasts long enough, apogee is detected
             if (TIME_I2MS(apogee_timer_) > apogee_time_thresh) {
                 rocket_state_ = FSM_State::STATE_APOGEE;
             }
 
             break;
-
-
 
         case FSM_State::STATE_APOGEE:
             apogee_timer_ = chVTGetSystemTime() - apogee_time_;
@@ -203,8 +200,6 @@ void HistoryBufferFSM6::tickFSM() {
                     rocket_state_= FSM_State::STATE_DROGUE_DETECT;
                     break;
             }
-            //potentially add back state to put us back into coast
-
             
             if (TIME_I2MS(apogee_timer_) < drogue_deploy_time_since_apogee_threshold) {
                 rocket_state_ = FSM_State::STATE_APOGEE;
