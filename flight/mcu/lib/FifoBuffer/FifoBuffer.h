@@ -1,63 +1,27 @@
 #ifndef TARS_SOFTWARE_FIFO_H
 #define TARS_SOFTWARE_FIFO_H
 
-#include <cstdint>
-#include <cstring>
 #include <ChRt.h>
-#include <iterator>
 
 template <typename T, size_t max_size>
 class FifoBuffer {
 public:
-    struct FifoIterator {
-    public:
-        using iterator_category = std::input_iterator_tag;
-        using difference_type = int64_t;
-        using value_type = T;
-        using pointer_type = T*;
-        using reference_type = T&;
-
-        FifoIterator(T* buf, size_t idx) : buf(buf), idx(idx) {}
-
-        T& operator*() const {
-            return buf[idx];
-        }
-        T* operator->() {
-            return &buf[idx];
-        }
-        FifoIterator& operator++() {
-            idx = (idx + 1) % max_size;
-            return *this;
-        }
-        FifoIterator operator++(int) {
-            FifoIterator tmp = *this;
-            ++(*this);
-            return tmp;
-        }
-        friend bool operator== (const FifoIterator& a, const FifoIterator& b) {
-            return a.buf == b.buf && a.idx == b.idx;
-        }
-        friend bool operator!= (const FifoIterator& a, const FifoIterator& b) {
-            return a.buf != b.buf || a.idx != b.idx;
-        }
-
-    private:
-        T* buf;
-        size_t idx;
-    };
-
-
-    FifoBuffer() : length(0), head_idx(0), tail_idx(0) {}
+    FifoBuffer() : length(0), head_idx(0), tail_idx(0), to_process_idx(0) {}
 
     bool push(T& element) {
         lock();
         if (length == max_size) {
             // if length == max_size, then head_idx == tail_idx
             arr[tail_idx] = element;
-            head_idx = tail_idx = (head_idx + 1) % max_size;
+            inc_idx(tail_idx);
+            if (to_process_idx == head_idx) {
+                to_process_idx = head_idx = tail_idx;
+            } else {
+                head_idx = tail_idx;
+            }
         } else {
             arr[tail_idx] = element;
-            tail_idx = (tail_idx + 1) % max_size;
+            inc_idx(tail_idx);
             length++;
         }
         unlock();
@@ -65,14 +29,32 @@ public:
     }
 
     bool pop(T* out) {
+        // TODO remove this method entirely
+        //   convert all usages to `next`
         lock();
         if (length == 0) {
             unlock();
             return false;
         } else {
             *out = arr[head_idx];
-            head_idx = (head_idx + 1) % max_size;
+            if (to_process_idx == head_idx) {
+                inc_idx(head_idx);
+                to_process_idx = head_idx;
+            }
             length--;
+            unlock();
+            return true;
+        }
+    }
+
+    bool next(T& out) {
+        lock();
+        if (length == 0 || to_process_idx == tail_idx) {
+            unlock();
+            return false;
+        } else {
+            out = arr[to_process_idx];
+            inc_idx(to_process_idx);
             unlock();
             return true;
         }
@@ -86,14 +68,6 @@ public:
         chMtxUnlock(&lock_);
     }
 
-    // before iterating, make sure to lock (and don't do pushes or pops while iterating)
-    FifoIterator begin() {
-        return FifoIterator { arr, head_idx };
-    }
-
-    FifoIterator end() {
-        return FifoIterator { arr, tail_idx };
-    }
     /**
      * @brief Reads the most recent N items into a passed array (can be larger than the actual count of items).
      *
@@ -102,22 +76,34 @@ public:
      * @return How many items were actually read
      */
     size_t recentN(T write_to[], size_t n) {
-        size_t i = 0;
+        // TODO change `n` to a template parameter on recent?
         if (n != 0) {
+            size_t i = 0;
+            size_t idx = head_idx;
             lock();
-            for (T& item : this) {
-                write_to[i] = item;
-                if (i++ == n) break;
+            while (idx != tail_idx && i < n) {
+                write_to[i++] = arr[idx];
+                inc_idx(idx);
             }
             unlock();
+            return i;
+        } else {
+            return 0;
         }
-        return i;
     }
 
 private:
+    void inline inc_idx(size_t& idx) {
+        idx++;
+        if (idx == max_size) {
+            idx = 0;
+        }
+    }
+
     size_t length;
     size_t head_idx;
     size_t tail_idx;
+    size_t to_process_idx;
     T arr[max_size];
 
     MUTEX_DECL(lock_);
