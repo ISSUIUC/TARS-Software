@@ -119,7 +119,7 @@ struct sensorDataStruct_t {
 
     // Rocket State
     bool has_rocketState_data;
-    rocketStateData rocketState_data;
+    rocketStateData<1> rocketState_data;
 
     // Flap state
     bool has_flap_data;
@@ -148,7 +148,7 @@ class DataLogBuffer {
     FifoBuffer<HighGData, FIFO_SIZE> highGFifo{};
     FifoBuffer<GpsData, FIFO_SIZE> gpsFifo{};
     FifoBuffer<stateData, FIFO_SIZE> stateFifo{};
-    FifoBuffer<rocketStateData, FIFO_SIZE> rocketStateFifo{};
+    FifoBuffer<rocketStateData<1>, FIFO_SIZE> rocketStateFifo{};
     FifoBuffer<FlapData, FIFO_SIZE> flapFifo{};
     FifoBuffer<VoltageData, FIFO_SIZE> voltageFifo{};
     FifoBuffer<BarometerData, FIFO_SIZE> barometerFifo{};
@@ -179,8 +179,8 @@ class DataLogBuffer {
     bool pushStateFifo(stateData* state_data);
     bool popStateFifo(stateData* state_data);
 
-    bool pushRocketStateFifo(rocketStateData* rocket_data);
-    bool popRocketStateFifo(rocketStateData* rocket_data);
+    bool pushRocketStateFifo(rocketStateData<1>* rocket_data);
+    bool popRocketStateFifo(rocketStateData<1>* rocket_data);
 
     bool pushBarometerFifo(BarometerData* barometer_data);
     bool popBarometerFifo(BarometerData* barometer_data);

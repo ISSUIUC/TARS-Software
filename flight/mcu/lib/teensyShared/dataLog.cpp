@@ -201,11 +201,11 @@ bool DataLogBuffer::popBarometerFifo(BarometerData* barometer_data) {
     return barometerFifo.pop(barometer_data);
 }
 
-bool DataLogBuffer::pushRocketStateFifo(rocketStateData* rocket_data) {
+bool DataLogBuffer::pushRocketStateFifo(rocketStateData<1>* rocket_data) {
     return rocketStateFifo.push(*rocket_data);
 }
 
-bool DataLogBuffer::popRocketStateFifo(rocketStateData* rocket_data) {
+bool DataLogBuffer::popRocketStateFifo(rocketStateData<1>* rocket_data) {
     return rocketStateFifo.pop(rocket_data);
 }
 

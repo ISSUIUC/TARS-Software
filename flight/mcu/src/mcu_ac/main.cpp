@@ -111,7 +111,7 @@ static THD_FUNCTION(rocket_FSM, arg) {
     RocketFSM *fsm_array[] = {&stateMachine};
 
     // Pass array of FSMs to FSMCollection along with number of FSMs in use
-    FSMCollection fsms(fsm_array, 1);
+    FSMCollection<1> fsms(fsm_array);
 
     while (true) {
 #ifdef THREAD_DEBUG
@@ -126,9 +126,11 @@ static THD_FUNCTION(rocket_FSM, arg) {
         chMtxUnlock(
             &pointer_struct->dataloggerTHDVarsPointer.dataMutex_rocket_state);
 
-        rocketStateData fsm_state;
-        fsms.getStates(&fsm_state);
-        Serial.println((int)fsm_state.rocketState);
+        rocketStateData<1> fsm_state;
+        fsms.getStates(fsm_state);
+        for (size_t i = 0; i < 1; i++) {
+            Serial.println((int) fsm_state.rocketStates[i]);
+        }
         pointer_struct->sensorDataPointer->rocketState_data = fsm_state;
         pointer_struct->dataloggerTHDVarsPointer.pushRocketStateFifo(
             &fsm_state);

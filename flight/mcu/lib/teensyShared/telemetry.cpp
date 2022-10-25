@@ -182,7 +182,7 @@ void Telemetry::transmit(const sensorDataStruct_t &sensor_data) {
     d.state_apo = sensor_data.state_data.state_apo;
     d.rssi = rf95.lastRssi();
     d.response_ID = last_command_id;
-    d.FSM_state = (int)sensor_data.rocketState_data.rocketState;
+    d.FSM_state = (int)sensor_data.rocketState_data.rocketStates[0];  // TODO should we transmit all?
     memcpy(d.sign, callsign, sizeof(callsign));
 
     rf95.send((uint8_t *)&d, sizeof(d));
