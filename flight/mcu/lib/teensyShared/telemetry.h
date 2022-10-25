@@ -18,28 +18,37 @@
 
 #define MAX_CMD_LEN 10
 
-struct TelemetryData2 {
-    float gps_lat;
-    float gps_long;
-    float gps_alt;
-    float barometer_pressure;
-    float barometer_temp;
-    float highG_ax;
-    float highG_ay;
-    float highG_az;
 
-    int8_t flap_extension;
-    int8_t voltage_battery;
-    int8_t FSM_State;
-    int8_t rssi;
-    int response_ID;
-    systime_t timestamp;
+struct TelemetryData2 {
+    systime_t timestamp; //[0, 2^32]
+
+    uint16_t barometer_pressure; //[0, 4096]
+    int16_t highG_ax; //[128, -128]
+    int16_t highG_ay; //[128, -128]
+    int16_t highG_az; //[128, -128]
+    int16_t gyro_x; //[-4096, 4096]
+    int16_t gyro_y; //[-4096, 4096]
+    int16_t gyro_z; //[-4096, 4096]
+
+    uint8_t flap_extension; //[0, 256]
+    uint8_t barometer_temp; //[0, 128]
 };
 
 struct TelemetmryPacket {
     TelemetryData2 datapoints[4];
-    int datapoint_count;
+    float gps_lat;
+    float gps_long;
+    float gps_alt;
+    float gnc_state_x;
+    float gnc_state_vx;
+    float gnc_state_ax;
+    int16_t response_ID; //[0, 2^16]
+    int8_t rssi; //[-128, 128]
+    int8_t datapoint_count; //[0,4]
+    uint8_t voltage_battery; //[0, 16]
+    uint8_t FSM_State; //[0,256]
 };
+
 
 // Data transmitted from rocket to ground station
 struct telemetry_data {
@@ -105,7 +114,7 @@ struct command_handler_struct {
 class Telemetry {
    public:
     Telemetry();
-    void transmit();
+    void transmit(const sensorDataStruct_t&);
     void handle_command(const telemetry_command& cmd);
     bool abort = false;
     void buffer_data(const sensorDataStruct_t&);
@@ -126,5 +135,5 @@ class Telemetry {
     char callsign[8] = "NO SIGN";
     command_handler_struct freq_status = {};
 
-    TelemetmryPacket make_packet();
+    TelemetmryPacket make_packet(const sensorDataStruct_t&);
 };

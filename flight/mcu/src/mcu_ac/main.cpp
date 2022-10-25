@@ -104,7 +104,7 @@ static THD_FUNCTION(telemetry_sending_THD, arg) {
     Telemetry tlm;
     pointer_struct->telemetry = &tlm;
     while (true) {
-        tlm.transmit();
+        tlm.transmit(sensorData);
         pointer_struct->abort = tlm.abort;
         chThdSleepMilliseconds(200);
         // transmit has a sleep in it
