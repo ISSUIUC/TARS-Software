@@ -178,6 +178,7 @@ TelemetmryPacket Telemetry::make_packet(const sensorDataStruct_t& data_struct){
     packet.gnc_state_ax = data_struct.state_data.state_ax;
     packet.gnc_state_vx = data_struct.state_data.state_vx;
     packet.gnc_state_x = data_struct.state_data.state_x;
+    packet.gns_state_apo = data_struct.state_data.state_apo;
 
     packet.response_ID = last_command_id;
     packet.rssi = rf95.lastRssi();
@@ -197,13 +198,13 @@ void Telemetry::buffer_data(const sensorDataStruct_t &sensor_data){
     data.timestamp = TIME_I2MS(chVTGetSystemTime());
     data.barometer_pressure = inv_convert_range<uint16_t>(sensor_data.barometer_data.pressure, 4096);
 
-    data.highG_ax = inv_convert_range<int16_t>(sensor_data.highG_data.hg_ax, 128);
-    data.highG_ay = inv_convert_range<int16_t>(sensor_data.highG_data.hg_ay, 128);
-    data.highG_az = inv_convert_range<int16_t>(sensor_data.highG_data.hg_az, 128);
+    data.highG_ax = inv_convert_range<int16_t>(sensor_data.highG_data.hg_ax, 256);
+    data.highG_ay = inv_convert_range<int16_t>(sensor_data.highG_data.hg_ay, 256);
+    data.highG_az = inv_convert_range<int16_t>(sensor_data.highG_data.hg_az, 256);
 
-    data.gyro_x = inv_convert_range<int16_t>(sensor_data.lowG_data.gx, 4096);
-    data.gyro_x = inv_convert_range<int16_t>(sensor_data.lowG_data.gy, 4096);
-    data.gyro_x = inv_convert_range<int16_t>(sensor_data.lowG_data.gz, 4096);
+    data.gyro_x = inv_convert_range<int16_t>(sensor_data.lowG_data.gx, 8192);
+    data.gyro_x = inv_convert_range<int16_t>(sensor_data.lowG_data.gy, 8192);
+    data.gyro_x = inv_convert_range<int16_t>(sensor_data.lowG_data.gz, 8192);
 
     data.flap_extension = (uint8_t)sensor_data.flap_data.extension;
     data.barometer_temp = inv_convert_range<uint8_t>(sensor_data.barometer_data.temperature, 128);

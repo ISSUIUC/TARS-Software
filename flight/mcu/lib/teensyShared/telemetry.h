@@ -42,6 +42,7 @@ struct TelemetmryPacket {
     float gnc_state_x;
     float gnc_state_vx;
     float gnc_state_ax;
+    float gns_state_apo;
     int16_t response_ID; //[0, 2^16]
     int8_t rssi; //[-128, 128]
     int8_t datapoint_count; //[0,4]

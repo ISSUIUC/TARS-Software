@@ -314,8 +314,8 @@ static THD_FUNCTION(dataLogger_THD, arg) {
 void chSetup() {
     chThdCreateStatic(telemetry_sending_WA, sizeof(telemetry_sending_WA), NORMALPRIO + 1,
                       telemetry_sending_THD, &sensor_pointers);
-    // chThdCreateStatic(telemetry_buffering_WA, sizeof(telemetry_buffering_WA), NORMALPRIO + 1,
-    //                 telemetry_buffering_THD, &sensor_pointers);                
+    chThdCreateStatic(telemetry_buffering_WA, sizeof(telemetry_buffering_WA), NORMALPRIO + 1,
+                    telemetry_buffering_THD, &sensor_pointers);                
     chThdCreateStatic(rocket_FSM_WA, sizeof(rocket_FSM_WA), NORMALPRIO + 1,
                       rocket_FSM, &sensor_pointers);
     chThdCreateStatic(gps_WA, sizeof(gps_WA), NORMALPRIO + 1, gps_THD,
@@ -328,8 +328,8 @@ void chSetup() {
                       highgIMU_THD, &sensor_pointers);
     chThdCreateStatic(servo_WA, sizeof(servo_WA), NORMALPRIO + 1, servo_THD,
                       &sensor_pointers);
-    chThdCreateStatic(dataLogger_WA, sizeof(dataLogger_WA), NORMALPRIO + 1,
-                      dataLogger_THD, &sensor_pointers);
+    // chThdCreateStatic(dataLogger_WA, sizeof(dataLogger_WA), NORMALPRIO + 1,
+    //                   dataLogger_THD, &sensor_pointers);
     chThdCreateStatic(voltage_WA, sizeof(voltage_WA), NORMALPRIO + 1,
                       voltage_THD, &sensor_pointers);
     chThdCreateStatic(kalman_WA, sizeof(kalman_WA), NORMALPRIO + 1, kalman_THD,
@@ -440,33 +440,33 @@ void setup() {
     // Telemetry tlm;
     // sensor_pointers.telemetry = &tlm;   
     // SD Card Setup
-    if (SD.begin(BUILTIN_SDCARD)) {
-        char file_extension[6] = ".dat";
+    // if (SD.begin(BUILTIN_SDCARD)) {
+    //     char file_extension[6] = ".dat";
 
-        char data_name[16] = "data";
-        // Initialize SD card
-        sensor_pointers.dataloggerTHDVarsPointer.dataFile =
-            SD.open(sd_file_namer(data_name, file_extension),
-                    O_CREAT | O_WRITE | O_TRUNC);
-        // print header to file on sd card that lists each variable that is
-        // logged
-        sensor_pointers.dataloggerTHDVarsPointer.dataFile.println(
-            "binary logging of sensor_data_t");
-        sensor_pointers.dataloggerTHDVarsPointer.dataFile.flush();
-        //
-        Serial.println(sensor_pointers.dataloggerTHDVarsPointer.dataFile.name());
-    } else {
-        digitalWrite(LED_RED, HIGH);
-        digitalWrite(LED_ORANGE, HIGH);
-        digitalWrite(LED_BLUE, HIGH);
-        Serial.println("SD Begin Failed. Stalling Program");
-        while (true) {
-            digitalWrite(LED_RED, HIGH);
-            delay(100);
-            digitalWrite(LED_RED, LOW);
-            delay(100);
-        }
-    }
+    //     char data_name[16] = "data";
+    //     // Initialize SD card
+    //     sensor_pointers.dataloggerTHDVarsPointer.dataFile =
+    //         SD.open(sd_file_namer(data_name, file_extension),
+    //                 O_CREAT | O_WRITE | O_TRUNC);
+    //     // print header to file on sd card that lists each variable that is
+    //     // logged
+    //     sensor_pointers.dataloggerTHDVarsPointer.dataFile.println(
+    //         "binary logging of sensor_data_t");
+    //     sensor_pointers.dataloggerTHDVarsPointer.dataFile.flush();
+    //     //
+    //     Serial.println(sensor_pointers.dataloggerTHDVarsPointer.dataFile.name());
+    // } else {
+    //     digitalWrite(LED_RED, HIGH);
+    //     digitalWrite(LED_ORANGE, HIGH);
+    //     digitalWrite(LED_BLUE, HIGH);
+    //     Serial.println("SD Begin Failed. Stalling Program");
+    //     while (true) {
+    //         digitalWrite(LED_RED, HIGH);
+    //         delay(100);
+    //         digitalWrite(LED_RED, LOW);
+    //         delay(100);
+    //     }
+    // }
 
     digitalWrite(LED_ORANGE, HIGH);
     digitalWrite(LED_BLUE, HIGH);
