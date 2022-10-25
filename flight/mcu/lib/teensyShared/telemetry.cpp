@@ -203,8 +203,8 @@ void Telemetry::buffer_data(const sensorDataStruct_t &sensor_data){
     data.highG_az = inv_convert_range<int16_t>(sensor_data.highG_data.hg_az, 256);
 
     data.gyro_x = inv_convert_range<int16_t>(sensor_data.lowG_data.gx, 8192);
-    data.gyro_x = inv_convert_range<int16_t>(sensor_data.lowG_data.gy, 8192);
-    data.gyro_x = inv_convert_range<int16_t>(sensor_data.lowG_data.gz, 8192);
+    data.gyro_y = inv_convert_range<int16_t>(sensor_data.lowG_data.gy, 8192);
+    data.gyro_z = inv_convert_range<int16_t>(sensor_data.lowG_data.gz, 8192);
 
     data.flap_extension = (uint8_t)sensor_data.flap_data.extension;
     data.barometer_temp = inv_convert_range<uint8_t>(sensor_data.barometer_data.temperature, 128);
