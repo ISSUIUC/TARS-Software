@@ -24,7 +24,7 @@ class HistoryBuffer{
         int endIndex;
     
     public:
-        HistoryBuffer(){
+        HistoryBuffer() {
             frontIndex = 0;
             endIndex = size - 1;
         }
