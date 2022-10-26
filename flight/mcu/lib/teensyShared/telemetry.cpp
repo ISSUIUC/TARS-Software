@@ -147,7 +147,7 @@ void Telemetry::transmit(const sensorDataStruct_t& data_struct) {
     digitalWrite(LED_BLUE, blue_state);
     blue_state = !blue_state;
 
-    TelemetmryPacket packet = make_packet(data_struct);
+    TelemetryPacket packet = make_packet(data_struct);
     rf95.send((uint8_t *)&packet, sizeof(packet));
 
     chThdSleepMilliseconds(170);
@@ -267,8 +267,8 @@ void Telemetry::transmit(const sensorDataStruct_t& data_struct) {
     }
 }
 
-TelemetmryPacket Telemetry::make_packet(const sensorDataStruct_t& data_struct){
-    TelemetmryPacket packet;
+TelemetryPacket Telemetry::make_packet(const sensorDataStruct_t& data_struct){
+    TelemetryPacket packet;
     packet.gps_lat = data_struct.gps_data.latitude;
     packet.gps_long = data_struct.gps_data.longitude;
     packet.gps_alt = data_struct.gps_data.altitude;

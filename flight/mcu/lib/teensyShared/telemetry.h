@@ -34,7 +34,7 @@ struct TelemetryData2 {
     uint8_t barometer_temp; //[0, 128]
 };
 
-struct TelemetmryPacket {
+struct TelemetryPacket {
     TelemetryData2 datapoints[4];
     float gps_lat;
     float gps_long;
@@ -136,5 +136,5 @@ class Telemetry {
     char callsign[8] = "NO SIGN";
     command_handler_struct freq_status = {};
 
-    TelemetmryPacket make_packet(const sensorDataStruct_t&);
+    TelemetryPacket make_packet(const sensorDataStruct_t&);
 };
