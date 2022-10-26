@@ -19,7 +19,7 @@
 #define MAX_CMD_LEN 10
 
 
-struct TelemetryData2 {
+struct TelemetryDataLite {
     systime_t timestamp; //[0, 2^32]
 
     uint16_t barometer_pressure; //[0, 4096]
@@ -35,7 +35,7 @@ struct TelemetryData2 {
 };
 
 struct TelemetryPacket {
-    TelemetryData2 datapoints[4];
+    TelemetryDataLite datapoints[4];
     float gps_lat;
     float gps_long;
     float gps_alt;
@@ -121,7 +121,7 @@ class Telemetry {
     void buffer_data(const sensorDataStruct_t&);
 
    private:
-    FifoBuffer<TelemetryData2, 4> buffered_data;
+    FifoBuffer<TelemetryDataLite, 4> buffered_data;
     int packetnum;
     telemetry_data d;
     RH_RF95 rf95;

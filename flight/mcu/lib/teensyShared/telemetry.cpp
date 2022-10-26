@@ -283,7 +283,7 @@ TelemetryPacket Telemetry::make_packet(const sensorDataStruct_t& data_struct){
     packet.voltage_battery = inv_convert_range<uint8_t>(data_struct.voltage_data.v_battery, 16);
     packet.FSM_State = (uint8_t)data_struct.rocketState_data.rocketState;
 
-    TelemetryData2 data;
+    TelemetryDataLite data;
     for(int i = 0; i < 4 && buffered_data.pop(&data); i++){
         packet.datapoints[i] = data;
         packet.datapoint_count = i;
@@ -292,7 +292,7 @@ TelemetryPacket Telemetry::make_packet(const sensorDataStruct_t& data_struct){
 }
 
 void Telemetry::buffer_data(const sensorDataStruct_t &sensor_data){
-    TelemetryData2 data;
+    TelemetryDataLite data;
     data.timestamp = TIME_I2MS(chVTGetSystemTime());
     data.barometer_pressure = inv_convert_range<uint16_t>(sensor_data.barometer_data.pressure, 4096);
 
