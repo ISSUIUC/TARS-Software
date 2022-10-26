@@ -78,14 +78,29 @@ class HistoryBuffer{
                 //we do arr[index] - arr[index+1] because the lower index is going to be the most recent value, which is why it goes first
                 int currentIndex = (frontIndex + i)%size;
                 int pastIndex = (frontIndex + i+1)%size;
-                firstDiff[i] = (arr[currentIndex] - arr[pastIndex])/((timestampArr[currentIndex]-timestampArr[pastIndex])*0.001);
+
+                if(timestampArr[currentIndex]-timestampArr[pastIndex] != 0){
+                    firstDiff[i] = (arr[currentIndex] - arr[pastIndex])/((timestampArr[currentIndex]-timestampArr[pastIndex])*0.001);
+                }
+                else{
+                    firstDiff[i] = (arr[currentIndex] - arr[pastIndex])/(0.02);
+                }
+                
             }
 
             //we want to get acceleration from velocity, so we do the same thing but this time with the velocity array
             //the new array with be length 49-1
             float secondDiff[(size/2)-2];
             for(int i = 0; i < (size/2)-2; i++){
-                secondDiff[i] = (firstDiff[i] - firstDiff[i+1])/((timestampArr[(frontIndex + i)%size]-timestampArr[(frontIndex + i+1)%size])*0.001);
+                if(timestampArr[(frontIndex + i)%size]-timestampArr[(frontIndex + i+1)%size] != 0){
+                    if(timestampArr[(frontIndex + i)%size]-timestampArr[(frontIndex + i+1)%size] != 0){
+                        secondDiff[i] = (firstDiff[i] - firstDiff[i+1])/((timestampArr[(frontIndex + i)%size]-timestampArr[(frontIndex + i+1)%size])*0.001);
+                    }
+                    else{
+                        secondDiff[i] = (firstDiff[i] - firstDiff[i+1])/(0.02);
+                    }
+                }
+
             }
 
             //we then calculate the average of the acceleration array
@@ -102,12 +117,22 @@ class HistoryBuffer{
             for(int i = size/2; i < size-1; i++){
                 int currentIndex = (frontIndex + i)%size;
                 int pastIndex = (frontIndex + i+1)%size;
-                firstDiff[i-(size/2)] = (arr[currentIndex] - arr[pastIndex])/((timestampArr[currentIndex]-timestampArr[pastIndex])*0.001);
+                if(timestampArr[currentIndex]-timestampArr[pastIndex] != 0){
+                    firstDiff[i-(size/2)] = (arr[currentIndex] - arr[pastIndex])/((timestampArr[currentIndex]-timestampArr[pastIndex])*0.001);
+                }
+                else{
+                    firstDiff[i-(size/2)] = (arr[currentIndex] - arr[pastIndex])/(0.02);
+                }
             }
 
             float secondDiff[(size/2)-2];
             for(int i = 0; i < (size/2)-2; i++){
-                secondDiff[i] = (firstDiff[i] - firstDiff[i+1])/((timestampArr[(frontIndex + i)%size]-timestampArr[(frontIndex + i+1)%size])*0.001);
+                if(timestampArr[(frontIndex + i)%size]-timestampArr[(frontIndex + i+1)%size] != 0){
+                    secondDiff[i] = (firstDiff[i] - firstDiff[i+1])/((timestampArr[(frontIndex + i)%size]-timestampArr[(frontIndex + i+1)%size])*0.001);
+                }
+                else{
+                    secondDiff[i] = (firstDiff[i] - firstDiff[i+1])/(0.02);
+                }
             }
     
             float avg = 0.0;

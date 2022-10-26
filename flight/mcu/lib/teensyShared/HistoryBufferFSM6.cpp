@@ -257,8 +257,9 @@ void HistoryBufferFSM6::tickFSM() {
             main_timer_ = chVTGetSystemTime() - main_time_;
 
             if(TIME_I2MS(main_timer_) > refresh_timer){
-                if (fabs((*IMU_acceleration_history_ptr_).getCurrentAverage() - (*IMU_acceleration_history_ptr_).getPastAverage()) > landing_imu_threshold) {
+                if (fabs((*altitude_history_ptr_).getCurrentAverage() - (*altitude_history_ptr_).getPastAverage()) < landing_altimeter_threshold) {
                     rocket_state_ = FSM_State::STATE_LANDED_DETECT;
+                    landing_time_ = chVTGetSystemTime();
                     break;
                 }
             }
@@ -274,14 +275,20 @@ void HistoryBufferFSM6::tickFSM() {
             break;
 
         case FSM_State::STATE_LANDED_DETECT:
-            if (fabs((*altitude_history_ptr_).getCurrentAverage() - (*altitude_history_ptr_).getPastAverage())< landing_altimeter_threshold) { // this average will be close to zero
-                    rocket_state_ = FSM_State::STATE_LANDED;
-                    break;
+            // If the 0 velocity was too brief, go back to main
+            if (fabs((*altitude_history_ptr_).getCurrentAverage() - (*altitude_history_ptr_).getPastAverage()) > landing_altimeter_threshold) {
+                rocket_state_ = FSM_State::STATE_MAIN;
+                break;
             }
 
-            else{
-                rocket_state_ = FSM_State::STATE_MAIN;
+            // Measure the length of the landed time (for hysteresis)
+            landing_timer = chVTGetSystemTime() - landing_time_;
+
+            // If the low velocity lasts long enough, landing is detected
+            if (TIME_I2MS(landing_timer) > landing_time_thresh) {
+                rocket_state_ = FSM_State::STATE_LANDED;
             }
+
             break;
 
         case FSM_State::STATE_LANDED:
