@@ -28,7 +28,7 @@ KalmanFilter::KalmanFilter(struct pointers* pointer_struct) {
  *
  */
 void KalmanFilter::kfTickFunction() {
-    if (*current_state_ > STATE_IDLE) {
+    if (*current_state_ > RocketFSM::FSM_State::STATE_IDLE) {
         priori();
         update();
     }
