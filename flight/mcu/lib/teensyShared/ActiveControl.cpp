@@ -17,7 +17,7 @@ Controller::Controller(struct pointers* pointer_struct,
     controller_servo_ = controller_servo;
     stateData_ = &pointer_struct->sensorDataPointer->state_data;
     current_state =
-        &pointer_struct->sensorDataPointer->rocketState_data.rocketState;
+        &pointer_struct->sensorDataPointer->rocketState_data.rocketStates[0];
     b_alt = &pointer_struct->sensorDataPointer->barometer_data.altitude;
     dataMutex_barometer_ =
         &pointer_struct->dataloggerTHDVarsPointer.dataMutex_barometer;

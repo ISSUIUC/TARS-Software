@@ -62,9 +62,16 @@ class RocketFSM {
  * @brief Structure for all values related to rocket state
  *
  */
+template <size_t count>
 struct rocketStateData {
-    RocketFSM::FSM_State rocketState = RocketFSM::FSM_State::STATE_INIT;
+    RocketFSM::FSM_State rocketStates[count];
     systime_t timeStamp_RS = 0;
+
+    rocketStateData() : rocketStates() {
+        for (size_t i = 0; i < count; i++) {
+            rocketStates[i] = RocketFSM::FSM_State::STATE_INIT;
+        }
+    }
 };
 
 #endif

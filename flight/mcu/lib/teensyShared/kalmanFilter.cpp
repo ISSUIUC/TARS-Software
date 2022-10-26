@@ -20,7 +20,7 @@ KalmanFilter::KalmanFilter(struct pointers* pointer_struct) {
     stateData_ = &pointer_struct->sensorDataPointer->state_data;
     data_logger_ = &pointer_struct->dataloggerTHDVarsPointer;
     current_state_ =
-        &pointer_struct->sensorDataPointer->rocketState_data.rocketState;
+        &pointer_struct->sensorDataPointer->rocketState_data.rocketStates[0];  // TODO use all rocket states?
 }
 
 /**
