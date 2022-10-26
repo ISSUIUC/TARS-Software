@@ -1,4 +1,4 @@
-/* main.cpp
+/** @file main.cpp
  *   ______  ___     ___    ____
  *  /_  __/ / _ |   / _ \  / __/
  *   / /   / __ |  / , _/ _\ \
@@ -32,11 +32,13 @@
 #include <Wire.h>
 
 #include "ActiveControl.h"
+#include "FSMCollection.h"
 #include "MS5611.h"  //Barometer library
 #include "ServoControl.h"
 #include "SparkFunLSM9DS1.h"                       //Low-G IMU Library
 #include "SparkFun_Qwiic_KX13X.h"                  //High-G IMU Library
 #include "SparkFun_u-blox_GNSS_Arduino_Library.h"  //GPS Library
+#include "TimerFSM.h"
 #include "dataLog.h"
 #include "kalmanFilter.h"
 #include "pins.h"
@@ -115,9 +117,17 @@ static THD_FUNCTION(telemetry_sending_THD, arg) {
 /* ROCKET FINITE STATE MACHINE THREAD                                         */
 
 static THD_FUNCTION(rocket_FSM, arg) {
-    struct pointers *pointer_struct = (struct pointers *)arg;
+    pointers *pointer_struct = (struct pointers *)arg;
 
-    static rocketFSM stateMachine(pointer_struct);
+    // Implement RocketFSM class and instantiate it here
+    // Refer to TemplateFSM for an example
+    TimerFSM stateMachine(pointer_struct);
+
+    // Add FSM pointer to array of FSMs to be updated
+    RocketFSM *fsm_array[] = {&stateMachine};
+
+    // Pass array of FSMs to FSMCollection along with number of FSMs in use
+    FSMCollection fsms(fsm_array, 1);
 
     while (true) {
 #ifdef THREAD_DEBUG
@@ -126,9 +136,18 @@ static THD_FUNCTION(rocket_FSM, arg) {
 
         chMtxLock(
             &pointer_struct->dataloggerTHDVarsPointer.dataMutex_rocket_state);
-        stateMachine.tickFSM();
+
+        fsms.tick();
+
         chMtxUnlock(
             &pointer_struct->dataloggerTHDVarsPointer.dataMutex_rocket_state);
+
+        rocketStateData fsm_state;
+        fsms.getStates(&fsm_state);
+        Serial.println((int)fsm_state.rocketState);
+        pointer_struct->sensorDataPointer->rocketState_data = fsm_state;
+        pointer_struct->dataloggerTHDVarsPointer.pushRocketStateFifo(
+            &fsm_state);
 
         chThdSleepMilliseconds(6);  // FSM runs at 100 Hz
     }
@@ -440,33 +459,34 @@ void setup() {
     // Telemetry tlm;
     // sensor_pointers.telemetry = &tlm;   
     // SD Card Setup
-    // if (SD.begin(BUILTIN_SDCARD)) {
-    //     char file_extension[6] = ".dat";
+    if (SD.begin(BUILTIN_SDCARD)) {
+        char file_extension[6] = ".dat";
 
-    //     char data_name[16] = "data";
-    //     // Initialize SD card
-    //     sensor_pointers.dataloggerTHDVarsPointer.dataFile =
-    //         SD.open(sd_file_namer(data_name, file_extension),
-    //                 O_CREAT | O_WRITE | O_TRUNC);
-    //     // print header to file on sd card that lists each variable that is
-    //     // logged
-    //     sensor_pointers.dataloggerTHDVarsPointer.dataFile.println(
-    //         "binary logging of sensor_data_t");
-    //     sensor_pointers.dataloggerTHDVarsPointer.dataFile.flush();
-    //     //
-    //     Serial.println(sensor_pointers.dataloggerTHDVarsPointer.dataFile.name());
-    // } else {
-    //     digitalWrite(LED_RED, HIGH);
-    //     digitalWrite(LED_ORANGE, HIGH);
-    //     digitalWrite(LED_BLUE, HIGH);
-    //     Serial.println("SD Begin Failed. Stalling Program");
-    //     while (true) {
-    //         digitalWrite(LED_RED, HIGH);
-    //         delay(100);
-    //         digitalWrite(LED_RED, LOW);
-    //         delay(100);
-    //     }
-    // }
+        char data_name[16] = "data";
+        // Initialize SD card
+        sensor_pointers.dataloggerTHDVarsPointer.dataFile =
+            SD.open(sd_file_namer(data_name, file_extension),
+                    O_CREAT | O_WRITE | O_TRUNC);
+        // print header to file on sd card that lists each variable that is
+        // logged
+        sensor_pointers.dataloggerTHDVarsPointer.dataFile.println(
+            "binary logging of sensor_data_t");
+        sensor_pointers.dataloggerTHDVarsPointer.dataFile.flush();
+        //
+        Serial.println(
+            sensor_pointers.dataloggerTHDVarsPointer.dataFile.name());
+    } else {
+        digitalWrite(LED_RED, HIGH);
+        digitalWrite(LED_ORANGE, HIGH);
+        digitalWrite(LED_BLUE, HIGH);
+        Serial.println("SD Begin Failed. Stalling Program");
+        while (true) {
+            digitalWrite(LED_RED, HIGH);
+            delay(100);
+            digitalWrite(LED_RED, LOW);
+            delay(100);
+        }
+    }
 
     digitalWrite(LED_ORANGE, HIGH);
     digitalWrite(LED_BLUE, HIGH);

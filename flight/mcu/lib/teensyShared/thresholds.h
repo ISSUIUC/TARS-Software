@@ -23,7 +23,7 @@ static const float coast_thresh = 0.5;
 static const float coast_to_apogee_time_thresh = 26300;
 
 // For preventing AC from actuating even when in coast state
-static const float coast_ac_delay_thresh = 15000;
+static const float coast_ac_delay_thresh = 1000;
 
 // Rocket won't leave boost state until burn_timer has exceeded this limit
 static const int burn_time_thresh_ms = 5000;

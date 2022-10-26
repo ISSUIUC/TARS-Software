@@ -25,7 +25,7 @@ class KalmanFilter {
     mutex_t* dataMutex_barometer_;
     mutex_t* dataMutex_state_;
     stateData* stateData_;
-    FSM_State* current_state_;
+    RocketFSM::FSM_State* current_state_;
     float* b_alt;
     float* gz_L;
     float* gz_H;
