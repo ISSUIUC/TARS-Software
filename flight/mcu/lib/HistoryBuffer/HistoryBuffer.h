@@ -107,7 +107,7 @@ class HistoryBuffer{
                 
                 avg += secondDiff[i];
             }
-            return((avg/float(((size/2)-2)))/9.81); 
+            return(avg/float(((size/2)-2))); 
         }
 
         float getPastSecondDerivativeAverage(){
@@ -138,7 +138,7 @@ class HistoryBuffer{
             for(unsigned i = 0; i < (size/2)-2; i++){
                 avg += secondDiff[i];
             }
-            return((avg/float(((size/2)-2)))/9.81); 
+            return(avg/float(((size/2)-2))); 
         }
 };
 #endif

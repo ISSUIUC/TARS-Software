@@ -39,12 +39,12 @@ static const float apogee_altimeter_threshold = 0.5;
 // some number greater than 0 to represent a drastic change in acceleration being detected to put us into drogue:
 static const float drogue_acceleration_change_threshold_imu = 0.04;
 
-static const float drogue_acceleration_change_threshold_altimeter = 1.02;
+static const float drogue_acceleration_change_threshold_altimeter = 10.01;
 
 // some number greater than 0 to represent a drastic change in acceleration being detected to put us into main:
 static const float main_acceleration_change_threshold_imu = 1.53;
 
-static const float main_acceleration_change_threshold_altimeter = 2.55;
+static const float main_acceleration_change_threshold_altimeter = 25.02;
 
 // how long before we force droge deploy
 static const float drogue_deploy_time_since_apogee_threshold = 3000;
