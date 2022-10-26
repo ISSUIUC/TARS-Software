@@ -259,13 +259,13 @@ void HistoryBufferFSM50::tickFSM() {
         case FSM_State::STATE_MAIN:
             main_timer_ = chVTGetSystemTime() - main_time_;
 
-            if(TIME_I2MS(main_timer_) > refresh_timer){
-                if (fabs((*altitude_history_ptr_).getCurrentAverage() - (*altitude_history_ptr_).getPastAverage()) < landing_altimeter_threshold) {
-                    rocket_state_ = FSM_State::STATE_LANDED_DETECT;
-                    landing_time_ = chVTGetSystemTime();
-                    break;
-                }
+
+            if (fabs((*altitude_history_ptr_).getCurrentAverage() - (*altitude_history_ptr_).getPastAverage()) < landing_altimeter_threshold) {
+                rocket_state_ = FSM_State::STATE_LANDED_DETECT;
+                landing_time_ = chVTGetSystemTime();
+                break;
             }
+            
             
             if (TIME_I2MS(main_timer_) < main_deploy_time_since_drogue_threshold) {
                 rocket_state_ = FSM_State::STATE_MAIN;

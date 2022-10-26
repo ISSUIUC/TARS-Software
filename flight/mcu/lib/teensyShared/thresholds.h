@@ -13,7 +13,7 @@ static const float coast_time_thresh = 300;
 //transition from coast to apogee if low velocity detected for 100ms
 static const float apogee_time_thresh = 100;
 
-static const float landing_time_thresh = 500;
+static const float landing_time_thresh = 1000;
 
 // 2 gs for launch detect
 static const float launch_linear_acceleration_thresh = 2;
@@ -25,10 +25,10 @@ static const float launch_time_thresh = 20;
 static const float coast_thresh = 0.5;
 
 // Switch to apogee state after 40 seconds
-static const float coast_to_apogee_time_thresh = 32000;
+static const float coast_to_apogee_time_thresh = 26300;
 
 // For preventing GNC flaps from actuating even when in coast state
-static const float coast_ac_delay_thresh = 2000;
+static const float coast_ac_delay_thresh = 1000;
 
 // Rocket will leave boost state when burn_timer has exceeded this limit
 static const int burn_time_thresh_ms = 5200;

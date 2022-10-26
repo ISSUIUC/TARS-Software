@@ -85,14 +85,7 @@ void Controller::ctrlTickFunction(pointers* pointer_struct) {
         pointer_struct->sensorDataPointer->flap_data.extension = u;
 
     } else {
-        if (pointer_struct->sensorDataPointer->rocketState_data.rocketState ==
-            RocketFSM::FSM_State::STATE_APOGEE) {
-            activeControlServos.servoActuation(0);
-            pointer_struct->sensorDataPointer->flap_data.extension = 0;
-        } else {
-            activeControlServos.servoActuation(15);
-            pointer_struct->sensorDataPointer->flap_data.extension = 15;
-        }
+        activeControlServos.servoActuation(0);
     }
 }
 
