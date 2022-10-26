@@ -31,7 +31,7 @@ class Controller {
 
     float launch_pad_alt;
     float apogee_des_msl;
-    float apogee_des_agl = 9144;
+    float apogee_des_agl = 3962;
 
     float* b_alt;
     mutex_t* dataMutex_barometer_;

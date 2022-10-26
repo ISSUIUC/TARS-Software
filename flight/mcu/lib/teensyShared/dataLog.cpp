@@ -170,6 +170,9 @@ bool DataLogBuffer::popLowGFifo(LowGData* lowG_Data) {
 }
 
 bool DataLogBuffer::pushHighGFifo(HighGData* highG_Data) {
+    // Also push a copy to the IMU acceleration history fifo buffer:
+    IMU_acceleration_history_50.push(highG_Data->hg_az, highG_Data->timeStamp_highG);
+    IMU_acceleration_history_6.push(highG_Data->hg_az, highG_Data->timeStamp_highG);
     return highGFifo.push(*highG_Data);
 }
 
@@ -186,6 +189,8 @@ bool DataLogBuffer::popGpsFifo(GpsData* gps_Data) {
 }
 
 bool DataLogBuffer::pushStateFifo(stateData* state_data) {
+    gnc_altitude_history_6.push(state_data->state_x, state_data->timeStamp_state);
+    gnc_IMU_acceleration_history_6.push(state_data->state_ax, state_data->timeStamp_state);
     return stateFifo.push(*state_data);
 }
 
@@ -194,6 +199,9 @@ bool DataLogBuffer::popStateFifo(stateData* state_data) {
 }
 
 bool DataLogBuffer::pushBarometerFifo(BarometerData* barometer_data) {
+    // Also push a copy to the alititude history fifo buffer:
+    altitude_history_50.push(barometer_data->altitude, barometer_data->timeStamp_barometer);
+    altitude_history_6.push(barometer_data->altitude, barometer_data->timeStamp_barometer);
     return barometerFifo.push(*barometer_data);
 }
 
@@ -201,11 +209,11 @@ bool DataLogBuffer::popBarometerFifo(BarometerData* barometer_data) {
     return barometerFifo.pop(barometer_data);
 }
 
-bool DataLogBuffer::pushRocketStateFifo(rocketStateData* rocket_data) {
+bool DataLogBuffer::pushRocketStateFifo(rocketStateData<4>* rocket_data) {
     return rocketStateFifo.push(*rocket_data);
 }
 
-bool DataLogBuffer::popRocketStateFifo(rocketStateData* rocket_data) {
+bool DataLogBuffer::popRocketStateFifo(rocketStateData<4>* rocket_data) {
     return rocketStateFifo.pop(rocket_data);
 }
 

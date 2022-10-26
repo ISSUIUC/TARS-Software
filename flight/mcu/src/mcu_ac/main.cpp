@@ -39,6 +39,9 @@
 #include "SparkFun_Qwiic_KX13X.h"                  //High-G IMU Library
 #include "SparkFun_u-blox_GNSS_Arduino_Library.h"  //GPS Library
 #include "TimerFSM.h"
+#include "HistoryBufferFSM50.h"
+#include "HistoryBufferFSM6.h"
+#include "KalmanFSM.h"
 #include "dataLog.h"
 #include "kalmanFilter.h"
 #include "pins.h"
@@ -105,13 +108,16 @@ static THD_FUNCTION(rocket_FSM, arg) {
 
     // Implement RocketFSM class and instantiate it here
     // Refer to TemplateFSM for an example
-    TimerFSM stateMachine(pointer_struct);
+    TimerFSM timer_fsm(pointer_struct);
+    HistoryBufferFSM50 history_buffer_fsm_50(pointer_struct);
+    HistoryBufferFSM6 history_buffer_fsm_6(pointer_struct);
+    KalmanFSM kalman_fsm(pointer_struct);
 
     // Add FSM pointer to array of FSMs to be updated
-    RocketFSM *fsm_array[] = {&stateMachine};
+    RocketFSM *fsm_array[] = {&timer_fsm, &history_buffer_fsm_50, &history_buffer_fsm_6, &kalman_fsm};
 
     // Pass array of FSMs to FSMCollection along with number of FSMs in use
-    FSMCollection fsms(fsm_array, 1);
+    FSMCollection<4> fsms(fsm_array);
 
     while (true) {
 #ifdef THREAD_DEBUG
@@ -126,9 +132,11 @@ static THD_FUNCTION(rocket_FSM, arg) {
         chMtxUnlock(
             &pointer_struct->dataloggerTHDVarsPointer.dataMutex_rocket_state);
 
-        rocketStateData fsm_state;
-        fsms.getStates(&fsm_state);
-        Serial.println((int)fsm_state.rocketState);
+        rocketStateData<4> fsm_state;
+        fsms.getStates(fsm_state);
+        for (size_t i = 0; i < 4; i++) {
+            Serial.println((int) fsm_state.rocketStates[i]);
+        }
         pointer_struct->sensorDataPointer->rocketState_data = fsm_state;
         pointer_struct->dataloggerTHDVarsPointer.pushRocketStateFifo(
             &fsm_state);
