@@ -284,6 +284,7 @@ TelemetryPacket Telemetry::make_packet(const sensorDataStruct_t& data_struct){
     packet.FSM_State = (uint8_t)data_struct.rocketState_data.rocketState;
 
     TelemetryDataLite data;
+    packet.datapoint_count = 0;
     for(int i = 0; i < 4 && buffered_data.pop(&data); i++){
         packet.datapoints[i] = data;
         packet.datapoint_count = i + 1;
