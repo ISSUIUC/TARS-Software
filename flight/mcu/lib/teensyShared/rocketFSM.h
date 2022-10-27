@@ -5,7 +5,6 @@
 // #include "sensors.h"
 #include <ChRt.h>
 #include <stdint.h>
-#include <map>
 
 // forward declare pointers
 struct pointers;
