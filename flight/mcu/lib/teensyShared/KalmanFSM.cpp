@@ -179,7 +179,7 @@ void KalmanFSM::tickFSM() {
 
         case FSM_State::STATE_APOGEE_DETECT:
             // If the 0 velocity was too brief, go back to coast
-            if (fabs((*altitude_history_ptr_).getCurrentAverage() - (*altitude_history_ptr_).getPastAverage()) > apogee_altimeter_threshold) {
+            if (fabs(gnc_state_ptr_->state_vx)*0.02 > apogee_altimeter_threshold) {
                 rocket_state_ = FSM_State::STATE_COAST_GNC;
                 break;
             }
