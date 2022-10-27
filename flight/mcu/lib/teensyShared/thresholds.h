@@ -19,7 +19,7 @@ static const float landing_time_thresh = 1000;
 static const float launch_linear_acceleration_thresh = 3;
 
 // Required time of detected acceleration to switch to boost
-static const float launch_time_thresh = 300;
+static const float launch_time_thresh = 250;
 
 // If we observe less than 0.5 g of accel, transition to coast
 static const float coast_thresh = 0.5;

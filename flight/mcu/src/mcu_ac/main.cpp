@@ -271,6 +271,9 @@ static THD_FUNCTION(kalman_THD, arg) {
     KF.Initialize();
 
     while (true) {
+        // #ifdef THREAD_DEBUG
+        //     Serial.println("In Kalman");
+        // #endif
         KF.kfTickFunction();
         // Serial.println("kalman");
         Serial.println(pointer_struct->sensorDataPointer->state_data.state_x);
@@ -480,10 +483,11 @@ void setup() {
         sensor_pointers.dataloggerTHDVarsPointer.dataFile =
             SD.open(sd_file_namer(data_name, file_extension),
                     O_CREAT | O_WRITE | O_TRUNC);
+
         // print header to file on sd card that lists each variable that is
         // logged
-        sensor_pointers.dataloggerTHDVarsPointer.dataFile.println(
-            "binary logging of sensor_data_t");
+        // auto written = sensor_pointers.dataloggerTHDVarsPointer.dataFile.println(
+        //     "binary logging of sensor_data_t");
         sensor_pointers.dataloggerTHDVarsPointer.dataFile.flush();
         //
         Serial.println(
@@ -497,7 +501,7 @@ void setup() {
             digitalWrite(LED_RED, HIGH);
             delay(100);
             digitalWrite(LED_RED, LOW);
-            delay(100);
+            delay(100); 
         }
     }
 

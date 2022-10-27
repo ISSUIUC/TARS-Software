@@ -30,7 +30,7 @@ Controller::Controller(struct pointers* pointer_struct,
      * experimentally determined to be the position in which
      * the flaps are perfectly flush with the airframe.
      */
-    controller_servo_->write(130);
+    controller_servo_->write(120);
     chThdSleepMilliseconds(1000);
     controller_servo_->write(10);
     chThdSleepMilliseconds(1000);
