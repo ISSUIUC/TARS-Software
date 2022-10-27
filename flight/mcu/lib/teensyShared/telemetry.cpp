@@ -286,7 +286,7 @@ TelemetryPacket Telemetry::make_packet(const sensorDataStruct_t& data_struct){
     TelemetryDataLite data;
     for(int i = 0; i < 4 && buffered_data.pop(&data); i++){
         packet.datapoints[i] = data;
-        packet.datapoint_count = i;
+        packet.datapoint_count = i + 1;
     }
     return packet;
 }
