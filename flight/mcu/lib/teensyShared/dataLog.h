@@ -12,6 +12,7 @@
 #include "SparkFun_u-blox_GNSS_Arduino_Library.h"
 #include "VoltageSensor.h"
 #include "rocketFSM.h"
+#include "HistoryBuffer.h"
 // #include "acShared.h"
 // #include "dataStructs.h"
 
@@ -119,7 +120,7 @@ struct sensorDataStruct_t {
 
     // Rocket State
     bool has_rocketState_data;
-    rocketStateData rocketState_data;
+    rocketStateData<4> rocketState_data;
 
     // Flap state
     bool has_flap_data;
@@ -148,7 +149,7 @@ class DataLogBuffer {
     FifoBuffer<HighGData, FIFO_SIZE> highGFifo{};
     FifoBuffer<GpsData, FIFO_SIZE> gpsFifo{};
     FifoBuffer<stateData, FIFO_SIZE> stateFifo{};
-    FifoBuffer<rocketStateData, FIFO_SIZE> rocketStateFifo{};
+    FifoBuffer<rocketStateData<4>, FIFO_SIZE> rocketStateFifo{};
     FifoBuffer<FlapData, FIFO_SIZE> flapFifo{};
     FifoBuffer<VoltageData, FIFO_SIZE> voltageFifo{};
     FifoBuffer<BarometerData, FIFO_SIZE> barometerFifo{};
@@ -162,6 +163,15 @@ class DataLogBuffer {
     MUTEX_DECL(dataMutex_rocket_state);
     MUTEX_DECL(dataMutex_voltage);
     MUTEX_DECL(dataMutex_state);
+
+    HistoryBuffer<50> altitude_history_50 = HistoryBuffer<50>();
+    HistoryBuffer<50> IMU_acceleration_history_50 = HistoryBuffer<50>();
+
+    HistoryBuffer<6> altitude_history_6 = HistoryBuffer<6>();
+    HistoryBuffer<6> IMU_acceleration_history_6 = HistoryBuffer<6>();
+
+    HistoryBuffer<6> gnc_altitude_history_6 = HistoryBuffer<6>();
+    HistoryBuffer<6> gnc_IMU_acceleration_history_6 = HistoryBuffer<6>();
 
     sensorDataStruct_t current_data;
 
@@ -179,8 +189,8 @@ class DataLogBuffer {
     bool pushStateFifo(stateData* state_data);
     bool popStateFifo(stateData* state_data);
 
-    bool pushRocketStateFifo(rocketStateData* rocket_data);
-    bool popRocketStateFifo(rocketStateData* rocket_data);
+    bool pushRocketStateFifo(rocketStateData<4>* rocket_data);
+    bool popRocketStateFifo(rocketStateData<4>* rocket_data);
 
     bool pushBarometerFifo(BarometerData* barometer_data);
     bool popBarometerFifo(BarometerData* barometer_data);

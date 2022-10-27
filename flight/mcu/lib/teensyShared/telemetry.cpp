@@ -147,6 +147,7 @@ void Telemetry::transmit(const sensorDataStruct_t& data_struct) {
     digitalWrite(LED_BLUE, blue_state);
     blue_state = !blue_state;
 
+
     TelemetryPacket packet = make_packet(data_struct);
     rf95.send((uint8_t *)&packet, sizeof(packet));
 
