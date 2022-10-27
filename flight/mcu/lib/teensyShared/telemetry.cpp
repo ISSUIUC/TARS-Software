@@ -282,7 +282,7 @@ TelemetryPacket Telemetry::make_packet(const sensorDataStruct_t& data_struct){
     packet.response_ID = last_command_id;
     packet.rssi = rf95.lastRssi();
     packet.voltage_battery = inv_convert_range<uint8_t>(data_struct.voltage_data.v_battery, 16);
-    packet.FSM_State = (uint8_t)data_struct.rocketState_data.rocketState;
+    packet.FSM_State = (uint8_t)data_struct.rocketState_data.rocketStates[0];
 
     TelemetryDataLite data;
     packet.datapoint_count = 0;

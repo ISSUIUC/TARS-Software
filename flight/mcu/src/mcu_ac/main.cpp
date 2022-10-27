@@ -266,11 +266,14 @@ static THD_FUNCTION(gps_THD, arg) {
 
 static THD_FUNCTION(kalman_THD, arg) {
     struct pointers *pointer_struct = (struct pointers *)arg;
+    
     KalmanFilter KF(pointer_struct);
     KF.Initialize();
 
     while (true) {
         KF.kfTickFunction();
+        // Serial.println("kalman");
+        Serial.println(pointer_struct->sensorDataPointer->state_data.state_x);
 
         chThdSleepMilliseconds(50);
     }

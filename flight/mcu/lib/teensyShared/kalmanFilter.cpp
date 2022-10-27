@@ -28,7 +28,7 @@ KalmanFilter::KalmanFilter(struct pointers* pointer_struct) {
  *
  */
 void KalmanFilter::kfTickFunction() {
-    if (*current_state_ > RocketFSM::FSM_State::STATE_IDLE) {
+    if (*current_state_ >= RocketFSM::FSM_State::STATE_IDLE) {
         priori();
         update();
     }
@@ -112,7 +112,7 @@ void KalmanFilter::Initialize() {
 
     // set R
     R(0, 0) = 2.0;
-    R(1, 1) = 0.01;
+    R(1, 1) = 0.1;
     // R(0,0) = 2.;
     // R(1,1) = .01;
 
@@ -153,6 +153,10 @@ void KalmanFilter::priori() {
  *
  */
 void KalmanFilter::update() {
+    if (*current_state_ >= RocketFSM::FSM_State::STATE_APOGEE) {
+        H(1, 2) = 0;
+    }
+
     Eigen::Matrix<float, 2, 2> temp = Eigen::Matrix<float, 2, 2>::Zero();
     temp = (((H * P_priori * H.transpose()) + R)).inverse();
     Eigen::Matrix<float, 3, 3> identity =
@@ -161,7 +165,7 @@ void KalmanFilter::update() {
 
     // Sensor Measurements
     chMtxLock(mutex_highG_);
-    y_k(1, 0) = (*gz_H) * 9.81;
+    y_k(1, 0) = ((*gz_H) * 9.81) - 9.81;
     chMtxUnlock(mutex_highG_);
 
     chMtxLock(dataMutex_barometer_);
