@@ -360,8 +360,8 @@ void chSetup() {
                       highgIMU_THD, &sensor_pointers);
     chThdCreateStatic(servo_WA, sizeof(servo_WA), NORMALPRIO + 1, servo_THD,
                       &sensor_pointers);
-    // chThdCreateStatic(dataLogger_WA, sizeof(dataLogger_WA), NORMALPRIO + 1,
-    //                   dataLogger_THD, &sensor_pointers);
+    chThdCreateStatic(dataLogger_WA, sizeof(dataLogger_WA), NORMALPRIO + 1,
+                      dataLogger_THD, &sensor_pointers);
     chThdCreateStatic(voltage_WA, sizeof(voltage_WA), NORMALPRIO + 1,
                       voltage_THD, &sensor_pointers);
     chThdCreateStatic(kalman_WA, sizeof(kalman_WA), NORMALPRIO + 1, kalman_THD,

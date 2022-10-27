@@ -33,7 +33,6 @@
 #include "thresholds.h"
 
 #include <cmath>
-#include <map>
 
 /**
  * @brief Constructor for KalmanFSM class
