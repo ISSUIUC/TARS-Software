@@ -134,9 +134,11 @@ static THD_FUNCTION(rocket_FSM, arg) {
 
         rocketStateData<4> fsm_state;
         fsms.getStates(fsm_state);
-        for (size_t i = 0; i < 4; i++) {
-            Serial.println((int) fsm_state.rocketStates[i]);
-        }
+        // for (size_t i = 2; i < 3; i++) {
+        //     Serial.print(i);
+        //     Serial.print(": ");
+        //     Serial.println((int) fsm_state.rocketStates[i]);
+        // }
         pointer_struct->sensorDataPointer->rocketState_data = fsm_state;
         pointer_struct->dataloggerTHDVarsPointer.pushRocketStateFifo(
             &fsm_state);

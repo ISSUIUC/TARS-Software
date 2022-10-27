@@ -16,10 +16,10 @@ static const float apogee_time_thresh = 100;
 static const float landing_time_thresh = 1000;
 
 // 2 gs for launch detect
-static const float launch_linear_acceleration_thresh = 2;
+static const float launch_linear_acceleration_thresh = 3;
 
 // Required time of detected acceleration to switch to boost
-static const float launch_time_thresh = 20;
+static const float launch_time_thresh = 300;
 
 // If we observe less than 0.5 g of accel, transition to coast
 static const float coast_thresh = 0.5;
@@ -37,7 +37,8 @@ static const int burn_time_thresh_ms = 5200;
 static const float apogee_altimeter_threshold = 0.5;
 
 // some number greater than 0 to represent a drastic change in acceleration being detected to put us into drogue:
-static const float drogue_acceleration_change_threshold_imu = 0.04;
+static const float drogue_acceleration_change_threshold_imu = 0.15;
+
 
 static const float drogue_acceleration_change_threshold_altimeter = 10.01;
 
@@ -47,7 +48,7 @@ static const float main_acceleration_change_threshold_imu = 1.53;
 static const float main_acceleration_change_threshold_altimeter = 25.02;
 
 // how long before we force droge deploy
-static const float drogue_deploy_time_since_apogee_threshold = 3000;
+static const float drogue_deploy_time_since_apogee_threshold = 10000;
 
 //how long before we force main deploy
 static const float main_deploy_time_since_drogue_threshold = 105000;
