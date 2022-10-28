@@ -30,8 +30,8 @@ void ServoControl::roundOffAngle(float& value) {
         value = 130;
     }
     // Max Extension Angle Value
-    if (value < 0) {
-        value = 0;
+    if (value < 12) {
+        value = 12;
     }
 
     value = std::round(value);

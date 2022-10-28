@@ -32,7 +32,7 @@ Controller::Controller(struct pointers* pointer_struct,
      */
     controller_servo_->write(120);
     chThdSleepMilliseconds(1000);
-    controller_servo_->write(10);
+    controller_servo_->write(12);
     chThdSleepMilliseconds(1000);
 
     setLaunchPadElevation();

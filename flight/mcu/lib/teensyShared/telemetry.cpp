@@ -16,16 +16,14 @@
 // #define SERIAL_PLOTTING
 
 #include <telemetry.h>
-
 #include <limits>
 
-template <typename T>
-T inv_convert_range(float val, float range) {
-    size_t numeric_range = (int64_t)std::numeric_limits<T>::max() -
-                           (int64_t)std::numeric_limits<T>::min() + 1;
-    float converted = val * (float)numeric_range / range;
-    return std::max(std::min((float)std::numeric_limits<T>::max(), converted),
-                    (float)std::numeric_limits<T>::min());
+
+template<typename T>
+T inv_convert_range(float val, float range){
+  size_t numeric_range = (int64_t)std::numeric_limits<T>::max() - (int64_t)std::numeric_limits<T>::min() + 1;
+  float converted = val * (float)numeric_range / range;
+  return std::max(std::min((float)std::numeric_limits<T>::max(), converted), (float)std::numeric_limits<T>::min());
 }
 
 Telemetry::Telemetry() : rf95(RFM95_CS, RFM95_INT) {
@@ -144,10 +142,11 @@ void Telemetry::handle_command(const telemetry_command &cmd) {
  *
  * @return void
  */
-void Telemetry::transmit(const sensorDataStruct_t &data_struct) {
+void Telemetry::transmit(const sensorDataStruct_t& data_struct) {
     static bool blue_state = false;
     digitalWrite(LED_BLUE, blue_state);
     blue_state = !blue_state;
+
 
     TelemetryPacket packet = make_packet(data_struct);
     rf95.send((uint8_t *)&packet, sizeof(packet));
@@ -158,28 +157,28 @@ void Telemetry::transmit(const sensorDataStruct_t &data_struct) {
 #ifdef SERIAL_PLOTTING
     Serial.print(R"({"type": "data", "value": {)");
     Serial.print(R"("response_ID":)");
-    Serial.print(d.response_ID);
+    Serial.print(data_struct.response_ID);
     Serial.print(',');
     Serial.print(R"("gps_lat":)");
-    Serial.print(d.gps_lat, 5);
+    Serial.print(data_struct.gps_lat, 5);
     Serial.print(',');
     Serial.print(R"("gps_long":)");
-    Serial.print(d.gps_long, 5);
+    Serial.print(data_struct.gps_long, 5);
     Serial.print(',');
     Serial.print(R"("gps_alt":)");
-    Serial.print(d.gps_alt, 5);
+    Serial.print(data_struct.gps_alt, 5);
     Serial.print(',');
     Serial.print(R"("barometer_alt":)");
-    Serial.print(d.barometer_alt, 5);
+    Serial.print(data_struct.barometer_alt, 5);
     Serial.print(',');
     Serial.print(R"("KX_IMU_ax":)");
-    Serial.print(d.KX_IMU_ax, 5);
+    Serial.print(data_struct.KX_IMU_ax, 5);
     Serial.print(',');
     Serial.print(R"("KX_IMU_ay":)");
-    Serial.print(d.KX_IMU_ay, 5);
+    Serial.print(data_struct.KX_IMU_ay, 5);
     Serial.print(',');
     Serial.print(R"("KX_IMU_az":)");
-    Serial.print(d.KX_IMU_az, 5);
+    Serial.print(data_struct.KX_IMU_az, 5);
     Serial.print(',');
     // Serial.print(R"("H3L_IMU_ax":)"); Serial.print(data.H3L_IMU_ax);
     // Serial.print(','); Serial.print(R"("H3L_IMU_ay":)");
@@ -187,22 +186,22 @@ void Telemetry::transmit(const sensorDataStruct_t &data_struct) {
     // Serial.print(R"("H3L_IMU_az":)"); Serial.print(data.H3L_IMU_az);
     // Serial.print(',');
     Serial.print(R"("LSM_IMU_ax":)");
-    Serial.print(d.LSM_IMU_ax, 5);
+    Serial.print(data_struct.LSM_IMU_ax, 5);
     Serial.print(',');
     Serial.print(R"("LSM_IMU_ay":)");
-    Serial.print(d.LSM_IMU_ay, 5);
+    Serial.print(data_struct.LSM_IMU_ay, 5);
     Serial.print(',');
     Serial.print(R"("LSM_IMU_az":)");
-    Serial.print(d.LSM_IMU_az, 5);
+    Serial.print(data_struct.LSM_IMU_az, 5);
     Serial.print(',');
     Serial.print(R"("LSM_IMU_gx":)");
-    Serial.print(d.LSM_IMU_gx, 5);
+    Serial.print(data_struct.LSM_IMU_gx, 5);
     Serial.print(',');
     Serial.print(R"("LSM_IMU_gy":)");
-    Serial.print(d.LSM_IMU_gy, 5);
+    Serial.print(data_struct.LSM_IMU_gy, 5);
     Serial.print(',');
     Serial.print(R"("LSM_IMU_gz":)");
-    Serial.print(d.LSM_IMU_gz, 5);
+    Serial.print(data_struct.LSM_IMU_gz, 5);
     Serial.print(',');
     Serial.print(R"("LSM_IMU_mx":)");
     Serial.print(d.LSM_IMU_mx, 5);
@@ -269,7 +268,7 @@ void Telemetry::transmit(const sensorDataStruct_t &data_struct) {
     }
 }
 
-TelemetryPacket Telemetry::make_packet(const sensorDataStruct_t &data_struct) {
+TelemetryPacket Telemetry::make_packet(const sensorDataStruct_t& data_struct){
     TelemetryPacket packet;
     packet.gps_lat = data_struct.gps_data.latitude;
     packet.gps_long = data_struct.gps_data.longitude;
@@ -282,39 +281,33 @@ TelemetryPacket Telemetry::make_packet(const sensorDataStruct_t &data_struct) {
 
     packet.response_ID = last_command_id;
     packet.rssi = rf95.lastRssi();
-    packet.voltage_battery =
-        inv_convert_range<uint8_t>(data_struct.voltage_data.v_battery, 16);
+    packet.voltage_battery = inv_convert_range<uint8_t>(data_struct.voltage_data.v_battery, 16);
     packet.FSM_State = (uint8_t)data_struct.rocketState_data.rocketStates[0];
 
     TelemetryDataLite data;
     packet.datapoint_count = 0;
-    for (int i = 0; i < 4 && buffered_data.pop(&data); i++) {
+    for(int i = 0; i < 4 && buffered_data.pop(&data); i++){
         packet.datapoints[i] = data;
         packet.datapoint_count = i + 1;
     }
     return packet;
 }
 
-void Telemetry::buffer_data(const sensorDataStruct_t &sensor_data) {
+void Telemetry::buffer_data(const sensorDataStruct_t &sensor_data){
     TelemetryDataLite data;
     data.timestamp = TIME_I2MS(chVTGetSystemTime());
-    data.barometer_pressure =
-        inv_convert_range<uint16_t>(sensor_data.barometer_data.pressure, 4096);
+    data.barometer_pressure = inv_convert_range<uint16_t>(sensor_data.barometer_data.pressure, 4096);
 
-    data.highG_ax =
-        inv_convert_range<int16_t>(sensor_data.highG_data.hg_ax, 256);
-    data.highG_ay =
-        inv_convert_range<int16_t>(sensor_data.highG_data.hg_ay, 256);
-    data.highG_az =
-        inv_convert_range<int16_t>(sensor_data.highG_data.hg_az, 256);
+    data.highG_ax = inv_convert_range<int16_t>(sensor_data.highG_data.hg_ax, 256);
+    data.highG_ay = inv_convert_range<int16_t>(sensor_data.highG_data.hg_ay, 256);
+    data.highG_az = inv_convert_range<int16_t>(sensor_data.highG_data.hg_az, 256);
 
     data.gyro_x = inv_convert_range<int16_t>(sensor_data.lowG_data.gx, 8192);
     data.gyro_y = inv_convert_range<int16_t>(sensor_data.lowG_data.gy, 8192);
     data.gyro_z = inv_convert_range<int16_t>(sensor_data.lowG_data.gz, 8192);
 
     data.flap_extension = (uint8_t)sensor_data.flap_data.extension;
-    data.barometer_temp =
-        inv_convert_range<uint8_t>(sensor_data.barometer_data.temperature, 128);
+    data.barometer_temp = inv_convert_range<uint8_t>(sensor_data.barometer_data.temperature, 128);
 
     buffered_data.push(data);
 }
