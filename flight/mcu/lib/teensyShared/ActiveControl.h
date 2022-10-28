@@ -23,8 +23,8 @@ class Controller {
     rk4 rk4_;
     float kp = 0.00008;
 
-    float min_extension = -2/1000;
-    float max_extension = 17.88 / 1000;
+    float min_extension = -2.0/1000.0;
+    float max_extension = 17.88 / 1000.0;
     float dt = .006;
     float prev_u = 0;
     float du_max = 0.01;

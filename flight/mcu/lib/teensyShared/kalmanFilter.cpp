@@ -56,7 +56,6 @@ void KalmanFilter::kfTickFunction(float dt, float sd) {
         SetQ(float(dt)/1000, sd);
         priori();
         update();
-        Serial.println(x_k(0));
     }
 }
 /**
