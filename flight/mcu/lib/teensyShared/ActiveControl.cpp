@@ -65,6 +65,12 @@ void Controller::ctrlTickFunction(pointers* pointer_struct) {
     u = u + sign * min * dt;
     prev_u = u;
 
+    // Set flap extension limits
+    if (u < min_extension) {
+        u = min_extension;
+    } else if (u > max_extension) {
+        u = max_extension;
+    }
 
     /*
      * When in COAST state, we set the flap extension to whatever the AC
