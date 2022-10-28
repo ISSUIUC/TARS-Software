@@ -274,7 +274,8 @@ static THD_FUNCTION(kalman_THD, arg) {
         // #ifdef THREAD_DEBUG
         //     Serial.println("In Kalman");
         // #endif
-        KF.kfTickFunction();
+        systime_t start = chVTGetSystemTime();
+        KF.kfTickFunction(TIME_I2MS(chVTGetSystemTime() - start), 13.0);
         // Serial.println("kalman");
         Serial.println(pointer_struct->sensorDataPointer->state_data.state_x);
 
