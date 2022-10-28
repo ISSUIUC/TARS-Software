@@ -7,6 +7,29 @@
 #include "kalmanFilter.h"
 #define EIGEN_MATRIX_PLUGIN "MatrixAddons.h"
 
+void KalmanFilter::SetQ(float dt, float sd) {
+    Q(0, 0) = pow(dt, 5) / 20;
+    Q(0, 1) = (pow(dt, 4) / 8 * 80);
+    Q(0, 2) = pow(dt, 3) / 6;
+    Q(1, 1) = pow(dt, 3) / 8;
+    Q(1, 2) = pow(dt, 2) / 2;
+    Q(2, 2) = dt;
+    Q(1, 0) = Q(0, 1);
+    Q(2, 0) = Q(0, 2);
+    Q(2, 1) = Q(1, 2);
+    Q*=sd;
+}
+
+void KalmanFilter::SetF(float dt) {
+    F_mat(0, 1) = dt;
+    F_mat(0, 2) = (s_dt * dt) / 2;
+    F_mat(1, 2) = dt;
+
+    F_mat(0, 0) = 1;
+    F_mat(1, 1) = 1;
+    F_mat(2, 2) = 1;
+}
+
 KalmanFilter::KalmanFilter(struct pointers* pointer_struct) {
     gz_L = &pointer_struct->sensorDataPointer->lowG_data.gz;
     gz_H = &pointer_struct->sensorDataPointer->highG_data.hg_az;
@@ -27,8 +50,10 @@ KalmanFilter::KalmanFilter(struct pointers* pointer_struct) {
  * @brief Run Kalman filter calculations as long as FSM has passed IDLE
  *
  */
-void KalmanFilter::kfTickFunction() {
+void KalmanFilter::kfTickFunction(float dt, float sd) {
     if (*current_state_ >= RocketFSM::FSM_State::STATE_IDLE) {
+        SetF(float(dt)/1000);
+        SetQ(float(dt)/1000, sd);
         priori();
         update();
     }
@@ -165,7 +190,7 @@ void KalmanFilter::update() {
 
     // Sensor Measurements
     chMtxLock(mutex_highG_);
-    y_k(1, 0) = ((*gz_H) * 9.81) - 9.81;
+    y_k(1, 0) = ((*gz_H) * 9.81) - 9.81 - 0.51;
     chMtxUnlock(mutex_highG_);
 
     chMtxLock(dataMutex_barometer_);

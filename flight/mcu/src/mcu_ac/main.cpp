@@ -269,12 +269,13 @@ static THD_FUNCTION(kalman_THD, arg) {
     
     KalmanFilter KF(pointer_struct);
     KF.Initialize();
-
+    systime_t last = chVTGetSystemTime();
     while (true) {
         // #ifdef THREAD_DEBUG
         //     Serial.println("In Kalman");
         // #endif
-        KF.kfTickFunction();
+        KF.kfTickFunction(TIME_I2MS(chVTGetSystemTime() - last), 13.0);
+        last = chVTGetSystemTime();
         // Serial.println("kalman");
         Serial.println(pointer_struct->sensorDataPointer->state_data.state_x);
 
