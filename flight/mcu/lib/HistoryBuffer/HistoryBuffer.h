@@ -53,8 +53,8 @@ class HistoryBuffer {
         // want to average the first 50 values (start at 0, end at 49)
         for (unsigned i = 0; i < size / 2; i++) {
             // add the value of the queue at "i"th index from the front index
-            // (frontIndex + i) if our index goes over, we mod it with the length
-            // to get it to wrap back around
+            // (frontIndex + i) if our index goes over, we mod it with the
+            // length to get it to wrap back around
             count += arr[(frontIndex + i) % size];
         }
         return count / (size / 2);
@@ -65,8 +65,8 @@ class HistoryBuffer {
         // want to average the last 50 values (start at 50, end at 99)
         for (unsigned i = size / 2; i < size; i++) {
             // add the value of the queue at "i"th index from the front index
-            // (frontIndex + i) if our index goes over, we mod it with the length
-            // to get it to wrap back around
+            // (frontIndex + i) if our index goes over, we mod it with the
+            // length to get it to wrap back around
             count += arr[(frontIndex + i) % size];
         }
         return count / (size / 2);
