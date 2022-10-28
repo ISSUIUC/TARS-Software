@@ -17,6 +17,7 @@ void KalmanFilter::SetQ(float dt, float sd) {
     Q(1, 0) = Q(0, 1);
     Q(2, 0) = Q(0, 2);
     Q(2, 1) = Q(1, 2);
+    Q*=sd;
 }
 
 void KalmanFilter::SetF(float dt) {
