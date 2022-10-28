@@ -148,7 +148,7 @@ char* sd_file_namer(char* fileName, char* fileExtensionParam) {
 int32_t flush_iterator = 0;
 void logData(File* dataFile, sensorDataStruct_t* data) {
     // Write raw bytes to SD card.
-    size_t written = dataFile->write((const uint8_t*)data, sizeof(*data));
+    dataFile->write((const uint8_t*)data, sizeof(*data));
 
     // Flush data once for every 50 writes
     // Flushing data is the step that actually writes to the card
