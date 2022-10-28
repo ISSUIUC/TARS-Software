@@ -52,10 +52,11 @@ KalmanFilter::KalmanFilter(struct pointers* pointer_struct) {
  */
 void KalmanFilter::kfTickFunction(float dt, float sd) {
     if (*current_state_ >= RocketFSM::FSM_State::STATE_IDLE) {
-        SetF(dt);
-        SetQ(dt, sd);
+        SetF(float(dt)/1000);
+        SetQ(float(dt)/1000, sd);
         priori();
         update();
+        Serial.println(x_k(0));
     }
 }
 /**
@@ -190,7 +191,7 @@ void KalmanFilter::update() {
 
     // Sensor Measurements
     chMtxLock(mutex_highG_);
-    y_k(1, 0) = ((*gz_H) * 9.81) - 9.81;
+    y_k(1, 0) = ((*gz_H) * 9.81) - 9.81 - 0.51;
     chMtxUnlock(mutex_highG_);
 
     chMtxLock(dataMutex_barometer_);
