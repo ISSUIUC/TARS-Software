@@ -85,7 +85,7 @@ void Controller::ctrlTickFunction(pointers* pointer_struct) {
         pointer_struct->sensorDataPointer->flap_data.extension = u;
 
     } else {
-        activeControlServos.servoActuation(10);
+        activeControlServos.servoActuation(min_extension);
     }
 }
 
