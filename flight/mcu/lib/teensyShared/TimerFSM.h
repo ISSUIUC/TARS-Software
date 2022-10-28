@@ -15,7 +15,7 @@ class TimerFSM : public RocketFSM {
     sysinterval_t burn_timer_;
     systime_t burnout_time_;
     sysinterval_t coast_timer_;
-    
+
     systime_t apogee_time_;
     sysinterval_t apogee_timer_;
 

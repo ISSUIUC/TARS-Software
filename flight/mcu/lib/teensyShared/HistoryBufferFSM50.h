@@ -1,7 +1,7 @@
 #pragma once
 
-#include "rocketFSM.h"
 #include "HistoryBuffer.h"
+#include "rocketFSM.h"
 
 class HistoryBufferFSM50 : public RocketFSM {
    public:
@@ -28,7 +28,6 @@ class HistoryBufferFSM50 : public RocketFSM {
 
     systime_t landing_time_;
     sysinterval_t landing_timer;
-    
 
     HistoryBuffer<50>* altitude_history_ptr_;
     HistoryBuffer<50>* IMU_acceleration_history_ptr_;

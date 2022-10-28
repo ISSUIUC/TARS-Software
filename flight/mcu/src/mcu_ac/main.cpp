@@ -33,15 +33,15 @@
 
 #include "ActiveControl.h"
 #include "FSMCollection.h"
+#include "HistoryBufferFSM50.h"
+#include "HistoryBufferFSM6.h"
+#include "KalmanFSM.h"
 #include "MS5611.h"  //Barometer library
 #include "ServoControl.h"
 #include "SparkFunLSM9DS1.h"                       //Low-G IMU Library
 #include "SparkFun_Qwiic_KX13X.h"                  //High-G IMU Library
 #include "SparkFun_u-blox_GNSS_Arduino_Library.h"  //GPS Library
 #include "TimerFSM.h"
-#include "HistoryBufferFSM50.h"
-#include "HistoryBufferFSM6.h"
-#include "KalmanFSM.h"
 #include "dataLog.h"
 #include "kalmanFilter.h"
 #include "pins.h"
@@ -90,9 +90,9 @@ static THD_WORKING_AREA(kalman_WA, 8192);
 static THD_FUNCTION(telemetry_buffering_THD, arg) {
     struct pointers *pointer_struct = (struct pointers *)arg;
 
-    while(pointer_struct->telemetry == nullptr) chThdSleepMilliseconds(50);
+    while (pointer_struct->telemetry == nullptr) chThdSleepMilliseconds(50);
 
-    Telemetry& tlm = *pointer_struct->telemetry;
+    Telemetry &tlm = *pointer_struct->telemetry;
     while (true) {
         tlm.buffer_data(sensorData);
         chThdSleepMilliseconds(80);
@@ -130,7 +130,8 @@ static THD_FUNCTION(rocket_FSM, arg) {
     KalmanFSM kalman_fsm(pointer_struct);
 
     // Add FSM pointer to array of FSMs to be updated
-    RocketFSM *fsm_array[] = {&timer_fsm, &history_buffer_fsm_50, &history_buffer_fsm_6, &kalman_fsm};
+    RocketFSM *fsm_array[] = {&timer_fsm, &history_buffer_fsm_50,
+                              &history_buffer_fsm_6, &kalman_fsm};
 
     // Pass array of FSMs to FSMCollection along with number of FSMs in use
     FSMCollection<4> fsms(fsm_array);
@@ -266,7 +267,7 @@ static THD_FUNCTION(gps_THD, arg) {
 
 static THD_FUNCTION(kalman_THD, arg) {
     struct pointers *pointer_struct = (struct pointers *)arg;
-    
+
     KalmanFilter KF(pointer_struct);
     KF.Initialize();
     systime_t last = chVTGetSystemTime();
@@ -348,10 +349,11 @@ static THD_FUNCTION(dataLogger_THD, arg) {
  *
  */
 void chSetup() {
-    chThdCreateStatic(telemetry_sending_WA, sizeof(telemetry_sending_WA), NORMALPRIO + 1,
-                      telemetry_sending_THD, &sensor_pointers);
-    chThdCreateStatic(telemetry_buffering_WA, sizeof(telemetry_buffering_WA), NORMALPRIO + 1,
-                    telemetry_buffering_THD, &sensor_pointers);                
+    chThdCreateStatic(telemetry_sending_WA, sizeof(telemetry_sending_WA),
+                      NORMALPRIO + 1, telemetry_sending_THD, &sensor_pointers);
+    chThdCreateStatic(telemetry_buffering_WA, sizeof(telemetry_buffering_WA),
+                      NORMALPRIO + 1, telemetry_buffering_THD,
+                      &sensor_pointers);
     chThdCreateStatic(rocket_FSM_WA, sizeof(rocket_FSM_WA), NORMALPRIO + 1,
                       rocket_FSM, &sensor_pointers);
     chThdCreateStatic(gps_WA, sizeof(gps_WA), NORMALPRIO + 1, gps_THD,
@@ -474,7 +476,7 @@ void setup() {
     gps.setNavigationFrequency(5);  // set sampling rate to 5hz
 
     // Telemetry tlm;
-    // sensor_pointers.telemetry = &tlm;   
+    // sensor_pointers.telemetry = &tlm;
     // SD Card Setup
     if (SD.begin(BUILTIN_SDCARD)) {
         char file_extension[6] = ".dat";
@@ -487,7 +489,8 @@ void setup() {
 
         // print header to file on sd card that lists each variable that is
         // logged
-        // auto written = sensor_pointers.dataloggerTHDVarsPointer.dataFile.println(
+        // auto written =
+        // sensor_pointers.dataloggerTHDVarsPointer.dataFile.println(
         //     "binary logging of sensor_data_t");
         sensor_pointers.dataloggerTHDVarsPointer.dataFile.flush();
         //
@@ -502,7 +505,7 @@ void setup() {
             digitalWrite(LED_RED, HIGH);
             delay(100);
             digitalWrite(LED_RED, LOW);
-            delay(100); 
+            delay(100);
         }
     }
 

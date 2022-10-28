@@ -27,7 +27,6 @@
 #include "pins.h"
 #include "thresholds.h"
 
-
 /**
  * @brief Constructor for TimerFSM class
  * @param pointers
@@ -162,41 +161,42 @@ void TimerFSM::tickFSM() {
             break;
         case FSM_State::STATE_APOGEE:
             apogee_timer_ = chVTGetSystemTime() - apogee_time_;
-            if (TIME_I2MS(apogee_timer_)>apogee_time_thresh) {
+            if (TIME_I2MS(apogee_timer_) > apogee_time_thresh) {
                 rocket_state_ = FSM_State::STATE_DROGUE_DETECT;
                 drogue_time_ = chVTGetSystemTime();
             }
 
             break;
-        
+
         case FSM_State::STATE_DROGUE_DETECT:
             rocket_state_ = FSM_State::STATE_DROGUE;
             break;
-        
+
         case FSM_State::STATE_DROGUE:
             drogue_timer_ = chVTGetSystemTime() - drogue_time_;
-            if (TIME_I2MS(drogue_timer_) > drogue_deploy_time_since_apogee_threshold) {
+            if (TIME_I2MS(drogue_timer_) >
+                drogue_deploy_time_since_apogee_threshold) {
                 rocket_state_ = FSM_State::STATE_MAIN_DETECT;
                 main_time_ = chVTGetSystemTime();
             }
             break;
-        
+
         case FSM_State::STATE_MAIN_DETECT:
             rocket_state_ = FSM_State::STATE_MAIN;
             break;
-        
-        
+
         case FSM_State::STATE_MAIN:
             main_timer_ = chVTGetSystemTime() - main_time_;
-            if (TIME_I2MS(main_timer_) > main_deploy_time_since_drogue_threshold) {
+            if (TIME_I2MS(main_timer_) >
+                main_deploy_time_since_drogue_threshold) {
                 rocket_state_ = FSM_State::STATE_LANDED_DETECT;
             }
             break;
-        
+
         case FSM_State::STATE_LANDED_DETECT:
             rocket_state_ = FSM_State::STATE_LANDED;
             break;
-        
+
         case FSM_State::STATE_LANDED:
             break;
 

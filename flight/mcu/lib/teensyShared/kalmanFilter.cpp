@@ -17,7 +17,7 @@ void KalmanFilter::SetQ(float dt, float sd) {
     Q(1, 0) = Q(0, 1);
     Q(2, 0) = Q(0, 2);
     Q(2, 1) = Q(1, 2);
-    Q*=sd;
+    Q *= sd;
 }
 
 void KalmanFilter::SetF(float dt) {
@@ -42,8 +42,8 @@ KalmanFilter::KalmanFilter(struct pointers* pointer_struct) {
         &pointer_struct->dataloggerTHDVarsPointer.dataMutex_state;
     stateData_ = &pointer_struct->sensorDataPointer->state_data;
     data_logger_ = &pointer_struct->dataloggerTHDVarsPointer;
-    current_state_ =
-        &pointer_struct->sensorDataPointer->rocketState_data.rocketStates[0];  // TODO use all rocket states?
+    current_state_ = &pointer_struct->sensorDataPointer->rocketState_data
+                          .rocketStates[0];  // TODO use all rocket states?
 }
 
 /**
@@ -52,8 +52,8 @@ KalmanFilter::KalmanFilter(struct pointers* pointer_struct) {
  */
 void KalmanFilter::kfTickFunction(float dt, float sd) {
     if (*current_state_ >= RocketFSM::FSM_State::STATE_IDLE) {
-        SetF(float(dt)/1000);
-        SetQ(float(dt)/1000, sd);
+        SetF(float(dt) / 1000);
+        SetQ(float(dt) / 1000, sd);
         priori();
         update();
     }

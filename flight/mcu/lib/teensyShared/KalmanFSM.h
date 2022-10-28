@@ -1,7 +1,7 @@
 #pragma once
 
-#include "rocketFSM.h"
 #include "dataLog.h"
+#include "rocketFSM.h"
 
 class KalmanFSM : public RocketFSM {
    public:
@@ -12,7 +12,7 @@ class KalmanFSM : public RocketFSM {
     pointers* pointer_struct;
 
     stateData* gnc_state_ptr_;
-    
+
     systime_t launch_time_;
     sysinterval_t burn_timer_;
     systime_t burnout_time_;
@@ -32,5 +32,4 @@ class KalmanFSM : public RocketFSM {
 
     HistoryBuffer<6>* altitude_history_ptr_;
     HistoryBuffer<6>* IMU_acceleration_history_ptr_;
-    
 };
