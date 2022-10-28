@@ -278,7 +278,7 @@ static THD_FUNCTION(kalman_THD, arg) {
         KF.kfTickFunction(TIME_I2MS(chVTGetSystemTime() - last), 13.0);
         last = chVTGetSystemTime();
         // Serial.println("kalman");
-        Serial.println(pointer_struct->sensorDataPointer->state_data.state_x);
+        // Serial.println(pointer_struct->sensorDataPointer->state_data.state_x);
 
         chThdSleepMilliseconds(50);
     }
