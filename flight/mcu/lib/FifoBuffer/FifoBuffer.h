@@ -8,7 +8,7 @@ class FifoBuffer {
 public:
     FifoBuffer() : length(0), head_idx(0), tail_idx(0), to_process_idx(0) {}
 
-    bool push(T& element) {
+    bool push(T const& element) {
         lock();
         if (length == max_size) {
             // if length == max_size, then head_idx == tail_idx

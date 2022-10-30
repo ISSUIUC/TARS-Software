@@ -1,5 +1,4 @@
 #include <PWMServo.h>
-#include <math.h>
 #include <rk4.h>
 
 #include <array>
@@ -7,19 +6,18 @@
 #include "ServoControl.h"
 #include "dataLog.h"
 
-using std::array;
-
 class Controller {
    public:
-    void ctrlTickFunction(pointers* pointer_struct);
+    void ctrlTickFunction();
     bool ActiveControl_ON();
-    Controller(struct pointers* pointer_struct, PWMServo* controller_servo);
+    Controller();
+    void init();
 
     void setLaunchPadElevation();
 
-    PWMServo* controller_servo_;
-    mutex_t* dataMutex_state_;
-    stateData* stateData_;
+    PWMServo controller_servo_;
+//    mutex_t* dataMutex_state_;
+//    stateData* stateData_;
     rk4 rk4_;
     float kp = 0.00008;
 
@@ -29,13 +27,15 @@ class Controller {
     float prev_u = 0;
     float du_max = 0.01;
 
-    float launch_pad_alt;
-    float apogee_des_msl;
+    float launch_pad_alt{};
+    float apogee_des_msl{};
     float apogee_des_agl = 3962;
 
-    float* b_alt;
-    mutex_t* dataMutex_barometer_;
+//    float* b_alt;
+//    mutex_t* dataMutex_barometer_;
 
-    RocketFSM::FSM_State* current_state;
+//    RocketFSMBase::FSM_State* current_state;
     ServoControl activeControlServos;
 };
+
+extern Controller activeController;

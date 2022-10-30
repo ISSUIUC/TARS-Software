@@ -2,12 +2,18 @@
 #include "ServoControl.h"
 #include "dataLog.h"
 #include "rk4.h"
-#include "rocketFSM.h"
+#include "RocketFSMBase.h"
 #include "sensors.h"
 
+struct KalmanState {
+    float x;
+    float vx;
+    float ax;
+};
+
 class KalmanFilter {
-   public:
-    KalmanFilter(struct pointers* pointer_struct);
+public:
+    MUTEX_DECL(mutex);
 
     void Initialize();
     void Initialize(float pos_f, float vel_f);
@@ -16,19 +22,16 @@ class KalmanFilter {
 
     void kfTickFunction();
 
-   private:
+    KalmanState getState() const;
+    void updateApogee(float estimate);
+private:
     float s_dt = 0.050;
 
-    DataLogBuffer* data_logger_;
-    mutex_t* mutex_lowG_;
-    mutex_t* mutex_highG_;
-    mutex_t* dataMutex_barometer_;
-    mutex_t* dataMutex_state_;
-    stateData* stateData_;
-    RocketFSM::FSM_State* current_state_;
-    float* b_alt;
-    float* gz_L;
-    float* gz_H;
+    float kalman_x = 0;
+    float kalman_vx = 0;
+    float kalman_ax = 0;
+    float kalman_apo = 0;
+    systime_t timestamp = 0;
 
     Eigen::Matrix<float, 3, 1> x_k{0, 0, 0};
     Eigen::Matrix<float, 3, 3> F_mat = Eigen::Matrix<float, 3, 3>::Zero();
@@ -43,3 +46,5 @@ class KalmanFilter {
 
     Eigen::Matrix<float, 3, 2> B = Eigen::Matrix<float, 3, 2>::Zero();
 };
+
+extern KalmanFilter kalmanFilter;

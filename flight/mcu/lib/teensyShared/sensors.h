@@ -15,22 +15,18 @@
 #ifndef SENSORS_H
 #define SENSORS_H
 
+#include "HighGSensor.h"
+#include "LowGSensor.h"
+#include "GPSSensor.h"
+#include "BarometerSensor.h"
 #include "VoltageSensor.h"
-#include "dataLog.h"
 
-void lowGimuTickFunction(LSM9DS1* lsm, DataLogBuffer* data_log_buffer,
-                         LowGData* lowG_data);
+extern HighGSensor highG;
+extern LowGSensor lowG;
+extern GPSSensor gps;
+extern BarometerSensor barometer;
+extern VoltageSensor voltage;
 
-void highGimuTickFunction(QwiicKX134* highG, DataLogBuffer* data_log_buffer,
-                          HighGData* highG_data);
-
-void gpsTickFunction(SFE_UBLOX_GNSS* gps, DataLogBuffer* data_log_buffer,
-                     GpsData* gps_data);
-
-void barometerTickFunction(MS5611* barometer, DataLogBuffer* data_log_buffer,
-                           BarometerData* barometer_data);
-
-void voltageTickFunction(VoltageSensor* voltage, DataLogBuffer* data_log_buffer,
-                         VoltageData* voltage_data);
+//MUTEX_DECL(flaps_mutex);
 
 #endif

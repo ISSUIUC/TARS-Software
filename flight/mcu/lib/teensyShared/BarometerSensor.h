@@ -1,20 +1,24 @@
 #ifndef BAROMETERSENSOR_H
 #define BAROMETERSENSOR_H
 
-#include <MS5611.h>
+#include "MS5611.h"
+#include "pins.h"
 
-class BarometerSensor {
+struct BarometerSensor {
    public:
-    void readReadings();
-    float getPressure();
-    float getTemperature();
-    float getAltitude();
+    MUTEX_DECL(mutex);
+
+    void init();
+    void refresh();
+    float getPressure() const;
+    float getTemperature() const;
+    float getAltitude() const;
 
    private:
-    MS5611* MS;
-    float pressure;
-    float temperature;
-    float altitude;
+    MS5611 MS{MS5611_CS};
+    float pressure = 0.0;
+    float temperature = 0.0;
+    float altitude = 0.0;
 };
 
 #endif

@@ -1,18 +1,15 @@
 #pragma once
 
-#include "rocketFSM.h"
+#include "RocketFSMBase.h"
+#include "ChRt.h"
 
-class TimerFSM : public RocketFSM {
-   public:
-    TimerFSM(pointers*);
-    virtual void tickFSM() override;
+class TimerFSM : public RocketFSMBase {
+public:
+    void tickFSM() override;
 
-   private:
-    pointers* pointer_struct;
-
-    float* linear_acceleration_ptr_;
-    systime_t launch_time_;
-    sysinterval_t burn_timer_;
-    systime_t burnout_time_;
-    sysinterval_t coast_timer_;
+private:
+    systime_t launch_time_ = 0;
+    sysinterval_t burn_timer_ = 0;
+    systime_t burnout_time_ = 0;
+    sysinterval_t coast_timer_ = 0;
 };

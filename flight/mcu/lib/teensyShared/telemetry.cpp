@@ -18,6 +18,7 @@
 #include <telemetry.h>
 #include <limits>
 
+Telemetry tlm;
 
 template<typename T>
 T inv_convert_range(float val, float range){
@@ -273,15 +274,15 @@ TelemetryPacket Telemetry::make_packet(const sensorDataStruct_t& data_struct){
     packet.gps_long = data_struct.gps_data.longitude;
     packet.gps_alt = data_struct.gps_data.altitude;
 
-    packet.gnc_state_ax = data_struct.state_data.state_ax;
-    packet.gnc_state_vx = data_struct.state_data.state_vx;
-    packet.gnc_state_x = data_struct.state_data.state_x;
-    packet.gns_state_apo = data_struct.state_data.state_apo;
+    packet.gnc_state_ax = data_struct.kalman_data.kalman_ax;
+    packet.gnc_state_vx = data_struct.kalman_data.kalman_vx;
+    packet.gnc_state_x = data_struct.kalman_data.kalman_x;
+    packet.gns_state_apo = data_struct.kalman_data.kalman_apo;
 
     packet.response_ID = last_command_id;
     packet.rssi = rf95.lastRssi();
     packet.voltage_battery = inv_convert_range<uint8_t>(data_struct.voltage_data.v_battery, 16);
-    packet.FSM_State = (uint8_t)data_struct.rocketState_data.rocketState;
+    packet.FSM_State = (uint8_t)data_struct.rocketState_data.rocketStates[0];
 
     TelemetryDataLite data;
     for(int i = 0; i < 4 && buffered_data.pop(&data); i++){

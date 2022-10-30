@@ -1,35 +1,27 @@
 #pragma once
 
-#include "rocketFSM.h"
+#include "RocketFSMBase.h"
 #include "HistoryBuffer.h"
 
-class HistoryBufferFSM50 : public RocketFSM {
+class HistoryBufferFSM50 : public RocketFSMBase {
    public:
-    HistoryBufferFSM50(pointers*);
-    virtual void tickFSM() override;
+    void tickFSM() override;
 
    private:
-    pointers* pointer_struct;
+    systime_t launch_time_ = 0;
+    sysinterval_t burn_timer_ = 0;
+    systime_t burnout_time_ = 0;
+    sysinterval_t coast_timer_ = 0;
 
-    float* linear_acceleration_ptr_;
-    systime_t launch_time_;
-    sysinterval_t burn_timer_;
-    systime_t burnout_time_;
-    sysinterval_t coast_timer_;
+    systime_t apogee_time_ = 0;
+    sysinterval_t apogee_timer_ = 0;
 
-    systime_t apogee_time_;
-    sysinterval_t apogee_timer_;
+    systime_t drogue_time_ = 0;
+    sysinterval_t drogue_timer_ = 0;
 
-    systime_t drogue_time_;
-    sysinterval_t drogue_timer_;
+    systime_t main_time_ = 0;
+    sysinterval_t main_timer_ = 0;
 
-    systime_t main_time_;
-    sysinterval_t main_timer_;
-
-    systime_t landing_time_;
-    sysinterval_t landing_timer;
-    
-
-    HistoryBuffer<50>* altitude_history_ptr_;
-    HistoryBuffer<50>* IMU_acceleration_history_ptr_;
+    systime_t landing_time_ = 0;
+    sysinterval_t landing_timer = 0;
 };

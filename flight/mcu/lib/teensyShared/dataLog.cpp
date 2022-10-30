@@ -20,6 +20,8 @@
 
 MUTEX_DECL(SD_Card_Mutex);
 
+DataLogBuffer dataLogger;
+
 /**
  * @brief Construct a new thd function object to log data to the SD card.
  *
@@ -28,7 +30,7 @@ MUTEX_DECL(SD_Card_Mutex);
  * file.
  *
  */
-void dataLoggerTickFunction(pointers* pointer_struct) {
+void dataLoggerTickFunction() {
     // Initialize a new data struct object to hold the data that will be
     // logged
 
@@ -36,38 +38,36 @@ void dataLoggerTickFunction(pointers* pointer_struct) {
     while (true) {
         sensorDataStruct_t current_data{};
 
-        DataLogBuffer& buffers = pointer_struct->dataloggerTHDVarsPointer;
-
         // read each fifo once checking if they have data
         current_data.has_lowG_data =
-            buffers.popLowGFifo(&current_data.lowG_data);
+            dataLogger.popLowGFifo(&current_data.lowG_data);
 
         current_data.has_highG_data =
-            buffers.popHighGFifo(&current_data.highG_data);
+            dataLogger.popHighGFifo(&current_data.highG_data);
 
-        current_data.has_gps_data = buffers.popGpsFifo(&current_data.gps_data);
+        current_data.has_gps_data = dataLogger.popGpsFifo(&current_data.gps_data);
 
-        current_data.has_state_data =
-            buffers.popStateFifo(&current_data.state_data);
+        current_data.has_kalman_data =
+            dataLogger.popKalmanFifo(&current_data.kalman_data);
 
         current_data.has_rocketState_data =
-            buffers.popRocketStateFifo(&current_data.rocketState_data);
+            dataLogger.popRocketStateFifo(&current_data.rocketState_data);
 
         current_data.has_barometer_data =
-            buffers.popBarometerFifo(&current_data.barometer_data);
+            dataLogger.popBarometerFifo(&current_data.barometer_data);
 
         current_data.has_flap_data =
-            buffers.popFlapsFifo(&current_data.flap_data);
+            dataLogger.popFlapsFifo(&current_data.flap_data);
 
         current_data.has_voltage_data =
-            buffers.popVoltageFifo(&current_data.voltage_data);
+            dataLogger.popVoltageFifo(&current_data.voltage_data);
 
         // check if any buffers have data
         bool any_have_data =
-            current_data.has_gps_data || current_data.has_highG_data ||
-            current_data.has_lowG_data || current_data.has_rocketState_data ||
-            current_data.has_state_data || current_data.has_barometer_data ||
-            current_data.has_flap_data || current_data.has_voltage_data;
+                current_data.has_gps_data || current_data.has_highG_data ||
+                current_data.has_lowG_data || current_data.has_rocketState_data ||
+                current_data.has_kalman_data || current_data.has_barometer_data ||
+                current_data.has_flap_data || current_data.has_voltage_data;
 
         if (!any_have_data) {
             return;
@@ -75,8 +75,7 @@ void dataLoggerTickFunction(pointers* pointer_struct) {
 
         // Log all data that was copied from the buffer onto the sd card
         chMtxLock(&SD_Card_Mutex);
-        logData(&pointer_struct->dataloggerTHDVarsPointer.dataFile,
-                &current_data);
+        logData(&dataLogger.dataFile, &current_data);
         chMtxUnlock(&SD_Card_Mutex);
     }
 }
@@ -161,76 +160,106 @@ void logData(File* dataFile, sensorDataStruct_t* data) {
     }
 }
 
-bool DataLogBuffer::pushLowGFifo(LowGData* lowG_Data) {
-    return lowGFifo.push(*lowG_Data);
+bool DataLogBuffer::pushLowGFifo(LowGData const& lowG_Data) {
+    return lowGFifo.push(lowG_Data);
 }
 
 bool DataLogBuffer::popLowGFifo(LowGData* lowG_Data) {
     return lowGFifo.pop(lowG_Data);
 }
 
-bool DataLogBuffer::pushHighGFifo(HighGData* highG_Data) {
+bool DataLogBuffer::pushHighGFifo(HighGData const& highG_Data) {
     // Also push a copy to the IMU acceleration history fifo buffer:
-    IMU_acceleration_history_50.push(highG_Data->hg_az, highG_Data->timeStamp_highG);
-    IMU_acceleration_history_6.push(highG_Data->hg_az, highG_Data->timeStamp_highG);
-    return highGFifo.push(*highG_Data);
+    IMU_acceleration_history_50.push(highG_Data.hg_az, highG_Data.timeStamp_highG);
+    IMU_acceleration_history_6.push(highG_Data.hg_az, highG_Data.timeStamp_highG);
+    return highGFifo.push(highG_Data);
 }
 
 bool DataLogBuffer::popHighGFifo(HighGData* highG_Data) {
     return highGFifo.pop(highG_Data);
 }
 
-bool DataLogBuffer::pushGpsFifo(GpsData* gps_Data) {
-    return gpsFifo.push(*gps_Data);
+bool DataLogBuffer::pushGpsFifo(GpsData const& gps_Data) {
+    return gpsFifo.push(gps_Data);
 }
 
 bool DataLogBuffer::popGpsFifo(GpsData* gps_Data) {
     return gpsFifo.pop(gps_Data);
 }
 
-bool DataLogBuffer::pushStateFifo(stateData* state_data) {
-    gnc_altitude_history_6.push(state_data->state_x, state_data->timeStamp_state);
-    gnc_IMU_acceleration_history_6.push(state_data->state_ax, state_data->timeStamp_state);
-    return stateFifo.push(*state_data);
+bool DataLogBuffer::pushKalmanFifo(KalmanData const& state_data) {
+    gnc_altitude_history_6.push(state_data.kalman_x, state_data.timeStamp_state);
+    gnc_IMU_acceleration_history_6.push(state_data.kalman_x, state_data.timeStamp_state);
+    return kalmanFifo.push(state_data);
 }
 
-bool DataLogBuffer::popStateFifo(stateData* state_data) {
-    return stateFifo.pop(state_data);
+bool DataLogBuffer::popKalmanFifo(KalmanData* state_data) {
+    return kalmanFifo.pop(state_data);
 }
 
-bool DataLogBuffer::pushBarometerFifo(BarometerData* barometer_data) {
+bool DataLogBuffer::pushBarometerFifo(BarometerData const& barometer_data) {
     // Also push a copy to the alititude history fifo buffer:
-    altitude_history_50.push(barometer_data->altitude, barometer_data->timeStamp_barometer);
-    altitude_history_6.push(barometer_data->altitude, barometer_data->timeStamp_barometer);
-    return barometerFifo.push(*barometer_data);
+    altitude_history_50.push(barometer_data.altitude, barometer_data.timeStamp_barometer);
+    altitude_history_6.push(barometer_data.altitude, barometer_data.timeStamp_barometer);
+    return barometerFifo.push(barometer_data);
 }
 
 bool DataLogBuffer::popBarometerFifo(BarometerData* barometer_data) {
     return barometerFifo.pop(barometer_data);
 }
 
-bool DataLogBuffer::pushRocketStateFifo(rocketStateData<4>* rocket_data) {
-    return rocketStateFifo.push(*rocket_data);
+bool DataLogBuffer::pushRocketStateFifo(rocketStateData<4> const& rocket_data) {
+    return rocketStateFifo.push(rocket_data);
 }
 
 bool DataLogBuffer::popRocketStateFifo(rocketStateData<4>* rocket_data) {
     return rocketStateFifo.pop(rocket_data);
 }
 
-bool DataLogBuffer::pushFlapsFifo(FlapData* flap_data) {
-    return flapFifo.push(*flap_data);
+bool DataLogBuffer::pushFlapsFifo(FlapData const& flap_data) {
+    return flapFifo.push(flap_data);
 }
 
 bool DataLogBuffer::popFlapsFifo(FlapData* flap_data) {
     return flapFifo.pop(flap_data);
 }
 
-bool DataLogBuffer::pushVoltageFifo(VoltageData* voltage_data) {
-    return voltageFifo.push(*voltage_data);
+bool DataLogBuffer::pushVoltageFifo(VoltageData const& voltage_data) {
+    return voltageFifo.push(voltage_data);
 }
 
 bool DataLogBuffer::popVoltageFifo(VoltageData* voltage_data) {
     return voltageFifo.pop(voltage_data);
+}
+
+void DataLogBuffer::init() {
+    if (SD.begin(BUILTIN_SDCARD)) {
+        char file_extension[6] = ".dat";
+
+        char data_name[16] = "data";
+        sd_file_namer(data_name, file_extension);
+        // Initialize SD card
+        // TODO this line is very wrong, the SD library we're using doesn't actually know these flags
+        //   we just ended up giving the right values on accident
+        //   also O_TRUNC is 0x0400, which is truncated off when we cast it to a uint8_t
+        dataFile = SD.open(data_name, O_CREAT | O_WRITE | O_TRUNC);
+        // print header to file on sd card that lists each variable that is logged
+        dataFile.println("binary logging of sensor_data_t");
+        dataFile.flush();
+        //
+        Serial.println(dataFile.name());
+    } else {
+        digitalWrite(LED_RED, HIGH);
+        digitalWrite(LED_ORANGE, HIGH);
+        digitalWrite(LED_BLUE, HIGH);
+        Serial.println("SD Begin Failed. Stalling Program");
+        while (true) {
+            digitalWrite(LED_RED, HIGH);
+            delay(100);
+            digitalWrite(LED_RED, LOW);
+            delay(100);
+        }
+    }
 }
 
 #endif

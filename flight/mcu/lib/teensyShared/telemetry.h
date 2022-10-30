@@ -138,3 +138,6 @@ class Telemetry {
 
     TelemetryPacket make_packet(const sensorDataStruct_t&);
 };
+
+
+extern Telemetry tlm;
