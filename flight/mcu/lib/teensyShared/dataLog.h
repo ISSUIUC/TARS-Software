@@ -13,18 +13,31 @@
 #include "RocketFSMBase.h"
 #include "HistoryBuffer.h"
 
-/**
- * @brief An enum to list all potential sensors.
- *
- */
-enum sensors { LOWG_IMU, HIGHG_IMU, BAROMETER, GPS };
 
 #define FIFO_SIZE 1000
+
+class DataLogBuffer;
+
+class DataLogView {
+public:
+    explicit DataLogView(DataLogBuffer& buffer);
+
+    sensorDataStruct_t read();
+private:
+    FifoView<LowGData, FIFO_SIZE> lowGView;
+    FifoView<HighGData, FIFO_SIZE> highGView;
+    FifoView<GpsData, FIFO_SIZE> gpsView;
+    FifoView<KalmanData, FIFO_SIZE> kalmanView;
+    FifoView<rocketStateData<4>, FIFO_SIZE> rocketStateView;
+    FifoView<FlapData, FIFO_SIZE> flapView;
+    FifoView<VoltageData, FIFO_SIZE> voltageView;
+    FifoView<BarometerData, FIFO_SIZE> barometerView;
+};
+
 /**
  * @brief A class to hold all info for ring buffers and mutexes used for data.
  *
  */
-
 class DataLogBuffer {
    private:
     FifoBuffer<LowGData, FIFO_SIZE> lowGFifo{};
@@ -37,6 +50,8 @@ class DataLogBuffer {
     FifoBuffer<BarometerData, FIFO_SIZE> barometerFifo{};
 
    public:
+    friend class DataLogView;
+
     HistoryBuffer<50> altitude_history_50 = HistoryBuffer<50>();
     HistoryBuffer<50> IMU_acceleration_history_50 = HistoryBuffer<50>();
 
@@ -46,41 +61,18 @@ class DataLogBuffer {
     HistoryBuffer<6> gnc_altitude_history_6 = HistoryBuffer<6>();
     HistoryBuffer<6> gnc_IMU_acceleration_history_6 = HistoryBuffer<6>();
 
-    File dataFile;
-
-    void init();
-
-    bool pushLowGFifo(LowGData const& lowG_Data);
-    bool popLowGFifo(LowGData* lowG_Data);
-
-    bool pushHighGFifo(HighGData const& highG_Data);
-    bool popHighGFifo(HighGData* highG_Data);
-
-    bool pushGpsFifo(GpsData const& gps_Data);
-    bool popGpsFifo(GpsData* gps_Data);
-
-    bool pushKalmanFifo(KalmanData const& state_data);
-    bool popKalmanFifo(KalmanData* state_data);
-
-    bool pushRocketStateFifo(rocketStateData<4> const& rocket_data);
-    bool popRocketStateFifo(rocketStateData<4>* rocket_data);
-
-    bool pushBarometerFifo(BarometerData const& barometer_data);
-    bool popBarometerFifo(BarometerData* barometer_data);
-
-    bool pushFlapsFifo(FlapData const& flap_data);
-    bool popFlapsFifo(FlapData* flap_data);
-
-    bool pushVoltageFifo(VoltageData const& voltage_data);
-    bool popVoltageFifo(VoltageData* voltage_data);
+    void pushLowGFifo(LowGData const& lowG_Data);
+    void pushHighGFifo(HighGData const& highG_Data);
+    void pushGpsFifo(GpsData const& gps_Data);
+    void pushKalmanFifo(KalmanData const& state_data);
+    void pushRocketStateFifo(rocketStateData<4> const& rocket_data);
+    void pushBarometerFifo(BarometerData const& barometer_data);
+    void pushFlapsFifo(FlapData const& flap_data);
+    void pushVoltageFifo(VoltageData const& voltage_data);
 };
 
+#undef FIFO_SIZE
+
 extern DataLogBuffer dataLogger;
-
-void dataLoggerTickFunction();
-
-char* sd_file_namer(char* inputName, char* fileExtensionParam);
-
-void logData(File* dataFile, sensorDataStruct_t* data);
 
 #endif

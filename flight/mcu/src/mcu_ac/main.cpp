@@ -37,6 +37,7 @@
 #include "sensors.h"
 #include "telemetry.h"
 #include "Abort.h"
+#include "SDLogger.h"
 
 // #define THREAD_DEBUG
 //#define LOWGIMU_DEBUG
@@ -206,7 +207,7 @@ static THD_FUNCTION(dataLogger_THD, arg) {
         Serial.println("Data Logging thread entrance");
 #endif
 
-        dataLoggerTickFunction();
+        sd_logger.update();
 
         chThdSleepMilliseconds(6);
     }
@@ -294,7 +295,7 @@ void setup() {
     barometer.init();
     gps.init();
 
-    dataLogger.init();
+    sd_logger.init();
 
     digitalWrite(LED_ORANGE, HIGH);
     digitalWrite(LED_BLUE, HIGH);

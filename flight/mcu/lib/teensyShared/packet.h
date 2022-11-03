@@ -143,6 +143,13 @@ struct sensorDataStruct_t {
     // Voltage state
     bool has_voltage_data;
     VoltageData voltage_data;
+
+    bool hasData() const {
+        return has_gps_data || has_highG_data ||
+               has_lowG_data || has_rocketState_data ||
+               has_kalman_data || has_barometer_data ||
+               has_flap_data || has_voltage_data;
+    }
 };
 
 #endif //MCU_PACKET_H

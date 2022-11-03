@@ -27,7 +27,7 @@ T inv_convert_range(float val, float range){
   return std::max(std::min((float)std::numeric_limits<T>::max(), converted), (float)std::numeric_limits<T>::min());
 }
 
-Telemetry::Telemetry() : rf95(RFM95_CS, RFM95_INT) {
+Telemetry::Telemetry() : rf95(RFM95_CS, RFM95_INT), data_view(buffered_data) {
     pinMode(RFM95_RST, OUTPUT);
     digitalWrite(RFM95_RST, HIGH);
     delay(100);
@@ -41,7 +41,7 @@ Telemetry::Telemetry() : rf95(RFM95_CS, RFM95_INT) {
 
     while (!rf95.init()) {
         Serial.println("Radio Initialization Failed");
-        while (1)
+        while (true)
             ;
     }
     Serial.println("[DEBUG]: Radio Initialized");
@@ -51,7 +51,7 @@ Telemetry::Telemetry() : rf95(RFM95_CS, RFM95_INT) {
 
     if (!rf95.setFrequency(RF95_FREQ)) {
         Serial.println("[ERROR]: Default setFrequency Failed");
-        while (1)
+        while (true)
             ;
     }
 
@@ -107,7 +107,7 @@ void Telemetry::handle_command(const telemetry_command &cmd) {
     if (last_command_id == cmd.cmd_id) {
         return;
     }
-    last_command_id = cmd.cmd_id;
+    last_command_id = (int16_t) cmd.cmd_id;
 
     /*
      * Write frequency to SD card to save
@@ -124,7 +124,7 @@ void Telemetry::handle_command(const telemetry_command &cmd) {
     }
 
     if (cmd.command == ABORT) {
-        if (abort == false) {
+        if (!abort) {
             abort = !abort;
         }
         Serial.println("[DEBUG]: Got abort");
@@ -261,7 +261,7 @@ void Telemetry::transmit(const sensorDataStruct_t& data_struct) {
     uint8_t buf[RH_RF95_MAX_MESSAGE_LEN];
     uint8_t len = sizeof(buf);
     if (rf95.available() && rf95.recv(buf, &len)) {
-        telemetry_command received;
+        telemetry_command received{};
         memcpy(&received, buf, sizeof(received));
 
         handle_command(received);
@@ -269,7 +269,7 @@ void Telemetry::transmit(const sensorDataStruct_t& data_struct) {
 }
 
 TelemetryPacket Telemetry::make_packet(const sensorDataStruct_t& data_struct){
-    TelemetryPacket packet;
+    TelemetryPacket packet{};
     packet.gps_lat = data_struct.gps_data.latitude;
     packet.gps_long = data_struct.gps_data.longitude;
     packet.gps_alt = data_struct.gps_data.altitude;
@@ -284,8 +284,8 @@ TelemetryPacket Telemetry::make_packet(const sensorDataStruct_t& data_struct){
     packet.voltage_battery = inv_convert_range<uint8_t>(data_struct.voltage_data.v_battery, 16);
     packet.FSM_State = (uint8_t)data_struct.rocketState_data.rocketStates[0];
 
-    TelemetryDataLite data;
-    for(int i = 0; i < 4 && buffered_data.pop(&data); i++){
+    TelemetryDataLite data{};
+    for(int8_t i = 0; i < 4 && data_view.next(data); i++){
         packet.datapoints[i] = data;
         packet.datapoint_count = i;
     }
@@ -293,7 +293,7 @@ TelemetryPacket Telemetry::make_packet(const sensorDataStruct_t& data_struct){
 }
 
 void Telemetry::buffer_data(const sensorDataStruct_t &sensor_data){
-    TelemetryDataLite data;
+    TelemetryDataLite data{};
     data.timestamp = TIME_I2MS(chVTGetSystemTime());
     data.barometer_pressure = inv_convert_range<uint16_t>(sensor_data.barometer_data.pressure, 4096);
 
