@@ -502,6 +502,20 @@ void setup() {
             sensor_pointers.dataloggerTHDVarsPointer.dataFile.name());
 
         parser = CSV_Parser("dd", true, ',');
+        if (parser.readSDfile("flight_computer.csv")) {
+            int16_t *column_1 = (int16_t*)cp["column_1"];
+            if (column_1) {
+                for (int row = 0; row < parser.getRowsCount(); row ++) {
+                    Serial.println("row: ");
+                    Serial.println(row, DEC);
+                    Serial.println(column_1[row], DEC);
+                }
+            } else {
+                Serial.println("Column found");
+            }
+        } else {
+            Serial.println("File not found");
+        }
         
 
     } else {
