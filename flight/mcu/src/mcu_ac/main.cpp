@@ -481,7 +481,7 @@ void setup() {
     // Telemetry tlm;
     // sensor_pointers.telemetry = &tlm;
     // SD Card Setup
-    CSV_Parser parser;
+    
     if (SD.begin(BUILTIN_SDCARD)) {
         char file_extension[6] = ".dat";
 
@@ -501,9 +501,9 @@ void setup() {
         Serial.println(
             sensor_pointers.dataloggerTHDVarsPointer.dataFile.name());
 
-        parser = CSV_Parser("dd", true, ',');
+        CSV_Parser parser = CSV_Parser("dd", true, ',');
         if (parser.readSDfile("flight_computer.csv")) {
-            int16_t *column_1 = (int16_t*)cp["column_1"];
+            int16_t *column_1 = (int16_t*)parser["column_1"];
             if (column_1) {
                 for (int row = 0; row < parser.getRowsCount(); row ++) {
                     Serial.println("row: ");
