@@ -21,6 +21,7 @@
 #include <SD.h>
 #include <SPI.h>
 #include <Wire.h>
+// #include <vector>
 
 #include <cmath>
 
@@ -29,6 +30,10 @@
 // #include "thresholds.h"
 #include "pins.h"
 #include "sensors.h"
+
+// #include "rapidcsv.h"
+
+int curr_row = 0;
 
 /**
  * @brief Construct a new thd function object to handle data collection from the

@@ -215,6 +215,7 @@ struct pointers {
     sensorDataStruct_t* sensorDataPointer{};
 
     DataLogBuffer dataloggerTHDVarsPointer;
+    // std::vector<double> high_g_vector;
     bool abort;
 };
 
