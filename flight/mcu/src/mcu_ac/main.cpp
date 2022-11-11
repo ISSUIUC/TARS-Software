@@ -23,6 +23,7 @@
  * Jeffery Zhou
  * Karnap Patel
  */
+#define CSV_PARSER_DONT_IMPORT_SD
 
 #include <Arduino.h>
 #include <ChRt.h>
@@ -33,6 +34,7 @@
 // #include <vector>
 #include "CSV_Parser.h"
 #include <fstream>
+#include <vector>
 
 #include "ActiveControl.h"
 #include "FSMCollection.h"
@@ -380,6 +382,56 @@ void chSetup() {
         ;
 }
 
+enum CSV_Headers {
+    timestamp_ms,
+    ax,
+    ay,
+    az,
+    gx,
+    gy,
+    gz,
+    mx,
+    my,
+    mz,
+    latitude,
+    longitude,
+    altitude,
+    satellite_count,
+    position_lock,
+    temperature,
+    pressure,
+    barometer_altitude,
+    highg_ax,
+    highg_ay,
+    highg_az,
+    rocket_state0,
+    rocket_state1,
+    rocket_state2,
+    rocket_state3,
+    flap_extension,
+    state_est_x,
+    state_est_vx,
+    state_est_ax,
+    state_est_apo,
+    battery_voltage
+
+};
+
+std::vector<String> parse_csv_row(String csv_line) {
+    std::vector<String> result;
+    String current_item = "";
+    for (int i = 0; i < csv_line.length() + 1; i++) {
+        char c = csv_line[i];
+        if (c == ',' || i == csv_line.length()) {
+            result.push_back(current_item);
+            current_item = "";
+        } else {
+            current_item += c;
+        }
+    }
+    return result;
+}
+
 /**
  * @brief Handles all configuration necessary before the threads start.
  *
@@ -500,22 +552,91 @@ void setup() {
         //
         Serial.println(
             sensor_pointers.dataloggerTHDVarsPointer.dataFile.name());
-
+        Serial.println("Creating CSV_Parser object");
         CSV_Parser parser = CSV_Parser("dd", true, ',');
-        if (parser.readSDfile("flight_computer.csv")) {
-            int16_t *column_1 = (int16_t*)parser["column_1"];
-            if (column_1) {
-                for (int row = 0; row < parser.getRowsCount(); row ++) {
-                    Serial.println("row: ");
-                    Serial.println(row, DEC);
-                    Serial.println(column_1[row], DEC);
-                }
-            } else {
-                Serial.println("Column found");
+        Serial.println("Created CSV_Parser object");
+        Serial.println("Attempting to read CSV file");
+        // parser.readSDfile("/flight_computer.csv");
+        File file = SD.open("/flight_computer.csv");
+        Serial.println("Read CSV file");
+
+        while (file.available()) {
+            std::vector<String> cur_row = parse_csv_row(file.read());
+            // parser << (char) file.read();
+            // Serial.write(file.read());
+            sensorDataStruct_t cur_struct;
+            cur_struct.lowG_data.ax = cur_row[CSV_Headers::ax].toFloat();
+            cur_struct.lowG_data.ay = cur_row[CSV_Headers::ay].toFloat();
+            cur_struct.lowG_data.az = cur_row[CSV_Headers::az].toFloat();
+
+            cur_struct.lowG_data.gx = cur_row[CSV_Headers::gx].toFloat();
+            cur_struct.lowG_data.gy = cur_row[CSV_Headers::gy].toFloat();
+            cur_struct.lowG_data.gz = cur_row[CSV_Headers::gz].toFloat();
+
+            cur_struct.lowG_data.mx = cur_row[CSV_Headers::mx].toFloat();
+            cur_struct.lowG_data.my = cur_row[CSV_Headers::my].toFloat();
+            cur_struct.lowG_data.mz = cur_row[CSV_Headers::mz].toFloat();
+            
+            cur_struct.barometer_data.temperature = cur_row[CSV_Headers::temperature].toFloat();
+            cur_struct.barometer_data.pressure = cur_row[CSV_Headers::pressure].toFloat();
+            cur_struct.barometer_data.altitude = cur_row[CSV_Headers::barometer_altitude].toFloat();
+
+            cur_struct.highG_data.hg_ax = cur_row[CSV_Headers::highg_ax].toFloat();
+            cur_struct.highG_data.hg_ay = cur_row[CSV_Headers::highg_ay].toFloat();
+            cur_struct.highG_data.hg_az = cur_row[CSV_Headers::highg_az].toFloat();
+
+            for (size_t i = 0; i < cur_row.size(); i++) {
+                Serial.print(cur_row[i]);
+                Serial.print(", ");
+                Serial.println();
             }
-        } else {
-            Serial.println("File not found");
         }
+        // int16_t *timestamp_col = (int16_t*)parser["timestamp_ms"];
+        // if (timestamp_col) {
+        //     for (int row = 0; row < parser.getRowsCount(); row++) {
+        //         Serial.println("row: ");
+        //         Serial.println(row, DEC);
+        //         Serial.println(timestamp_col[row], DEC);
+        //     }
+        // }
+        // int16_t *column_1 = (int16_t *)parser["column_1"];
+        // if (column_1) {
+        //     for (int row = 0; row < parser.getRowsCount(); row++) {
+        //         Serial.println("row: ");
+        //         Serial.println(row, DEC);
+        //         Serial.println(column_1[row], DEC);
+        //     }
+        // } else {
+        //     Serial.println("Column not found");
+        // }
+        // std::ifstream flight_file;
+        // flight_file.open("flight_computer.csv");
+        // std::vector<String> rows;
+
+        // String cur_line;
+        // if (flight_file.is_open()) {
+        //     while (flight_file.good()) {
+        //         std::getline(flight_file, cur_line);
+        //         rows.push_back(cur_line);
+        //     }
+        // }
+
+
+        // if (parser.readSDfile("flight_computer.csv")) {
+        //     Serial.println("Read CSV file");
+        //     int16_t *column_1 = (int16_t*)parser["column_1"];
+        //     if (column_1) {
+        //         for (int row = 0; row < parser.getRowsCount(); row ++) {
+        //             Serial.println("row: ");
+        //             Serial.println(row, DEC);
+        //             Serial.println(column_1[row], DEC);
+        //         }
+        //     } else {
+        //         Serial.println("Column not found");
+        //     }
+        // } else {
+        //     Serial.println("File not found");
+        // }
         
 
     } else {
