@@ -439,6 +439,7 @@ std::vector<String> parse_csv_row(String csv_line) {
 
 void setup() {
     Serial.begin(9600);
+    while (!Serial);
     pinMode(LED_BLUE, OUTPUT);
     pinMode(LED_RED, OUTPUT);
     pinMode(LED_ORANGE, OUTPUT);
@@ -559,38 +560,67 @@ void setup() {
         // parser.readSDfile("/flight_computer.csv");
         File file = SD.open("/flight_computer.csv");
         Serial.println("Read CSV file");
-
+        int line_num = 0;
         while (file.available()) {
-            std::vector<String> cur_row = parse_csv_row(file.read());
+            Serial.println("Reading line");
+            // std::vector<String> cur_row = parse_csv_row(file.read());
+            // Serial.println(file.read());
+            // String cur_row = file.readStringUntil('\r');
+            String cur_row;
+
+            char cur_char = file.read();
+            while (cur_char != '\r') {
+                cur_row += cur_char;
+                cur_char = file.read();
+            }
+            cur_row = cur_row.substring(1, cur_row.length() - 1);
+            line_num++;
+            if (line_num <= 1) {
+                continue;
+            }
+            std::vector<String> formatted_row = parse_csv_row(cur_row);
+            // \r\n
+            // \n
+            // char* cur_row;
+            // file.readBytesUntil('\n', cur_row, 100000);
+            Serial.println(cur_row);
             // parser << (char) file.read();
             // Serial.write(file.read());
+
             sensorDataStruct_t cur_struct;
-            cur_struct.lowG_data.ax = cur_row[CSV_Headers::ax].toFloat();
-            cur_struct.lowG_data.ay = cur_row[CSV_Headers::ay].toFloat();
-            cur_struct.lowG_data.az = cur_row[CSV_Headers::az].toFloat();
+            cur_struct.lowG_data.ax = formatted_row[CSV_Headers::ax].toFloat();
+            cur_struct.lowG_data.ay = formatted_row[CSV_Headers::ay].toFloat();
+            cur_struct.lowG_data.az = formatted_row[CSV_Headers::az].toFloat();
 
-            cur_struct.lowG_data.gx = cur_row[CSV_Headers::gx].toFloat();
-            cur_struct.lowG_data.gy = cur_row[CSV_Headers::gy].toFloat();
-            cur_struct.lowG_data.gz = cur_row[CSV_Headers::gz].toFloat();
+            cur_struct.lowG_data.gx = formatted_row[CSV_Headers::gx].toFloat();
+            cur_struct.lowG_data.gy = formatted_row[CSV_Headers::gy].toFloat();
+            cur_struct.lowG_data.gz = formatted_row[CSV_Headers::gz].toFloat();
 
-            cur_struct.lowG_data.mx = cur_row[CSV_Headers::mx].toFloat();
-            cur_struct.lowG_data.my = cur_row[CSV_Headers::my].toFloat();
-            cur_struct.lowG_data.mz = cur_row[CSV_Headers::mz].toFloat();
+            cur_struct.lowG_data.mx = formatted_row[CSV_Headers::mx].toFloat();
+            cur_struct.lowG_data.my = formatted_row[CSV_Headers::my].toFloat();
+            cur_struct.lowG_data.mz = formatted_row[CSV_Headers::mz].toFloat();
             
-            cur_struct.barometer_data.temperature = cur_row[CSV_Headers::temperature].toFloat();
-            cur_struct.barometer_data.pressure = cur_row[CSV_Headers::pressure].toFloat();
-            cur_struct.barometer_data.altitude = cur_row[CSV_Headers::barometer_altitude].toFloat();
+            cur_struct.barometer_data.temperature = formatted_row[CSV_Headers::temperature].toFloat();
+            cur_struct.barometer_data.pressure = formatted_row[CSV_Headers::pressure].toFloat();
+            cur_struct.barometer_data.altitude = formatted_row[CSV_Headers::barometer_altitude].toFloat();
 
-            cur_struct.highG_data.hg_ax = cur_row[CSV_Headers::highg_ax].toFloat();
-            cur_struct.highG_data.hg_ay = cur_row[CSV_Headers::highg_ay].toFloat();
-            cur_struct.highG_data.hg_az = cur_row[CSV_Headers::highg_az].toFloat();
+            cur_struct.highG_data.hg_ax = formatted_row[CSV_Headers::highg_ax].toFloat();
+            cur_struct.highG_data.hg_ay = formatted_row[CSV_Headers::highg_ay].toFloat();
+            cur_struct.highG_data.hg_az = formatted_row[CSV_Headers::highg_az].toFloat();
 
-            for (size_t i = 0; i < cur_row.size(); i++) {
-                Serial.print(cur_row[i]);
-                Serial.print(", ");
-                Serial.println();
-            }
+            // for (size_t i = 0; i < cur_row.size(); i++) {
+            //     Serial.print(cur_row[i]);
+            //     Serial.print(", ");
+            //     Serial.println();
+            // }
+            sensor_pointers.sensorDataVector.push_back(cur_struct);
         }
+        for (auto thing : sensor_pointers.sensorDataVector) {
+            Serial.println(thing.lowG_data.ax);
+        }
+
+
+
         // int16_t *timestamp_col = (int16_t*)parser["timestamp_ms"];
         // if (timestamp_col) {
         //     for (int row = 0; row < parser.getRowsCount(); row++) {

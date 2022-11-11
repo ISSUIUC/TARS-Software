@@ -4,6 +4,7 @@
 #include <ChRt.h>
 #include <SD.h>
 #include <stdint.h>
+#include <vector>
 
 #include "FifoBuffer.h"
 #include "HistoryBuffer.h"
