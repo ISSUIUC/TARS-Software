@@ -206,6 +206,13 @@ class DataLogBuffer {
 // forward declare;
 struct Telemetry;
 // TODO: Re-think this struct
+
+template <typename T>
+struct Node {
+    T data;
+    Node* next;
+};
+
 struct pointers {
     LSM9DS1* lowGimuPointer{};
     QwiicKX134* highGimuPointer{};
@@ -218,6 +225,7 @@ struct pointers {
     DataLogBuffer dataloggerTHDVarsPointer;
     // std::vector<double> high_g_vector;
     std::vector<sensorDataStruct_t> sensorDataVector;
+    Node<sensorDataStruct_t>* sensor_list_head;
     bool abort;
 };
 

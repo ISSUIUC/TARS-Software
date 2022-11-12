@@ -561,8 +561,11 @@ void setup() {
         File file = SD.open("/flight_computer.csv");
         Serial.println("Read CSV file");
         int line_num = 0;
+        Node<String> *node;
+        Node<String> *cur = node;
+        std::vector<String> lines;
         while (file.available()) {
-            Serial.println("Reading line");
+            // Serial.println("Reading line");
             // std::vector<String> cur_row = parse_csv_row(file.read());
             // Serial.println(file.read());
             // String cur_row = file.readStringUntil('\r');
@@ -578,15 +581,29 @@ void setup() {
             if (line_num <= 1) {
                 continue;
             }
-            std::vector<String> formatted_row = parse_csv_row(cur_row);
+
+            if (!node) {
+                node = new Node<String>{cur_row, nullptr};
+                cur = node;
+            } else {
+                cur->next = new Node<String>{cur_row, nullptr};
+                cur = cur->next;
+            }
+
+            // lines.push_back(cur_row);
             // \r\n
             // \n
             // char* cur_row;
             // file.readBytesUntil('\n', cur_row, 100000);
-            Serial.println(cur_row);
+            // Serial.println(cur_row);
             // parser << (char) file.read();
             // Serial.write(file.read());
+        }
 
+        Serial.println("Finished reading CSV file");
+
+        for (size_t i = 0; i < lines.size(); i++) {
+            std::vector<String> formatted_row = parse_csv_row(lines[i]);
             sensorDataStruct_t cur_struct;
             cur_struct.lowG_data.ax = formatted_row[CSV_Headers::ax].toFloat();
             cur_struct.lowG_data.ay = formatted_row[CSV_Headers::ay].toFloat();
@@ -599,14 +616,20 @@ void setup() {
             cur_struct.lowG_data.mx = formatted_row[CSV_Headers::mx].toFloat();
             cur_struct.lowG_data.my = formatted_row[CSV_Headers::my].toFloat();
             cur_struct.lowG_data.mz = formatted_row[CSV_Headers::mz].toFloat();
-            
-            cur_struct.barometer_data.temperature = formatted_row[CSV_Headers::temperature].toFloat();
-            cur_struct.barometer_data.pressure = formatted_row[CSV_Headers::pressure].toFloat();
-            cur_struct.barometer_data.altitude = formatted_row[CSV_Headers::barometer_altitude].toFloat();
 
-            cur_struct.highG_data.hg_ax = formatted_row[CSV_Headers::highg_ax].toFloat();
-            cur_struct.highG_data.hg_ay = formatted_row[CSV_Headers::highg_ay].toFloat();
-            cur_struct.highG_data.hg_az = formatted_row[CSV_Headers::highg_az].toFloat();
+            cur_struct.barometer_data.temperature =
+                formatted_row[CSV_Headers::temperature].toFloat();
+            cur_struct.barometer_data.pressure =
+                formatted_row[CSV_Headers::pressure].toFloat();
+            cur_struct.barometer_data.altitude =
+                formatted_row[CSV_Headers::barometer_altitude].toFloat();
+
+            cur_struct.highG_data.hg_ax =
+                formatted_row[CSV_Headers::highg_ax].toFloat();
+            cur_struct.highG_data.hg_ay =
+                formatted_row[CSV_Headers::highg_ay].toFloat();
+            cur_struct.highG_data.hg_az =
+                formatted_row[CSV_Headers::highg_az].toFloat();
 
             // for (size_t i = 0; i < cur_row.size(); i++) {
             //     Serial.print(cur_row[i]);
@@ -615,6 +638,9 @@ void setup() {
             // }
             sensor_pointers.sensorDataVector.push_back(cur_struct);
         }
+
+        Serial.println("Finished parsing CSV file");
+
         for (auto thing : sensor_pointers.sensorDataVector) {
             Serial.println(thing.lowG_data.ax);
         }
