@@ -6,7 +6,13 @@ class TimerFSM : public RocketFSM {
    public:
     TimerFSM(pointers*);
     virtual void tickFSM() override;
-
+/**
+ * @brief timestamps and timers used to govern FSM
+ * 
+ * Time is the timestamp within which the event occurs
+ * Timer is the amount time spent in each state and calculated based on 
+ * the timestamps compared to the current time
+*/
    private:
     pointers* pointer_struct;
 
