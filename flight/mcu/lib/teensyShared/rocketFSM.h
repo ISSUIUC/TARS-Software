@@ -12,7 +12,7 @@ struct pointers;
 class RocketFSM {
    public:
     /**
-     * @brief Labels for each FSM state
+     * @brief Labels for each FSM state. Contains intermediary states (eg: Launch Detect) along with actual states (eg: Boost)
      */
     enum class FSM_State {
         STATE_INIT,
@@ -33,18 +33,6 @@ class RocketFSM {
         STATE_ABORT
     };
 
-    //    std::map<int, String> state_map = { {0, "STATE_INIT"}, {1,
-    //    "STATE_IDLE"}, {2, "STATE_LAUNCH_DETECT"}, {3, "STATE_BOOST"}, {4,
-    //    "STATE_BURNOUT_DETECT"}, {5, "STATE_COAST_PREGNC"}, {6,
-    //    "STATE_COAST_GNC"}, {7, "STATE_APOGEE_DETECT"}, {8, "STATE_APOGEE"},
-    //    {9, "STATE_DROGUE_DETECT"},
-    //    {10, "STATE_DROGUE"},
-    //    {11,"STATE_MAIN_DETECT"},
-    //    {12, "STATE_MAIN"},
-    //    {13, "STATE_LANDED_DETECT"},
-    //    {14, "STATE_LANDED"},
-    //    {15, "STATE_ABORT"}};
-
     virtual void tickFSM() = 0;
 
     FSM_State getFSMState() const { return rocket_state_; }
@@ -55,6 +43,8 @@ class RocketFSM {
 
 /**
  * @brief Structure for all values related to rocket state
+ * 
+ * Contains the timestamp for FSM data along with an array of FSM states for each FSM in the flight code
  *
  */
 template <size_t count>

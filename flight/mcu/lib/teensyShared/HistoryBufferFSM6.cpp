@@ -7,8 +7,6 @@
  *              Jusjeev Singh Bhurjee
  *              Rithvik Bhogavilli
  *              Nicholas Phillips
- *
- *
  *              Jessica Myers
  *              Aidan Costello
  *              Aaditya Voruganti
@@ -16,13 +14,11 @@
  * @brief      The implementation of the finite state machine class that governs
  * state transitions.
  *
- * The HistoryBufferFSM6 class encapsulates the finite state machine that
- * dictates which state the rocket is in throughout the mission. The class
- * implements the logic necessary to reliably transition between states along
- * with hysteresis to avoid premature state transitions.
+ * This FSM contains logic developed in 2022 in which the team lead wanted to move away from using timer-based logic and as much sensor
+ * and physics-based logic as possible. See https://wiki.illinois.edu/wiki/display/ILSPACESOC/Rocket+FSM+Flowchart for a more visual description of the FSM logic
  *
  * This is a highly critical software module and should be tested throughly in
- * simulation and on hardware targets.:
+ * simulation and on hardware targets.
  *
  */
 
