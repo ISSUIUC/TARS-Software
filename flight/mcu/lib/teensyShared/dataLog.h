@@ -224,8 +224,10 @@ struct pointers {
 
     DataLogBuffer dataloggerTHDVarsPointer;
     // std::vector<double> high_g_vector;
-    std::vector<sensorDataStruct_t> sensorDataVector;
-    Node<sensorDataStruct_t>* sensor_list_head;
+    // std::vector<sensorDataStruct_t> sensorDataVector;
+    // Node<sensorDataStruct_t>* sensor_list_head;
+    sensorDataStruct_t* current_sensor_data;
+    int sensor_data_index;
     bool abort;
 };
 
