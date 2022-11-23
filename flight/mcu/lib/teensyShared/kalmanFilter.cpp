@@ -1,12 +1,23 @@
 /**
  * @file kalmanFilter.cpp
  *
- * @brief Implementation of the AC team's Kalman Filter
+ * @brief Implementation of a Linear Kalman Filter to estimate position, velocity, and acceleration.
+ * 
+ * @details This class takes input data from a barometer and accelerometer to estimate state data for the rocket.
  */
 
 #include "kalmanFilter.h"
 #define EIGEN_MATRIX_PLUGIN "MatrixAddons.h"
 
+/**
+ * @brief Sets the Q matrix given time step and spectral density.
+ * 
+ * @param dt Time step calculated by the Kalman Filter Thread
+ * @param sd Spectral density of the noise
+ * 
+ * The Q matrix is the covariance matrix for the process noise and is
+ * updated based on the time taken per cycle of the Kalman Filter Thread.
+ */
 void KalmanFilter::SetQ(float dt, float sd) {
     Q(0, 0) = pow(dt, 5) / 20;
     Q(0, 1) = pow(dt, 4) / 8 * 80;
@@ -20,6 +31,14 @@ void KalmanFilter::SetQ(float dt, float sd) {
     Q *= sd;
 }
 
+/**
+ * @brief Sets the F matrix given time step.
+ * 
+ * @param dt Time step calculated by the Kalman Filter Thread
+ * 
+ * The F matrix is the state transition matrix and is defined 
+ * by how the states change over time.
+ */
 void KalmanFilter::SetF(float dt) {
     F_mat(0, 1) = dt;
     F_mat(0, 2) = (s_dt * dt) / 2;
@@ -49,6 +68,8 @@ KalmanFilter::KalmanFilter(struct pointers* pointer_struct) {
 /**
  * @brief Run Kalman filter calculations as long as FSM has passed IDLE
  *
+ * @param dt Time step calculated by the Kalman Filter Thread
+ * @param sd Spectral density of the noise
  */
 void KalmanFilter::kfTickFunction(float dt, float sd) {
     if (*current_state_ >= RocketFSM::FSM_State::STATE_IDLE) {
@@ -145,6 +166,13 @@ void KalmanFilter::Initialize() {
     B(2, 0) = -1;
 }
 
+/**
+ * @brief Initializes the Kalman Filter with an initial position and velocity estimate
+ * 
+ * @param pos_f Initial position estimate
+ * @param vel_f Initial velocity estimate
+ */
+
 void KalmanFilter::Initialize(float pos_f, float vel_f) {
     // set x_k
     x_k(0, 0) = pos_f;
@@ -166,6 +194,14 @@ void KalmanFilter::Initialize(float pos_f, float vel_f) {
     B(2, 0) = -1;
 }
 
+/**
+ * @brief Estimates current state of the rocket without current sensor data
+ *
+ * The priori step of the Kalman filter is used to estimate the current state
+ * of the rocket without knowledge of the current sensor data. In other words,
+ * it extrapolates the state at time n+1 based on the state at time n.
+ */
+
 void KalmanFilter::priori() {
     // x_priori = (F @ x_k) + ((B @ u).T) #* For some reason doesnt work when B
     // or u is = 0
@@ -174,7 +210,11 @@ void KalmanFilter::priori() {
 }
 
 /**
- * @brief Update Kalman Gain
+ * @brief Update Kalman Gain and state estimate with current sensor data
+ * 
+ * After receiving new sensor data, the Kalman filter updates the state estimate
+ * and Kalman gain. The Kalman gain can be considered as a measure of how uncertain
+ * the new sensor data is. After updating the gain, the state estimate is updated.
  *
  */
 void KalmanFilter::update() {
