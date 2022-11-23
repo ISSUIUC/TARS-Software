@@ -9,7 +9,7 @@
 
 void KalmanFilter::SetQ(float dt, float sd) {
     Q(0, 0) = pow(dt, 5) / 20;
-    Q(0, 1) = (pow(dt, 4) / 8 * 80);
+    Q(0, 1) = pow(dt, 4) / 8 * 80;
     Q(0, 2) = pow(dt, 3) / 6;
     Q(1, 1) = pow(dt, 3) / 8;
     Q(1, 2) = pow(dt, 2) / 2;
@@ -120,7 +120,7 @@ void KalmanFilter::Initialize() {
 
     // set Q
     Q(0, 0) = pow(s_dt, 5) / 20;
-    Q(0, 1) = (pow(s_dt, 4) / 8 * 80);
+    Q(0, 1) = pow(s_dt, 4) / 8 * 80;
     Q(0, 2) = pow(s_dt, 3) / 6;
     Q(1, 1) = pow(s_dt, 3) / 8;
     Q(1, 2) = pow(s_dt, 2) / 2;
