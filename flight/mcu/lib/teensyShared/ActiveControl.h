@@ -34,7 +34,7 @@ class Controller {
 //    float* b_alt;
 //    mutex_t* dataMutex_barometer_;
 
-//    RocketFSMBase::FSM_State* current_state;
+//    FSM_State* current_state;
     ServoControl activeControlServos;
 };
 

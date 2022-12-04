@@ -14,7 +14,7 @@
  *
  */
 void KalmanFilter::kfTickFunction() {
-    if (getActiveFSM().getFSMState() > RocketFSMBase::FSM_State::STATE_IDLE) {
+    if (getActiveFSM().getFSMState() > FSM_State::STATE_IDLE) {
         priori();
         update();
     }

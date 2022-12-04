@@ -85,7 +85,7 @@ void Controller::ctrlTickFunction() {
  * @returns boolean depending on whether flaps should actuate or not
  */
 bool Controller::ActiveControl_ON() {
-    return getActiveFSM().getFSMState() == RocketFSMBase::FSM_State::STATE_COAST_GNC;
+    return getActiveFSM().getFSMState() == FSM_State::STATE_COAST_GNC;
 }
 
 /**
