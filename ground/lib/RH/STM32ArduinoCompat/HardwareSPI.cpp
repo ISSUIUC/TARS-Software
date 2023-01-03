@@ -41,11 +41,9 @@ extern "C" {
 #define SPIx_MOSI_SOURCE GPIO_PinSource7
 #define SPIx_MOSI_AF GPIO_AF_SPI1
 
-HardwareSPI::HardwareSPI(uint32_t spiPortNumber)
-    : _spiPortNumber(spiPortNumber) {}
+HardwareSPI::HardwareSPI(uint32_t spiPortNumber) : _spiPortNumber(spiPortNumber) {}
 
-void HardwareSPI::begin(SPIFrequency frequency, uint32_t bitOrder,
-                        uint32_t mode) {
+void HardwareSPI::begin(SPIFrequency frequency, uint32_t bitOrder, uint32_t mode) {
     GPIO_InitTypeDef GPIO_InitStructure;
     //  NVIC_InitTypeDef NVIC_InitStructure;
     SPI_InitTypeDef SPI_InitStructure;
@@ -56,8 +54,7 @@ void HardwareSPI::begin(SPIFrequency frequency, uint32_t bitOrder,
     RCC_APB2PeriphClockCmd(SPIx_CLK, ENABLE);
 
     /* Enable GPIO clocks */
-    RCC_AHB1PeriphClockCmd(
-        SPIx_SCK_GPIO_CLK | SPIx_MISO_GPIO_CLK | SPIx_MOSI_GPIO_CLK, ENABLE);
+    RCC_AHB1PeriphClockCmd(SPIx_SCK_GPIO_CLK | SPIx_MISO_GPIO_CLK | SPIx_MOSI_GPIO_CLK, ENABLE);
 
     /* SPI GPIO Configuration
      * --------------------------------------------------*/

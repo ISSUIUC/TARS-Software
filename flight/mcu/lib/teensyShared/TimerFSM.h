@@ -10,14 +10,13 @@ class TimerFSM : public RocketFSM {
    private:
     pointers* pointer_struct;
 
-
     /**
      * @brief Timestamps and timers used to govern FSM logic
-     * 
+     *
      * Time is the timestamp within which the event occurs
-     * Timer is the amount time spent in each state and calculated based on 
+     * Timer is the amount time spent in each state and calculated based on
      * the timestamps compared to the current time
-    */
+     */
     float* linear_acceleration_ptr_;
     systime_t launch_time_;
     sysinterval_t burn_timer_;

@@ -56,8 +56,7 @@ short cmd_number = 0;
 
 template <typename T>
 float convert_range(T val, float range) {
-    size_t numeric_range = (int64_t)std::numeric_limits<T>::max() -
-                           (int64_t)std::numeric_limits<T>::min() + 1;
+    size_t numeric_range = (int64_t)std::numeric_limits<T>::max() - (int64_t)std::numeric_limits<T>::min() + 1;
     return val * range / (float)numeric_range;
 }
 
@@ -173,20 +172,14 @@ std::queue<TelemetryCommandQueueElement> cmd_queue;
 std::queue<FullTelemetryData> print_queue;
 
 constexpr const char* json_command_success = R"({"type": "command_success"})";
-constexpr const char* json_command_parse_error =
-    R"({"type": "command_error", "error": "serial parse error"})";
-constexpr const char* json_buffer_full_error =
-    R"({"type": "command_error", "error": "command buffer not empty"})";
+constexpr const char* json_command_parse_error = R"({"type": "command_error", "error": "serial parse error"})";
+constexpr const char* json_buffer_full_error = R"({"type": "command_error", "error": "command buffer not empty"})";
 
-constexpr const char* json_init_failure =
-    R"({"type": "init_error", "error": "failed to initilize LORA"})";
+constexpr const char* json_init_failure = R"({"type": "init_error", "error": "failed to initilize LORA"})";
 constexpr const char* json_init_success = R"({"type": "init_success"})";
-constexpr const char* json_set_frequency_failure =
-    R"({"type": "freq_error", "error": "set_frequency failed"})";
-constexpr const char* json_receive_failure =
-    R"({"type": "receive_error", "error": "recv failed"})";
-constexpr const char* json_send_failure =
-    R"({"type": "send_error", "error": "command_retries_exceded"})";
+constexpr const char* json_set_frequency_failure = R"({"type": "freq_error", "error": "set_frequency failed"})";
+constexpr const char* json_receive_failure = R"({"type": "receive_error", "error": "recv failed"})";
+constexpr const char* json_send_failure = R"({"type": "send_error", "error": "command_retries_exceded"})";
 constexpr int max_command_retries = 5;
 
 float current_freq = RF95_FREQ;
@@ -237,113 +230,112 @@ void EnqueuePacket(const TelemetryPacket& packet, float frequency) {
     }
 }
 
-void PrintDequeue(){
-    if(print_queue.empty()) return;
+void PrintDequeue() {
+    if (print_queue.empty()) return;
 
     auto packet = print_queue.front();
-    if(packet.print_time > millis()) return;
+    if (packet.print_time > millis()) return;
     print_queue.pop();
 
     TelemetryDataLite data = packet.data;
 
-        float baro_altitude =
-            -log(convert_range(data.barometer_pressure, 4096) * 0.000987) *
-            (convert_range(data.barometer_temp, 128) + 273.15) * 29.254;
-        Serial.print(R"({"type": "data", "value": {)");
-        Serial.print(R"("response_ID":)");
-        Serial.print(packet.response_ID);
-        Serial.print(',');
-        Serial.print(R"("gps_lat":)");
-        printFloat(packet.gps_lat);
-        Serial.print(',');
-        Serial.print(R"("gps_long":)");
-        printFloat(packet.gps_long);
-        Serial.print(',');
-        Serial.print(R"("gps_alt":)");
-        printFloat(packet.gps_alt);
-        Serial.print(',');
-        Serial.print(R"("barometer_alt":)");
-        printFloat(baro_altitude);
-        Serial.print(',');
-        Serial.print(R"("KX_IMU_ax":)");
-        printFloat(convert_range(data.highG_ax, 256));
-        Serial.print(',');
-        Serial.print(R"("KX_IMU_ay":)");
-        printFloat(convert_range(data.highG_ay, 256));
-        Serial.print(',');
-        Serial.print(R"("KX_IMU_az":)");
-        printFloat(convert_range(data.highG_az, 256));
-        Serial.print(',');
-        // Serial.print(R"("H3L_IMU_ax":)"); Serial.print(data.H3L_IMU_ax);
-        // Serial.print(','); Serial.print(R"("H3L_IMU_ay":)");
-        // Serial.print(data.H3L_IMU_ay); Serial.print(',');
-        // Serial.print(R"("H3L_IMU_az":)"); Serial.print(data.H3L_IMU_az);
-        // Serial.print(',');
-        Serial.print(R"("LSM_IMU_ax":)");
-        printFloat(0);
-        Serial.print(',');
-        Serial.print(R"("LSM_IMU_ay":)");
-        printFloat(0);
-        Serial.print(',');
-        Serial.print(R"("LSM_IMU_az":)");
-        printFloat(0);
-        Serial.print(',');
-        Serial.print(R"("LSM_IMU_gx":)");
-        printFloat(convert_range(data.gyro_x, 8192));
-        Serial.print(',');
-        Serial.print(R"("LSM_IMU_gy":)");
-        printFloat(convert_range(data.gyro_y, 8192));
-        Serial.print(',');
-        Serial.print(R"("LSM_IMU_gz":)");
-        printFloat(convert_range(data.gyro_z, 8192));
-        Serial.print(',');
-        Serial.print(R"("LSM_IMU_mx":)");
-        printFloat(0);
-        Serial.print(',');
-        Serial.print(R"("LSM_IMU_my":)");
-        printFloat(0);
-        Serial.print(',');
-        Serial.print(R"("LSM_IMU_mz":)");
-        printFloat(0);
-        Serial.print(',');
-        Serial.print(R"("FSM_state":)");
-        Serial.print(packet.FSM_State);
-        Serial.print(',');
-        Serial.print(R"("sign":")");
-        Serial.print("NOSIGN");
-        Serial.print("\",");
-        Serial.print(R"("RSSI":)");
-        Serial.print(rf95.lastRssi());
-        Serial.print(',');
-        Serial.print(R"("Voltage":)");
-        printFloat(convert_range(packet.voltage_battery, 16));
-        Serial.print(',');
-        Serial.print(R"("frequency":)");
-        Serial.print(packet.freq);
-        Serial.print(',');
-        Serial.print(R"("flap_extension":)");
-        printFloat(data.flap_extension);
-        Serial.print(",");
-        Serial.print(R"("STE_ALT":)");
-        printFloat(packet.gnc_state_x);
-        Serial.print(",");
-        Serial.print(R"("STE_VEL":)");
-        printFloat(packet.gnc_state_vx);
-        Serial.print(",");
-        Serial.print(R"("STE_ACC":)");
-        printFloat(packet.gnc_state_ax);
-        Serial.print(",");
-        Serial.print(R"("TEMP":)");
-        printFloat(convert_range(data.barometer_temp, 128));
-        Serial.print(",");
-        Serial.print(R"("pressure":)");
-        printFloat(convert_range(data.barometer_pressure, 4096));
-        Serial.print(",");
-        Serial.print(R"("STE_APO":)");
-        printFloat(packet.gns_state_apo);
-        Serial.print("");
+    float baro_altitude = -log(convert_range(data.barometer_pressure, 4096) * 0.000987) *
+                          (convert_range(data.barometer_temp, 128) + 273.15) * 29.254;
+    Serial.print(R"({"type": "data", "value": {)");
+    Serial.print(R"("response_ID":)");
+    Serial.print(packet.response_ID);
+    Serial.print(',');
+    Serial.print(R"("gps_lat":)");
+    printFloat(packet.gps_lat);
+    Serial.print(',');
+    Serial.print(R"("gps_long":)");
+    printFloat(packet.gps_long);
+    Serial.print(',');
+    Serial.print(R"("gps_alt":)");
+    printFloat(packet.gps_alt);
+    Serial.print(',');
+    Serial.print(R"("barometer_alt":)");
+    printFloat(baro_altitude);
+    Serial.print(',');
+    Serial.print(R"("KX_IMU_ax":)");
+    printFloat(convert_range(data.highG_ax, 256));
+    Serial.print(',');
+    Serial.print(R"("KX_IMU_ay":)");
+    printFloat(convert_range(data.highG_ay, 256));
+    Serial.print(',');
+    Serial.print(R"("KX_IMU_az":)");
+    printFloat(convert_range(data.highG_az, 256));
+    Serial.print(',');
+    // Serial.print(R"("H3L_IMU_ax":)"); Serial.print(data.H3L_IMU_ax);
+    // Serial.print(','); Serial.print(R"("H3L_IMU_ay":)");
+    // Serial.print(data.H3L_IMU_ay); Serial.print(',');
+    // Serial.print(R"("H3L_IMU_az":)"); Serial.print(data.H3L_IMU_az);
+    // Serial.print(',');
+    Serial.print(R"("LSM_IMU_ax":)");
+    printFloat(0);
+    Serial.print(',');
+    Serial.print(R"("LSM_IMU_ay":)");
+    printFloat(0);
+    Serial.print(',');
+    Serial.print(R"("LSM_IMU_az":)");
+    printFloat(0);
+    Serial.print(',');
+    Serial.print(R"("LSM_IMU_gx":)");
+    printFloat(convert_range(data.gyro_x, 8192));
+    Serial.print(',');
+    Serial.print(R"("LSM_IMU_gy":)");
+    printFloat(convert_range(data.gyro_y, 8192));
+    Serial.print(',');
+    Serial.print(R"("LSM_IMU_gz":)");
+    printFloat(convert_range(data.gyro_z, 8192));
+    Serial.print(',');
+    Serial.print(R"("LSM_IMU_mx":)");
+    printFloat(0);
+    Serial.print(',');
+    Serial.print(R"("LSM_IMU_my":)");
+    printFloat(0);
+    Serial.print(',');
+    Serial.print(R"("LSM_IMU_mz":)");
+    printFloat(0);
+    Serial.print(',');
+    Serial.print(R"("FSM_state":)");
+    Serial.print(packet.FSM_State);
+    Serial.print(',');
+    Serial.print(R"("sign":")");
+    Serial.print("NOSIGN");
+    Serial.print("\",");
+    Serial.print(R"("RSSI":)");
+    Serial.print(rf95.lastRssi());
+    Serial.print(',');
+    Serial.print(R"("Voltage":)");
+    printFloat(convert_range(packet.voltage_battery, 16));
+    Serial.print(',');
+    Serial.print(R"("frequency":)");
+    Serial.print(packet.freq);
+    Serial.print(',');
+    Serial.print(R"("flap_extension":)");
+    printFloat(data.flap_extension);
+    Serial.print(",");
+    Serial.print(R"("STE_ALT":)");
+    printFloat(packet.gnc_state_x);
+    Serial.print(",");
+    Serial.print(R"("STE_VEL":)");
+    printFloat(packet.gnc_state_vx);
+    Serial.print(",");
+    Serial.print(R"("STE_ACC":)");
+    printFloat(packet.gnc_state_ax);
+    Serial.print(",");
+    Serial.print(R"("TEMP":)");
+    printFloat(convert_range(data.barometer_temp, 128));
+    Serial.print(",");
+    Serial.print(R"("pressure":)");
+    printFloat(convert_range(data.barometer_pressure, 4096));
+    Serial.print(",");
+    Serial.print(R"("STE_APO":)");
+    printFloat(packet.gns_state_apo);
+    Serial.print("");
 
-        Serial.println("}}");
+    Serial.println("}}");
 }
 
 void SerialPrintTelemetryData(const TelemetryPacket& packet, float frequency) {
@@ -366,9 +358,8 @@ void SerialPrintTelemetryData(const TelemetryPacket& packet, float frequency) {
 
         TelemetryDataLite data = packet.datapoints[i];
 
-        float baro_altitude =
-            -log(convert_range(data.barometer_pressure, 4096) * 0.000987) *
-            (convert_range(data.barometer_temp, 128) + 273.15) * 29.254;
+        float baro_altitude = -log(convert_range(data.barometer_pressure, 4096) * 0.000987) *
+                              (convert_range(data.barometer_temp, 128) + 273.15) * 29.254;
         Serial.print(R"({"type": "data", "value": {)");
         Serial.print(R"("response_ID":)");
         Serial.print(packet.response_ID);
@@ -499,8 +490,7 @@ void SerialInput(const char* key, const char* value) {
     } else if (strcmp(key, "CALLSIGN") == 0) {
         command.command = CommandType::SET_CALLSIGN;
         memset(command.callsign, ' ', sizeof(command.callsign));
-        memcpy(command.callsign, value,
-               min(strlen(value), sizeof(command.callsign)));
+        memcpy(command.callsign, value, min(strlen(value), sizeof(command.callsign)));
     } else if (strcmp(key, "FLOC") == 0) {
         float v = atof(value);
         v = min(max(v, 390), 445);
@@ -584,8 +574,7 @@ void loop() {
                 if (cmd.command.id == packet.response_ID) {
                     if (cmd.command.command == CommandType::SET_FREQ) {
                         set_freq_local_bug_fix(cmd.command.freq);
-                        Serial.print(
-                            R"({"type": "freq_success", "frequency":)");
+                        Serial.print(R"({"type": "freq_success", "frequency":)");
                         Serial.print(cmd.command.freq);
                         Serial.println("}");
                     }

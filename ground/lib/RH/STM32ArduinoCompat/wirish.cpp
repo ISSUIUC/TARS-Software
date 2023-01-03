@@ -23,170 +23,90 @@ typedef struct {
 // provide Arduino-like pin addressing, digitalRead etc.
 // Indexed by pin number
 GPIOPin pins[] = {
-    {RCC_AHB1Periph_GPIOA, GPIOA, GPIO_Pin_0, EXTI_PortSourceGPIOA,
-     EXTI_PinSource0},  // 0 = PA0
-    {RCC_AHB1Periph_GPIOA, GPIOA, GPIO_Pin_1, EXTI_PortSourceGPIOA,
-     EXTI_PinSource1},
-    {RCC_AHB1Periph_GPIOA, GPIOA, GPIO_Pin_2, EXTI_PortSourceGPIOA,
-     EXTI_PinSource2},
-    {RCC_AHB1Periph_GPIOA, GPIOA, GPIO_Pin_3, EXTI_PortSourceGPIOA,
-     EXTI_PinSource3},
-    {RCC_AHB1Periph_GPIOA, GPIOA, GPIO_Pin_4, EXTI_PortSourceGPIOA,
-     EXTI_PinSource4},
-    {RCC_AHB1Periph_GPIOA, GPIOA, GPIO_Pin_5, EXTI_PortSourceGPIOA,
-     EXTI_PinSource5},
-    {RCC_AHB1Periph_GPIOA, GPIOA, GPIO_Pin_6, EXTI_PortSourceGPIOA,
-     EXTI_PinSource6},
-    {RCC_AHB1Periph_GPIOA, GPIOA, GPIO_Pin_7, EXTI_PortSourceGPIOA,
-     EXTI_PinSource7},
-    {RCC_AHB1Periph_GPIOA, GPIOA, GPIO_Pin_8, EXTI_PortSourceGPIOA,
-     EXTI_PinSource8},
-    {RCC_AHB1Periph_GPIOA, GPIOA, GPIO_Pin_9, EXTI_PortSourceGPIOA,
-     EXTI_PinSource9},
-    {RCC_AHB1Periph_GPIOA, GPIOA, GPIO_Pin_10, EXTI_PortSourceGPIOA,
-     EXTI_PinSource10},
-    {RCC_AHB1Periph_GPIOA, GPIOA, GPIO_Pin_11, EXTI_PortSourceGPIOA,
-     EXTI_PinSource11},
-    {RCC_AHB1Periph_GPIOA, GPIOA, GPIO_Pin_12, EXTI_PortSourceGPIOA,
-     EXTI_PinSource12},
-    {RCC_AHB1Periph_GPIOA, GPIOA, GPIO_Pin_13, EXTI_PortSourceGPIOA,
-     EXTI_PinSource13},
-    {RCC_AHB1Periph_GPIOA, GPIOA, GPIO_Pin_14, EXTI_PortSourceGPIOA,
-     EXTI_PinSource14},
-    {RCC_AHB1Periph_GPIOA, GPIOA, GPIO_Pin_15, EXTI_PortSourceGPIOA,
-     EXTI_PinSource15},  // 15 = PA15
+    {RCC_AHB1Periph_GPIOA, GPIOA, GPIO_Pin_0, EXTI_PortSourceGPIOA, EXTI_PinSource0},  // 0 = PA0
+    {RCC_AHB1Periph_GPIOA, GPIOA, GPIO_Pin_1, EXTI_PortSourceGPIOA, EXTI_PinSource1},
+    {RCC_AHB1Periph_GPIOA, GPIOA, GPIO_Pin_2, EXTI_PortSourceGPIOA, EXTI_PinSource2},
+    {RCC_AHB1Periph_GPIOA, GPIOA, GPIO_Pin_3, EXTI_PortSourceGPIOA, EXTI_PinSource3},
+    {RCC_AHB1Periph_GPIOA, GPIOA, GPIO_Pin_4, EXTI_PortSourceGPIOA, EXTI_PinSource4},
+    {RCC_AHB1Periph_GPIOA, GPIOA, GPIO_Pin_5, EXTI_PortSourceGPIOA, EXTI_PinSource5},
+    {RCC_AHB1Periph_GPIOA, GPIOA, GPIO_Pin_6, EXTI_PortSourceGPIOA, EXTI_PinSource6},
+    {RCC_AHB1Periph_GPIOA, GPIOA, GPIO_Pin_7, EXTI_PortSourceGPIOA, EXTI_PinSource7},
+    {RCC_AHB1Periph_GPIOA, GPIOA, GPIO_Pin_8, EXTI_PortSourceGPIOA, EXTI_PinSource8},
+    {RCC_AHB1Periph_GPIOA, GPIOA, GPIO_Pin_9, EXTI_PortSourceGPIOA, EXTI_PinSource9},
+    {RCC_AHB1Periph_GPIOA, GPIOA, GPIO_Pin_10, EXTI_PortSourceGPIOA, EXTI_PinSource10},
+    {RCC_AHB1Periph_GPIOA, GPIOA, GPIO_Pin_11, EXTI_PortSourceGPIOA, EXTI_PinSource11},
+    {RCC_AHB1Periph_GPIOA, GPIOA, GPIO_Pin_12, EXTI_PortSourceGPIOA, EXTI_PinSource12},
+    {RCC_AHB1Periph_GPIOA, GPIOA, GPIO_Pin_13, EXTI_PortSourceGPIOA, EXTI_PinSource13},
+    {RCC_AHB1Periph_GPIOA, GPIOA, GPIO_Pin_14, EXTI_PortSourceGPIOA, EXTI_PinSource14},
+    {RCC_AHB1Periph_GPIOA, GPIOA, GPIO_Pin_15, EXTI_PortSourceGPIOA, EXTI_PinSource15},  // 15 = PA15
 
-    {RCC_AHB1Periph_GPIOB, GPIOB, GPIO_Pin_0, EXTI_PortSourceGPIOB,
-     EXTI_PinSource0},  // 16 = PB0
-    {RCC_AHB1Periph_GPIOB, GPIOB, GPIO_Pin_1, EXTI_PortSourceGPIOB,
-     EXTI_PinSource1},
-    {RCC_AHB1Periph_GPIOB, GPIOB, GPIO_Pin_2, EXTI_PortSourceGPIOB,
-     EXTI_PinSource2},
-    {RCC_AHB1Periph_GPIOB, GPIOB, GPIO_Pin_3, EXTI_PortSourceGPIOB,
-     EXTI_PinSource3},
-    {RCC_AHB1Periph_GPIOB, GPIOB, GPIO_Pin_4, EXTI_PortSourceGPIOB,
-     EXTI_PinSource4},
-    {RCC_AHB1Periph_GPIOB, GPIOB, GPIO_Pin_5, EXTI_PortSourceGPIOB,
-     EXTI_PinSource5},
-    {RCC_AHB1Periph_GPIOB, GPIOB, GPIO_Pin_6, EXTI_PortSourceGPIOB,
-     EXTI_PinSource6},
-    {RCC_AHB1Periph_GPIOB, GPIOB, GPIO_Pin_7, EXTI_PortSourceGPIOB,
-     EXTI_PinSource7},
-    {RCC_AHB1Periph_GPIOB, GPIOB, GPIO_Pin_8, EXTI_PortSourceGPIOB,
-     EXTI_PinSource8},
-    {RCC_AHB1Periph_GPIOB, GPIOB, GPIO_Pin_9, EXTI_PortSourceGPIOB,
-     EXTI_PinSource9},
-    {RCC_AHB1Periph_GPIOB, GPIOB, GPIO_Pin_10, EXTI_PortSourceGPIOB,
-     EXTI_PinSource10},
-    {RCC_AHB1Periph_GPIOB, GPIOB, GPIO_Pin_11, EXTI_PortSourceGPIOB,
-     EXTI_PinSource11},
-    {RCC_AHB1Periph_GPIOB, GPIOB, GPIO_Pin_12, EXTI_PortSourceGPIOB,
-     EXTI_PinSource12},
-    {RCC_AHB1Periph_GPIOB, GPIOB, GPIO_Pin_13, EXTI_PortSourceGPIOB,
-     EXTI_PinSource13},
-    {RCC_AHB1Periph_GPIOB, GPIOB, GPIO_Pin_14, EXTI_PortSourceGPIOB,
-     EXTI_PinSource14},
-    {RCC_AHB1Periph_GPIOB, GPIOB, GPIO_Pin_15, EXTI_PortSourceGPIOB,
-     EXTI_PinSource15},  // 31 = PB15
+    {RCC_AHB1Periph_GPIOB, GPIOB, GPIO_Pin_0, EXTI_PortSourceGPIOB, EXTI_PinSource0},  // 16 = PB0
+    {RCC_AHB1Periph_GPIOB, GPIOB, GPIO_Pin_1, EXTI_PortSourceGPIOB, EXTI_PinSource1},
+    {RCC_AHB1Periph_GPIOB, GPIOB, GPIO_Pin_2, EXTI_PortSourceGPIOB, EXTI_PinSource2},
+    {RCC_AHB1Periph_GPIOB, GPIOB, GPIO_Pin_3, EXTI_PortSourceGPIOB, EXTI_PinSource3},
+    {RCC_AHB1Periph_GPIOB, GPIOB, GPIO_Pin_4, EXTI_PortSourceGPIOB, EXTI_PinSource4},
+    {RCC_AHB1Periph_GPIOB, GPIOB, GPIO_Pin_5, EXTI_PortSourceGPIOB, EXTI_PinSource5},
+    {RCC_AHB1Periph_GPIOB, GPIOB, GPIO_Pin_6, EXTI_PortSourceGPIOB, EXTI_PinSource6},
+    {RCC_AHB1Periph_GPIOB, GPIOB, GPIO_Pin_7, EXTI_PortSourceGPIOB, EXTI_PinSource7},
+    {RCC_AHB1Periph_GPIOB, GPIOB, GPIO_Pin_8, EXTI_PortSourceGPIOB, EXTI_PinSource8},
+    {RCC_AHB1Periph_GPIOB, GPIOB, GPIO_Pin_9, EXTI_PortSourceGPIOB, EXTI_PinSource9},
+    {RCC_AHB1Periph_GPIOB, GPIOB, GPIO_Pin_10, EXTI_PortSourceGPIOB, EXTI_PinSource10},
+    {RCC_AHB1Periph_GPIOB, GPIOB, GPIO_Pin_11, EXTI_PortSourceGPIOB, EXTI_PinSource11},
+    {RCC_AHB1Periph_GPIOB, GPIOB, GPIO_Pin_12, EXTI_PortSourceGPIOB, EXTI_PinSource12},
+    {RCC_AHB1Periph_GPIOB, GPIOB, GPIO_Pin_13, EXTI_PortSourceGPIOB, EXTI_PinSource13},
+    {RCC_AHB1Periph_GPIOB, GPIOB, GPIO_Pin_14, EXTI_PortSourceGPIOB, EXTI_PinSource14},
+    {RCC_AHB1Periph_GPIOB, GPIOB, GPIO_Pin_15, EXTI_PortSourceGPIOB, EXTI_PinSource15},  // 31 = PB15
 
-    {RCC_AHB1Periph_GPIOC, GPIOC, GPIO_Pin_0, EXTI_PortSourceGPIOC,
-     EXTI_PinSource0},  // 32 = PC0
-    {RCC_AHB1Periph_GPIOC, GPIOC, GPIO_Pin_1, EXTI_PortSourceGPIOC,
-     EXTI_PinSource1},
-    {RCC_AHB1Periph_GPIOC, GPIOC, GPIO_Pin_2, EXTI_PortSourceGPIOC,
-     EXTI_PinSource2},
-    {RCC_AHB1Periph_GPIOC, GPIOC, GPIO_Pin_3, EXTI_PortSourceGPIOC,
-     EXTI_PinSource3},
-    {RCC_AHB1Periph_GPIOC, GPIOC, GPIO_Pin_4, EXTI_PortSourceGPIOC,
-     EXTI_PinSource4},
-    {RCC_AHB1Periph_GPIOC, GPIOC, GPIO_Pin_5, EXTI_PortSourceGPIOC,
-     EXTI_PinSource5},
-    {RCC_AHB1Periph_GPIOC, GPIOC, GPIO_Pin_6, EXTI_PortSourceGPIOC,
-     EXTI_PinSource6},
-    {RCC_AHB1Periph_GPIOC, GPIOC, GPIO_Pin_7, EXTI_PortSourceGPIOC,
-     EXTI_PinSource7},
-    {RCC_AHB1Periph_GPIOC, GPIOC, GPIO_Pin_8, EXTI_PortSourceGPIOC,
-     EXTI_PinSource8},
-    {RCC_AHB1Periph_GPIOC, GPIOC, GPIO_Pin_9, EXTI_PortSourceGPIOC,
-     EXTI_PinSource9},
-    {RCC_AHB1Periph_GPIOC, GPIOC, GPIO_Pin_10, EXTI_PortSourceGPIOC,
-     EXTI_PinSource10},
-    {RCC_AHB1Periph_GPIOC, GPIOC, GPIO_Pin_11, EXTI_PortSourceGPIOC,
-     EXTI_PinSource11},
-    {RCC_AHB1Periph_GPIOC, GPIOC, GPIO_Pin_12, EXTI_PortSourceGPIOC,
-     EXTI_PinSource12},
-    {RCC_AHB1Periph_GPIOC, GPIOC, GPIO_Pin_13, EXTI_PortSourceGPIOC,
-     EXTI_PinSource13},
-    {RCC_AHB1Periph_GPIOC, GPIOC, GPIO_Pin_14, EXTI_PortSourceGPIOC,
-     EXTI_PinSource14},
-    {RCC_AHB1Periph_GPIOC, GPIOC, GPIO_Pin_15, EXTI_PortSourceGPIOC,
-     EXTI_PinSource15},  // 47 = PC15
+    {RCC_AHB1Periph_GPIOC, GPIOC, GPIO_Pin_0, EXTI_PortSourceGPIOC, EXTI_PinSource0},  // 32 = PC0
+    {RCC_AHB1Periph_GPIOC, GPIOC, GPIO_Pin_1, EXTI_PortSourceGPIOC, EXTI_PinSource1},
+    {RCC_AHB1Periph_GPIOC, GPIOC, GPIO_Pin_2, EXTI_PortSourceGPIOC, EXTI_PinSource2},
+    {RCC_AHB1Periph_GPIOC, GPIOC, GPIO_Pin_3, EXTI_PortSourceGPIOC, EXTI_PinSource3},
+    {RCC_AHB1Periph_GPIOC, GPIOC, GPIO_Pin_4, EXTI_PortSourceGPIOC, EXTI_PinSource4},
+    {RCC_AHB1Periph_GPIOC, GPIOC, GPIO_Pin_5, EXTI_PortSourceGPIOC, EXTI_PinSource5},
+    {RCC_AHB1Periph_GPIOC, GPIOC, GPIO_Pin_6, EXTI_PortSourceGPIOC, EXTI_PinSource6},
+    {RCC_AHB1Periph_GPIOC, GPIOC, GPIO_Pin_7, EXTI_PortSourceGPIOC, EXTI_PinSource7},
+    {RCC_AHB1Periph_GPIOC, GPIOC, GPIO_Pin_8, EXTI_PortSourceGPIOC, EXTI_PinSource8},
+    {RCC_AHB1Periph_GPIOC, GPIOC, GPIO_Pin_9, EXTI_PortSourceGPIOC, EXTI_PinSource9},
+    {RCC_AHB1Periph_GPIOC, GPIOC, GPIO_Pin_10, EXTI_PortSourceGPIOC, EXTI_PinSource10},
+    {RCC_AHB1Periph_GPIOC, GPIOC, GPIO_Pin_11, EXTI_PortSourceGPIOC, EXTI_PinSource11},
+    {RCC_AHB1Periph_GPIOC, GPIOC, GPIO_Pin_12, EXTI_PortSourceGPIOC, EXTI_PinSource12},
+    {RCC_AHB1Periph_GPIOC, GPIOC, GPIO_Pin_13, EXTI_PortSourceGPIOC, EXTI_PinSource13},
+    {RCC_AHB1Periph_GPIOC, GPIOC, GPIO_Pin_14, EXTI_PortSourceGPIOC, EXTI_PinSource14},
+    {RCC_AHB1Periph_GPIOC, GPIOC, GPIO_Pin_15, EXTI_PortSourceGPIOC, EXTI_PinSource15},  // 47 = PC15
 
-    {RCC_AHB1Periph_GPIOD, GPIOD, GPIO_Pin_0, EXTI_PortSourceGPIOD,
-     EXTI_PinSource0},  // 48 = PD0
-    {RCC_AHB1Periph_GPIOD, GPIOD, GPIO_Pin_1, EXTI_PortSourceGPIOD,
-     EXTI_PinSource1},
-    {RCC_AHB1Periph_GPIOD, GPIOD, GPIO_Pin_2, EXTI_PortSourceGPIOD,
-     EXTI_PinSource2},
-    {RCC_AHB1Periph_GPIOD, GPIOD, GPIO_Pin_3, EXTI_PortSourceGPIOD,
-     EXTI_PinSource3},
-    {RCC_AHB1Periph_GPIOD, GPIOD, GPIO_Pin_4, EXTI_PortSourceGPIOD,
-     EXTI_PinSource4},
-    {RCC_AHB1Periph_GPIOD, GPIOD, GPIO_Pin_5, EXTI_PortSourceGPIOD,
-     EXTI_PinSource5},
-    {RCC_AHB1Periph_GPIOD, GPIOD, GPIO_Pin_6, EXTI_PortSourceGPIOD,
-     EXTI_PinSource6},
-    {RCC_AHB1Periph_GPIOD, GPIOD, GPIO_Pin_7, EXTI_PortSourceGPIOD,
-     EXTI_PinSource7},
-    {RCC_AHB1Periph_GPIOD, GPIOD, GPIO_Pin_8, EXTI_PortSourceGPIOD,
-     EXTI_PinSource8},
-    {RCC_AHB1Periph_GPIOD, GPIOD, GPIO_Pin_9, EXTI_PortSourceGPIOD,
-     EXTI_PinSource9},
-    {RCC_AHB1Periph_GPIOD, GPIOD, GPIO_Pin_10, EXTI_PortSourceGPIOD,
-     EXTI_PinSource10},
-    {RCC_AHB1Periph_GPIOD, GPIOD, GPIO_Pin_11, EXTI_PortSourceGPIOD,
-     EXTI_PinSource11},
-    {RCC_AHB1Periph_GPIOD, GPIOD, GPIO_Pin_12, EXTI_PortSourceGPIOD,
-     EXTI_PinSource12},
-    {RCC_AHB1Periph_GPIOD, GPIOD, GPIO_Pin_13, EXTI_PortSourceGPIOD,
-     EXTI_PinSource13},
-    {RCC_AHB1Periph_GPIOD, GPIOD, GPIO_Pin_14, EXTI_PortSourceGPIOD,
-     EXTI_PinSource14},
-    {RCC_AHB1Periph_GPIOD, GPIOD, GPIO_Pin_15, EXTI_PortSourceGPIOD,
-     EXTI_PinSource15},  // 63 = PD15
+    {RCC_AHB1Periph_GPIOD, GPIOD, GPIO_Pin_0, EXTI_PortSourceGPIOD, EXTI_PinSource0},  // 48 = PD0
+    {RCC_AHB1Periph_GPIOD, GPIOD, GPIO_Pin_1, EXTI_PortSourceGPIOD, EXTI_PinSource1},
+    {RCC_AHB1Periph_GPIOD, GPIOD, GPIO_Pin_2, EXTI_PortSourceGPIOD, EXTI_PinSource2},
+    {RCC_AHB1Periph_GPIOD, GPIOD, GPIO_Pin_3, EXTI_PortSourceGPIOD, EXTI_PinSource3},
+    {RCC_AHB1Periph_GPIOD, GPIOD, GPIO_Pin_4, EXTI_PortSourceGPIOD, EXTI_PinSource4},
+    {RCC_AHB1Periph_GPIOD, GPIOD, GPIO_Pin_5, EXTI_PortSourceGPIOD, EXTI_PinSource5},
+    {RCC_AHB1Periph_GPIOD, GPIOD, GPIO_Pin_6, EXTI_PortSourceGPIOD, EXTI_PinSource6},
+    {RCC_AHB1Periph_GPIOD, GPIOD, GPIO_Pin_7, EXTI_PortSourceGPIOD, EXTI_PinSource7},
+    {RCC_AHB1Periph_GPIOD, GPIOD, GPIO_Pin_8, EXTI_PortSourceGPIOD, EXTI_PinSource8},
+    {RCC_AHB1Periph_GPIOD, GPIOD, GPIO_Pin_9, EXTI_PortSourceGPIOD, EXTI_PinSource9},
+    {RCC_AHB1Periph_GPIOD, GPIOD, GPIO_Pin_10, EXTI_PortSourceGPIOD, EXTI_PinSource10},
+    {RCC_AHB1Periph_GPIOD, GPIOD, GPIO_Pin_11, EXTI_PortSourceGPIOD, EXTI_PinSource11},
+    {RCC_AHB1Periph_GPIOD, GPIOD, GPIO_Pin_12, EXTI_PortSourceGPIOD, EXTI_PinSource12},
+    {RCC_AHB1Periph_GPIOD, GPIOD, GPIO_Pin_13, EXTI_PortSourceGPIOD, EXTI_PinSource13},
+    {RCC_AHB1Periph_GPIOD, GPIOD, GPIO_Pin_14, EXTI_PortSourceGPIOD, EXTI_PinSource14},
+    {RCC_AHB1Periph_GPIOD, GPIOD, GPIO_Pin_15, EXTI_PortSourceGPIOD, EXTI_PinSource15},  // 63 = PD15
 
-    {RCC_AHB1Periph_GPIOE, GPIOE, GPIO_Pin_0, EXTI_PortSourceGPIOE,
-     EXTI_PinSource0},  // 64 = PE0
-    {RCC_AHB1Periph_GPIOE, GPIOE, GPIO_Pin_1, EXTI_PortSourceGPIOE,
-     EXTI_PinSource1},
-    {RCC_AHB1Periph_GPIOE, GPIOE, GPIO_Pin_2, EXTI_PortSourceGPIOE,
-     EXTI_PinSource2},
-    {RCC_AHB1Periph_GPIOE, GPIOE, GPIO_Pin_3, EXTI_PortSourceGPIOE,
-     EXTI_PinSource3},
-    {RCC_AHB1Periph_GPIOE, GPIOE, GPIO_Pin_4, EXTI_PortSourceGPIOE,
-     EXTI_PinSource4},
-    {RCC_AHB1Periph_GPIOE, GPIOE, GPIO_Pin_5, EXTI_PortSourceGPIOE,
-     EXTI_PinSource5},
-    {RCC_AHB1Periph_GPIOE, GPIOE, GPIO_Pin_6, EXTI_PortSourceGPIOE,
-     EXTI_PinSource6},
-    {RCC_AHB1Periph_GPIOE, GPIOE, GPIO_Pin_7, EXTI_PortSourceGPIOE,
-     EXTI_PinSource7},
-    {RCC_AHB1Periph_GPIOE, GPIOE, GPIO_Pin_8, EXTI_PortSourceGPIOE,
-     EXTI_PinSource8},
-    {RCC_AHB1Periph_GPIOE, GPIOE, GPIO_Pin_9, EXTI_PortSourceGPIOE,
-     EXTI_PinSource9},
-    {RCC_AHB1Periph_GPIOE, GPIOE, GPIO_Pin_10, EXTI_PortSourceGPIOE,
-     EXTI_PinSource10},
-    {RCC_AHB1Periph_GPIOE, GPIOE, GPIO_Pin_11, EXTI_PortSourceGPIOE,
-     EXTI_PinSource11},
-    {RCC_AHB1Periph_GPIOE, GPIOE, GPIO_Pin_12, EXTI_PortSourceGPIOE,
-     EXTI_PinSource12},
-    {RCC_AHB1Periph_GPIOE, GPIOE, GPIO_Pin_13, EXTI_PortSourceGPIOE,
-     EXTI_PinSource13},
-    {RCC_AHB1Periph_GPIOE, GPIOE, GPIO_Pin_14, EXTI_PortSourceGPIOE,
-     EXTI_PinSource14},
-    {RCC_AHB1Periph_GPIOE, GPIOE, GPIO_Pin_15, EXTI_PortSourceGPIOE,
-     EXTI_PinSource15},  // 79 = PE15
+    {RCC_AHB1Periph_GPIOE, GPIOE, GPIO_Pin_0, EXTI_PortSourceGPIOE, EXTI_PinSource0},  // 64 = PE0
+    {RCC_AHB1Periph_GPIOE, GPIOE, GPIO_Pin_1, EXTI_PortSourceGPIOE, EXTI_PinSource1},
+    {RCC_AHB1Periph_GPIOE, GPIOE, GPIO_Pin_2, EXTI_PortSourceGPIOE, EXTI_PinSource2},
+    {RCC_AHB1Periph_GPIOE, GPIOE, GPIO_Pin_3, EXTI_PortSourceGPIOE, EXTI_PinSource3},
+    {RCC_AHB1Periph_GPIOE, GPIOE, GPIO_Pin_4, EXTI_PortSourceGPIOE, EXTI_PinSource4},
+    {RCC_AHB1Periph_GPIOE, GPIOE, GPIO_Pin_5, EXTI_PortSourceGPIOE, EXTI_PinSource5},
+    {RCC_AHB1Periph_GPIOE, GPIOE, GPIO_Pin_6, EXTI_PortSourceGPIOE, EXTI_PinSource6},
+    {RCC_AHB1Periph_GPIOE, GPIOE, GPIO_Pin_7, EXTI_PortSourceGPIOE, EXTI_PinSource7},
+    {RCC_AHB1Periph_GPIOE, GPIOE, GPIO_Pin_8, EXTI_PortSourceGPIOE, EXTI_PinSource8},
+    {RCC_AHB1Periph_GPIOE, GPIOE, GPIO_Pin_9, EXTI_PortSourceGPIOE, EXTI_PinSource9},
+    {RCC_AHB1Periph_GPIOE, GPIOE, GPIO_Pin_10, EXTI_PortSourceGPIOE, EXTI_PinSource10},
+    {RCC_AHB1Periph_GPIOE, GPIOE, GPIO_Pin_11, EXTI_PortSourceGPIOE, EXTI_PinSource11},
+    {RCC_AHB1Periph_GPIOE, GPIOE, GPIO_Pin_12, EXTI_PortSourceGPIOE, EXTI_PinSource12},
+    {RCC_AHB1Periph_GPIOE, GPIOE, GPIO_Pin_13, EXTI_PortSourceGPIOE, EXTI_PinSource13},
+    {RCC_AHB1Periph_GPIOE, GPIOE, GPIO_Pin_14, EXTI_PortSourceGPIOE, EXTI_PinSource14},
+    {RCC_AHB1Periph_GPIOE, GPIOE, GPIO_Pin_15, EXTI_PortSourceGPIOE, EXTI_PinSource15},  // 79 = PE15
 
 };
 #define NUM_PINS (sizeof(pins) / sizeof(GPIOPin))
@@ -200,14 +120,12 @@ typedef struct {
 // IRQ line data indexed by pin source number with its port
 // and the programmable handler that will handle interrupts on that line
 IRQLine irqlines[] = {
-    {EXTI_Line0, EXTI0_IRQn, 0},      {EXTI_Line1, EXTI1_IRQn, 0},
-    {EXTI_Line2, EXTI2_IRQn, 0},      {EXTI_Line3, EXTI3_IRQn, 0},
-    {EXTI_Line4, EXTI4_IRQn, 0},      {EXTI_Line5, EXTI9_5_IRQn, 0},
-    {EXTI_Line6, EXTI9_5_IRQn, 0},    {EXTI_Line7, EXTI9_5_IRQn, 0},
-    {EXTI_Line8, EXTI9_5_IRQn, 0},    {EXTI_Line9, EXTI9_5_IRQn, 0},
-    {EXTI_Line10, EXTI15_10_IRQn, 0}, {EXTI_Line11, EXTI15_10_IRQn, 0},
-    {EXTI_Line12, EXTI15_10_IRQn, 0}, {EXTI_Line13, EXTI15_10_IRQn, 0},
-    {EXTI_Line14, EXTI15_10_IRQn, 0}, {EXTI_Line15, EXTI15_10_IRQn, 0},
+    {EXTI_Line0, EXTI0_IRQn, 0},      {EXTI_Line1, EXTI1_IRQn, 0},      {EXTI_Line2, EXTI2_IRQn, 0},
+    {EXTI_Line3, EXTI3_IRQn, 0},      {EXTI_Line4, EXTI4_IRQn, 0},      {EXTI_Line5, EXTI9_5_IRQn, 0},
+    {EXTI_Line6, EXTI9_5_IRQn, 0},    {EXTI_Line7, EXTI9_5_IRQn, 0},    {EXTI_Line8, EXTI9_5_IRQn, 0},
+    {EXTI_Line9, EXTI9_5_IRQn, 0},    {EXTI_Line10, EXTI15_10_IRQn, 0}, {EXTI_Line11, EXTI15_10_IRQn, 0},
+    {EXTI_Line12, EXTI15_10_IRQn, 0}, {EXTI_Line13, EXTI15_10_IRQn, 0}, {EXTI_Line14, EXTI15_10_IRQn, 0},
+    {EXTI_Line15, EXTI15_10_IRQn, 0},
 };
 
 #define NUM_IRQ_LINES (sizeof(irqlines) / sizeof(IRQLine))
@@ -385,8 +303,7 @@ void attachInterrupt(uint8_t pin, void (*handler)(void), int mode) {
     EXTI_Init(&EXTI_InitStructure);
 
     /* Enable and set EXTI Interrupt to the lowest priority */
-    NVIC_InitStructure.NVIC_IRQChannel =
-        irqlines[pins[pin].extipinsource].extiirqn;
+    NVIC_InitStructure.NVIC_IRQChannel = irqlines[pins[pin].extipinsource].extiirqn;
     NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x0F;
     NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x0F;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
@@ -406,9 +323,7 @@ void delay(unsigned long ms) {
 
 unsigned long millis() { return systick_count; }
 
-long random(long from, long to) {
-    return from + (RNG_GetRandomNumber() % (to - from));
-}
+long random(long from, long to) { return from + (RNG_GetRandomNumber() % (to - from)); }
 
 long random(long to) { return random(0, to); }
 

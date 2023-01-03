@@ -12,7 +12,8 @@ struct pointers;
 class RocketFSM {
    public:
     /**
-     * @brief Labels for each FSM state. Contains intermediary states (eg: Launch Detect) along with actual states (eg: Boost)
+     * @brief Labels for each FSM state. Contains intermediary states (eg: Launch Detect) along with actual states (eg:
+     * Boost)
      */
     enum class FSM_State {
         STATE_INIT,
@@ -43,7 +44,7 @@ class RocketFSM {
 
 /**
  * @brief Structure for all values related to rocket state
- * 
+ *
  * Contains the timestamp for FSM data along with an array of FSM states for each FSM in the flight code
  *
  */

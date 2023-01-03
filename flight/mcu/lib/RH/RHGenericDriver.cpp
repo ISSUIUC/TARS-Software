@@ -39,8 +39,7 @@ bool RHGenericDriver::waitAvailableTimeout(uint16_t timeout) {
 }
 
 bool RHGenericDriver::waitPacketSent() {
-    while (_mode == RHModeTx)
-        YIELD;  // Wait for any previous transmit to finish
+    while (_mode == RHModeTx) YIELD;  // Wait for any previous transmit to finish
     return true;
 }
 
@@ -70,8 +69,7 @@ bool RHGenericDriver::waitCAD() {
                                         // random is redefined
         delay(_random(1, 10) * 100);
 #else
-        delay(random(1, 10) *
-              100);  // Should these values be configurable? Macros?
+        delay(random(1, 10) * 100);  // Should these values be configurable? Macros?
 #endif
     }
 
@@ -81,13 +79,9 @@ bool RHGenericDriver::waitCAD() {
 // subclasses are expected to override if CAD is available for that radio
 bool RHGenericDriver::isChannelActive() { return false; }
 
-void RHGenericDriver::setPromiscuous(bool promiscuous) {
-    _promiscuous = promiscuous;
-}
+void RHGenericDriver::setPromiscuous(bool promiscuous) { _promiscuous = promiscuous; }
 
-void RHGenericDriver::setThisAddress(uint8_t address) {
-    _thisAddress = address;
-}
+void RHGenericDriver::setThisAddress(uint8_t address) { _thisAddress = address; }
 
 void RHGenericDriver::setHeaderTo(uint8_t to) { _txHeaderTo = to; }
 
@@ -117,8 +111,7 @@ void RHGenericDriver::setMode(RHMode mode) { _mode = mode; }
 bool RHGenericDriver::sleep() { return false; }
 
 // Diagnostic help
-void RHGenericDriver::printBuffer(const char* prompt, const uint8_t* buf,
-                                  uint8_t len) {
+void RHGenericDriver::printBuffer(const char* prompt, const uint8_t* buf, uint8_t len) {
     uint8_t i;
 
 #ifdef RH_HAVE_SERIAL
@@ -141,9 +134,7 @@ uint16_t RHGenericDriver::rxGood() { return _rxGood; }
 
 uint16_t RHGenericDriver::txGood() { return _txGood; }
 
-void RHGenericDriver::setCADTimeout(unsigned long cad_timeout) {
-    _cad_timeout = cad_timeout;
-}
+void RHGenericDriver::setCADTimeout(unsigned long cad_timeout) { _cad_timeout = cad_timeout; }
 
 #if (RH_PLATFORM == RH_PLATFORM_ARDUINO) && defined(RH_PLATFORM_ATTINY)
 // Tinycore does not have __cxa_pure_virtual, so without this we

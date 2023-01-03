@@ -908,8 +908,7 @@ class RH_RF22 : public RHSPIDriver {
     /// using the register calculator at
     /// http://www.hoperf.com/upload/rf/RF22B%2023B%2031B%2042B%2043B%20Register%20Settings_RevB1-v5.xls
     typedef struct {
-        uint8_t
-            reg_1c;  ///< Value for register RH_RF22_REG_1C_IF_FILTER_BANDWIDTH
+        uint8_t reg_1c;  ///< Value for register RH_RF22_REG_1C_IF_FILTER_BANDWIDTH
         uint8_t reg_1f;  ///< Value for register
                          ///< RH_RF22_REG_1F_CLOCK_RECOVERY_GEARSHIFT_OVERRIDE
         uint8_t reg_20;  ///< Value for register
@@ -924,22 +923,17 @@ class RH_RF22 : public RHSPIDriver {
                          ///< RH_RF22_REG_24_CLOCK_RECOVERY_TIMING_LOOP_GAIN1
         uint8_t reg_25;  ///< Value for register
                          ///< RH_RF22_REG_25_CLOCK_RECOVERY_TIMING_LOOP_GAIN0
-        uint8_t
-            reg_2c;  ///< Value for register RH_RF22_REG_2C_OOK_COUNTER_VALUE_1
-        uint8_t
-            reg_2d;  ///< Value for register RH_RF22_REG_2D_OOK_COUNTER_VALUE_2
+        uint8_t reg_2c;  ///< Value for register RH_RF22_REG_2C_OOK_COUNTER_VALUE_1
+        uint8_t reg_2d;  ///< Value for register RH_RF22_REG_2D_OOK_COUNTER_VALUE_2
         uint8_t reg_2e;  ///< Value for register RH_RF22_REG_2E_SLICER_PEAK_HOLD
         uint8_t reg_58;  ///< Value for register
                          ///< RH_RF22_REG_58_CHARGE_PUMP_CURRENT_TRIMMING
         uint8_t reg_69;  ///< Value for register RH_RF22_REG_69_AGC_OVERRIDE1
         uint8_t reg_6e;  ///< Value for register RH_RF22_REG_6E_TX_DATA_RATE1
         uint8_t reg_6f;  ///< Value for register RH_RF22_REG_6F_TX_DATA_RATE0
-        uint8_t
-            reg_70;  ///< Value for register RH_RF22_REG_70_MODULATION_CONTROL1
-        uint8_t
-            reg_71;  ///< Value for register RH_RF22_REG_71_MODULATION_CONTROL2
-        uint8_t
-            reg_72;  ///< Value for register RH_RF22_REG_72_FREQUENCY_DEVIATION
+        uint8_t reg_70;  ///< Value for register RH_RF22_REG_70_MODULATION_CONTROL1
+        uint8_t reg_71;  ///< Value for register RH_RF22_REG_71_MODULATION_CONTROL2
+        uint8_t reg_72;  ///< Value for register RH_RF22_REG_72_FREQUENCY_DEVIATION
     } ModemConfig;
 
     /// Choices for setModemConfig() for a selected subset of common modulation
@@ -951,8 +945,8 @@ class RH_RF22 : public RHSPIDriver {
     /// versions (though we will try to avoid it).
     typedef enum {
         UnmodulatedCarrier = 0,  ///< Unmodulated carrier for testing
-        FSK_PN9_Rb2Fd5,  ///< FSK, No Manchester, Rb = 2kbs, Fd = 5kHz, PN9
-                         ///< random modulation for testing
+        FSK_PN9_Rb2Fd5,          ///< FSK, No Manchester, Rb = 2kbs, Fd = 5kHz, PN9
+                                 ///< random modulation for testing
 
         FSK_Rb2Fd5,        ///< FSK, No Manchester, Rb = 2kbs,    Fd = 5kHz
         FSK_Rb2_4Fd36,     ///< FSK, No Manchester, Rb = 2.4kbs,  Fd = 36kHz
@@ -962,10 +956,10 @@ class RH_RF22 : public RHSPIDriver {
         FSK_Rb38_4Fd19_6,  ///< FSK, No Manchester, Rb = 38.4kbs, Fd = 19.6kHz
         FSK_Rb57_6Fd28_8,  ///< FSK, No Manchester, Rb = 57.6kbs, Fd = 28.8kHz
         FSK_Rb125Fd125,    ///< FSK, No Manchester, Rb = 125kbs,  Fd = 125kHz
-        FSK_Rb_512Fd2_5,  ///< FSK, No Manchester, Rb = 512bs,  Fd = 2.5kHz, for
-                          ///< POCSAG compatibility
-        FSK_Rb_512Fd4_5,  ///< FSK, No Manchester, Rb = 512bs,  Fd = 4.5kHz, for
-                          ///< POCSAG compatibility
+        FSK_Rb_512Fd2_5,   ///< FSK, No Manchester, Rb = 512bs,  Fd = 2.5kHz, for
+                           ///< POCSAG compatibility
+        FSK_Rb_512Fd4_5,   ///< FSK, No Manchester, Rb = 512bs,  Fd = 4.5kHz, for
+                           ///< POCSAG compatibility
 
         GFSK_Rb2Fd5,        ///< GFSK, No Manchester, Rb = 2kbs,    Fd = 5kHz
         GFSK_Rb2_4Fd36,     ///< GFSK, No Manchester, Rb = 2.4kbs,  Fd = 36kHz
@@ -1023,8 +1017,7 @@ class RH_RF22 : public RHSPIDriver {
     /// boards, any digital pin may be used. \param[in] spi Pointer to the SPI
     /// interface object to use.
     ///                Defaults to the standard Arduino hardware SPI interface
-    RH_RF22(uint8_t slaveSelectPin = SS, uint8_t interruptPin = 2,
-            RHGenericSPI& spi = hardware_spi);
+    RH_RF22(uint8_t slaveSelectPin = SS, uint8_t interruptPin = 2, RHGenericSPI& spi = hardware_spi);
 
     /// Initialises this instance and the radio module connected to it.
     /// The following steps are taken:
@@ -1057,16 +1050,14 @@ class RH_RF22 : public RHSPIDriver {
     /// \param[in] adcoffs Amplifier offseet (0 to 15).
     /// \return The analog value. 0 to 255.
     uint8_t adcRead(uint8_t adcsel = RH_RF22_ADCSEL_INTERNAL_TEMPERATURE_SENSOR,
-                    uint8_t adcref = RH_RF22_ADCREF_BANDGAP_VOLTAGE,
-                    uint8_t adcgain = 0, uint8_t adcoffs = 0);
+                    uint8_t adcref = RH_RF22_ADCREF_BANDGAP_VOLTAGE, uint8_t adcgain = 0, uint8_t adcoffs = 0);
 
     /// Reads the on-chip temperature sensor
     /// \param[in] tsrange Specifies the temperature range to use. One of
     /// RH_RF22_TSRANGE_* \param[in] tvoffs Specifies the temperature value
     /// offset. This is actually signed value added to the measured temperature
     /// value \return The measured temperature.
-    uint8_t temperatureRead(uint8_t tsrange = RH_RF22_TSRANGE_M64_64C,
-                            uint8_t tvoffs = 0);
+    uint8_t temperatureRead(uint8_t tsrange = RH_RF22_TSRANGE_M64_64C, uint8_t tvoffs = 0);
 
     /// Reads the wakeup timer value in registers
     /// RH_RF22_REG_17_WAKEUP_TIMER_VALUE1 and

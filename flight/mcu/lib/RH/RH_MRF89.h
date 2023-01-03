@@ -34,8 +34,7 @@
 // header Here we allow for 4 bytes headers, user data. Message length and CRC
 // are automatically encoded and decoded by the MRF89XA
 #ifndef RH_MRF89_MAX_MESSAGE_LEN
-#define RH_MRF89_MAX_MESSAGE_LEN \
-    (RH_MRF89_MAX_PAYLOAD_LEN - RH_MRF89_HEADER_LEN)
+#define RH_MRF89_MAX_MESSAGE_LEN (RH_MRF89_MAX_PAYLOAD_LEN - RH_MRF89_HEADER_LEN)
 #endif
 
 // Bits that must be set to do a SPI read
@@ -404,24 +403,23 @@ class RH_MRF89 : public RHNRFSPIDriver {
     /// will try to avoid it). OOK is not yet supported. Based on sample configs
     /// in MRF89XA.h from Microchip
     typedef enum {
-        FSK_Rb2Fd33 =
-            0,  ///< FSK, No Manchester, Whitened, Rb = 2kbs,    Fd = 33kHz
-        FSK_Rb5Fd33,     ///< FSK, No Manchester, Whitened, Rb = 5kbs,    Fd =
-                         ///< 33kHz
-        FSK_Rb10Fd33,    ///< FSK, No Manchester, Whitened, Rb = 10kbs,   Fd =
-                         ///< 33kHz
-        FSK_Rb20Fd40,    ///< FSK, No Manchester, Whitened, Rb = 20kbs,   Fd =
-                         ///< 40kHz
-        FSK_Rb40Fd80,    ///< FSK, No Manchester, Whitened, Rb = 40kbs,   Fd =
-                         ///< 80kHz
-        FSK_Rb50Fd100,   ///< FSK, No Manchester, Whitened, Rb = 50kbs,   Fd =
-                         ///< 100kHz
-        FSK_Rb66Fd133,   ///< FSK, No Manchester, Whitened, Rb = 66kbs,   Fd =
-                         ///< 133kHz
-        FSK_Rb100Fd200,  ///< FSK, No Manchester, Whitened, Rb = 100kbs,  Fd =
-                         ///< 200kHz
-        FSK_Rb200Fd200   ///< FSK, No Manchester, Whitened, Rb = 200kbs,  Fd =
-                         ///< 200kHz
+        FSK_Rb2Fd33 = 0,  ///< FSK, No Manchester, Whitened, Rb = 2kbs,    Fd = 33kHz
+        FSK_Rb5Fd33,      ///< FSK, No Manchester, Whitened, Rb = 5kbs,    Fd =
+                          ///< 33kHz
+        FSK_Rb10Fd33,     ///< FSK, No Manchester, Whitened, Rb = 10kbs,   Fd =
+                          ///< 33kHz
+        FSK_Rb20Fd40,     ///< FSK, No Manchester, Whitened, Rb = 20kbs,   Fd =
+                          ///< 40kHz
+        FSK_Rb40Fd80,     ///< FSK, No Manchester, Whitened, Rb = 40kbs,   Fd =
+                          ///< 80kHz
+        FSK_Rb50Fd100,    ///< FSK, No Manchester, Whitened, Rb = 50kbs,   Fd =
+                          ///< 100kHz
+        FSK_Rb66Fd133,    ///< FSK, No Manchester, Whitened, Rb = 66kbs,   Fd =
+                          ///< 133kHz
+        FSK_Rb100Fd200,   ///< FSK, No Manchester, Whitened, Rb = 100kbs,  Fd =
+                          ///< 200kHz
+        FSK_Rb200Fd200    ///< FSK, No Manchester, Whitened, Rb = 200kbs,  Fd =
+                          ///< 200kHz
     } ModemConfigChoice;
 
     /// Constructor.
@@ -439,8 +437,7 @@ class RH_MRF89 : public RHNRFSPIDriver {
     /// MRF89XA does not need to be connected). \param[in] spi Pointer to the
     /// SPI interface object to use.
     ///                Defaults to the standard Arduino hardware SPI interface
-    RH_MRF89(uint8_t csconPin = SS, uint8_t csdatPin = 9,
-             uint8_t interruptPin = 2, RHGenericSPI& spi = hardware_spi);
+    RH_MRF89(uint8_t csconPin = SS, uint8_t csdatPin = 9, uint8_t interruptPin = 2, RHGenericSPI& spi = hardware_spi);
 
     /// Initialise the Driver transport hardware and software.
     /// Make sure the Driver is properly configured before calling init().

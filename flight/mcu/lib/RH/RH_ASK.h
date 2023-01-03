@@ -264,8 +264,8 @@ class RH_ASK : public RHGenericDriver {
     /// controller. It will be set HIGH to enable the transmitter (unless
     /// pttInverted is true). \param[in] pttInverted true if you desire the
     /// pttin to be inverted so that LOW wil enable the transmitter.
-    RH_ASK(uint16_t speed = 2000, uint8_t rxPin = 11, uint8_t txPin = 12,
-           uint8_t pttPin = 10, bool pttInverted = false);
+    RH_ASK(uint16_t speed = 2000, uint8_t rxPin = 11, uint8_t txPin = 12, uint8_t pttPin = 10,
+           bool pttInverted = false);
 
     /// Initialise the Driver transport hardware and software.
     /// Make sure the Driver is properly configured before calling init().

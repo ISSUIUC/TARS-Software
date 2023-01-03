@@ -2,7 +2,7 @@
  * @file kalmanFilter.cpp
  *
  * @brief Implementation of a Linear Kalman Filter to estimate position, velocity, and acceleration.
- * 
+ *
  * @details This class takes input data from a barometer and accelerometer to estimate state data for the rocket.
  */
 
@@ -11,10 +11,10 @@
 
 /**
  * @brief Sets the Q matrix given time step and spectral density.
- * 
+ *
  * @param dt Time step calculated by the Kalman Filter Thread
  * @param sd Spectral density of the noise
- * 
+ *
  * The Q matrix is the covariance matrix for the process noise and is
  * updated based on the time taken per cycle of the Kalman Filter Thread.
  */
@@ -33,10 +33,10 @@ void KalmanFilter::SetQ(float dt, float sd) {
 
 /**
  * @brief Sets the F matrix given time step.
- * 
+ *
  * @param dt Time step calculated by the Kalman Filter Thread
- * 
- * The F matrix is the state transition matrix and is defined 
+ *
+ * The F matrix is the state transition matrix and is defined
  * by how the states change over time.
  */
 void KalmanFilter::SetF(float dt) {
@@ -55,14 +55,12 @@ KalmanFilter::KalmanFilter(struct pointers* pointer_struct) {
     b_alt = &pointer_struct->sensorDataPointer->barometer_data.altitude;
     mutex_lowG_ = &pointer_struct->dataloggerTHDVarsPointer.dataMutex_lowG;
     mutex_highG_ = &pointer_struct->dataloggerTHDVarsPointer.dataMutex_highG;
-    dataMutex_barometer_ =
-        &pointer_struct->dataloggerTHDVarsPointer.dataMutex_barometer;
-    dataMutex_state_ =
-        &pointer_struct->dataloggerTHDVarsPointer.dataMutex_state;
+    dataMutex_barometer_ = &pointer_struct->dataloggerTHDVarsPointer.dataMutex_barometer;
+    dataMutex_state_ = &pointer_struct->dataloggerTHDVarsPointer.dataMutex_state;
     stateData_ = &pointer_struct->sensorDataPointer->state_data;
     data_logger_ = &pointer_struct->dataloggerTHDVarsPointer;
-    current_state_ = &pointer_struct->sensorDataPointer->rocketState_data
-                          .rocketStates[0];  // TODO use all rocket states?
+    current_state_ =
+        &pointer_struct->sensorDataPointer->rocketState_data.rocketStates[0];  // TODO use all rocket states?
 }
 
 /**
@@ -168,7 +166,7 @@ void KalmanFilter::Initialize() {
 
 /**
  * @brief Initializes the Kalman Filter with an initial position and velocity estimate
- * 
+ *
  * @param pos_f Initial position estimate
  * @param vel_f Initial velocity estimate
  */
@@ -211,7 +209,7 @@ void KalmanFilter::priori() {
 
 /**
  * @brief Update Kalman Gain and state estimate with current sensor data
- * 
+ *
  * After receiving new sensor data, the Kalman filter updates the state estimate
  * and Kalman gain. The Kalman gain can be considered as a measure of how uncertain
  * the new sensor data is. After updating the gain, the state estimate is updated.
@@ -224,8 +222,7 @@ void KalmanFilter::update() {
 
     Eigen::Matrix<float, 2, 2> temp = Eigen::Matrix<float, 2, 2>::Zero();
     temp = (((H * P_priori * H.transpose()) + R)).inverse();
-    Eigen::Matrix<float, 3, 3> identity =
-        Eigen::Matrix<float, 3, 3>::Identity();
+    Eigen::Matrix<float, 3, 3> identity = Eigen::Matrix<float, 3, 3>::Identity();
     K = (P_priori * H.transpose()) * temp;
 
     // Sensor Measurements

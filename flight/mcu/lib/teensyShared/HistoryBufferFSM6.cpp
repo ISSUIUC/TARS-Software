@@ -14,8 +14,9 @@
  * @brief      The implementation of the finite state machine class that governs
  * state transitions.
  *
- * This FSM contains logic developed in 2022 in which the team lead wanted to move away from using timer-based logic and as much sensor
- * and physics-based logic as possible. See https://wiki.illinois.edu/wiki/display/ILSPACESOC/Rocket+FSM+Flowchart for a more visual description of the FSM logic
+ * This FSM contains logic developed in 2022 in which the team lead wanted to move away from using timer-based logic and
+ * as much sensor and physics-based logic as possible. See
+ * https://wiki.illinois.edu/wiki/display/ILSPACESOC/Rocket+FSM+Flowchart for a more visual description of the FSM logic
  *
  * This is a highly critical software module and should be tested throughly in
  * simulation and on hardware targets.
@@ -42,13 +43,10 @@
 HistoryBufferFSM6::HistoryBufferFSM6(pointers *ptr) {
     pointer_struct = ptr;
     // Get the linear accelration from the High-G IMU
-    linear_acceleration_ptr_ =
-        &pointer_struct->sensorDataPointer->highG_data.hg_az;
+    linear_acceleration_ptr_ = &pointer_struct->sensorDataPointer->highG_data.hg_az;
 
-    altitude_history_ptr_ =
-        &pointer_struct->dataloggerTHDVarsPointer.altitude_history_6;
-    IMU_acceleration_history_ptr_ =
-        &pointer_struct->dataloggerTHDVarsPointer.IMU_acceleration_history_6;
+    altitude_history_ptr_ = &pointer_struct->dataloggerTHDVarsPointer.altitude_history_6;
+    IMU_acceleration_history_ptr_ = &pointer_struct->dataloggerTHDVarsPointer.IMU_acceleration_history_6;
 }
 
 /**
@@ -157,8 +155,7 @@ void HistoryBufferFSM6::tickFSM() {
         case FSM_State::STATE_COAST_GNC:
             coast_timer_ = chVTGetSystemTime() - burnout_time_;
 
-            if (fabs((*altitude_history_ptr_).getCurrentAverage() -
-                     (*altitude_history_ptr_).getPastAverage()) <
+            if (fabs((*altitude_history_ptr_).getCurrentAverage() - (*altitude_history_ptr_).getPastAverage()) <
                 apogee_altimeter_threshold) {
                 rocket_state_ = FSM_State::STATE_APOGEE_DETECT;
                 apogee_time_ = chVTGetSystemTime();
@@ -181,8 +178,7 @@ void HistoryBufferFSM6::tickFSM() {
 
         case FSM_State::STATE_APOGEE_DETECT:
             // If the 0 velocity was too brief, go back to coast
-            if (fabs((*altitude_history_ptr_).getCurrentAverage() -
-                     (*altitude_history_ptr_).getPastAverage()) >
+            if (fabs((*altitude_history_ptr_).getCurrentAverage() - (*altitude_history_ptr_).getPastAverage()) >
                 apogee_altimeter_threshold) {
                 rocket_state_ = FSM_State::STATE_COAST_GNC;
                 break;
@@ -201,14 +197,12 @@ void HistoryBufferFSM6::tickFSM() {
         case FSM_State::STATE_APOGEE:
             apogee_timer_ = chVTGetSystemTime() - apogee_time_;
             if (fabs((*IMU_acceleration_history_ptr_).getCurrentAverage() -
-                     (*IMU_acceleration_history_ptr_).getPastAverage()) >
-                drogue_acceleration_change_threshold_imu) {
+                     (*IMU_acceleration_history_ptr_).getPastAverage()) > drogue_acceleration_change_threshold_imu) {
                 rocket_state_ = FSM_State::STATE_DROGUE_DETECT;
                 break;
             }
 
-            if (TIME_I2MS(apogee_timer_) <
-                drogue_deploy_time_since_apogee_threshold) {
+            if (TIME_I2MS(apogee_timer_) < drogue_deploy_time_since_apogee_threshold) {
                 rocket_state_ = FSM_State::STATE_APOGEE;
             } else {
                 rocket_state_ = FSM_State::STATE_DROGUE;
@@ -217,10 +211,8 @@ void HistoryBufferFSM6::tickFSM() {
             break;
 
         case FSM_State::STATE_DROGUE_DETECT:
-            if (fabs(
-                    (*altitude_history_ptr_)
-                        .getCurrentSecondDerivativeAverage() -
-                    (*altitude_history_ptr_).getPastSecondDerivativeAverage()) >
+            if (fabs((*altitude_history_ptr_).getCurrentSecondDerivativeAverage() -
+                     (*altitude_history_ptr_).getPastSecondDerivativeAverage()) >
                 drogue_acceleration_change_threshold_altimeter) {
                 rocket_state_ = FSM_State::STATE_DROGUE;
                 drogue_time_ = chVTGetSystemTime();
@@ -236,15 +228,13 @@ void HistoryBufferFSM6::tickFSM() {
             drogue_timer_ = chVTGetSystemTime() - drogue_time_;
             if (TIME_I2MS(drogue_timer_) > refresh_timer) {
                 if (fabs((*IMU_acceleration_history_ptr_).getCurrentAverage() -
-                         (*IMU_acceleration_history_ptr_).getPastAverage()) >
-                    main_acceleration_change_threshold_imu) {
+                         (*IMU_acceleration_history_ptr_).getPastAverage()) > main_acceleration_change_threshold_imu) {
                     rocket_state_ = FSM_State::STATE_MAIN_DETECT;
                     break;
                 }
             }
 
-            if (TIME_I2MS(drogue_timer_) <
-                main_deploy_time_since_drogue_threshold) {
+            if (TIME_I2MS(drogue_timer_) < main_deploy_time_since_drogue_threshold) {
                 rocket_state_ = FSM_State::STATE_DROGUE;
 
             } else {
@@ -254,10 +244,8 @@ void HistoryBufferFSM6::tickFSM() {
             break;
 
         case FSM_State::STATE_MAIN_DETECT:
-            if (fabs(
-                    (*altitude_history_ptr_)
-                        .getCurrentSecondDerivativeAverage() -
-                    (*altitude_history_ptr_).getPastSecondDerivativeAverage()) >
+            if (fabs((*altitude_history_ptr_).getCurrentSecondDerivativeAverage() -
+                     (*altitude_history_ptr_).getPastSecondDerivativeAverage()) >
                 main_acceleration_change_threshold_altimeter) {
                 rocket_state_ = FSM_State::STATE_MAIN;
                 main_time_ = chVTGetSystemTime();
@@ -270,16 +258,14 @@ void HistoryBufferFSM6::tickFSM() {
         case FSM_State::STATE_MAIN:
             main_timer_ = chVTGetSystemTime() - main_time_;
 
-            if (fabs((*altitude_history_ptr_).getCurrentAverage() -
-                     (*altitude_history_ptr_).getPastAverage()) <
+            if (fabs((*altitude_history_ptr_).getCurrentAverage() - (*altitude_history_ptr_).getPastAverage()) <
                 landing_altimeter_threshold) {
                 rocket_state_ = FSM_State::STATE_LANDED_DETECT;
                 landing_time_ = chVTGetSystemTime();
                 break;
             }
 
-            if (TIME_I2MS(main_timer_) <
-                main_deploy_time_since_drogue_threshold) {
+            if (TIME_I2MS(main_timer_) < main_deploy_time_since_drogue_threshold) {
                 rocket_state_ = FSM_State::STATE_MAIN;
 
             } else {
@@ -290,8 +276,7 @@ void HistoryBufferFSM6::tickFSM() {
 
         case FSM_State::STATE_LANDED_DETECT:
             // If the 0 velocity was too brief, go back to main
-            if (fabs((*altitude_history_ptr_).getCurrentAverage() -
-                     (*altitude_history_ptr_).getPastAverage()) >
+            if (fabs((*altitude_history_ptr_).getCurrentAverage() - (*altitude_history_ptr_).getPastAverage()) >
                 landing_altimeter_threshold) {
                 rocket_state_ = FSM_State::STATE_MAIN;
                 break;

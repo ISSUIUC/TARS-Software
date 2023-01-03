@@ -37,8 +37,7 @@ class RHNRFSPIDriver : public RHGenericDriver {
     /// communications with the SPI device that uis iused by this Driver.
     /// \param[in] spi Reference to the SPI interface to use. The default is to
     /// use a default built-in Hardware interface.
-    RHNRFSPIDriver(uint8_t slaveSelectPin = SS,
-                   RHGenericSPI& spi = hardware_spi);
+    RHNRFSPIDriver(uint8_t slaveSelectPin = SS, RHGenericSPI& spi = hardware_spi);
 
     /// Initialise the Driver transport hardware and software.
     /// Make sure the Driver is properly configured before calling init().

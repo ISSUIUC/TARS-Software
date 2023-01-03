@@ -23,9 +23,7 @@ RingBuffer::RingBuffer() : _head(0), _tail(0), _overruns(0), _underruns(0) {}
 
 bool RingBuffer::isEmpty() { return _head == _tail; }
 
-bool RingBuffer::isFull() {
-    return ((_head + 1) % ARDUINO_RINGBUFFER_SIZE) == _tail;
-}
+bool RingBuffer::isFull() { return ((_head + 1) % ARDUINO_RINGBUFFER_SIZE) == _tail; }
 
 bool RingBuffer::write(uint8_t ch) {
     if (isFull()) {
@@ -77,8 +75,7 @@ void HardwareSerial::begin(unsigned long baud) {
     USART_InitStructure.USART_StopBits = USART_StopBits_1;
     USART_InitStructure.USART_Parity = USART_Parity_No;
     USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
-    USART_InitStructure.USART_HardwareFlowControl =
-        USART_HardwareFlowControl_None;
+    USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
 
     // Different for each USART:
     if (_usart == USART1) {
@@ -156,8 +153,7 @@ void HardwareSerial::begin(unsigned long baud) {
     } else if (_usart == UART5) {
         // Initialise the clocks for this USART and its RX, TX pins port
         RCC_APB1PeriphClockCmd(RCC_APB1Periph_UART5, ENABLE);
-        RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC | RCC_AHB1Periph_GPIOD,
-                               ENABLE);
+        RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC | RCC_AHB1Periph_GPIOD, ENABLE);
 
         GPIO_PinAFConfig(GPIOC, GPIO_PinSource12, GPIO_AF_UART5);
         GPIO_PinAFConfig(GPIOD, GPIO_PinSource2, GPIO_AF_UART5);
@@ -218,9 +214,8 @@ void USART1_IRQHandler(void) {
     if (USART_GetITStatus(USART1, USART_IT_TXE) != RESET) {
         // Transmitter is empty, maybe send another char?
         if (Serial1._txRingBuffer.isEmpty())
-            USART_ITConfig(
-                USART1, USART_IT_TXE,
-                DISABLE);  // No more to send, disable the TX interrupt
+            USART_ITConfig(USART1, USART_IT_TXE,
+                           DISABLE);  // No more to send, disable the TX interrupt
         else
             USART_SendData(USART1, Serial1._txRingBuffer.read());
     }
@@ -233,9 +228,8 @@ void USART2_IRQHandler(void) {
     if (USART_GetITStatus(USART2, USART_IT_TXE) != RESET) {
         // Transmitter is empty, maybe send another char?
         if (Serial2._txRingBuffer.isEmpty())
-            USART_ITConfig(
-                USART2, USART_IT_TXE,
-                DISABLE);  // No more to send, disable the TX interrupt
+            USART_ITConfig(USART2, USART_IT_TXE,
+                           DISABLE);  // No more to send, disable the TX interrupt
         else
             USART_SendData(USART2, Serial2._txRingBuffer.read());
     }
@@ -248,9 +242,8 @@ void USART3_IRQHandler(void) {
     if (USART_GetITStatus(USART3, USART_IT_TXE) != RESET) {
         // Transmitter is empty, maybe send another char?
         if (Serial3._txRingBuffer.isEmpty())
-            USART_ITConfig(
-                USART3, USART_IT_TXE,
-                DISABLE);  // No more to send, disable the TX interrupt
+            USART_ITConfig(USART3, USART_IT_TXE,
+                           DISABLE);  // No more to send, disable the TX interrupt
         else
             USART_SendData(USART3, Serial3._txRingBuffer.read());
     }
@@ -263,9 +256,8 @@ void UART4_IRQHandler(void) {
     if (USART_GetITStatus(UART4, USART_IT_TXE) != RESET) {
         // Transmitter is empty, maybe send another char?
         if (Serial4._txRingBuffer.isEmpty())
-            USART_ITConfig(
-                UART4, USART_IT_TXE,
-                DISABLE);  // No more to send, disable the TX interrupt
+            USART_ITConfig(UART4, USART_IT_TXE,
+                           DISABLE);  // No more to send, disable the TX interrupt
         else
             USART_SendData(UART4, Serial4._txRingBuffer.read());
     }
@@ -278,9 +270,8 @@ void UART5_IRQHandler(void) {
     if (USART_GetITStatus(UART5, USART_IT_TXE) != RESET) {
         // Transmitter is empty, maybe send another char?
         if (Serial5._txRingBuffer.isEmpty())
-            USART_ITConfig(
-                UART5, USART_IT_TXE,
-                DISABLE);  // No more to send, disable the TX interrupt
+            USART_ITConfig(UART5, USART_IT_TXE,
+                           DISABLE);  // No more to send, disable the TX interrupt
         else
             USART_SendData(UART5, Serial5._txRingBuffer.read());
     }
@@ -293,9 +284,8 @@ void USART6_IRQHandler(void) {
     if (USART_GetITStatus(USART6, USART_IT_TXE) != RESET) {
         // Transmitter is empty, maybe send another char?
         if (Serial6._txRingBuffer.isEmpty())
-            USART_ITConfig(
-                USART6, USART_IT_TXE,
-                DISABLE);  // No more to send, disable the TX interrupt
+            USART_ITConfig(USART6, USART_IT_TXE,
+                           DISABLE);  // No more to send, disable the TX interrupt
         else
             USART_SendData(USART6, Serial6._txRingBuffer.read());
     }

@@ -14,11 +14,11 @@
  * @brief      The implementation of the finite state machine class that governs
  * state transitions.
  *
- * The TimerFSM is a collection of barebones logic that only uses vertical acceleration to detect BOOST and BURNOUT. After these states, 
- * the transitions are entirely dictated by predetermined time intervals that are calculated using OpenRocket and/or SILSIM simulations. 
- * This FSM is useful as a sort of control variable to compare against the other ones, and also ensures that the GNC flaps do not retract at the 
- * wrong time. 
- * 
+ * The TimerFSM is a collection of barebones logic that only uses vertical acceleration to detect BOOST and BURNOUT.
+ * After these states, the transitions are entirely dictated by predetermined time intervals that are calculated using
+ * OpenRocket and/or SILSIM simulations. This FSM is useful as a sort of control variable to compare against the other
+ * ones, and also ensures that the GNC flaps do not retract at the wrong time.
+ *
  * This is a highly critical software module and should be tested throughly in
  * simulation and on hardware targets.
  *
@@ -42,8 +42,7 @@
 TimerFSM::TimerFSM(pointers *ptr) {
     pointer_struct = ptr;
     // Get the linear accelration from the High-G IMU
-    linear_acceleration_ptr_ =
-        &pointer_struct->sensorDataPointer->highG_data.hg_az;
+    linear_acceleration_ptr_ = &pointer_struct->sensorDataPointer->highG_data.hg_az;
 }
 
 /**
@@ -177,8 +176,7 @@ void TimerFSM::tickFSM() {
 
         case FSM_State::STATE_DROGUE:
             drogue_timer_ = chVTGetSystemTime() - drogue_time_;
-            if (TIME_I2MS(drogue_timer_) >
-                drogue_deploy_time_since_apogee_threshold) {
+            if (TIME_I2MS(drogue_timer_) > drogue_deploy_time_since_apogee_threshold) {
                 rocket_state_ = FSM_State::STATE_MAIN_DETECT;
                 main_time_ = chVTGetSystemTime();
             }
@@ -190,8 +188,7 @@ void TimerFSM::tickFSM() {
 
         case FSM_State::STATE_MAIN:
             main_timer_ = chVTGetSystemTime() - main_time_;
-            if (TIME_I2MS(main_timer_) >
-                main_deploy_time_since_drogue_threshold) {
+            if (TIME_I2MS(main_timer_) > main_deploy_time_since_drogue_threshold) {
                 rocket_state_ = FSM_State::STATE_LANDED_DETECT;
             }
             break;

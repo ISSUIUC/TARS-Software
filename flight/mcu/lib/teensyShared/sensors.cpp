@@ -37,8 +37,7 @@
  * @param arg Contains pointers to various objects needed by the low-g IMU.
  *
  */
-void lowGimuTickFunction(LSM9DS1* lsm, DataLogBuffer* data_log_buffer,
-                         LowGData* lowG_Data) {
+void lowGimuTickFunction(LSM9DS1* lsm, DataLogBuffer* data_log_buffer, LowGData* lowG_Data) {
     chSysLock();
     lsm->readAccel();
     lsm->readGyro();
@@ -95,8 +94,7 @@ void lowGimuTickFunction(LSM9DS1* lsm, DataLogBuffer* data_log_buffer,
  * @param arg Contains pointers to various objects needed by the GPS.
  *
  */
-void gpsTickFunction(SFE_UBLOX_GNSS* gps, DataLogBuffer* data_log_buffer,
-                     GpsData* gps_data) {
+void gpsTickFunction(SFE_UBLOX_GNSS* gps, DataLogBuffer* data_log_buffer, GpsData* gps_data) {
     // get read timestamp
     systime_t timeStamp_GPS = chVTGetSystemTime();
 
@@ -163,8 +161,7 @@ void gpsTickFunction(SFE_UBLOX_GNSS* gps, DataLogBuffer* data_log_buffer,
  * @param arg Contains pointers to the various objects needed by the high-g IMU.
  *
  */
-void highGimuTickFunction(QwiicKX134* highG, DataLogBuffer* data_log_buffer,
-                          HighGData* highg_data) {
+void highGimuTickFunction(QwiicKX134* highG, DataLogBuffer* data_log_buffer, HighGData* highg_data) {
     // Read data from high g IMU
     chSysLock();
     auto data = highG->getAccelData();
@@ -199,8 +196,7 @@ void highGimuTickFunction(QwiicKX134* highG, DataLogBuffer* data_log_buffer,
  *
  */
 // void barometerTickFunction(pointers *pointer_struct) {
-void barometerTickFunction(MS5611* barometer, DataLogBuffer* data_log_buffer,
-                           BarometerData* barometer_data) {
+void barometerTickFunction(MS5611* barometer, DataLogBuffer* data_log_buffer, BarometerData* barometer_data) {
     // Reads data from the barometer
     barometer->read(12);
 
@@ -209,12 +205,10 @@ void barometerTickFunction(MS5611* barometer, DataLogBuffer* data_log_buffer,
 
     // Log pressure and temperature
     barometer_data->pressure =
-        (barometer->getPressure() * 0.01) +
-        26.03;  // Converting both of them into correct unit (in mbar)
+        (barometer->getPressure() * 0.01) + 26.03;  // Converting both of them into correct unit (in mbar)
     // also the barometer was 26.03 mbar off, so we add that on.
     barometer_data->temperature =
-        barometer->getTemperature() *
-        0.01;  // Converting both of them into correct unit (in degC)
+        barometer->getTemperature() * 0.01;  // Converting both of them into correct unit (in degC)
 
     // Compute altitude from pres and temp based on Hypsometric equation
     // h = RTln(p0/p)/g, R = specific gas constant; T in K, g for grav. accel.;
@@ -228,8 +222,8 @@ void barometerTickFunction(MS5611* barometer, DataLogBuffer* data_log_buffer,
     // (pointer_struct->sensorDataPointer->barometer_data.temperature+273.15)/9.8/0.029;
 
     // A version with no divide operation to enable faster computation, probably
-    barometer_data->altitude = -log(barometer_data->pressure * 0.000987) *
-                               (barometer_data->temperature + 273.15) * 29.254;
+    barometer_data->altitude =
+        -log(barometer_data->pressure * 0.000987) * (barometer_data->temperature + 273.15) * 29.254;
 
     data_log_buffer->pushBarometerFifo(barometer_data);
 
@@ -243,8 +237,7 @@ void barometerTickFunction(MS5611* barometer, DataLogBuffer* data_log_buffer,
 #endif
 }
 
-void voltageTickFunction(VoltageSensor* voltage, DataLogBuffer* data_log_buffer,
-                         VoltageData* voltage_data) {
+void voltageTickFunction(VoltageSensor* voltage, DataLogBuffer* data_log_buffer, VoltageData* voltage_data) {
     auto data = voltage->read();
     *voltage_data = data;
     data_log_buffer->pushVoltageFifo(&data);

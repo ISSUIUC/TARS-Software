@@ -33,8 +33,7 @@ HardwareSPI SPI(1);
 #define SPI_CLOCK_DIV1 (VARIANT_MCK / 5250000)    // 16MHz
 #endif
 
-RHHardwareSPI::RHHardwareSPI(Frequency frequency, BitOrder bitOrder,
-                             DataMode dataMode)
+RHHardwareSPI::RHHardwareSPI(Frequency frequency, BitOrder bitOrder, DataMode dataMode)
     : RHGenericSPI(frequency, bitOrder, dataMode) {}
 
 uint8_t RHHardwareSPI::transfer(uint8_t data) { return SPI.transfer(data); }
@@ -54,8 +53,7 @@ void RHHardwareSPI::detachInterrupt() {
 void RHHardwareSPI::begin() {
     // Sigh: there are no common symbols for some of these SPI options across
     // all platforms
-#if (RH_PLATFORM == RH_PLATFORM_ARDUINO) || \
-    (RH_PLATFORM == RH_PLATFORM_UNO32) ||   \
+#if (RH_PLATFORM == RH_PLATFORM_ARDUINO) || (RH_PLATFORM == RH_PLATFORM_UNO32) || \
     (RH_PLATFORM == RH_PLATFORM_CHIPKIT_CORE)
     uint8_t dataMode;
     if (_dataMode == DataMode0)
@@ -68,14 +66,12 @@ void RHHardwareSPI::begin() {
         dataMode = SPI_MODE3;
     else
         dataMode = SPI_MODE0;
-#if (RH_PLATFORM == RH_PLATFORM_ARDUINO) && defined(__arm__) && \
-    defined(CORE_TEENSY)
+#if (RH_PLATFORM == RH_PLATFORM_ARDUINO) && defined(__arm__) && defined(CORE_TEENSY)
     // Temporary work-around due to problem where avr_emulation.h does not work
     // properly for the setDataMode() cal
     SPCR &= ~SPI_MODE_MASK;
 #else
-#if (RH_PLATFORM == RH_PLATFORM_ARDUINO) && defined(__arm__) && \
-    defined(ARDUINO_ARCH_SAMD)
+#if (RH_PLATFORM == RH_PLATFORM_ARDUINO) && defined(__arm__) && defined(ARDUINO_ARCH_SAMD)
     // Zero requires begin() before anything else :-)
     SPI.begin();
 #endif
@@ -83,8 +79,7 @@ void RHHardwareSPI::begin() {
     SPI.setDataMode(dataMode);
 #endif
 
-#if (RH_PLATFORM == RH_PLATFORM_ARDUINO) && defined(__arm__) && \
-    (defined(ARDUINO_SAM_DUE) || defined(ARDUINO_ARCH_SAMD))
+#if (RH_PLATFORM == RH_PLATFORM_ARDUINO) && defined(__arm__) && (defined(ARDUINO_SAM_DUE) || defined(ARDUINO_ARCH_SAMD))
     // Arduino Due in 1.5.5 has its own BitOrder :-(
     // So too does Arduino Zero
     ::BitOrder bitOrder;

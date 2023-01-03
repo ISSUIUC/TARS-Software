@@ -42,8 +42,7 @@
 // address and header and payload to be included in the 64 byte encryption
 // limit. the one byte payload length is not encrpyted
 #ifndef RH_RF69_MAX_MESSAGE_LEN
-#define RH_RF69_MAX_MESSAGE_LEN \
-    (RH_RF69_MAX_ENCRYPTABLE_PAYLOAD_LEN - RH_RF69_HEADER_LEN)
+#define RH_RF69_MAX_MESSAGE_LEN (RH_RF69_MAX_ENCRYPTABLE_PAYLOAD_LEN - RH_RF69_HEADER_LEN)
 #endif
 
 // Keep track of the mode the RF69 is in
@@ -730,8 +729,8 @@ class RH_RF69 : public RHSPIDriver {
         GFSK_Rb250Fd250,    ///< GFSK, Whitening, Rb = 250kbs,  Fd = 250kHz
         GFSK_Rb55555Fd50,   ///< GFSK, Whitening, Rb = 55555kbs,Fd = 50kHz
 
-        OOK_Rb1Bw1,     ///< OOK, Whitening, Rb = 1kbs,    Rx Bandwidth = 1kHz.
-        OOK_Rb1_2Bw75,  ///< OOK, Whitening, Rb = 1.2kbs,  Rx Bandwidth = 75kHz.
+        OOK_Rb1Bw1,        ///< OOK, Whitening, Rb = 1kbs,    Rx Bandwidth = 1kHz.
+        OOK_Rb1_2Bw75,     ///< OOK, Whitening, Rb = 1.2kbs,  Rx Bandwidth = 75kHz.
         OOK_Rb2_4Bw4_8,    ///< OOK, Whitening, Rb = 2.4kbs,  Rx Bandwidth
                            ///< = 4.8kHz.
         OOK_Rb4_8Bw9_6,    ///< OOK, Whitening, Rb = 4.8kbs,  Rx Bandwidth
@@ -740,7 +739,7 @@ class RH_RF69 : public RHSPIDriver {
                            ///< = 19.2kHz.
         OOK_Rb19_2Bw38_4,  ///< OOK, Whitening, Rb = 19.2kbs, Rx Bandwidth
                            ///< = 38.4kHz.
-        OOK_Rb32Bw64,  ///< OOK, Whitening, Rb = 32kbs,   Rx Bandwidth = 64kHz.
+        OOK_Rb32Bw64,      ///< OOK, Whitening, Rb = 32kbs,   Rx Bandwidth = 64kHz.
 
         //	Test,
     } ModemConfigChoice;
@@ -765,8 +764,7 @@ class RH_RF69 : public RHSPIDriver {
     /// boards, any digital pin may be used. \param[in] spi Pointer to the SPI
     /// interface object to use.
     ///                Defaults to the standard Arduino hardware SPI interface
-    RH_RF69(uint8_t slaveSelectPin = SS, uint8_t interruptPin = 2,
-            RHGenericSPI& spi = hardware_spi);
+    RH_RF69(uint8_t slaveSelectPin = SS, uint8_t interruptPin = 2, RHGenericSPI& spi = hardware_spi);
 
     /// Initialises this instance and the radio module connected to it.
     /// The following steps are taken:
@@ -836,8 +834,7 @@ class RH_RF69 : public RHSPIDriver {
     /// limited to 1% and a maximum VSWR of 3:1 at the antenna port. \param
     /// ishighpowermodule Set to true if the connected module is a high power
     /// module RFM69HW
-    void setTxPower(int8_t power,
-                    bool ishighpowermodule = RH_RF69_DEFAULT_HIGHPOWER);
+    void setTxPower(int8_t power, bool ishighpowermodule = RH_RF69_DEFAULT_HIGHPOWER);
 
     /// Sets all the registers required to configure the data modem in the RF69,
     /// including the data rate, bandwidths etc. You can use this to configure

@@ -86,9 +86,7 @@ class HistoryBuffer {
 
             if (timestampArr[currentIndex] - timestampArr[pastIndex] != 0) {
                 firstDiff[i] = (arr[currentIndex] - arr[pastIndex]) /
-                               (TIME_I2MS(timestampArr[currentIndex] -
-                                          timestampArr[pastIndex]) *
-                                0.001);
+                               (TIME_I2MS(timestampArr[currentIndex] - timestampArr[pastIndex]) * 0.001);
             } else {
                 firstDiff[i] = (arr[currentIndex] - arr[pastIndex]) / (0.02);
             }
@@ -99,13 +97,10 @@ class HistoryBuffer {
         // 49-1
         float secondDiff[(size / 2) - 2];
         for (unsigned i = 0; i < (size / 2) - 2; i++) {
-            if (timestampArr[(frontIndex + i) % size] -
-                    timestampArr[(frontIndex + i + 1) % size] !=
-                0) {
+            if (timestampArr[(frontIndex + i) % size] - timestampArr[(frontIndex + i + 1) % size] != 0) {
                 secondDiff[i] =
                     (firstDiff[i] - firstDiff[i + 1]) /
-                    (TIME_I2MS(timestampArr[(frontIndex + i) % size] -
-                               timestampArr[(frontIndex + i + 1) % size]) *
+                    (TIME_I2MS(timestampArr[(frontIndex + i) % size] - timestampArr[(frontIndex + i + 1) % size]) *
                      0.001);
             } else {
                 secondDiff[i] = (firstDiff[i] - firstDiff[i + 1]) / (0.02);
@@ -128,26 +123,19 @@ class HistoryBuffer {
             int currentIndex = (frontIndex + i) % size;
             int pastIndex = (frontIndex + i + 1) % size;
             if (timestampArr[currentIndex] - timestampArr[pastIndex] != 0) {
-                firstDiff[i - (size / 2)] =
-                    (arr[currentIndex] - arr[pastIndex]) /
-                    (TIME_I2MS(timestampArr[currentIndex] -
-                               timestampArr[pastIndex]) *
-                     0.001);
+                firstDiff[i - (size / 2)] = (arr[currentIndex] - arr[pastIndex]) /
+                                            (TIME_I2MS(timestampArr[currentIndex] - timestampArr[pastIndex]) * 0.001);
             } else {
-                firstDiff[i - (size / 2)] =
-                    (arr[currentIndex] - arr[pastIndex]) / (0.02);
+                firstDiff[i - (size / 2)] = (arr[currentIndex] - arr[pastIndex]) / (0.02);
             }
         }
 
         float secondDiff[(size / 2) - 2];
         for (unsigned i = 0; i < (size / 2) - 2; i++) {
-            if (timestampArr[(frontIndex + i) % size] -
-                    timestampArr[(frontIndex + i + 1) % size] !=
-                0) {
+            if (timestampArr[(frontIndex + i) % size] - timestampArr[(frontIndex + i + 1) % size] != 0) {
                 secondDiff[i] =
                     (firstDiff[i] - firstDiff[i + 1]) /
-                    (TIME_I2MS(timestampArr[(frontIndex + i) % size] -
-                               timestampArr[(frontIndex + i + 1) % size]) *
+                    (TIME_I2MS(timestampArr[(frontIndex + i) % size] - timestampArr[(frontIndex + i + 1) % size]) *
                      0.001);
             } else {
                 secondDiff[i] = (firstDiff[i] - firstDiff[i + 1]) / (0.02);

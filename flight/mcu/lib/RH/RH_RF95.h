@@ -555,12 +555,12 @@ class RH_RF95 : public RHSPIDriver {
     typedef enum {
         Bw125Cr45Sf128 = 0,  ///< Bw = 125 kHz, Cr = 4/5, Sf = 128chips/symbol,
                              ///< CRC on. Default medium range
-        Bw500Cr45Sf128,  ///< Bw = 500 kHz, Cr = 4/5, Sf = 128chips/symbol, CRC
-                         ///< on. Fast+short range
-        Bw31_25Cr48Sf512,  ///< Bw = 31.25 kHz, Cr = 4/8, Sf = 512chips/symbol,
-                           ///< CRC on. Slow+long range
-        Bw125Cr48Sf4096,   ///< Bw = 125 kHz, Cr = 4/8, Sf = 4096chips/symbol,
-                           ///< CRC on. Slow+long range
+        Bw500Cr45Sf128,      ///< Bw = 500 kHz, Cr = 4/5, Sf = 128chips/symbol, CRC
+                             ///< on. Fast+short range
+        Bw31_25Cr48Sf512,    ///< Bw = 31.25 kHz, Cr = 4/8, Sf = 512chips/symbol,
+                             ///< CRC on. Slow+long range
+        Bw125Cr48Sf4096,     ///< Bw = 125 kHz, Cr = 4/8, Sf = 4096chips/symbol,
+                             ///< CRC on. Slow+long range
     } ModemConfigChoice;
 
     /// Constructor. You can have multiple instances, but each instance must
@@ -584,8 +584,7 @@ class RH_RF95 : public RHSPIDriver {
     /// digital pin may be used. \param[in] spi Pointer to the SPI interface
     /// object to use.
     ///                Defaults to the standard Arduino hardware SPI interface
-    RH_RF95(uint8_t slaveSelectPin = SS, uint8_t interruptPin = 2,
-            RHGenericSPI& spi = hardware_spi);
+    RH_RF95(uint8_t slaveSelectPin = SS, uint8_t interruptPin = 2, RHGenericSPI& spi = hardware_spi);
 
     /// Initialise the Driver transport hardware and software.
     /// Make sure the Driver is properly configured before calling init().
