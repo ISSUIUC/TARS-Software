@@ -27,9 +27,8 @@ char** _simulator_argv;
 // Returns milliseconds since beginning of day
 unsigned long time_in_millis() {
     struct timeval te;
-    gettimeofday(&te, NULL);  // get current time
-    unsigned long milliseconds =
-        te.tv_sec * 1000LL + te.tv_usec / 1000;  // caclulate milliseconds
+    gettimeofday(&te, NULL);                                              // get current time
+    unsigned long milliseconds = te.tv_sec * 1000LL + te.tv_usec / 1000;  // caclulate milliseconds
     return milliseconds;
 }
 

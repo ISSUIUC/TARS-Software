@@ -9,8 +9,7 @@
 // Each interrupt can be handled by a different instance of RH_RF95, allowing
 // you to have 2 or more LORAs per Arduino
 RH_RF95* RH_RF95::_deviceForInterrupt[RH_RF95_NUM_INTERRUPTS] = {0, 0, 0};
-uint8_t RH_RF95::_interruptCount =
-    0;  // Index into _deviceForInterrupt for next device
+uint8_t RH_RF95::_interruptCount = 0;  // Index into _deviceForInterrupt for next device
 
 // These are indexed by the values of ModemConfigChoice
 // Stored in flash (program) memory to save SRAM
@@ -23,8 +22,7 @@ PROGMEM static const RH_RF95::ModemConfig MODEM_CONFIG_TABLE[] = {
 
 };
 
-RH_RF95::RH_RF95(uint8_t slaveSelectPin, uint8_t interruptPin,
-                 RHGenericSPI& spi)
+RH_RF95::RH_RF95(uint8_t slaveSelectPin, uint8_t interruptPin, RHGenericSPI& spi)
     : RHSPIDriver(slaveSelectPin, spi), _rxBufValid(0) {
     _interruptPin = interruptPin;
     _myInterruptIndex = 0xff;  // Not allocated yet
@@ -43,8 +41,7 @@ bool RH_RF95::init() {
     // No way to check the device type :-(
 
     // Set sleep mode, so we can also set LORA mode:
-    spiWrite(RH_RF95_REG_01_OP_MODE,
-             RH_RF95_MODE_SLEEP | RH_RF95_LONG_RANGE_MODE);
+    spiWrite(RH_RF95_REG_01_OP_MODE, RH_RF95_MODE_SLEEP | RH_RF95_LONG_RANGE_MODE);
     delay(10);  // Wait for sleep mode to take over from say, CAD
     // Check we are in sleep mode, with LORA set
     auto val = spiRead(RH_RF95_REG_01_OP_MODE);
@@ -117,16 +114,14 @@ bool RH_RF95::init() {
 void RH_RF95::handleInterrupt() {
     // Read the interrupt register
     uint8_t irq_flags = spiRead(RH_RF95_REG_12_IRQ_FLAGS);
-    if (_mode == RHModeRx &&
-        irq_flags & (RH_RF95_RX_TIMEOUT | RH_RF95_PAYLOAD_CRC_ERROR)) {
+    if (_mode == RHModeRx && irq_flags & (RH_RF95_RX_TIMEOUT | RH_RF95_PAYLOAD_CRC_ERROR)) {
         _rxBad++;
     } else if (_mode == RHModeRx && irq_flags & RH_RF95_RX_DONE) {
         // Have received a packet
         uint8_t len = spiRead(RH_RF95_REG_13_RX_NB_BYTES);
 
         // Reset the fifo read ptr to the beginning of the packet
-        spiWrite(RH_RF95_REG_0D_FIFO_ADDR_PTR,
-                 spiRead(RH_RF95_REG_10_FIFO_RX_CURRENT_ADDR));
+        spiWrite(RH_RF95_REG_0D_FIFO_ADDR_PTR, spiRead(RH_RF95_REG_10_FIFO_RX_CURRENT_ADDR));
         spiBurstRead(RH_RF95_REG_00_FIFO, _buf, len);
         _bufLen = len;
         spiWrite(RH_RF95_REG_12_IRQ_FLAGS, 0xff);  // Clear all IRQ flags
@@ -168,8 +163,7 @@ void RH_RF95::validateRxBuf() {
     _rxHeaderFrom = _buf[1];
     _rxHeaderId = _buf[2];
     _rxHeaderFlags = _buf[3];
-    if (_promiscuous || _rxHeaderTo == _thisAddress ||
-        _rxHeaderTo == RH_BROADCAST_ADDRESS) {
+    if (_promiscuous || _rxHeaderTo == _thisAddress || _rxHeaderTo == RH_BROADCAST_ADDRESS) {
         _rxGood++;
         _rxBufValid = true;
     }
@@ -194,8 +188,7 @@ bool RH_RF95::recv(uint8_t* buf, uint8_t* len) {
     if (buf && len) {
         ATOMIC_BLOCK_START;
         // Skip the 4 headers that are at the beginning of the rxBuf
-        if (*len > _bufLen - RH_RF95_HEADER_LEN)
-            *len = _bufLen - RH_RF95_HEADER_LEN;
+        if (*len > _bufLen - RH_RF95_HEADER_LEN) *len = _bufLen - RH_RF95_HEADER_LEN;
         memcpy(buf, _buf + RH_RF95_HEADER_LEN, *len);
         ATOMIC_BLOCK_END;
     }
@@ -228,10 +221,9 @@ bool RH_RF95::send(const uint8_t* data, uint8_t len) {
 
 bool RH_RF95::printRegisters() {
 #ifdef RH_HAVE_SERIAL
-    uint8_t registers[] = {
-        0x01, 0x06, 0x07, 0x08,  0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10,
-        0x11, 0x12, 0x13, 0x014, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1a, 0x1b, 0x1c,
-        0x1d, 0x1e, 0x1f, 0x20,  0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27};
+    uint8_t registers[] = {0x01, 0x06, 0x07, 0x08,  0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10,
+                           0x11, 0x12, 0x13, 0x014, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1a, 0x1b, 0x1c,
+                           0x1d, 0x1e, 0x1f, 0x20,  0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27};
 
     uint8_t i;
     for (i = 0; i < sizeof(registers); i++) {
@@ -331,9 +323,7 @@ void RH_RF95::setSpreadingFactor(int8_t sf) {
         spiWrite(RH_RF95_REG_37_DETECTION_THRESHOLD, 0x0a);
     }
 
-    spiWrite(
-        RH_RF95_REG_1E_MODEM_CONFIG2,
-        (spiRead(RH_RF95_REG_1E_MODEM_CONFIG2) & 0x0f) | ((sf << 4) & 0xf0));
+    spiWrite(RH_RF95_REG_1E_MODEM_CONFIG2, (spiRead(RH_RF95_REG_1E_MODEM_CONFIG2) & 0x0f) | ((sf << 4) & 0xf0));
 }
 
 void RH_RF95::setSignalBandwidth(long sbw) {
@@ -361,8 +351,7 @@ void RH_RF95::setSignalBandwidth(long sbw) {
         bw = 9;
     }
 
-    spiWrite(RH_RF95_REG_1D_MODEM_CONFIG1,
-             (spiRead(RH_RF95_REG_1D_MODEM_CONFIG1) & 0x0f) | (bw << 4));
+    spiWrite(RH_RF95_REG_1D_MODEM_CONFIG1, (spiRead(RH_RF95_REG_1D_MODEM_CONFIG1) & 0x0f) | (bw << 4));
 }
 
 void RH_RF95::setCodingRate4(int8_t denominator) {
@@ -374,8 +363,7 @@ void RH_RF95::setCodingRate4(int8_t denominator) {
 
     int cr = denominator - 4;
 
-    spiWrite(RH_RF95_REG_1D_MODEM_CONFIG1,
-             (spiRead(RH_RF95_REG_1D_MODEM_CONFIG1) & 0xf1) | (cr << 1));
+    spiWrite(RH_RF95_REG_1D_MODEM_CONFIG1, (spiRead(RH_RF95_REG_1D_MODEM_CONFIG1) & 0xf1) | (cr << 1));
 }
 void RH_RF95::setSyncWord(int sw) { spiWrite(RH_RF95_REG_39_SYNC_WORD, sw); }
 
@@ -389,8 +377,7 @@ void RH_RF95::setModemRegisters(const ModemConfig* config) {
 // Set one of the canned FSK Modem configs
 // Returns true if its a valid choice
 bool RH_RF95::setModemConfig(ModemConfigChoice index) {
-    if (index > (signed int)(sizeof(MODEM_CONFIG_TABLE) / sizeof(ModemConfig)))
-        return false;
+    if (index > (signed int)(sizeof(MODEM_CONFIG_TABLE) / sizeof(ModemConfig))) return false;
 
     ModemConfig cfg;
     memcpy_P(&cfg, &MODEM_CONFIG_TABLE[index], sizeof(RH_RF95::ModemConfig));

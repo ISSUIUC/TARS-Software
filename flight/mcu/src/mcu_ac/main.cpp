@@ -33,6 +33,9 @@
 
 #include "ActiveControl.h"
 #include "FSMCollection.h"
+#include "HistoryBufferFSM50.h"
+#include "HistoryBufferFSM6.h"
+#include "KalmanFSM.h"
 #include "MS5611.h"  //Barometer library
 #include "ServoControl.h"
 #include "SparkFunLSM9DS1.h"                       //Low-G IMU Library
@@ -78,17 +81,33 @@ static THD_WORKING_AREA(highgIMU_WA, 8192);
 static THD_WORKING_AREA(servo_WA, 8192);
 static THD_WORKING_AREA(dataLogger_WA, 8192);
 static THD_WORKING_AREA(voltage_WA, 8192);
-static THD_WORKING_AREA(telemetry_WA, 8192);
+static THD_WORKING_AREA(telemetry_sending_WA, 8192);
+static THD_WORKING_AREA(telemetry_buffering_WA, 8192);
 static THD_WORKING_AREA(kalman_WA, 8192);
+/******************************************************************************/
+/* TELEMETRY THREAD                                         */
+
+static THD_FUNCTION(telemetry_buffering_THD, arg) {
+    struct pointers *pointer_struct = (struct pointers *)arg;
+
+    while (pointer_struct->telemetry == nullptr) chThdSleepMilliseconds(50);
+
+    Telemetry &tlm = *pointer_struct->telemetry;
+    while (true) {
+        tlm.buffer_data(sensorData);
+        chThdSleepMilliseconds(80);
+    }
+}
 
 /******************************************************************************/
 /* TELEMETRY THREAD                                         */
 
-static THD_FUNCTION(telemetry_THD, arg) {
+static THD_FUNCTION(telemetry_sending_THD, arg) {
     struct pointers *pointer_struct = (struct pointers *)arg;
 
-    // int packetnum = 0;
+    // Telemetry& tlm = *pointer_struct->telemetry;
     Telemetry tlm;
+    pointer_struct->telemetry = &tlm;
     while (true) {
         tlm.transmit(sensorData);
         pointer_struct->abort = tlm.abort;
@@ -105,33 +124,37 @@ static THD_FUNCTION(rocket_FSM, arg) {
 
     // Implement RocketFSM class and instantiate it here
     // Refer to TemplateFSM for an example
-    TimerFSM stateMachine(pointer_struct);
+    TimerFSM timer_fsm(pointer_struct);
+    HistoryBufferFSM50 history_buffer_fsm_50(pointer_struct);
+    HistoryBufferFSM6 history_buffer_fsm_6(pointer_struct);
+    KalmanFSM kalman_fsm(pointer_struct);
 
     // Add FSM pointer to array of FSMs to be updated
-    RocketFSM *fsm_array[] = {&stateMachine};
+    RocketFSM *fsm_array[] = {&timer_fsm, &history_buffer_fsm_50, &history_buffer_fsm_6, &kalman_fsm};
 
     // Pass array of FSMs to FSMCollection along with number of FSMs in use
-    FSMCollection fsms(fsm_array, 1);
+    FSMCollection<4> fsms(fsm_array);
 
     while (true) {
 #ifdef THREAD_DEBUG
         Serial.println("### Rocket FSM thread entrance");
 #endif
 
-        chMtxLock(
-            &pointer_struct->dataloggerTHDVarsPointer.dataMutex_rocket_state);
+        chMtxLock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_rocket_state);
 
         fsms.tick();
 
-        chMtxUnlock(
-            &pointer_struct->dataloggerTHDVarsPointer.dataMutex_rocket_state);
+        chMtxUnlock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_rocket_state);
 
-        rocketStateData fsm_state;
-        fsms.getStates(&fsm_state);
-        Serial.println((int)fsm_state.rocketState);
+        rocketStateData<4> fsm_state;
+        fsms.getStates(fsm_state);
+        // for (size_t i = 2; i < 3; i++) {
+        //     Serial.print(i);
+        //     Serial.print(": ");
+        //     Serial.println((int) fsm_state.rocketStates[i]);
+        // }
         pointer_struct->sensorDataPointer->rocketState_data = fsm_state;
-        pointer_struct->dataloggerTHDVarsPointer.pushRocketStateFifo(
-            &fsm_state);
+        pointer_struct->dataloggerTHDVarsPointer.pushRocketStateFifo(&fsm_state);
 
         chThdSleepMilliseconds(6);  // FSM runs at 100 Hz
     }
@@ -169,8 +192,7 @@ static THD_FUNCTION(barometer_THD, arg) {
 
     MS5611 *barometer = pointer_struct->barometerPointer;
     DataLogBuffer *data_log_buffer = &pointer_struct->dataloggerTHDVarsPointer;
-    BarometerData *barometer_data =
-        &pointer_struct->sensorDataPointer->barometer_data;
+    BarometerData *barometer_data = &pointer_struct->sensorDataPointer->barometer_data;
 
     while (true) {
 #ifdef THREAD_DEBUG
@@ -240,11 +262,18 @@ static THD_FUNCTION(gps_THD, arg) {
 
 static THD_FUNCTION(kalman_THD, arg) {
     struct pointers *pointer_struct = (struct pointers *)arg;
+
     KalmanFilter KF(pointer_struct);
     KF.Initialize();
-
+    systime_t last = chVTGetSystemTime();
     while (true) {
-        KF.kfTickFunction();
+        // #ifdef THREAD_DEBUG
+        //     Serial.println("In Kalman");
+        // #endif
+        KF.kfTickFunction(TIME_I2MS(chVTGetSystemTime() - last), 13.0);
+        last = chVTGetSystemTime();
+        // Serial.println("kalman");
+        // Serial.println(pointer_struct->sensorDataPointer->state_data.state_x);
 
         chThdSleepMilliseconds(50);
     }
@@ -288,8 +317,7 @@ static THD_FUNCTION(voltage_THD, arg) {
         voltageTickFunction(&volt_sensor, data_log_buffer, volt_data);
         chMtxUnlock(&data_log_buffer->dataMutex_voltage);
 
-        chThdSleepMilliseconds(
-            6);  // Set equal sleep time as the other threads, can change
+        chThdSleepMilliseconds(6);  // Set equal sleep time as the other threads, can change
     }
 }
 
@@ -315,26 +343,19 @@ static THD_FUNCTION(dataLogger_THD, arg) {
  *
  */
 void chSetup() {
-    chThdCreateStatic(telemetry_WA, sizeof(telemetry_WA), NORMALPRIO + 1,
-                      telemetry_THD, &sensor_pointers);
-    chThdCreateStatic(rocket_FSM_WA, sizeof(rocket_FSM_WA), NORMALPRIO + 1,
-                      rocket_FSM, &sensor_pointers);
-    chThdCreateStatic(gps_WA, sizeof(gps_WA), NORMALPRIO + 1, gps_THD,
+    chThdCreateStatic(telemetry_sending_WA, sizeof(telemetry_sending_WA), NORMALPRIO + 1, telemetry_sending_THD,
                       &sensor_pointers);
-    chThdCreateStatic(lowgIMU_WA, sizeof(lowgIMU_WA), NORMALPRIO + 1,
-                      lowgIMU_THD, &sensor_pointers);
-    chThdCreateStatic(barometer_WA, sizeof(barometer_WA), NORMALPRIO + 1,
-                      barometer_THD, &sensor_pointers);
-    chThdCreateStatic(highgIMU_WA, sizeof(highgIMU_WA), NORMALPRIO + 1,
-                      highgIMU_THD, &sensor_pointers);
-    chThdCreateStatic(servo_WA, sizeof(servo_WA), NORMALPRIO + 1, servo_THD,
+    chThdCreateStatic(telemetry_buffering_WA, sizeof(telemetry_buffering_WA), NORMALPRIO + 1, telemetry_buffering_THD,
                       &sensor_pointers);
-    chThdCreateStatic(dataLogger_WA, sizeof(dataLogger_WA), NORMALPRIO + 1,
-                      dataLogger_THD, &sensor_pointers);
-    chThdCreateStatic(voltage_WA, sizeof(voltage_WA), NORMALPRIO + 1,
-                      voltage_THD, &sensor_pointers);
-    chThdCreateStatic(kalman_WA, sizeof(kalman_WA), NORMALPRIO + 1, kalman_THD,
-                      &sensor_pointers);
+    chThdCreateStatic(rocket_FSM_WA, sizeof(rocket_FSM_WA), NORMALPRIO + 1, rocket_FSM, &sensor_pointers);
+    chThdCreateStatic(gps_WA, sizeof(gps_WA), NORMALPRIO + 1, gps_THD, &sensor_pointers);
+    chThdCreateStatic(lowgIMU_WA, sizeof(lowgIMU_WA), NORMALPRIO + 1, lowgIMU_THD, &sensor_pointers);
+    chThdCreateStatic(barometer_WA, sizeof(barometer_WA), NORMALPRIO + 1, barometer_THD, &sensor_pointers);
+    chThdCreateStatic(highgIMU_WA, sizeof(highgIMU_WA), NORMALPRIO + 1, highgIMU_THD, &sensor_pointers);
+    chThdCreateStatic(servo_WA, sizeof(servo_WA), NORMALPRIO + 1, servo_THD, &sensor_pointers);
+    chThdCreateStatic(dataLogger_WA, sizeof(dataLogger_WA), NORMALPRIO + 1, dataLogger_THD, &sensor_pointers);
+    chThdCreateStatic(voltage_WA, sizeof(voltage_WA), NORMALPRIO + 1, voltage_THD, &sensor_pointers);
+    chThdCreateStatic(kalman_WA, sizeof(kalman_WA), NORMALPRIO + 1, kalman_THD, &sensor_pointers);
 
     while (true)
         ;
@@ -421,8 +442,7 @@ void setup() {
     digitalWrite(LED_ORANGE, HIGH);
 
     if (!gps.begin(SPI1, ZOEM8Q0_CS, 4000000)) {
-        Serial.println(
-            "Failed to communicate with ZOEM8Q0 gps. Stalling Program");
+        Serial.println("Failed to communicate with ZOEM8Q0 gps. Stalling Program");
         while (true)
             ;
     } else {
@@ -431,13 +451,14 @@ void setup() {
     digitalWrite(LED_ORANGE, LOW);
 
     gps.setPortOutput(COM_PORT_SPI,
-                      COM_TYPE_UBX);  // Set the SPI port to output UBX only
-                                      // (turn off NMEA noise)
-    gps.saveConfigSelective(
-        VAL_CFG_SUBSEC_IOPORT);  // Save (only) the communications port settings
-                                 // to flash and BBR
-    gps.setNavigationFrequency(5);  // set sampling rate to 5hz
+                      COM_TYPE_UBX);                 // Set the SPI port to output UBX only
+                                                     // (turn off NMEA noise)
+    gps.saveConfigSelective(VAL_CFG_SUBSEC_IOPORT);  // Save (only) the communications port settings
+                                                     // to flash and BBR
+    gps.setNavigationFrequency(5);                   // set sampling rate to 5hz
 
+    // Telemetry tlm;
+    // sensor_pointers.telemetry = &tlm;
     // SD Card Setup
     if (SD.begin(BUILTIN_SDCARD)) {
         char file_extension[6] = ".dat";
@@ -445,16 +466,16 @@ void setup() {
         char data_name[16] = "data";
         // Initialize SD card
         sensor_pointers.dataloggerTHDVarsPointer.dataFile =
-            SD.open(sd_file_namer(data_name, file_extension),
-                    O_CREAT | O_WRITE | O_TRUNC);
+            SD.open(sd_file_namer(data_name, file_extension), O_CREAT | O_WRITE | O_TRUNC);
+
         // print header to file on sd card that lists each variable that is
         // logged
-        sensor_pointers.dataloggerTHDVarsPointer.dataFile.println(
-            "binary logging of sensor_data_t");
+        // auto written =
+        // sensor_pointers.dataloggerTHDVarsPointer.dataFile.println(
+        //     "binary logging of sensor_data_t");
         sensor_pointers.dataloggerTHDVarsPointer.dataFile.flush();
         //
-        Serial.println(
-            sensor_pointers.dataloggerTHDVarsPointer.dataFile.name());
+        Serial.println(sensor_pointers.dataloggerTHDVarsPointer.dataFile.name());
     } else {
         digitalWrite(LED_RED, HIGH);
         digitalWrite(LED_ORANGE, HIGH);

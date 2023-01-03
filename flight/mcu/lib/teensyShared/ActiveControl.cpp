@@ -11,18 +11,14 @@
 #include "rocketFSM.h"
 #include "thresholds.h"
 
-Controller::Controller(struct pointers* pointer_struct,
-                       PWMServo* controller_servo)
+Controller::Controller(struct pointers* pointer_struct, PWMServo* controller_servo)
     : activeControlServos(controller_servo) {
     controller_servo_ = controller_servo;
     stateData_ = &pointer_struct->sensorDataPointer->state_data;
-    current_state =
-        &pointer_struct->sensorDataPointer->rocketState_data.rocketState;
+    current_state = &pointer_struct->sensorDataPointer->rocketState_data.rocketStates[0];
     b_alt = &pointer_struct->sensorDataPointer->barometer_data.altitude;
-    dataMutex_barometer_ =
-        &pointer_struct->dataloggerTHDVarsPointer.dataMutex_barometer;
-    dataMutex_state_ =
-        &pointer_struct->dataloggerTHDVarsPointer.dataMutex_state;
+    dataMutex_barometer_ = &pointer_struct->dataloggerTHDVarsPointer.dataMutex_barometer;
+    dataMutex_state_ = &pointer_struct->dataloggerTHDVarsPointer.dataMutex_state;
 
     /*
      * Startup sequence
@@ -30,9 +26,9 @@ Controller::Controller(struct pointers* pointer_struct,
      * experimentally determined to be the position in which
      * the flaps are perfectly flush with the airframe.
      */
-    controller_servo_->write(180);
+    controller_servo_->write(120);
     chThdSleepMilliseconds(1000);
-    controller_servo_->write(15);
+    controller_servo_->write(12);
     chThdSleepMilliseconds(1000);
 
     setLaunchPadElevation();
@@ -85,14 +81,7 @@ void Controller::ctrlTickFunction(pointers* pointer_struct) {
         pointer_struct->sensorDataPointer->flap_data.extension = u;
 
     } else {
-        if (pointer_struct->sensorDataPointer->rocketState_data.rocketState ==
-            RocketFSM::FSM_State::STATE_APOGEE) {
-            activeControlServos.servoActuation(0);
-            pointer_struct->sensorDataPointer->flap_data.extension = 0;
-        } else {
-            activeControlServos.servoActuation(15);
-            pointer_struct->sensorDataPointer->flap_data.extension = 15;
-        }
+        activeControlServos.servoActuation(min_extension);
     }
 }
 
@@ -101,9 +90,7 @@ void Controller::ctrlTickFunction(pointers* pointer_struct) {
  * based on FSM state
  * @returns boolean depending on whether flaps should actuate or not
  */
-bool Controller::ActiveControl_ON() {
-    return *current_state == RocketFSM::FSM_State::STATE_COAST_GNC;
-}
+bool Controller::ActiveControl_ON() { return *current_state == RocketFSM::FSM_State::STATE_COAST_GNC; }
 
 /**
  * @brief Initializes launchpad elevation through barometer measurement.

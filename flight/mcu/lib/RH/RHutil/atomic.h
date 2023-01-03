@@ -84,25 +84,17 @@ static __inline__ void __iRestore(const uint32_t *__s) {
     __asm__ volatile("" ::: "memory");
 }
 
-#define ATOMIC_BLOCK(type) \
-    for (type, __ToDo = __iCliRetVal(); __ToDo; __ToDo = 0)
+#define ATOMIC_BLOCK(type) for (type, __ToDo = __iCliRetVal(); __ToDo; __ToDo = 0)
 
-#define ATOMIC_RESTORESTATE                                          \
-    uint32_t primask_save __attribute__((__cleanup__(__iRestore))) = \
-        __get_primask()
+#define ATOMIC_RESTORESTATE uint32_t primask_save __attribute__((__cleanup__(__iRestore))) = __get_primask()
 
-#define ATOMIC_FORCEON \
-    uint32_t primask_save __attribute__((__cleanup__(__iSeiParam))) = 0
+#define ATOMIC_FORCEON uint32_t primask_save __attribute__((__cleanup__(__iSeiParam))) = 0
 
-#define NONATOMIC_BLOCK(type) \
-    for (type, __ToDo = __iSeiRetVal(); __ToDo; __ToDo = 0)
+#define NONATOMIC_BLOCK(type) for (type, __ToDo = __iSeiRetVal(); __ToDo; __ToDo = 0)
 
-#define NONATOMIC_RESTORESTATE                                       \
-    uint32_t primask_save __attribute__((__cleanup__(__iRestore))) = \
-        __get_primask()
+#define NONATOMIC_RESTORESTATE uint32_t primask_save __attribute__((__cleanup__(__iRestore))) = __get_primask()
 
-#define NONATOMIC_FORCEOFF \
-    uint32_t primask_save __attribute__((__cleanup__(__iCliParam))) = 0
+#define NONATOMIC_FORCEOFF uint32_t primask_save __attribute__((__cleanup__(__iCliParam))) = 0
 
 #endif
 #endif

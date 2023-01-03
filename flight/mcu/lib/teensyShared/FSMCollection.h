@@ -10,28 +10,27 @@
  * @param count Number of FSMs in FSMs array
  */
 
+template <size_t count>
 class FSMCollection {
    public:
-    FSMCollection(RocketFSM** FSMs, size_t count)
-        : FSMs_(FSMs), count_(count) {}
+    FSMCollection(RocketFSM** FSMs) : FSMs_(FSMs) {}
 
     void tick() {
         // tick all FSMs
-        for (size_t i = 0; i < count_; i++) {
+        for (size_t i = 0; i < count; i++) {
             FSMs_[i]->tickFSM();
         }
     }
 
-    void getStates(rocketStateData* out) {
+    void getStates(rocketStateData<count>& out) {
         // update FSM states and timestamps
         systime_t time = chVTGetSystemTime();
-        for (size_t i = 0; i < count_; i++) {
-            out[i].rocketState = FSMs_[i]->getFSMState();
-            out[i].timeStamp_RS = time;
+        for (size_t i = 0; i < count; i++) {
+            out.rocketStates[i] = FSMs_[i]->getFSMState();
+            out.timeStamp_RS = time;
         }
     }
 
    private:
     RocketFSM** FSMs_;  // array of pointers to FSMs
-    size_t count_;      // number of FSMs
 };

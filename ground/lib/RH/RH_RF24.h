@@ -43,8 +43,7 @@
 // header Here we allow for message length 4 bytes of address and header and
 // payload to be included in payload size limit.
 #ifndef RH_RF24_MAX_MESSAGE_LEN
-#define RH_RF24_MAX_MESSAGE_LEN \
-    (RH_RF24_MAX_PAYLOAD_LEN - RH_RF24_HEADER_LEN - 1)
+#define RH_RF24_MAX_MESSAGE_LEN (RH_RF24_MAX_PAYLOAD_LEN - RH_RF24_HEADER_LEN - 1)
 #endif
 
 // Max number of times we will try to read CTS from the radio
@@ -709,8 +708,7 @@ class RH_RF24 : public RHSPIDriver {
     /// to set the desired modulation type, data rate and deviation/bandwidth.
     /// OBSOLETE: no need ever to use this now
     typedef struct {
-        uint8_t
-            prop_2000;  ///< Value for property RH_RF24_PROPERTY_MODEM_MOD_TYPE
+        uint8_t prop_2000;  ///< Value for property RH_RF24_PROPERTY_MODEM_MOD_TYPE
         uint8_t prop_2003;  ///< Value for property
                             ///< RH_RF24_PROPERTY_MODEM_DATA_RATE_2
         uint8_t prop_2004;  ///< Value for property
@@ -737,10 +735,8 @@ class RH_RF24 : public RHSPIDriver {
                             ///< RH_RF24_PROPERTY_MODEM_DECIMATION_CFG1
         uint8_t prop_201f;  ///< Value for property
                             ///< RH_RF24_PROPERTY_MODEM_DECIMATION_CFG0
-        uint8_t
-            prop_2022;  ///< Value for property RH_RF24_PROPERTY_MODEM_BCR_OSR_1
-        uint8_t
-            prop_2023;  ///< Value for property RH_RF24_PROPERTY_MODEM_BCR_OSR_0
+        uint8_t prop_2022;  ///< Value for property RH_RF24_PROPERTY_MODEM_BCR_OSR_1
+        uint8_t prop_2023;  ///< Value for property RH_RF24_PROPERTY_MODEM_BCR_OSR_0
         uint8_t prop_2024;  ///< Value for property
                             ///< RH_RF24_PROPERTY_MODEM_BCR_NCO_OFFSET_2
         uint8_t prop_2025;  ///< Value for property
@@ -751,10 +747,8 @@ class RH_RF24 : public RHSPIDriver {
                             ///< RH_RF24_PROPERTY_MODEM_BCR_GAIN_1
         uint8_t prop_2028;  ///< Value for property
                             ///< RH_RF24_PROPERTY_MODEM_BCR_GAIN_0
-        uint8_t
-            prop_2029;  ///< Value for property RH_RF24_PROPERTY_MODEM_BCR_GEAR
-        uint8_t
-            prop_202d;  ///< Value for property RH_RF24_PROPERTY_MODEM_AFC_WAIT
+        uint8_t prop_2029;  ///< Value for property RH_RF24_PROPERTY_MODEM_BCR_GEAR
+        uint8_t prop_202d;  ///< Value for property RH_RF24_PROPERTY_MODEM_AFC_WAIT
         uint8_t prop_202e;  ///< Value for property
                             ///< RH_RF24_PROPERTY_MODEM_AFC_GAIN_1
         uint8_t prop_202f;  ///< Value for property
@@ -775,36 +769,24 @@ class RH_RF24 : public RHSPIDriver {
                             ///< RH_RF24_PROPERTY_MODEM_FSK4_GAIN1
         uint8_t prop_203c;  ///< Value for property
                             ///< RH_RF24_PROPERTY_MODEM_FSK4_GAIN0
-        uint8_t
-            prop_203d;  ///< Value for property RH_RF24_PROPERTY_MODEM_FSK4_TH1
-        uint8_t
-            prop_203e;  ///< Value for property RH_RF24_PROPERTY_MODEM_FSK4_TH0
-        uint8_t
-            prop_203f;  ///< Value for property RH_RF24_PROPERTY_MODEM_FSK4_MAP
-        uint8_t
-            prop_2040;  ///< Value for property RH_RF24_PROPERTY_MODEM_OOK_PDTC
-        uint8_t
-            prop_2043;  ///< Value for property RH_RF24_PROPERTY_MODEM_OOK_MISC
+        uint8_t prop_203d;  ///< Value for property RH_RF24_PROPERTY_MODEM_FSK4_TH1
+        uint8_t prop_203e;  ///< Value for property RH_RF24_PROPERTY_MODEM_FSK4_TH0
+        uint8_t prop_203f;  ///< Value for property RH_RF24_PROPERTY_MODEM_FSK4_MAP
+        uint8_t prop_2040;  ///< Value for property RH_RF24_PROPERTY_MODEM_OOK_PDTC
+        uint8_t prop_2043;  ///< Value for property RH_RF24_PROPERTY_MODEM_OOK_MISC
         uint8_t prop_2045;  ///< Value for property
                             ///< RH_RF24_PROPERTY_MODEM_RAW_CONTROL
-        uint8_t
-            prop_2046;  ///< Value for property RH_RF24_PROPERTY_MODEM_RAW_EYE_1
-        uint8_t
-            prop_2047;  ///< Value for property RH_RF24_PROPERTY_MODEM_RAW_EYE_0
-        uint8_t
-            prop_204e;  ///< Value for property RH_RF24_PROPERTY_MODEM_RSSI_COMP
-        uint8_t
-            prop_2100;  ///< Value for property
-                        ///< RH_RF24_PROPERTY_MODEM_CHFLT_RX1_CHFLT_COE13_7_0
-        uint8_t
-            prop_2101;  ///< Value for property
-                        ///< RH_RF24_PROPERTY_MODEM_CHFLT_RX1_CHFLT_COE12_7_0
-        uint8_t
-            prop_2102;  ///< Value for property
-                        ///< RH_RF24_PROPERTY_MODEM_CHFLT_RX1_CHFLT_COE11_7_0
-        uint8_t
-            prop_2103;  ///< Value for property
-                        ///< RH_RF24_PROPERTY_MODEM_CHFLT_RX1_CHFLT_COE10_7_0
+        uint8_t prop_2046;  ///< Value for property RH_RF24_PROPERTY_MODEM_RAW_EYE_1
+        uint8_t prop_2047;  ///< Value for property RH_RF24_PROPERTY_MODEM_RAW_EYE_0
+        uint8_t prop_204e;  ///< Value for property RH_RF24_PROPERTY_MODEM_RSSI_COMP
+        uint8_t prop_2100;  ///< Value for property
+                            ///< RH_RF24_PROPERTY_MODEM_CHFLT_RX1_CHFLT_COE13_7_0
+        uint8_t prop_2101;  ///< Value for property
+                            ///< RH_RF24_PROPERTY_MODEM_CHFLT_RX1_CHFLT_COE12_7_0
+        uint8_t prop_2102;  ///< Value for property
+                            ///< RH_RF24_PROPERTY_MODEM_CHFLT_RX1_CHFLT_COE11_7_0
+        uint8_t prop_2103;  ///< Value for property
+                            ///< RH_RF24_PROPERTY_MODEM_CHFLT_RX1_CHFLT_COE10_7_0
         uint8_t prop_2104;  ///< Value for property
                             ///< RH_RF24_PROPERTY_MODEM_CHFLT_RX1_CHFLT_COE9_7_0
         uint8_t prop_2105;  ///< Value for property
@@ -833,18 +815,14 @@ class RH_RF24 : public RHSPIDriver {
                             ///< RH_RF24_PROPERTY_MODEM_CHFLT_RX1_CHFLT_COEM2
         uint8_t prop_2111;  ///< Value for property
                             ///< RH_RF24_PROPERTY_MODEM_CHFLT_RX1_CHFLT_COEM3
-        uint8_t
-            prop_2112;  ///< Value for property
-                        ///< RH_RF24_PROPERTY_MODEM_CHFLT_RX2_CHFLT_COE13_7_0
-        uint8_t
-            prop_2113;  ///< Value for property
-                        ///< RH_RF24_PROPERTY_MODEM_CHFLT_RX2_CHFLT_COE12_7_0
-        uint8_t
-            prop_2114;  ///< Value for property
-                        ///< RH_RF24_PROPERTY_MODEM_CHFLT_RX2_CHFLT_COE11_7_0
-        uint8_t
-            prop_2115;  ///< Value for property
-                        ///< RH_RF24_PROPERTY_MODEM_CHFLT_RX2_CHFLT_COE10_7_0
+        uint8_t prop_2112;  ///< Value for property
+                            ///< RH_RF24_PROPERTY_MODEM_CHFLT_RX2_CHFLT_COE13_7_0
+        uint8_t prop_2113;  ///< Value for property
+                            ///< RH_RF24_PROPERTY_MODEM_CHFLT_RX2_CHFLT_COE12_7_0
+        uint8_t prop_2114;  ///< Value for property
+                            ///< RH_RF24_PROPERTY_MODEM_CHFLT_RX2_CHFLT_COE11_7_0
+        uint8_t prop_2115;  ///< Value for property
+                            ///< RH_RF24_PROPERTY_MODEM_CHFLT_RX2_CHFLT_COE10_7_0
         uint8_t prop_2116;  ///< Value for property
                             ///< RH_RF24_PROPERTY_MODEM_CHFLT_RX2_CHFLT_COE9_7_0
         uint8_t prop_2117;  ///< Value for property
@@ -878,12 +856,9 @@ class RH_RF24 : public RHSPIDriver {
                             ///< RH_RF24_PROPERTY_SYNTH_PFDCP_CPFF
         uint8_t prop_2301;  ///< Value for property
                             ///< RH_RF24_PROPERTY_SYNTH_PFDCP_CPINT
-        uint8_t
-            prop_2303;  ///< Value for property RH_RF24_PROPERTY_SYNTH_LPFILT3
-        uint8_t
-            prop_2304;  ///< Value for property RH_RF24_PROPERTY_SYNTH_LPFILT2
-        uint8_t
-            prop_2305;  ///< Value for property RH_RF24_PROPERTY_SYNTH_LPFILT1
+        uint8_t prop_2303;  ///< Value for property RH_RF24_PROPERTY_SYNTH_LPFILT3
+        uint8_t prop_2304;  ///< Value for property RH_RF24_PROPERTY_SYNTH_LPFILT2
+        uint8_t prop_2305;  ///< Value for property RH_RF24_PROPERTY_SYNTH_LPFILT1
     } ModemConfig;
 
     /// Choices for setModemConfig() for a selected subset of common
@@ -933,9 +908,8 @@ class RH_RF24 : public RHSPIDriver {
 
     /// \brief Defines the commands we can interrogate in printRegisters
     typedef struct {
-        uint8_t cmd;  ///< The command number
-        uint8_t
-            replyLen;  ///< Number of bytes in the reply stream (after the CTS)
+        uint8_t cmd;       ///< The command number
+        uint8_t replyLen;  ///< Number of bytes in the reply stream (after the CTS)
     } CommandInfo;
 
     /// Constructor. You can have multiple instances, but each instance must
@@ -960,8 +934,8 @@ class RH_RF24 : public RHSPIDriver {
     ///                     provide reliable radio startup.
     /// \param[in] spi Pointer to the SPI interface object to use.
     ///                Defaults to the standard Arduino hardware SPI interface
-    RH_RF24(uint8_t slaveSelectPin = SS, uint8_t interruptPin = 2,
-            uint8_t sdnPin = 9, RHGenericSPI& spi = hardware_spi);
+    RH_RF24(uint8_t slaveSelectPin = SS, uint8_t interruptPin = 2, uint8_t sdnPin = 9,
+            RHGenericSPI& spi = hardware_spi);
 
     /// Initialises this instance and the radio module connected to it.
     /// The following steps are taken:
@@ -1119,8 +1093,7 @@ class RH_RF24 : public RHSPIDriver {
     ///            If none are required, set to NULL
     /// \param[in] read_len The number of bytes to read from the reply stream.
     /// If none required, set to 0. \return true if the command succeeeded.
-    bool command(uint8_t cmd, const uint8_t* write_buf = 0,
-                 uint8_t write_len = 0, uint8_t* read_buf = 0,
+    bool command(uint8_t cmd, const uint8_t* write_buf = 0, uint8_t write_len = 0, uint8_t* read_buf = 0,
                  uint8_t read_len = 0);
 
     /// Set one or more chip properties using the RH_RF24_CMD_SET_PROPERTY
@@ -1133,8 +1106,7 @@ class RH_RF24 : public RHSPIDriver {
     /// param[in] values Array of 0 or more values to write the firstProperty
     /// and subsequent proerties param[in] count The number of values in the
     /// values array \return true if the command succeeeded.
-    bool set_properties(uint16_t firstProperty, const uint8_t* values,
-                        uint8_t count);
+    bool set_properties(uint16_t firstProperty, const uint8_t* values, uint8_t count);
 
     /// Get one or more chip properties using the RH_RF24_CMD_GET_PROPERTY
     /// command. See the Si446x API Description AN625 for details on what

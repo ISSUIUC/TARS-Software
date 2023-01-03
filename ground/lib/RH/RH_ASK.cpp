@@ -40,19 +40,12 @@ static uint8_t symbols[] = {0xd,  0xe,  0x13, 0x15, 0x16, 0x19, 0x1a, 0x1c,
 // swapping
 #define RH_ASK_START_SYMBOL 0xb38
 
-RH_ASK::RH_ASK(uint16_t speed, uint8_t rxPin, uint8_t txPin, uint8_t pttPin,
-               bool pttInverted)
-    : _speed(speed),
-      _rxPin(rxPin),
-      _txPin(txPin),
-      _pttPin(pttPin),
-      _pttInverted(pttInverted),
-      _rxInverted(false) {
+RH_ASK::RH_ASK(uint16_t speed, uint8_t rxPin, uint8_t txPin, uint8_t pttPin, bool pttInverted)
+    : _speed(speed), _rxPin(rxPin), _txPin(txPin), _pttPin(pttPin), _pttInverted(pttInverted), _rxInverted(false) {
     // Initialise the first 8 nibbles of the tx buffer to be the standard
     // preamble. We will append messages after that. 0x38, 0x2c is the start
     // symbol before 6-bit conversion to RH_ASK_START_SYMBOL
-    uint8_t preamble[RH_ASK_PREAMBLE_LEN] = {0x2a, 0x2a, 0x2a, 0x2a,
-                                             0x2a, 0x2a, 0x38, 0x2c};
+    uint8_t preamble[RH_ASK_PREAMBLE_LEN] = {0x2a, 0x2a, 0x2a, 0x2a, 0x2a, 0x2a, 0x38, 0x2c};
     memcpy(_txBuf, preamble, sizeof(preamble));
 }
 
@@ -84,8 +77,7 @@ bool RH_ASK::init() {
 }
 
 // Put these prescaler structs in PROGMEM, not on the stack
-#if (RH_PLATFORM == RH_PLATFORM_ARDUINO) || \
-    (RH_PLATFORM == RH_PLATFORM_GENERIC_AVR8)
+#if (RH_PLATFORM == RH_PLATFORM_ARDUINO) || (RH_PLATFORM == RH_PLATFORM_GENERIC_AVR8)
 #if defined(RH_ASK_ARDUINO_USE_TIMER2)
 // Timer 2 has different prescalers
 PROGMEM static const uint16_t prescalers[] = {0, 1, 8, 32, 64, 128, 256, 3333};
@@ -99,10 +91,8 @@ PROGMEM static const uint16_t prescalers[] = {0, 1, 8, 64, 256, 1024, 3333};
 // Returns prescaler index into {0, 1, 8, 64, 256, 1024} array
 // and sets nticks to compare-match value if lower than max_ticks
 // returns 0 & nticks = 0 on fault
-uint8_t RH_ASK::timerCalc(uint16_t speed, uint16_t max_ticks,
-                          uint16_t* nticks) {
-#if (RH_PLATFORM == RH_PLATFORM_ARDUINO) || \
-    (RH_PLATFORM == RH_PLATFORM_GENERIC_AVR8)
+uint8_t RH_ASK::timerCalc(uint16_t speed, uint16_t max_ticks, uint16_t* nticks) {
+#if (RH_PLATFORM == RH_PLATFORM_ARDUINO) || (RH_PLATFORM == RH_PLATFORM_GENERIC_AVR8)
     // Clock divider (prescaler) values - 0/3333: error flag
     uint8_t prescaler;      // index into array & return bit value
     unsigned long ulticks;  // calculate by ntick overflow
@@ -156,8 +146,7 @@ void RH_ASK::timerSetup() {
     _COMB(TCCR, RH_ASK_TIMER_INDEX, B) = _BV(WGM12);
     _COMB(TCCR, RH_ASK_TIMER_INDEX, B) |= prescaler;
     _COMB(OCR, RH_ASK_TIMER_INDEX, A) = nticks;
-    _COMB(TI, MSK, RH_ASK_TIMER_INDEX) |=
-        _BV(_COMB(OCIE, RH_ASK_TIMER_INDEX, A));
+    _COMB(TI, MSK, RH_ASK_TIMER_INDEX) |= _BV(_COMB(OCIE, RH_ASK_TIMER_INDEX, A));
 
 #elif (RH_PLATFORM == RH_PLATFORM_MSP430)  // LaunchPad specific
     // Calculate the counter overflow count based on the required bit speed
@@ -214,8 +203,7 @@ void RH_ASK::timerSetup() {
 #define RH_ASK_ZERO_TIMER_IRQ TC3_IRQn
 
     // Enable clock for TC
-    REG_GCLK_CLKCTRL = (uint16_t)(GCLK_CLKCTRL_CLKEN | GCLK_CLKCTRL_GEN_GCLK0 |
-                                  GCLK_CLKCTRL_ID(GCM_TCC2_TC3));
+    REG_GCLK_CLKCTRL = (uint16_t)(GCLK_CLKCTRL_CLKEN | GCLK_CLKCTRL_GEN_GCLK0 | GCLK_CLKCTRL_ID(GCM_TCC2_TC3));
     while (GCLK->STATUS.bit.SYNCBUSY == 1)
         ;  // wait for sync
 
@@ -226,8 +214,7 @@ void RH_ASK::timerSetup() {
     while (TC->STATUS.bit.SYNCBUSY == 1)
         ;  // wait for sync
 
-    TC->CTRLA.reg |=
-        TC_CTRLA_MODE_COUNT16;  // Set Timer counter Mode to 16 bits
+    TC->CTRLA.reg |= TC_CTRLA_MODE_COUNT16;  // Set Timer counter Mode to 16 bits
     while (TC->STATUS.bit.SYNCBUSY == 1)
         ;                                    // wait for sync
     TC->CTRLA.reg |= TC_CTRLA_WAVEGEN_MFRQ;  // Set TC as Match Frequency
@@ -275,9 +262,8 @@ void RH_ASK::timerSetup() {
     // Clock speed 4 can handle all reasonable _speeds we might ask for. Its
     // divisor is 128 and we want 8 interrupts per bit
     uint32_t rc = (VARIANT_MCK / _speed) / 128 / 8;
-    TC_Configure(
-        RH_ASK_DUE_TIMER, RH_ASK_DUE_TIMER_CHANNEL,
-        TC_CMR_WAVE | TC_CMR_WAVSEL_UP_RC | TC_CMR_TCCLKS_TIMER_CLOCK4);
+    TC_Configure(RH_ASK_DUE_TIMER, RH_ASK_DUE_TIMER_CHANNEL,
+                 TC_CMR_WAVE | TC_CMR_WAVSEL_UP_RC | TC_CMR_TCCLKS_TIMER_CLOCK4);
     TC_SetRC(RH_ASK_DUE_TIMER, RH_ASK_DUE_TIMER_CHANNEL, rc);
     // Enable the RC Compare Interrupt
     RH_ASK_DUE_TIMER->TC_CHANNEL[RH_ASK_DUE_TIMER_CHANNEL].TC_IER = TC_IER_CPCS;
@@ -351,13 +337,12 @@ void RH_ASK::timerSetup() {
     // Inspired by SparkIntervalTimer
     // We use Timer 6
     void TimerInterruptHandler();  // Forward declaration for interrupt handler
-#define SYSCORECLOCK 60000000UL  // Timer clock tree uses core clock / 2
+#define SYSCORECLOCK 60000000UL             // Timer clock tree uses core clock / 2
     TIM_TimeBaseInitTypeDef timerInitStructure;
     NVIC_InitTypeDef nvicStructure;
     TIM_TypeDef* TIMx;
-    uint32_t period = (1000000 / 8) / _speed;  // In microseconds
-    uint16_t prescaler = (uint16_t)(SYSCORECLOCK / 1000000UL) -
-                         1;  // To get TIM counter clock = 1MHz
+    uint32_t period = (1000000 / 8) / _speed;                       // In microseconds
+    uint16_t prescaler = (uint16_t)(SYSCORECLOCK / 1000000UL) - 1;  // To get TIM counter clock = 1MHz
 
     attachSystemInterrupt(SysInterrupt_TIM6_Update, TimerInterruptHandler);
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM6, ENABLE);
@@ -379,8 +364,7 @@ void RH_ASK::timerSetup() {
 
 #elif (RH_PLATFORM == RH_PLATFORM_CHIPKIT_CORE)
     // UsingChipKIT Core on Arduino IDE
-    uint32_t chipkit_timer_interrupt_handler(
-        uint32_t currentTime);  // Forward declaration
+    uint32_t chipkit_timer_interrupt_handler(uint32_t currentTime);  // Forward declaration
     attachCoreTimerService(chipkit_timer_interrupt_handler);
 
 #elif (RH_PLATFORM == RH_PLATFORM_UNO32)
@@ -392,8 +376,7 @@ void RH_ASK::timerSetup() {
 #elif (RH_PLATFORM == RH_PLATFORM_ESP8266)
     void INTERRUPT_ATTR esp8266_timer_interrupt_handler();  // Forward declarat
     // The - 120 is a heuristic to correct for interrupt handling overheads
-    _timerIncrement =
-        (clockCyclesPerMicrosecond() * 1000000 / 8 / _speed) - 120;
+    _timerIncrement = (clockCyclesPerMicrosecond() * 1000000 / 8 / _speed) - 120;
     timer0_isr_init();
     timer0_attachInterrupt(esp8266_timer_interrupt_handler);
     timer0_write(ESP.getCycleCount() + _timerIncrement);
@@ -464,10 +447,9 @@ bool RH_ASK::send(const uint8_t* data, uint8_t len) {
     uint8_t i;
     uint16_t index = 0;
     uint16_t crc = 0xffff;
-    uint8_t* p = _txBuf + RH_ASK_PREAMBLE_LEN;  // start of the message area
-    uint8_t count =
-        len + 3 + RH_ASK_HEADER_LEN;  // Added byte count and FCS and headers to
-                                      // get total number of bytes
+    uint8_t* p = _txBuf + RH_ASK_PREAMBLE_LEN;    // start of the message area
+    uint8_t count = len + 3 + RH_ASK_HEADER_LEN;  // Added byte count and FCS and headers to
+                                                  // get total number of bytes
 
     if (len > RH_ASK_MAX_MESSAGE_LEN) return false;
 
@@ -535,8 +517,7 @@ bool INTERRUPT_ATTR RH_ASK::readRx() {
 // Write the TX output pin, taking into account platform type.
 void INTERRUPT_ATTR RH_ASK::writeTx(bool value) {
 #if (RH_PLATFORM == RH_PLATFORM_GENERIC_AVR8)
-    ((value) ? (RH_ASK_TX_PORT |= (1 << RH_ASK_TX_PIN))
-             : (RH_ASK_TX_PORT &= ~(1 << RH_ASK_TX_PIN)));
+    ((value) ? (RH_ASK_TX_PORT |= (1 << RH_ASK_TX_PIN)) : (RH_ASK_TX_PORT &= ~(1 << RH_ASK_TX_PIN)));
 #else
     digitalWrite(_txPin, value);
 #endif
@@ -546,11 +527,9 @@ void INTERRUPT_ATTR RH_ASK::writeTx(bool value) {
 void INTERRUPT_ATTR RH_ASK::writePtt(bool value) {
 #if (RH_PLATFORM == RH_PLATFORM_GENERIC_AVR8)
 #if RH_ASK_PTT_PIN
-    ((value) ? (RH_ASK_PTT_PORT |= (1 << RH_ASK_PTT_PIN))
-             : (RH_ASK_PTT_PORT &= ~(1 << RH_ASK_PTT_PIN)));
+    ((value) ? (RH_ASK_PTT_PORT |= (1 << RH_ASK_PTT_PIN)) : (RH_ASK_PTT_PORT &= ~(1 << RH_ASK_PTT_PIN)));
 #else
-    ((value) ? (RH_ASK_TX_PORT |= (1 << RH_ASK_TX_PIN))
-             : (RH_ASK_TX_PORT &= ~(1 << RH_ASK_TX_PIN)));
+    ((value) ? (RH_ASK_TX_PORT |= (1 << RH_ASK_TX_PIN)) : (RH_ASK_TX_PORT &= ~(1 << RH_ASK_TX_PIN)));
 #endif
 #else
     digitalWrite(_pttPin, value ^ _pttInverted);
@@ -575,12 +554,10 @@ uint8_t RH_ASK::maxMessageLength() { return RH_ASK_MAX_MESSAGE_LEN; }
 #define RH_ASK_TIMER_VECTOR _COMB(TIMER, RH_ASK_TIMER_INDEX, _COMPA_vect)
 #endif
 
-#if (RH_PLATFORM == RH_PLATFORM_ARDUINO) && defined(__arm__) && \
-    defined(CORE_TEENSY)
+#if (RH_PLATFORM == RH_PLATFORM_ARDUINO) && defined(__arm__) && defined(CORE_TEENSY)
 void TIMER1_COMPA_vect(void) { thisASKDriver->handleTimerInterrupt(); }
 
-#elif (RH_PLATFORM == RH_PLATFORM_ARDUINO) && defined(__arm__) && \
-    defined(ARDUINO_ARCH_SAMD)
+#elif (RH_PLATFORM == RH_PLATFORM_ARDUINO) && defined(__arm__) && defined(ARDUINO_ARCH_SAMD)
 // Arduino Zero
 void TC3_Handler() {
     // The type cast must fit with the selected timer mode
@@ -589,16 +566,14 @@ void TC3_Handler() {
     thisASKDriver->handleTimerInterrupt();
 }
 
-#elif (RH_PLATFORM == RH_PLATFORM_ARDUINO) && defined(__arm__) && \
-    defined(ARDUINO_SAM_DUE)
+#elif (RH_PLATFORM == RH_PLATFORM_ARDUINO) && defined(__arm__) && defined(ARDUINO_SAM_DUE)
 // Arduino Due
 void TC1_Handler() {
     TC_GetStatus(RH_ASK_DUE_TIMER, 1);
     thisASKDriver->handleTimerInterrupt();
 }
 
-#elif (RH_PLATFORM == RH_PLATFORM_ARDUINO) || \
-    (RH_PLATFORM == RH_PLATFORM_GENERIC_AVR8)
+#elif (RH_PLATFORM == RH_PLATFORM_ARDUINO) || (RH_PLATFORM == RH_PLATFORM_GENERIC_AVR8)
 // This is the interrupt service routine called when timer1 overflows
 // Its job is to output the next bit from the transmitter (every 8 calls)
 // and to call the PLL code if the receiver is enabled
@@ -613,16 +588,13 @@ void interrupt() { thisASKDriver->handleTimerInterrupt(); }
 void TimerInterruptHandler() { thisASKDriver->handleTimerInterrupt(); }
 
 #elif (RH_PLATFORM == RH_PLATFORM_MSP430)
-interrupt(TIMER0_A0_VECTOR) Timer_A_int(void) {
-    thisASKDriver->handleTimerInterrupt();
-};
+interrupt(TIMER0_A0_VECTOR) Timer_A_int(void) { thisASKDriver->handleTimerInterrupt(); };
 
 #elif (RH_PLATFORM == RH_PLATFORM_CHIPKIT_CORE)
 // Using ChipKIT Core on Arduino IDE
 uint32_t chipkit_timer_interrupt_handler(uint32_t currentTime) {
     thisASKDriver->handleTimerInterrupt();
-    return (currentTime +
-            ((CORE_TICK_RATE * 1000) / 8) / thisASKDriver->speed());
+    return (currentTime + ((CORE_TICK_RATE * 1000) / 8) / thisASKDriver->speed());
 }
 
 #elif (RH_PLATFORM == RH_PLATFORM_UNO32)
@@ -669,8 +641,7 @@ uint8_t INTERRUPT_ATTR RH_ASK::symbol_6to4(uint8_t symbol) {
 void RH_ASK::validateRxBuf() {
     uint16_t crc = 0xffff;
     // The CRC covers the byte count, headers and user data
-    for (uint8_t i = 0; i < _rxBufLen; i++)
-        crc = RHcrc_ccitt_update(crc, _rxBuf[i]);
+    for (uint8_t i = 0; i < _rxBufLen; i++) crc = RHcrc_ccitt_update(crc, _rxBuf[i]);
     if (crc != 0xf0b8)  // CRC when buffer and expected CRC are CRC'd
     {
         // Reject and drop the message
@@ -684,8 +655,7 @@ void RH_ASK::validateRxBuf() {
     _rxHeaderFrom = _rxBuf[2];
     _rxHeaderId = _rxBuf[3];
     _rxHeaderFlags = _rxBuf[4];
-    if (_promiscuous || _rxHeaderTo == _thisAddress ||
-        _rxHeaderTo == RH_BROADCAST_ADDRESS) {
+    if (_promiscuous || _rxHeaderTo == _thisAddress || _rxHeaderTo == RH_BROADCAST_ADDRESS) {
         _rxGood++;
         _rxBufValid = true;
     }
@@ -699,9 +669,7 @@ void INTERRUPT_ATTR RH_ASK::receiveTimer() {
 
     if (rxSample != _rxLastSample) {
         // Transition, advance if ramp > 80, retard if < 80
-        _rxPllRamp +=
-            ((_rxPllRamp < RH_ASK_RAMP_TRANSITION) ? RH_ASK_RAMP_INC_RETARD
-                                                   : RH_ASK_RAMP_INC_ADVANCE);
+        _rxPllRamp += ((_rxPllRamp < RH_ASK_RAMP_TRANSITION) ? RH_ASK_RAMP_INC_RETARD : RH_ASK_RAMP_INC_ADVANCE);
         _rxLastSample = rxSample;
     } else {
         // No transition
@@ -727,8 +695,7 @@ void INTERRUPT_ATTR RH_ASK::receiveTimer() {
                 // Have 12 bits of encoded message == 1 byte encoded
                 // Decode as 2 lots of 6 bits into 2 lots of 4 bits
                 // The 6 lsbits are the high nybble
-                uint8_t this_byte = (symbol_6to4(_rxBits & 0x3f)) << 4 |
-                                    symbol_6to4(_rxBits >> 6);
+                uint8_t this_byte = (symbol_6to4(_rxBits & 0x3f)) << 4 | symbol_6to4(_rxBits >> 6);
 
                 // The first decoded byte is the byte count of the following
                 // message the count includes the byte count and the 2 trailing

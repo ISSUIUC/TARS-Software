@@ -5,8 +5,7 @@
 
 #include <RHDatagram.h>
 
-RHDatagram::RHDatagram(RHGenericDriver& driver, uint8_t thisAddress)
-    : _driver(driver), _thisAddress(thisAddress) {}
+RHDatagram::RHDatagram(RHGenericDriver& driver, uint8_t thisAddress) : _driver(driver), _thisAddress(thisAddress) {}
 
 ////////////////////////////////////////////////////////////////////
 // Public methods
@@ -28,8 +27,7 @@ bool RHDatagram::sendto(uint8_t* buf, uint8_t len, uint8_t address) {
     return _driver.send(buf, len);
 }
 
-bool RHDatagram::recvfrom(uint8_t* buf, uint8_t* len, uint8_t* from,
-                          uint8_t* to, uint8_t* id, uint8_t* flags) {
+bool RHDatagram::recvfrom(uint8_t* buf, uint8_t* len, uint8_t* from, uint8_t* to, uint8_t* id, uint8_t* flags) {
     if (_driver.recv(buf, len)) {
         if (from) *from = headerFrom();
         if (to) *to = headerTo();
@@ -46,13 +44,9 @@ void RHDatagram::waitAvailable() { _driver.waitAvailable(); }
 
 bool RHDatagram::waitPacketSent() { return _driver.waitPacketSent(); }
 
-bool RHDatagram::waitPacketSent(uint16_t timeout) {
-    return _driver.waitPacketSent(timeout);
-}
+bool RHDatagram::waitPacketSent(uint16_t timeout) { return _driver.waitPacketSent(timeout); }
 
-bool RHDatagram::waitAvailableTimeout(uint16_t timeout) {
-    return _driver.waitAvailableTimeout(timeout);
-}
+bool RHDatagram::waitAvailableTimeout(uint16_t timeout) { return _driver.waitAvailableTimeout(timeout); }
 
 uint8_t RHDatagram::thisAddress() { return _thisAddress; }
 
@@ -62,9 +56,7 @@ void RHDatagram::setHeaderFrom(uint8_t from) { _driver.setHeaderFrom(from); }
 
 void RHDatagram::setHeaderId(uint8_t id) { _driver.setHeaderId(id); }
 
-void RHDatagram::setHeaderFlags(uint8_t set, uint8_t clear) {
-    _driver.setHeaderFlags(set, clear);
-}
+void RHDatagram::setHeaderFlags(uint8_t set, uint8_t clear) { _driver.setHeaderFlags(set, clear); }
 
 uint8_t RHDatagram::headerTo() { return _driver.headerTo(); }
 

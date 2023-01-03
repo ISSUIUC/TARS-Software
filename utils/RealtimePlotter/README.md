@@ -5,7 +5,7 @@ This is a realtime plotting utility written in Processing that is really useful 
 
 This was not written by ISS, but only modified to suit our needs better. Credit goes to [sebnil/RealtimePlotter](https://github.com/sebnil/RealtimePlotter)
 
-==============
+Update as of 2022: We have now written functionality to use the Telemetry Ground Station GUI as a serial plotter by printing the same JSON string that the feather on the ground prints through serial in flight software. This can be switched on and off using the `SERIAL_PLOTTING` ifdef in `telemetry.cpp`.
 
 Debugging sensors on a microprocessor can be a hassle and the most used approach is to output the sensor values to a serial monitor. I made a realtime plotting tool which is a better and more visual way of doing the same thing.
 

@@ -13,8 +13,7 @@
 // Each interrupt can be handled by a different instance of RH_MRF89, allowing
 // you to have 2 or more LORAs per Arduino
 RH_MRF89* RH_MRF89::_deviceForInterrupt[RH_MRF89_NUM_INTERRUPTS] = {0, 0, 0};
-uint8_t RH_MRF89::_interruptCount =
-    0;  // Index into _deviceForInterrupt for next device
+uint8_t RH_MRF89::_interruptCount = 0;  // Index into _deviceForInterrupt for next device
 
 // These are indexed by the values of ModemConfigChoice
 // Values based on sample modulation values from MRF89XA.h
@@ -34,12 +33,8 @@ PROGMEM static const RH_MRF89::ModemConfig MODEM_CONFIG_TABLE[] = {
 
 };
 
-RH_MRF89::RH_MRF89(uint8_t csconPin, uint8_t csdatPin, uint8_t interruptPin,
-                   RHGenericSPI& spi)
-    : RHNRFSPIDriver(csconPin, spi),
-      _csconPin(csconPin),
-      _csdatPin(csdatPin),
-      _interruptPin(interruptPin) {
+RH_MRF89::RH_MRF89(uint8_t csconPin, uint8_t csdatPin, uint8_t interruptPin, RHGenericSPI& spi)
+    : RHNRFSPIDriver(csconPin, spi), _csconPin(csconPin), _csdatPin(csdatPin), _interruptPin(interruptPin) {
     _myInterruptIndex = 0xff;  // Not allocated yet
 }
 
@@ -110,14 +105,11 @@ bool RH_MRF89::init() {
     // VCOT 60mV
     // OOK max 28kbps
     // Based on 70622C.pdf, section 3.12:
-    spiWriteRegister(RH_MRF89_REG_00_GCONREG, RH_MRF89_CMOD_STANDBY |
-                                                  RH_MRF89_FBS_950_960 |
-                                                  RH_MRF89_VCOT_60MV);
+    spiWriteRegister(RH_MRF89_REG_00_GCONREG, RH_MRF89_CMOD_STANDBY | RH_MRF89_FBS_950_960 | RH_MRF89_VCOT_60MV);
     spiWriteRegister(RH_MRF89_REG_01_DMODREG,
-                     RH_MRF89_MODSEL_FSK |
-                         RH_MRF89_OPMODE_PACKET);  // FSK, Packet mode, LNA 0dB
-    spiWriteRegister(RH_MRF89_REG_02_FDEVREG, 0);  // Set by setModemConfig
-    spiWriteRegister(RH_MRF89_REG_03_BRSREG, 0);   // Set by setModemConfig
+                     RH_MRF89_MODSEL_FSK | RH_MRF89_OPMODE_PACKET);  // FSK, Packet mode, LNA 0dB
+    spiWriteRegister(RH_MRF89_REG_02_FDEVREG, 0);                    // Set by setModemConfig
+    spiWriteRegister(RH_MRF89_REG_03_BRSREG, 0);                     // Set by setModemConfig
     spiWriteRegister(RH_MRF89_REG_04_FLTHREG,
                      0);  // Set by setModemConfig (OOK only)
     spiWriteRegister(RH_MRF89_REG_05_FIFOCREG, RH_MRF89_FSIZE_64);
@@ -132,24 +124,21 @@ bool RH_MRF89::init() {
     // IRQ1 rx mode: CRCOK
     // IRQ1 tx mode: TXDONE
     spiWriteRegister(RH_MRF89_REG_0D_FTXRXIREG,
-                     RH_MRF89_IRQ0RXS_PACKET_SYNC |
-                         RH_MRF89_IRQ1RXS_PACKET_CRCOK | RH_MRF89_IRQ1TX);
+                     RH_MRF89_IRQ0RXS_PACKET_SYNC | RH_MRF89_IRQ1RXS_PACKET_CRCOK | RH_MRF89_IRQ1TX);
     spiWriteRegister(RH_MRF89_REG_0E_FTPRIREG, RH_MRF89_LENPLL);
     spiWriteRegister(RH_MRF89_REG_0F_RSTHIREG,
-                     0x00);  // default not used if no RSSI interrupts
+                     0x00);                        // default not used if no RSSI interrupts
     spiWriteRegister(RH_MRF89_REG_10_FILCREG, 0);  // Set by setModemConfig
 
     spiWriteRegister(RH_MRF89_REG_11_PFCREG,
                      0x38);  // 100kHz, recommended, but not used, see
                              // RH_MRF89_REG_12_SYNCREG OOK only?
-    spiWriteRegister(
-        RH_MRF89_REG_12_SYNCREG,
-        RH_MRF89_SYNCREN |
-            RH_MRF89_SYNCWSZ_32);  // No polyphase, no bsync, sync, 0 errors
-    spiWriteRegister(RH_MRF89_REG_13_RSVREG, 0x07);  // default
+    spiWriteRegister(RH_MRF89_REG_12_SYNCREG,
+                     RH_MRF89_SYNCREN | RH_MRF89_SYNCWSZ_32);  // No polyphase, no bsync, sync, 0 errors
+    spiWriteRegister(RH_MRF89_REG_13_RSVREG, 0x07);            // default
     //    spiWriteRegister(RH_MRF89_REG_14_RSTSREG, 0x00); // NO, read only
     spiWriteRegister(RH_MRF89_REG_15_OOKCREG,
-                     0x00);  // Set by setModemConfig OOK only
+                     0x00);                              // Set by setModemConfig OOK only
     spiWriteRegister(RH_MRF89_REG_16_SYNCV31REG, 0x69);  // Set by setSyncWords
     spiWriteRegister(RH_MRF89_REG_17_SYNCV23REG, 0x81);  // Set by setSyncWords
     spiWriteRegister(RH_MRF89_REG_18_SYNCV15REG, 0x7E);  // Set by setSyncWords
@@ -159,14 +148,12 @@ bool RH_MRF89::init() {
                      0xf0 | RH_MRF89_TXOPVAL_13DBM);  // TX cutoff freq=375kHz,
     spiWriteRegister(RH_MRF89_REG_1B_CLKOREG,
                      0x00);  // Disable clock output to save power
-    spiWriteRegister(
-        RH_MRF89_REG_1C_PLOADREG,
-        0x40);  // payload=64bytes (no RX-filtering on packet length)
+    spiWriteRegister(RH_MRF89_REG_1C_PLOADREG,
+                     0x40);  // payload=64bytes (no RX-filtering on packet length)
     spiWriteRegister(RH_MRF89_REG_1D_NADDSREG,
                      0x00);  // Node Address (0=default) Not used
-    spiWriteRegister(RH_MRF89_REG_1E_PKTCREG,
-                     RH_MRF89_PKTLENF | RH_MRF89_PRESIZE_4 | RH_MRF89_WHITEON |
-                         RH_MRF89_CHKCRCEN | RH_MRF89_ADDFIL_OFF);
+    spiWriteRegister(RH_MRF89_REG_1E_PKTCREG, RH_MRF89_PKTLENF | RH_MRF89_PRESIZE_4 | RH_MRF89_WHITEON |
+                                                  RH_MRF89_CHKCRCEN | RH_MRF89_ADDFIL_OFF);
     spiWriteRegister(RH_MRF89_REG_1F_FCRCREG,
                      0x00);  // default (FIFO access in standby=write, clear
                              // FIFO on CRC mismatch)
@@ -223,20 +210,14 @@ void RH_MRF89::handleInterrupt() {
         if (_bufLen < 4) {
             // Drain the FIFO
             uint8_t i;
-            for (i = 0; spiReadRegister(RH_MRF89_REG_0D_FTXRXIREG) &
-                        RH_MRF89_FIFOEMPTY;
-                 i++)
-                spiReadData();
+            for (i = 0; spiReadRegister(RH_MRF89_REG_0D_FTXRXIREG) & RH_MRF89_FIFOEMPTY; i++) spiReadData();
             clearRxBuf();
             return;
         }
 
         // Now drain all the data from the FIFO into _buf
         uint8_t i;
-        for (i = 0;
-             spiReadRegister(RH_MRF89_REG_0D_FTXRXIREG) & RH_MRF89_FIFOEMPTY;
-             i++)
-            _buf[i] = spiReadData();
+        for (i = 0; spiReadRegister(RH_MRF89_REG_0D_FTXRXIREG) & RH_MRF89_FIFOEMPTY; i++) _buf[i] = spiReadData();
 
         // All good. See if its for us
         validateRxBuf();
@@ -362,8 +343,7 @@ bool RH_MRF89::recv(uint8_t* buf, uint8_t* len) {
     if (buf && len) {
         ATOMIC_BLOCK_START;
         // Skip the 4 headers that are at the beginning of the rxBuf
-        if (*len > _bufLen - RH_MRF89_HEADER_LEN)
-            *len = _bufLen - RH_MRF89_HEADER_LEN;
+        if (*len > _bufLen - RH_MRF89_HEADER_LEN) *len = _bufLen - RH_MRF89_HEADER_LEN;
         memcpy(buf, _buf + RH_MRF89_HEADER_LEN, *len);
         ATOMIC_BLOCK_END;
     }
@@ -403,8 +383,7 @@ void RH_MRF89::validateRxBuf() {
     _rxHeaderFrom = _buf[1];
     _rxHeaderId = _buf[2];
     _rxHeaderFlags = _buf[3];
-    if (_promiscuous || _rxHeaderTo == _thisAddress ||
-        _rxHeaderTo == RH_BROADCAST_ADDRESS) {
+    if (_promiscuous || _rxHeaderTo == _thisAddress || _rxHeaderTo == RH_BROADCAST_ADDRESS) {
         _rxGood++;
         _rxBufValid = true;
     }
@@ -481,8 +460,7 @@ bool RH_MRF89::setFrequency(float centre) {
 // Set one of the canned FSK Modem configs
 // Returns true if its a valid choice
 bool RH_MRF89::setModemConfig(ModemConfigChoice index) {
-    if (index > (signed int)(sizeof(MODEM_CONFIG_TABLE) / sizeof(ModemConfig)))
-        return false;
+    if (index > (signed int)(sizeof(MODEM_CONFIG_TABLE) / sizeof(ModemConfig))) return false;
 
     RH_MRF89::ModemConfig cfg;
     memcpy_P(&cfg, &MODEM_CONFIG_TABLE[index], sizeof(cfg));
@@ -509,8 +487,7 @@ void RH_MRF89::setPreambleLength(uint8_t bytes) {
     if (bytes >= 1 && bytes <= 4) {
         bytes--;
         uint8_t pktcreg = spiReadRegister(RH_MRF89_REG_1E_PKTCREG);
-        pktcreg =
-            (pktcreg & ~RH_MRF89_PRESIZE) | ((bytes << 5) & RH_MRF89_PRESIZE);
+        pktcreg = (pktcreg & ~RH_MRF89_PRESIZE) | ((bytes << 5) & RH_MRF89_PRESIZE);
         spiWriteRegister(RH_MRF89_REG_1E_PKTCREG, pktcreg);
     }
 }
@@ -518,13 +495,11 @@ void RH_MRF89::setPreambleLength(uint8_t bytes) {
 void RH_MRF89::setSyncWords(const uint8_t* syncWords, uint8_t len) {
     if (syncWords && (len > 0 and len <= 4)) {
         uint8_t syncreg = spiReadRegister(RH_MRF89_REG_12_SYNCREG);
-        syncreg = (syncreg & ~RH_MRF89_SYNCWSZ) |
-                  (((len - 1) << 3) & RH_MRF89_SYNCWSZ);
+        syncreg = (syncreg & ~RH_MRF89_SYNCWSZ) | (((len - 1) << 3) & RH_MRF89_SYNCWSZ);
         spiWriteRegister(RH_MRF89_REG_12_SYNCREG, syncreg);
         uint8_t i;
         for (i = 0; i < 4; i++) {
-            if (len > i)
-                spiWriteRegister(RH_MRF89_REG_16_SYNCV31REG + i, syncWords[i]);
+            if (len > i) spiWriteRegister(RH_MRF89_REG_16_SYNCV31REG + i, syncWords[i]);
         }
     }
 }

@@ -31,8 +31,7 @@
 // included in the 64 byte encryption limit. the one byte payload length is not
 // encrpyted
 #ifndef RH_SERIAL_MAX_MESSAGE_LEN
-#define RH_SERIAL_MAX_MESSAGE_LEN \
-    (RH_SERIAL_MAX_PAYLOAD_LEN - RH_SERIAL_HEADER_LEN)
+#define RH_SERIAL_MAX_MESSAGE_LEN (RH_SERIAL_MAX_PAYLOAD_LEN - RH_SERIAL_HEADER_LEN)
 #endif
 
 #if (RH_PLATFORM == RH_PLATFORM_STM32F2)

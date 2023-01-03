@@ -23,8 +23,7 @@
 
 // This is the maximum RadioHead user message length that can be supported by
 // this library. Limited by the supported message lengths in the nRF905
-#define RH_NRF905_MAX_MESSAGE_LEN \
-    (RH_NRF905_MAX_PAYLOAD_LEN - RH_NRF905_HEADER_LEN)
+#define RH_NRF905_MAX_MESSAGE_LEN (RH_NRF905_MAX_PAYLOAD_LEN - RH_NRF905_HEADER_LEN)
 
 // Register names
 #define RH_NRF905_REG_MASK 0x0f
@@ -272,8 +271,8 @@ class RH_NRF905 : public RHNRFSPIDriver {
     /// Arduino (D10 for Diecimila, Uno etc, D53 for Mega, D10 for Maple,
     /// Teensy) \param[in] spi Pointer to the SPI interface object to use.
     ///                Defaults to the standard Arduino hardware SPI interface
-    RH_NRF905(uint8_t chipEnablePin = 8, uint8_t txEnablePin = 9,
-              uint8_t slaveSelectPin = SS, RHGenericSPI& spi = hardware_spi);
+    RH_NRF905(uint8_t chipEnablePin = 8, uint8_t txEnablePin = 9, uint8_t slaveSelectPin = SS,
+              RHGenericSPI& spi = hardware_spi);
 
     /// Initialises this instance and the radio module connected to it.
     /// The following steps are taken:g

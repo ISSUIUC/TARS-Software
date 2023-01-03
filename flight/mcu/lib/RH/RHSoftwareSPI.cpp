@@ -5,8 +5,7 @@
 
 #include <RHSoftwareSPI.h>
 
-RHSoftwareSPI::RHSoftwareSPI(Frequency frequency, BitOrder bitOrder,
-                             DataMode dataMode)
+RHSoftwareSPI::RHSoftwareSPI(Frequency frequency, BitOrder bitOrder, DataMode dataMode)
     : RHGenericSPI(frequency, bitOrder, dataMode) {
     setPins(12, 11, 13);
 }

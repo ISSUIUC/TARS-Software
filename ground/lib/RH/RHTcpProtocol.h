@@ -28,14 +28,14 @@
 
 /// \brief Generic RH_TCP simulator message structure
 typedef struct {
-    uint32_t length;  ///< Number of octets following, in network byte order
+    uint32_t length;                              ///< Number of octets following, in network byte order
     uint8_t payload[RH_TCP_MAX_PAYLOAD_LEN + 1];  ///< Payload
 } RHTcpMessage;
 
 /// \brief Generic RH_TCP  message structure with message type
 typedef struct {
-    uint32_t length;  ///< Number of octets following, in network byte order
-    uint8_t type;     ///< One of RH_TCP_MESSAGE_TYPE_*
+    uint32_t length;                          ///< Number of octets following, in network byte order
+    uint8_t type;                             ///< One of RH_TCP_MESSAGE_TYPE_*
     uint8_t payload[RH_TCP_MAX_PAYLOAD_LEN];  ///< Payload
 } RHTcpTypeMessage;
 
@@ -48,12 +48,12 @@ typedef struct {
 
 /// \brief RH_TCP radio message passed to or from the simulator
 typedef struct {
-    uint32_t length;  ///< Number of octets following, in network byte order
-    uint8_t type;     ///< == RH_TCP_MESSAGE_TYPE_PACKET
-    uint8_t to;       ///< Node address of the recipient
-    uint8_t from;     ///< Node address of the sender
-    uint8_t id;       ///< Message sequence number
-    uint8_t flags;    ///< Message flags
+    uint32_t length;                          ///< Number of octets following, in network byte order
+    uint8_t type;                             ///< == RH_TCP_MESSAGE_TYPE_PACKET
+    uint8_t to;                               ///< Node address of the recipient
+    uint8_t from;                             ///< Node address of the sender
+    uint8_t id;                               ///< Message sequence number
+    uint8_t flags;                            ///< Message flags
     uint8_t payload[RH_TCP_MAX_MESSAGE_LEN];  ///< 0 or more, length deduced
                                               ///< from length above
 } RHTcpPacket;

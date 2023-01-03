@@ -12,8 +12,7 @@ class SerialParser {
      * SuccessCallback : (const char * key, const char * value) -> void
      * ErrorCallback : () -> void
      */
-    SerialParser(SuccessCallback success, ErrorCallback error)
-        : success(success), error(error) {}
+    SerialParser(SuccessCallback success, ErrorCallback error) : success(success), error(error) {}
     void read() {
         while (Serial.available()) {
             char c = Serial.read();
@@ -26,8 +25,7 @@ class SerialParser {
                 if (write_overflow) {
                     error();
                 } else {
-                    char* seperator_loc =
-                        (char*)memchr(input_buffer, seperator, write_head);
+                    char* seperator_loc = (char*)memchr(input_buffer, seperator, write_head);
                     if (seperator_loc == nullptr) {
                         error();
                     } else {

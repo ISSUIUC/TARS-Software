@@ -17,8 +17,7 @@ RHRouter::RoutedMessage RHRouter::_tmpMessage;
 
 ////////////////////////////////////////////////////////////////////
 // Constructors
-RHRouter::RHRouter(RHGenericDriver& driver, uint8_t thisAddress)
-    : RHReliableDatagram(driver, thisAddress) {
+RHRouter::RHRouter(RHGenericDriver& driver, uint8_t thisAddress) : RHReliableDatagram(driver, thisAddress) {
     _max_hops = RH_DEFAULT_MAX_HOPS;
     clearRoutingTable();
 }
@@ -74,16 +73,14 @@ void RHRouter::addRouteTo(uint8_t dest, uint8_t next_hop, uint8_t state) {
 RHRouter::RoutingTableEntry* RHRouter::getRouteTo(uint8_t dest) {
     uint8_t i;
     for (i = 0; i < RH_ROUTING_TABLE_SIZE; i++)
-        if (_routes[i].dest == dest && _routes[i].state != Invalid)
-            return &_routes[i];
+        if (_routes[i].dest == dest && _routes[i].state != Invalid) return &_routes[i];
     return NULL;
 }
 
 ////////////////////////////////////////////////////////////////////
 void RHRouter::deleteRoute(uint8_t index) {
     // Delete a route by copying following routes on top of it
-    memcpy(&_routes[index], &_routes[index + 1],
-           sizeof(RoutingTableEntry) * (RH_ROUTING_TABLE_SIZE - index - 1));
+    memcpy(&_routes[index], &_routes[index + 1], sizeof(RoutingTableEntry) * (RH_ROUTING_TABLE_SIZE - index - 1));
     _routes[RH_ROUTING_TABLE_SIZE - 1].state = Invalid;
 }
 
@@ -127,18 +124,15 @@ void RHRouter::clearRoutingTable() {
     for (i = 0; i < RH_ROUTING_TABLE_SIZE; i++) _routes[i].state = Invalid;
 }
 
-uint8_t RHRouter::sendtoWait(uint8_t* buf, uint8_t len, uint8_t dest,
-                             uint8_t flags) {
+uint8_t RHRouter::sendtoWait(uint8_t* buf, uint8_t len, uint8_t dest, uint8_t flags) {
     return sendtoFromSourceWait(buf, len, dest, _thisAddress, flags);
 }
 
 ////////////////////////////////////////////////////////////////////
 // Waits for delivery to the next hop (but not for delivery to the final
 // destination)
-uint8_t RHRouter::sendtoFromSourceWait(uint8_t* buf, uint8_t len, uint8_t dest,
-                                       uint8_t source, uint8_t flags) {
-    if (((uint16_t)len + sizeof(RoutedMessageHeader)) >
-        _driver.maxMessageLength())
+uint8_t RHRouter::sendtoFromSourceWait(uint8_t* buf, uint8_t len, uint8_t dest, uint8_t source, uint8_t flags) {
+    if (((uint16_t)len + sizeof(RoutedMessageHeader)) > _driver.maxMessageLength())
         return RH_ROUTER_ERROR_INVALID_LENGTH;
 
     // Construct a RH RouterMessage message
@@ -162,8 +156,7 @@ uint8_t RHRouter::route(RoutedMessage* message, uint8_t messageLen) {
         next_hop = route->next_hop;
     }
 
-    if (!RHReliableDatagram::sendtoWait((uint8_t*)message, messageLen,
-                                        next_hop))
+    if (!RHReliableDatagram::sendtoWait((uint8_t*)message, messageLen, next_hop))
         return RH_ROUTER_ERROR_UNABLE_TO_DELIVER;
 
     return RH_ROUTER_ERROR_NONE;
@@ -176,49 +169,41 @@ void RHRouter::peekAtMessage(RoutedMessage* message, uint8_t messageLen) {
 }
 
 ////////////////////////////////////////////////////////////////////
-bool RHRouter::recvfromAck(uint8_t* buf, uint8_t* len, uint8_t* source,
-                           uint8_t* dest, uint8_t* id, uint8_t* flags) {
+bool RHRouter::recvfromAck(uint8_t* buf, uint8_t* len, uint8_t* source, uint8_t* dest, uint8_t* id, uint8_t* flags) {
     uint8_t tmpMessageLen = sizeof(_tmpMessage);
     uint8_t _from;
     uint8_t _to;
     uint8_t _id;
     uint8_t _flags;
-    if (RHReliableDatagram::recvfromAck((uint8_t*)&_tmpMessage, &tmpMessageLen,
-                                        &_from, &_to, &_id, &_flags)) {
+    if (RHReliableDatagram::recvfromAck((uint8_t*)&_tmpMessage, &tmpMessageLen, &_from, &_to, &_id, &_flags)) {
         // Here we simulate networks with limited visibility between nodes
         // so we can test routing
 #ifdef RH_TEST_NETWORK
         if (
 #if RH_TEST_NETWORK == 1
             // This network looks like 1-2-3-4
-            (_thisAddress == 1 && _from == 2) ||
-            (_thisAddress == 2 && (_from == 1 || _from == 3)) ||
-            (_thisAddress == 3 && (_from == 2 || _from == 4)) ||
-            (_thisAddress == 4 && _from == 3)
+            (_thisAddress == 1 && _from == 2) || (_thisAddress == 2 && (_from == 1 || _from == 3)) ||
+            (_thisAddress == 3 && (_from == 2 || _from == 4)) || (_thisAddress == 4 && _from == 3)
 
 #elif RH_TEST_NETWORK == 2
             // This network looks like 1-2-4
             //                         | | |
             //                         --3--
-            (_thisAddress == 1 && (_from == 2 || _from == 3)) ||
-            _thisAddress == 2 || _thisAddress == 3 ||
+            (_thisAddress == 1 && (_from == 2 || _from == 3)) || _thisAddress == 2 || _thisAddress == 3 ||
             (_thisAddress == 4 && (_from == 2 || _from == 3))
 
 #elif RH_TEST_NETWORK == 3
             // This network looks like 1-2-4
             //                         |   |
             //                         --3--
-            (_thisAddress == 1 && (_from == 2 || _from == 3)) ||
-            (_thisAddress == 2 && (_from == 1 || _from == 4)) ||
-            (_thisAddress == 3 && (_from == 1 || _from == 4)) ||
-            (_thisAddress == 4 && (_from == 2 || _from == 3))
+            (_thisAddress == 1 && (_from == 2 || _from == 3)) || (_thisAddress == 2 && (_from == 1 || _from == 4)) ||
+            (_thisAddress == 3 && (_from == 1 || _from == 4)) || (_thisAddress == 4 && (_from == 2 || _from == 3))
 
 #elif RH_TEST_NETWORK == 4
             // This network looks like 1-2-3
             //                           |
             //                           4
-            (_thisAddress == 1 && _from == 2) || _thisAddress == 2 ||
-            (_thisAddress == 3 && _from == 2) ||
+            (_thisAddress == 1 && _from == 2) || _thisAddress == 2 || (_thisAddress == 3 && _from == 2) ||
             (_thisAddress == 4 && _from == 2)
 
 #endif
@@ -231,8 +216,7 @@ bool RHRouter::recvfromAck(uint8_t* buf, uint8_t* len, uint8_t* source,
 
         peekAtMessage(&_tmpMessage, tmpMessageLen);
         // See if its for us or has to be routed
-        if (_tmpMessage.header.dest == _thisAddress ||
-            _tmpMessage.header.dest == RH_BROADCAST_ADDRESS) {
+        if (_tmpMessage.header.dest == _thisAddress || _tmpMessage.header.dest == RH_BROADCAST_ADDRESS) {
             // Deliver it here
             if (source) *source = _tmpMessage.header.source;
             if (dest) *dest = _tmpMessage.header.dest;
@@ -242,8 +226,7 @@ bool RHRouter::recvfromAck(uint8_t* buf, uint8_t* len, uint8_t* source,
             if (*len > msgLen) *len = msgLen;
             memcpy(buf, _tmpMessage.data, *len);
             return true;  // Its for you!
-        } else if (_tmpMessage.header.dest != RH_BROADCAST_ADDRESS &&
-                   _tmpMessage.header.hops++ < _max_hops) {
+        } else if (_tmpMessage.header.dest != RH_BROADCAST_ADDRESS && _tmpMessage.header.hops++ < _max_hops) {
             // Maybe it has to be routed to the next hop
             // REVISIT: if it fails due to no route or unable to deliver to the
             // next hop, tell the originator. BUT HOW?
@@ -255,9 +238,8 @@ bool RHRouter::recvfromAck(uint8_t* buf, uint8_t* len, uint8_t* source,
 }
 
 ////////////////////////////////////////////////////////////////////
-bool RHRouter::recvfromAckTimeout(uint8_t* buf, uint8_t* len, uint16_t timeout,
-                                  uint8_t* source, uint8_t* dest, uint8_t* id,
-                                  uint8_t* flags) {
+bool RHRouter::recvfromAckTimeout(uint8_t* buf, uint8_t* len, uint16_t timeout, uint8_t* source, uint8_t* dest,
+                                  uint8_t* id, uint8_t* flags) {
     unsigned long starttime = millis();
     int32_t timeLeft;
     while ((timeLeft = timeout - (millis() - starttime)) > 0) {

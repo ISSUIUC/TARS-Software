@@ -966,11 +966,10 @@
 #endif
 #endif
 
-#if defined(__AVR_ATtiny84__) || defined(__AVR_ATtiny85__) ||   \
-    defined(__AVR_ATtiny24__) || defined(__AVR_ATtiny44__) ||   \
-    defined(__AVR_ATtiny45__) || defined(__AVR_ATtinyX4__) ||   \
-    defined(__AVR_ATtinyX5__) || defined(__AVR_ATtiny2313__) || \
-    defined(__AVR_ATtiny4313__) || defined(__AVR_ATtinyX313__)
+#if defined(__AVR_ATtiny84__) || defined(__AVR_ATtiny85__) || defined(__AVR_ATtiny24__) ||     \
+    defined(__AVR_ATtiny44__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtinyX4__) ||     \
+    defined(__AVR_ATtinyX5__) || defined(__AVR_ATtiny2313__) || defined(__AVR_ATtiny4313__) || \
+    defined(__AVR_ATtinyX313__)
 #define RH_PLATFORM_ATTINY
 #endif
 
@@ -1003,8 +1002,7 @@
 #define RH_HAVE_HARDWARE_SPI
 #define RH_HAVE_SERIAL
 
-#elif (RH_PLATFORM == RH_PLATFORM_UNO32 || \
-       RH_PLATFORM == RH_PLATFORM_CHIPKIT_CORE)
+#elif (RH_PLATFORM == RH_PLATFORM_UNO32 || RH_PLATFORM == RH_PLATFORM_CHIPKIT_CORE)
 #include <SPI.h>
 #include <WProgram.h>
 #include <string.h>
@@ -1025,16 +1023,14 @@
 #define Serial SerialUSB
 #define RH_HAVE_SERIAL
 
-#elif (RH_PLATFORM == \
-       RH_PLATFORM_STM32F2)  // Particle Photon with firmware-develop
+#elif (RH_PLATFORM == RH_PLATFORM_STM32F2)  // Particle Photon with firmware-develop
 #include <application.h>
 #include <math.h>  // floor
 #include <stm32f2xx.h>
 #define RH_HAVE_SERIAL
 #define RH_HAVE_HARDWARE_SPI
 
-#elif (RH_PLATFORM == \
-       RH_PLATFORM_STM32STD)  // STM32 with STM32F4xx_StdPeriph_Driver
+#elif (RH_PLATFORM == RH_PLATFORM_STM32STD)  // STM32 with STM32F4xx_StdPeriph_Driver
 #include <HardwareSPI.h>
 #include <math.h>
 #include <stdint.h>
@@ -1117,8 +1113,7 @@
 #define ATOMIC_BLOCK_END \
     }                    \
     INTRestoreInterrupts(__status);
-#elif (RH_PLATFORM == \
-       RH_PLATFORM_STM32F2)  // Particle Photon with firmware-develop
+#elif (RH_PLATFORM == RH_PLATFORM_STM32F2)  // Particle Photon with firmware-develop
 #define ATOMIC_BLOCK_START \
     {                      \
         int __prev = HAL_disable_irq();
@@ -1143,8 +1138,7 @@
 // Try to be compatible with systems that support yield() and multitasking
 // instead of spin-loops
 // Recent Arduino IDE or Teensy 3 has yield()
-#if (RH_PLATFORM == RH_PLATFORM_ARDUINO && ARDUINO >= 155 && \
-     !defined(RH_PLATFORM_ATTINY)) ||                        \
+#if (RH_PLATFORM == RH_PLATFORM_ARDUINO && ARDUINO >= 155 && !defined(RH_PLATFORM_ATTINY)) || \
     (TEENSYDUINO && defined(__MK20DX128__))
 #define YIELD yield();
 #elif (RH_PLATFORM == RH_PLATFORM_ESP8266)
@@ -1166,51 +1160,32 @@
 #if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
 // Arduino Mega, Mega ADK, Mega Pro
 // 2->0, 3->1, 21->2, 20->3, 19->4, 18->5
-#define digitalPinToInterrupt(p)                               \
-    ((p) == 2 ? 0                                              \
-              : ((p) == 3 ? 1                                  \
-                          : ((p) >= 18 && (p) <= 21 ? 23 - (p) \
-                                                    : NOT_AN_INTERRUPT)))
+#define digitalPinToInterrupt(p) \
+    ((p) == 2 ? 0 : ((p) == 3 ? 1 : ((p) >= 18 && (p) <= 21 ? 23 - (p) : NOT_AN_INTERRUPT)))
 
 #elif defined(__AVR_ATmega1284__) || defined(__AVR_ATmega1284P__)
 // Arduino 1284 and 1284P - See Manicbug and Optiboot
 // 10->0, 11->1, 2->2
-#define digitalPinToInterrupt(p) \
-    ((p) == 10 ? 0 : ((p) == 11 ? 1 : ((p) == 2 ? 2 : NOT_AN_INTERRUPT)))
+#define digitalPinToInterrupt(p) ((p) == 10 ? 0 : ((p) == 11 ? 1 : ((p) == 2 ? 2 : NOT_AN_INTERRUPT)))
 
 #elif defined(__AVR_ATmega32U4__)
 // Leonardo, Yun, Micro, Pro Micro, Flora, Esplora
 // 3->0, 2->1, 0->2, 1->3, 7->4
 #define digitalPinToInterrupt(p) \
-    ((p) == 0                    \
-         ? 2                     \
-         : ((p) == 1             \
-                ? 3              \
-                : ((p) == 2      \
-                       ? 1       \
-                       : ((p) == 3 ? 0 : ((p) == 7 ? 4 : NOT_AN_INTERRUPT)))))
+    ((p) == 0 ? 2 : ((p) == 1 ? 3 : ((p) == 2 ? 1 : ((p) == 3 ? 0 : ((p) == 7 ? 4 : NOT_AN_INTERRUPT)))))
 
 #else
 // All other arduino except Due:
 // Serial Arduino, Extreme, NG, BT, Uno, Diecimila, Duemilanove, Nano, Menta,
 // Pro, Mini 04, Fio, LilyPad, Ethernet etc 2->0, 3->1
-#define digitalPinToInterrupt(p) \
-    ((p) == 2 ? 0 : ((p) == 3 ? 1 : NOT_AN_INTERRUPT))
+#define digitalPinToInterrupt(p) ((p) == 2 ? 0 : ((p) == 3 ? 1 : NOT_AN_INTERRUPT))
 
 #endif
 
-#elif (RH_PLATFORM == RH_PLATFORM_UNO32) || \
-    (RH_PLATFORM == RH_PLATFORM_CHIPKIT_CORE)
+#elif (RH_PLATFORM == RH_PLATFORM_UNO32) || (RH_PLATFORM == RH_PLATFORM_CHIPKIT_CORE)
 // Hmmm, this is correct for Uno32, but what about other boards on ChipKIT Core?
-#define digitalPinToInterrupt(p)       \
-    ((p) == 38                         \
-         ? 0                           \
-         : ((p) == 2                   \
-                ? 1                    \
-                : ((p) == 7            \
-                       ? 2             \
-                       : ((p) == 8 ? 3 \
-                                   : ((p) == 735 ? 4 : NOT_AN_INTERRUPT)))))
+#define digitalPinToInterrupt(p) \
+    ((p) == 38 ? 0 : ((p) == 2 ? 1 : ((p) == 7 ? 2 : ((p) == 8 ? 3 : ((p) == 735 ? 4 : NOT_AN_INTERRUPT)))))
 
 #else
 // Everything else (including Due and Teensy) interrupt number the same as the
@@ -1221,8 +1196,7 @@
 
 // On some platforms, attachInterrupt() takes a pin number, not an interrupt
 // number
-#if (RH_PLATFORM == RH_PLATFORM_ARDUINO) && defined(__arm__) && \
-    (defined(ARDUINO_ARCH_SAMD) || defined(ARDUINO_SAM_DUE))
+#if (RH_PLATFORM == RH_PLATFORM_ARDUINO) && defined(__arm__) && (defined(ARDUINO_ARCH_SAMD) || defined(ARDUINO_SAM_DUE))
 #define RH_ATTACHINTERRUPT_TAKES_PIN_NUMBER
 #endif
 
@@ -1245,9 +1219,8 @@
 // Atmel processors
 #define htons(x) (((x) << 8) | (((x) >> 8) & 0xFF))
 #define ntohs(x) htons(x)
-#define htonl(x)                                              \
-    (((x) << 24 & 0xFF000000UL) | ((x) << 8 & 0x00FF0000UL) | \
-     ((x) >> 8 & 0x0000FF00UL) | ((x) >> 24 & 0x000000FFUL))
+#define htonl(x) \
+    (((x) << 24 & 0xFF000000UL) | ((x) << 8 & 0x00FF0000UL) | ((x) >> 8 & 0x0000FF00UL) | ((x) >> 24 & 0x000000FFUL))
 #define ntohl(x) htonl(x)
 
 #elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__

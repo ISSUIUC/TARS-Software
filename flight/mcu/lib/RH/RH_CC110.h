@@ -34,8 +34,7 @@
 // Can be pre-defined to a smaller size (to save SRAM) prior to including this
 // header Here we allow for 1 byte message length, 4 bytes headers, user data
 #ifndef RH_CC110_MAX_MESSAGE_LEN
-#define RH_CC110_MAX_MESSAGE_LEN \
-    (RH_CC110_MAX_PAYLOAD_LEN - RH_CC110_HEADER_LEN - 1)
+#define RH_CC110_MAX_MESSAGE_LEN (RH_CC110_MAX_PAYLOAD_LEN - RH_CC110_HEADER_LEN - 1)
 #endif
 
 #define RH_CC110_SPI_READ_MASK 0x80
@@ -643,18 +642,18 @@ class RH_CC110 : public RHNRFSPIDriver {
                               ///< 58kHz, optimised for sensitivity
         GFSK_Rb2_4Fd5_2,      ///< GFSK, Data Rate: 2.4kBaud, Dev: 5.2kHz, RX BW
                               ///< 58kHz, optimised for sensitivity
-        GFSK_Rb4_8Fd25_4,  ///< GFSK, Data Rate: 4.8kBaud, Dev: 25.4kHz, RX BW
-                           ///< 100kHz, optimised for sensitivity
-        GFSK_Rb10Fd19,  ///< GFSK, Data Rate: 10kBaud, Dev: 19kHz, RX BW 100kHz,
-                        ///< optimised for sensitivity
-        GFSK_Rb38_4Fd20,  ///< GFSK, Data Rate: 38.4kBaud, Dev: 20kHz, RX BW
-                          ///< 100kHz, optimised for sensitivity
-        GFSK_Rb76_8Fd32,  ///< GFSK, Data Rate: 76.8kBaud, Dev: 32kHz, RX BW
-                          ///< 232kHz, optimised for sensitivity
-        GFSK_Rb100Fd47,   ///< GFSK, Data Rate: 100kBaud, Dev: 47kHz, RX BW
-                          ///< 325kHz, optimised for sensitivity
-        GFSK_Rb250Fd127,  ///< GFSK, Data Rate: 250kBaud, Dev: 127kHz, RX BW
-                          ///< 540kHz, optimised for sensitivity
+        GFSK_Rb4_8Fd25_4,     ///< GFSK, Data Rate: 4.8kBaud, Dev: 25.4kHz, RX BW
+                              ///< 100kHz, optimised for sensitivity
+        GFSK_Rb10Fd19,        ///< GFSK, Data Rate: 10kBaud, Dev: 19kHz, RX BW 100kHz,
+                              ///< optimised for sensitivity
+        GFSK_Rb38_4Fd20,      ///< GFSK, Data Rate: 38.4kBaud, Dev: 20kHz, RX BW
+                              ///< 100kHz, optimised for sensitivity
+        GFSK_Rb76_8Fd32,      ///< GFSK, Data Rate: 76.8kBaud, Dev: 32kHz, RX BW
+                              ///< 232kHz, optimised for sensitivity
+        GFSK_Rb100Fd47,       ///< GFSK, Data Rate: 100kBaud, Dev: 47kHz, RX BW
+                              ///< 325kHz, optimised for sensitivity
+        GFSK_Rb250Fd127,      ///< GFSK, Data Rate: 250kBaud, Dev: 127kHz, RX BW
+                              ///< 540kHz, optimised for sensitivity
     } ModemConfigChoice;
 
     /// These power outputs are based on the suggested optimum values for
@@ -693,8 +692,8 @@ class RH_CC110 : public RHNRFSPIDriver {
     /// with a 27MHz crystal oscillator. Defaults to false. \param[in] spi
     /// Pointer to the SPI interface object to use.
     ///                Defaults to the standard Arduino hardware SPI interface
-    RH_CC110(uint8_t slaveSelectPin = SS, uint8_t interruptPin = 2,
-             bool is27MHz = false, RHGenericSPI& spi = hardware_spi);
+    RH_CC110(uint8_t slaveSelectPin = SS, uint8_t interruptPin = 2, bool is27MHz = false,
+             RHGenericSPI& spi = hardware_spi);
 
     /// Initialise the Driver transport hardware and software.
     /// Make sure the Driver is properly configured before calling init().

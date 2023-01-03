@@ -41,8 +41,7 @@ class SerialSimulator {
         return printf("\n");
     }
     size_t print(const char* s) {
-        return printf(
-            "%s", s);  // This style prevent warnings from [-Wformat-security]
+        return printf("%s", s);  // This style prevent warnings from [-Wformat-security]
     }
     size_t print(unsigned int n, int base = DEC) {
         if (base == DEC)
@@ -57,9 +56,7 @@ class SerialSimulator {
     }
     size_t print(char ch) { return printf("%c", ch); }
     size_t println(char ch) { return printf("%c\n", ch); }
-    size_t print(unsigned char ch, int base = DEC) {
-        return print((unsigned int)ch, base);
-    }
+    size_t print(unsigned char ch, int base = DEC) { return print((unsigned int)ch, base); }
     size_t println(unsigned char ch, int base = DEC) {
         print((unsigned int)ch, base);
         return printf("\n");

@@ -5,11 +5,9 @@
 
 #include <RH_NRF24.h>
 
-RH_NRF24::RH_NRF24(uint8_t chipEnablePin, uint8_t slaveSelectPin,
-                   RHGenericSPI& spi)
+RH_NRF24::RH_NRF24(uint8_t chipEnablePin, uint8_t slaveSelectPin, RHGenericSPI& spi)
     : RHNRFSPIDriver(slaveSelectPin, spi), _rxBufValid(0) {
-    _configuration =
-        RH_NRF24_EN_CRC | RH_NRF24_CRCO;  // Default: 2 byte CRC enabled
+    _configuration = RH_NRF24_EN_CRC | RH_NRF24_CRCO;  // Default: 2 byte CRC enabled
     _chipEnablePin = chipEnablePin;
 }
 
@@ -24,24 +22,18 @@ bool RH_NRF24::init() {
     digitalWrite(_chipEnablePin, LOW);
 
     // Clear interrupts
-    spiWriteRegister(RH_NRF24_REG_07_STATUS,
-                     RH_NRF24_RX_DR | RH_NRF24_TX_DS | RH_NRF24_MAX_RT);
+    spiWriteRegister(RH_NRF24_REG_07_STATUS, RH_NRF24_RX_DR | RH_NRF24_TX_DS | RH_NRF24_MAX_RT);
     // Enable dynamic payload length on all pipes
     spiWriteRegister(RH_NRF24_REG_1C_DYNPD, RH_NRF24_DPL_ALL);
     // Enable dynamic payload length, disable payload-with-ack, enable noack
-    spiWriteRegister(RH_NRF24_REG_1D_FEATURE,
-                     RH_NRF24_EN_DPL | RH_NRF24_EN_DYN_ACK);
+    spiWriteRegister(RH_NRF24_REG_1D_FEATURE, RH_NRF24_EN_DPL | RH_NRF24_EN_DYN_ACK);
     // Test if there is actually a device connected and responding
     // CAUTION: RFM73 and version 2.0 silicon may require ACTIVATE
-    if (spiReadRegister(RH_NRF24_REG_1D_FEATURE) !=
-        (RH_NRF24_EN_DPL | RH_NRF24_EN_DYN_ACK)) {
+    if (spiReadRegister(RH_NRF24_REG_1D_FEATURE) != (RH_NRF24_EN_DPL | RH_NRF24_EN_DYN_ACK)) {
         spiWrite(RH_NRF24_COMMAND_ACTIVATE, 0x73);
         // Enable dynamic payload length, disable payload-with-ack, enable noack
-        spiWriteRegister(RH_NRF24_REG_1D_FEATURE,
-                         RH_NRF24_EN_DPL | RH_NRF24_EN_DYN_ACK);
-        if (spiReadRegister(RH_NRF24_REG_1D_FEATURE) !=
-            (RH_NRF24_EN_DPL | RH_NRF24_EN_DYN_ACK))
-            return false;
+        spiWriteRegister(RH_NRF24_REG_1D_FEATURE, RH_NRF24_EN_DPL | RH_NRF24_EN_DYN_ACK);
+        if (spiReadRegister(RH_NRF24_REG_1D_FEATURE) != (RH_NRF24_EN_DPL | RH_NRF24_EN_DYN_ACK)) return false;
     }
 
     // Make sure we are powered down
@@ -60,26 +52,19 @@ bool RH_NRF24::init() {
 
 // Use the register commands to read and write the registers
 uint8_t RH_NRF24::spiReadRegister(uint8_t reg) {
-    return spiRead((reg & RH_NRF24_REGISTER_MASK) |
-                   RH_NRF24_COMMAND_R_REGISTER);
+    return spiRead((reg & RH_NRF24_REGISTER_MASK) | RH_NRF24_COMMAND_R_REGISTER);
 }
 
 uint8_t RH_NRF24::spiWriteRegister(uint8_t reg, uint8_t val) {
-    return spiWrite(
-        (reg & RH_NRF24_REGISTER_MASK) | RH_NRF24_COMMAND_W_REGISTER, val);
+    return spiWrite((reg & RH_NRF24_REGISTER_MASK) | RH_NRF24_COMMAND_W_REGISTER, val);
 }
 
-uint8_t RH_NRF24::spiBurstReadRegister(uint8_t reg, uint8_t* dest,
-                                       uint8_t len) {
-    return spiBurstRead(
-        (reg & RH_NRF24_REGISTER_MASK) | RH_NRF24_COMMAND_R_REGISTER, dest,
-        len);
+uint8_t RH_NRF24::spiBurstReadRegister(uint8_t reg, uint8_t* dest, uint8_t len) {
+    return spiBurstRead((reg & RH_NRF24_REGISTER_MASK) | RH_NRF24_COMMAND_R_REGISTER, dest, len);
 }
 
-uint8_t RH_NRF24::spiBurstWriteRegister(uint8_t reg, uint8_t* src,
-                                        uint8_t len) {
-    return spiBurstWrite(
-        (reg & RH_NRF24_REGISTER_MASK) | RH_NRF24_COMMAND_W_REGISTER, src, len);
+uint8_t RH_NRF24::spiBurstWriteRegister(uint8_t reg, uint8_t* src, uint8_t len) {
+    return spiBurstWrite((reg & RH_NRF24_REGISTER_MASK) | RH_NRF24_COMMAND_W_REGISTER, src, len);
 }
 
 uint8_t RH_NRF24::statusRead() {
@@ -150,8 +135,7 @@ bool RH_NRF24::sleep() {
 
 void RH_NRF24::setModeRx() {
     if (_mode != RHModeRx) {
-        spiWriteRegister(RH_NRF24_REG_00_CONFIG,
-                         _configuration | RH_NRF24_PWR_UP | RH_NRF24_PRIM_RX);
+        spiWriteRegister(RH_NRF24_REG_00_CONFIG, _configuration | RH_NRF24_PWR_UP | RH_NRF24_PRIM_RX);
         digitalWrite(_chipEnablePin, HIGH);
         _mode = RHModeRx;
     }
@@ -163,10 +147,8 @@ void RH_NRF24::setModeTx() {
         // CE staying high makes us go to standby-II when the packet is sent
         digitalWrite(_chipEnablePin, LOW);
         // Ensure DS is not set
-        spiWriteRegister(RH_NRF24_REG_07_STATUS,
-                         RH_NRF24_TX_DS | RH_NRF24_MAX_RT);
-        spiWriteRegister(RH_NRF24_REG_00_CONFIG,
-                         _configuration | RH_NRF24_PWR_UP);
+        spiWriteRegister(RH_NRF24_REG_07_STATUS, RH_NRF24_TX_DS | RH_NRF24_MAX_RT);
+        spiWriteRegister(RH_NRF24_REG_00_CONFIG, _configuration | RH_NRF24_PWR_UP);
         digitalWrite(_chipEnablePin, HIGH);
         _mode = RHModeTx;
     }
@@ -183,8 +165,7 @@ bool RH_NRF24::send(const uint8_t* data, uint8_t len) {
     _buf[2] = _txHeaderId;
     _buf[3] = _txHeaderFlags;
     memcpy(_buf + RH_NRF24_HEADER_LEN, data, len);
-    spiBurstWrite(RH_NRF24_COMMAND_W_TX_PAYLOAD_NOACK, _buf,
-                  len + RH_NRF24_HEADER_LEN);
+    spiBurstWrite(RH_NRF24_COMMAND_W_TX_PAYLOAD_NOACK, _buf, len + RH_NRF24_HEADER_LEN);
     setModeTx();
     // Radio will return to Standby II mode after transmission is complete
     _txGood++;
@@ -199,8 +180,7 @@ bool RH_NRF24::waitPacketSent() {
     // end of transmission
     // We dont actually use auto-ack, so prob dont expect to see RH_NRF24_MAX_RT
     uint8_t status;
-    while (!((status = statusRead()) & (RH_NRF24_TX_DS | RH_NRF24_MAX_RT)))
-        YIELD;
+    while (!((status = statusRead()) & (RH_NRF24_TX_DS | RH_NRF24_MAX_RT))) YIELD;
 
     // Must clear RH_NRF24_MAX_RT if it is set, else no further comm
     if (status & RH_NRF24_MAX_RT) flushTx();
@@ -218,16 +198,13 @@ bool RH_NRF24::isSending() {
 bool RH_NRF24::printRegisters() {
 #ifdef RH_HAVE_SERIAL
     // Iterate over register range, but don't process registers not in use.
-    for (uint8_t r = RH_NRF24_REG_00_CONFIG; r <= RH_NRF24_REG_1D_FEATURE;
-         r++) {
-        if ((r <= RH_NRF24_REG_17_FIFO_STATUS) ||
-            (r >= RH_NRF24_REG_1C_DYNPD)) {
+    for (uint8_t r = RH_NRF24_REG_00_CONFIG; r <= RH_NRF24_REG_1D_FEATURE; r++) {
+        if ((r <= RH_NRF24_REG_17_FIFO_STATUS) || (r >= RH_NRF24_REG_1C_DYNPD)) {
             Serial.print(r, HEX);
             Serial.print(": ");
             uint8_t len = 1;
             // Address registers are 5 bytes in size
-            if ((RH_NRF24_REG_0A_RX_ADDR_P0 == r) ||
-                (RH_NRF24_REG_0B_RX_ADDR_P1 == r) ||
+            if ((RH_NRF24_REG_0A_RX_ADDR_P0 == r) || (RH_NRF24_REG_0B_RX_ADDR_P1 == r) ||
                 (RH_NRF24_REG_10_TX_ADDR == r)) {
                 len = 5;
             }
@@ -253,8 +230,7 @@ void RH_NRF24::validateRxBuf() {
     _rxHeaderFrom = _buf[1];
     _rxHeaderId = _buf[2];
     _rxHeaderFlags = _buf[3];
-    if (_promiscuous || _rxHeaderTo == _thisAddress ||
-        _rxHeaderTo == RH_BROADCAST_ADDRESS) {
+    if (_promiscuous || _rxHeaderTo == _thisAddress || _rxHeaderTo == RH_BROADCAST_ADDRESS) {
         _rxGood++;
         _rxBufValid = true;
     }
@@ -264,8 +240,7 @@ bool RH_NRF24::available() {
     if (!_rxBufValid) {
         if (_mode == RHModeTx) return false;
         setModeRx();
-        if (spiReadRegister(RH_NRF24_REG_17_FIFO_STATUS) & RH_NRF24_RX_EMPTY)
-            return false;
+        if (spiReadRegister(RH_NRF24_REG_17_FIFO_STATUS) & RH_NRF24_RX_EMPTY) return false;
         // Manual says that messages > 32 octets should be discarded
         uint8_t len = spiRead(RH_NRF24_COMMAND_R_RX_PL_WID);
         if (len > 32) {
@@ -295,8 +270,7 @@ bool RH_NRF24::recv(uint8_t* buf, uint8_t* len) {
     if (!available()) return false;
     if (buf && len) {
         // Skip the 4 headers that are at the beginning of the rxBuf
-        if (*len > _bufLen - RH_NRF24_HEADER_LEN)
-            *len = _bufLen - RH_NRF24_HEADER_LEN;
+        if (*len > _bufLen - RH_NRF24_HEADER_LEN) *len = _bufLen - RH_NRF24_HEADER_LEN;
         memcpy(buf, _buf + RH_NRF24_HEADER_LEN, *len);
     }
     clearRxBuf();  // This message accepted and cleared

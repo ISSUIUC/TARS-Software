@@ -5,6 +5,7 @@
 
 #include <array>
 
+#include "FifoBuffer.h"
 #include "SD.h"
 #include "pins.h"
 #include "sensors.h"
@@ -16,6 +17,37 @@
 #define RF95_FREQ 434.0
 
 #define MAX_CMD_LEN 10
+
+struct TelemetryDataLite {
+    systime_t timestamp;  //[0, 2^32]
+
+    uint16_t barometer_pressure;  //[0, 4096]
+    int16_t highG_ax;             //[128, -128]
+    int16_t highG_ay;             //[128, -128]
+    int16_t highG_az;             //[128, -128]
+    int16_t gyro_x;               //[-4096, 4096]
+    int16_t gyro_y;               //[-4096, 4096]
+    int16_t gyro_z;               //[-4096, 4096]
+
+    uint8_t flap_extension;  //[0, 256]
+    uint8_t barometer_temp;  //[0, 128]
+};
+
+struct TelemetryPacket {
+    TelemetryDataLite datapoints[4];
+    float gps_lat;
+    float gps_long;
+    float gps_alt;
+    float gnc_state_x;
+    float gnc_state_vx;
+    float gnc_state_ax;
+    float gns_state_apo;
+    int16_t response_ID;      //[0, 2^16]
+    int8_t rssi;              //[-128, 128]
+    int8_t datapoint_count;   //[0,4]
+    uint8_t voltage_battery;  //[0, 16]
+    uint8_t FSM_State;        //[0,256]
+};
 
 // Data transmitted from rocket to ground station
 struct telemetry_data {
@@ -84,8 +116,10 @@ class Telemetry {
     void transmit(const sensorDataStruct_t&);
     void handle_command(const telemetry_command& cmd);
     bool abort = false;
+    void buffer_data(const sensorDataStruct_t&);
 
    private:
+    FifoBuffer<TelemetryDataLite, 4> buffered_data;
     int packetnum;
     telemetry_data d;
     RH_RF95 rf95;
@@ -99,4 +133,6 @@ class Telemetry {
     // Initializing callsign
     char callsign[8] = "NO SIGN";
     command_handler_struct freq_status = {};
+
+    TelemetryPacket make_packet(const sensorDataStruct_t&);
 };
