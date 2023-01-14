@@ -1,4 +1,4 @@
-# TARS Flight Software Repository
+# TARS Flight Software Repository - Intrepid 3 Archive
 Illinois Space Society's flight software codebase for the TARS system.
 
 ### Directory Structure:
