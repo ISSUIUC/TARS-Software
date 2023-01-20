@@ -1,0 +1,45 @@
+-- Found Git: /opt/homebrew/bin/git (found version "2.37.3") 
+-- The C compiler identification is GNU 11.2.0
+-- The CXX compiler identification is GNU 11.2.0
+-- The ASM compiler identification is GNU
+-- Found assembler: /Users/aidancostello/.espressif/tools/xtensa-esp32s3-elf/esp-2022r1-11.2.0/xtensa-esp32s3-elf/bin/xtensa-esp32s3-elf-gcc
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /Users/aidancostello/.espressif/tools/xtensa-esp32s3-elf/esp-2022r1-11.2.0/xtensa-esp32s3-elf/bin/xtensa-esp32s3-elf-gcc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /Users/aidancostello/.espressif/tools/xtensa-esp32s3-elf/esp-2022r1-11.2.0/xtensa-esp32s3-elf/bin/xtensa-esp32s3-elf-g++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Building ESP-IDF components for target esp32s3
+Processing 2 dependencies:
+[1/2] espressif/led_strip (2.2.1)
+[2/2] idf (5.0.0)
+-- Project sdkconfig file /Users/aidancostello/Github/TARS-Software/flight/blink/sdkconfig
+-- Looking for sys/types.h
+-- Looking for sys/types.h - found
+-- Looking for stdint.h
+-- Looking for stdint.h - found
+-- Looking for stddef.h
+-- Looking for stddef.h - found
+-- Check size of time_t
+-- Check size of time_t - done
+-- Found Python3: /Users/aidancostello/.espressif/python_env/idf5.0_py3.10_env/bin/python (found version "3.10.6") found components: Interpreter 
+-- Performing Test C_COMPILER_SUPPORTS_WFORMAT_SIGNEDNESS
+-- Performing Test C_COMPILER_SUPPORTS_WFORMAT_SIGNEDNESS - Success
+-- App "blink" version: f784ce98-dirty
+-- Adding linker script /Users/aidancostello/Github/TARS-Software/flight/blink/build/esp-idf/esp_system/ld/memory.ld
+-- Adding linker script /Users/aidancostello/esp/esp-idf/components/esp_system/ld/esp32s3/sections.ld.in
+-- Adding linker script /Users/aidancostello/esp/esp-idf/components/esp_rom/esp32s3/ld/esp32s3.rom.ld
+-- Adding linker script /Users/aidancostello/esp/esp-idf/components/esp_rom/esp32s3/ld/esp32s3.rom.api.ld
+-- Adding linker script /Users/aidancostello/esp/esp-idf/components/esp_rom/esp32s3/ld/esp32s3.rom.libgcc.ld
+-- Adding linker script /Users/aidancostello/esp/esp-idf/components/esp_rom/esp32s3/ld/esp32s3.rom.newlib.ld
+-- Adding linker script /Users/aidancostello/esp/esp-idf/components/esp_rom/esp32s3/ld/esp32s3.rom.version.ld
+-- Adding linker script /Users/aidancostello/esp/esp-idf/components/soc/esp32s3/ld/esp32s3.peripherals.ld
+-- Components: app_trace app_update bootloader bootloader_support bt cmock console cxx driver efuse esp-tls esp_adc esp_app_format esp_common esp_eth esp_event esp_gdbstub esp_hid esp_http_client esp_http_server esp_https_ota esp_https_server esp_hw_support esp_lcd esp_local_ctrl esp_netif esp_partition esp_phy esp_pm esp_psram esp_ringbuf esp_rom esp_system esp_timer esp_wifi espcoredump espressif__led_strip esptool_py fatfs freertos hal heap http_parser idf_test ieee802154 json log lwip main mbedtls mqtt newlib nvs_flash openthread partition_table perfmon protobuf-c protocomm pthread sdmmc soc spi_flash spiffs tcp_transport touch_element ulp unity usb vfs wear_levelling wifi_provisioning wpa_supplicant xtensa
+-- Component paths: /Users/aidancostello/esp/esp-idf/components/app_trace /Users/aidancostello/esp/esp-idf/components/app_update /Users/aidancostello/esp/esp-idf/components/bootloader /Users/aidancostello/esp/esp-idf/components/bootloader_support /Users/aidancostello/esp/esp-idf/components/bt /Users/aidancostello/esp/esp-idf/components/cmock /Users/aidancostello/esp/esp-idf/components/console /Users/aidancostello/esp/esp-idf/components/cxx /Users/aidancostello/esp/esp-idf/components/driver /Users/aidancostello/esp/esp-idf/components/efuse /Users/aidancostello/esp/esp-idf/components/esp-tls /Users/aidancostello/esp/esp-idf/components/esp_adc /Users/aidancostello/esp/esp-idf/components/esp_app_format /Users/aidancostello/esp/esp-idf/components/esp_common /Users/aidancostello/esp/esp-idf/components/esp_eth /Users/aidancostello/esp/esp-idf/components/esp_event /Users/aidancostello/esp/esp-idf/components/esp_gdbstub /Users/aidancostello/esp/esp-idf/components/esp_hid /Users/aidancostello/esp/esp-idf/components/esp_http_client /Users/aidancostello/esp/esp-idf/components/esp_http_server /Users/aidancostello/esp/esp-idf/components/esp_https_ota /Users/aidancostello/esp/esp-idf/components/esp_https_server /Users/aidancostello/esp/esp-idf/components/esp_hw_support /Users/aidancostello/esp/esp-idf/components/esp_lcd /Users/aidancostello/esp/esp-idf/components/esp_local_ctrl /Users/aidancostello/esp/esp-idf/components/esp_netif /Users/aidancostello/esp/esp-idf/components/esp_partition /Users/aidancostello/esp/esp-idf/components/esp_phy /Users/aidancostello/esp/esp-idf/components/esp_pm /Users/aidancostello/esp/esp-idf/components/esp_psram /Users/aidancostello/esp/esp-idf/components/esp_ringbuf /Users/aidancostello/esp/esp-idf/components/esp_rom /Users/aidancostello/esp/esp-idf/components/esp_system /Users/aidancostello/esp/esp-idf/components/esp_timer /Users/aidancostello/esp/esp-idf/components/esp_wifi /Users/aidancostello/esp/esp-idf/components/espcoredump /Users/aidancostello/Github/TARS-Software/flight/blink/managed_components/espressif__led_strip /Users/aidancostello/esp/esp-idf/components/esptool_py /Users/aidancostello/esp/esp-idf/components/fatfs /Users/aidancostello/esp/esp-idf/components/freertos /Users/aidancostello/esp/esp-idf/components/hal /Users/aidancostello/esp/esp-idf/components/heap /Users/aidancostello/esp/esp-idf/components/http_parser /Users/aidancostello/esp/esp-idf/components/idf_test /Users/aidancostello/esp/esp-idf/components/ieee802154 /Users/aidancostello/esp/esp-idf/components/json /Users/aidancostello/esp/esp-idf/components/log /Users/aidancostello/esp/esp-idf/components/lwip /Users/aidancostello/Github/TARS-Software/flight/blink/main /Users/aidancostello/esp/esp-idf/components/mbedtls /Users/aidancostello/esp/esp-idf/components/mqtt /Users/aidancostello/esp/esp-idf/components/newlib /Users/aidancostello/esp/esp-idf/components/nvs_flash /Users/aidancostello/esp/esp-idf/components/openthread /Users/aidancostello/esp/esp-idf/components/partition_table /Users/aidancostello/esp/esp-idf/components/perfmon /Users/aidancostello/esp/esp-idf/components/protobuf-c /Users/aidancostello/esp/esp-idf/components/protocomm /Users/aidancostello/esp/esp-idf/components/pthread /Users/aidancostello/esp/esp-idf/components/sdmmc /Users/aidancostello/esp/esp-idf/components/soc /Users/aidancostello/esp/esp-idf/components/spi_flash /Users/aidancostello/esp/esp-idf/components/spiffs /Users/aidancostello/esp/esp-idf/components/tcp_transport /Users/aidancostello/esp/esp-idf/components/touch_element /Users/aidancostello/esp/esp-idf/components/ulp /Users/aidancostello/esp/esp-idf/components/unity /Users/aidancostello/esp/esp-idf/components/usb /Users/aidancostello/esp/esp-idf/components/vfs /Users/aidancostello/esp/esp-idf/components/wear_levelling /Users/aidancostello/esp/esp-idf/components/wifi_provisioning /Users/aidancostello/esp/esp-idf/components/wpa_supplicant /Users/aidancostello/esp/esp-idf/components/xtensa
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /Users/aidancostello/Github/TARS-Software/flight/blink/build
