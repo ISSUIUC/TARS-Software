@@ -22,10 +22,12 @@ void LowGSensor::update() {
     my = LSM.calcMag(LSM.my);
     mz = LSM.calcMag(LSM.mz);
 
+    timestamp = chVTGetSystemTime();
+
     chMtxUnlock(&mutex);
     chSysUnlock();
 
-    dataLogger.pushLowGFifo((LowGData) {ax, ay, az, gx, gy, gz, mx, my, mz});
+    dataLogger.pushLowGFifo((LowGData) {ax, ay, az, gx, gy, gz, mx, my, mz, timestamp});
 }
 
 Acceleration LowGSensor::getAcceleration() {

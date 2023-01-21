@@ -1,6 +1,8 @@
 #ifndef MCU_PACKET_H
 #define MCU_PACKET_H
 
+#include "ChRt.h"
+
 /**
  * @brief Labels for each FSM state
  */
