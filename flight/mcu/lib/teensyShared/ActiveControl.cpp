@@ -10,6 +10,7 @@
 
 #include "rocketFSM.h"
 #include "thresholds.h"
+#include "global_data_hack.h"
 
 Controller::Controller(struct pointers* pointer_struct, PWMServo* controller_servo)
     : activeControlServos(controller_servo) {
@@ -30,8 +31,9 @@ Controller::Controller(struct pointers* pointer_struct, PWMServo* controller_ser
     chThdSleepMilliseconds(1000);
     controller_servo_->write(12);
     chThdSleepMilliseconds(1000);
-
+    Serial.print("init ac");
     setLaunchPadElevation();
+    Serial.print("set launchpad");
 }
 
 void Controller::ctrlTickFunction(pointers* pointer_struct) {
@@ -67,6 +69,14 @@ void Controller::ctrlTickFunction(pointers* pointer_struct) {
     } else if (u > max_extension) {
         u = max_extension;
     }
+
+    if(!ActiveControl_ON()) u = 0;
+    Serial.print(global_state.time_ms);
+    Serial.print(",");
+    Serial.print(u, 5);
+    Serial.print(",");
+    Serial.println(stateData_->state_apo);
+
 
     /*
      * When in COAST state, we set the flap extension to whatever the AC

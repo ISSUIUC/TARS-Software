@@ -48,6 +48,9 @@
 #include "rocketFSM.h"
 #include "sensors.h"
 #include "telemetry.h"
+#include "global_data_hack.h"
+
+SensorState global_state;
 
 // DataLogBuffer datalogger_THD_vars;
 
@@ -84,6 +87,86 @@ static THD_WORKING_AREA(voltage_WA, 8192);
 static THD_WORKING_AREA(telemetry_sending_WA, 8192);
 static THD_WORKING_AREA(telemetry_buffering_WA, 8192);
 static THD_WORKING_AREA(kalman_WA, 8192);
+static THD_WORKING_AREA(data_ingest_WA, 8192);
+
+
+static THD_FUNCTION(data_ingest_THD, arg) {
+    struct pointers *pointer_struct = (struct pointers *)arg;
+    char buff[512];
+    Serial.setTimeout(10000);
+    Serial.print("begin");
+    while(true){
+        int read_count = Serial.readBytesUntil('\n', buff, 511);
+        if(read_count > 0){
+            if(buff[read_count-1] == '\r') buff[read_count-1] = 0;
+            SensorState& s = global_state;
+            sscanf(buff, "%lu,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", 
+            &s.time_ms,
+            &s.ax,
+            &s.ay,
+            &s.az,
+            &s.gx,
+            &s.gy,
+            &s.gz,
+            &s.mx,
+            &s.my,
+            &s.mz,
+            &s.latitude,
+            &s.longitude,
+            &s.altitude,
+            &s.satellite_count,
+            &s.position_lock,
+            &s.temperature,
+            &s.pressure,
+            &s.barometer_altitude,
+            &s.highg_ax,
+            &s.highg_ay,
+            &s.highg_az,
+            &s.rocket_state0,
+            &s.rocket_state1,
+            &s.rocket_state2,
+            &s.rocket_state3,
+            &s.flap_extension,
+            &s.state_est_x,
+            &s.state_est_vx,
+            &s.state_est_ax,
+            &s.state_est_apo,
+            &s.battery_voltage);
+            s.time_ch = TIME_MS2I(s.time_ms);
+            buff[read_count] = 0;
+            pointer_struct->sensorDataPointer->barometer_data.altitude = s.altitude;
+            pointer_struct->sensorDataPointer->barometer_data.pressure = s.pressure;
+            pointer_struct->sensorDataPointer->barometer_data.temperature = s.temperature;
+            pointer_struct->sensorDataPointer->gps_data.altitude = s.altitude;
+            pointer_struct->sensorDataPointer->gps_data.latitude = s.latitude;
+            pointer_struct->sensorDataPointer->gps_data.longitude = s.longitude;
+            pointer_struct->sensorDataPointer->gps_data.posLock = s.position_lock;
+            pointer_struct->sensorDataPointer->gps_data.siv_count = s.satellite_count;
+            pointer_struct->sensorDataPointer->voltage_data.v_battery = s.battery_voltage;
+            pointer_struct->sensorDataPointer->lowG_data.ax = s.ax;
+            pointer_struct->sensorDataPointer->lowG_data.ay = s.ay;
+            pointer_struct->sensorDataPointer->lowG_data.az = s.az;
+            pointer_struct->sensorDataPointer->lowG_data.mx = s.mx;
+            pointer_struct->sensorDataPointer->lowG_data.my = s.my;
+            pointer_struct->sensorDataPointer->lowG_data.mz = s.mz;
+            pointer_struct->sensorDataPointer->lowG_data.gx = s.gx;
+            pointer_struct->sensorDataPointer->lowG_data.gy = s.gy;
+            pointer_struct->sensorDataPointer->lowG_data.gz = s.gz;
+            pointer_struct->sensorDataPointer->highG_data.hg_ax = s.highg_ax;
+            pointer_struct->sensorDataPointer->highG_data.hg_ay = s.highg_ay;
+            pointer_struct->sensorDataPointer->highG_data.hg_az = s.highg_az;
+            pointer_struct->sensorDataPointer->rocketState_data.rocketStates[0] = (RocketFSM::FSM_State)s.rocket_state0;
+            pointer_struct->sensorDataPointer->rocketState_data.rocketStates[1] = (RocketFSM::FSM_State)s.rocket_state1;
+            pointer_struct->sensorDataPointer->rocketState_data.rocketStates[2] = (RocketFSM::FSM_State)s.rocket_state2;
+            pointer_struct->sensorDataPointer->rocketState_data.rocketStates[3] = (RocketFSM::FSM_State)s.rocket_state3;
+            pointer_struct->sensorDataPointer->state_data.state_x = s.state_est_x;
+            pointer_struct->sensorDataPointer->state_data.state_vx = s.state_est_vx;
+            pointer_struct->sensorDataPointer->state_data.state_ax = s.state_est_ax;
+            pointer_struct->sensorDataPointer->state_data.state_apo = s.state_est_apo;
+        }
+        chThdSleepMilliseconds(1);
+    }
+}
 /******************************************************************************/
 /* TELEMETRY THREAD                                         */
 
@@ -265,13 +348,13 @@ static THD_FUNCTION(kalman_THD, arg) {
 
     KalmanFilter KF(pointer_struct);
     KF.Initialize();
-    systime_t last = chVTGetSystemTime();
+    systime_t last = global_state.time_ch;
     while (true) {
         // #ifdef THREAD_DEBUG
         //     Serial.println("In Kalman");
         // #endif
-        KF.kfTickFunction(TIME_I2MS(chVTGetSystemTime() - last), 13.0);
-        last = chVTGetSystemTime();
+        KF.kfTickFunction(TIME_I2MS(global_state.time_ch - last), 13.0);
+        last = global_state.time_ch;
         // Serial.println("kalman");
         // Serial.println(pointer_struct->sensorDataPointer->state_data.state_x);
 
@@ -343,19 +426,20 @@ static THD_FUNCTION(dataLogger_THD, arg) {
  *
  */
 void chSetup() {
-    chThdCreateStatic(telemetry_sending_WA, sizeof(telemetry_sending_WA), NORMALPRIO + 1, telemetry_sending_THD,
-                      &sensor_pointers);
-    chThdCreateStatic(telemetry_buffering_WA, sizeof(telemetry_buffering_WA), NORMALPRIO + 1, telemetry_buffering_THD,
-                      &sensor_pointers);
-    chThdCreateStatic(rocket_FSM_WA, sizeof(rocket_FSM_WA), NORMALPRIO + 1, rocket_FSM, &sensor_pointers);
-    chThdCreateStatic(gps_WA, sizeof(gps_WA), NORMALPRIO + 1, gps_THD, &sensor_pointers);
-    chThdCreateStatic(lowgIMU_WA, sizeof(lowgIMU_WA), NORMALPRIO + 1, lowgIMU_THD, &sensor_pointers);
-    chThdCreateStatic(barometer_WA, sizeof(barometer_WA), NORMALPRIO + 1, barometer_THD, &sensor_pointers);
-    chThdCreateStatic(highgIMU_WA, sizeof(highgIMU_WA), NORMALPRIO + 1, highgIMU_THD, &sensor_pointers);
+    chThdCreateStatic(data_ingest_WA, sizeof(data_ingest_WA), NORMALPRIO + 1, data_ingest_THD, &sensor_pointers);
+    // chThdCreateStatic(telemetry_sending_WA, sizeof(telemetry_sending_WA), NORMALPRIO + 1, telemetry_sending_THD,
+    //                   &sensor_pointers);
+    // chThdCreateStatic(telemetry_buffering_WA, sizeof(telemetry_buffering_WA), NORMALPRIO + 1, telemetry_buffering_THD,
+    //                   &sensor_pointers);
+    // chThdCreateStatic(rocket_FSM_WA, sizeof(rocket_FSM_WA), NORMALPRIO + 1, rocket_FSM, &sensor_pointers);
+    // chThdCreateStatic(gps_WA, sizeof(gps_WA), NORMALPRIO + 1, gps_THD, &sensor_pointers);
+    // chThdCreateStatic(lowgIMU_WA, sizeof(lowgIMU_WA), NORMALPRIO + 1, lowgIMU_THD, &sensor_pointers);
+    // chThdCreateStatic(barometer_WA, sizeof(barometer_WA), NORMALPRIO + 1, barometer_THD, &sensor_pointers);
+    // chThdCreateStatic(highgIMU_WA, sizeof(highgIMU_WA), NORMALPRIO + 1, highgIMU_THD, &sensor_pointers);
     chThdCreateStatic(servo_WA, sizeof(servo_WA), NORMALPRIO + 1, servo_THD, &sensor_pointers);
-    chThdCreateStatic(dataLogger_WA, sizeof(dataLogger_WA), NORMALPRIO + 1, dataLogger_THD, &sensor_pointers);
-    chThdCreateStatic(voltage_WA, sizeof(voltage_WA), NORMALPRIO + 1, voltage_THD, &sensor_pointers);
-    chThdCreateStatic(kalman_WA, sizeof(kalman_WA), NORMALPRIO + 1, kalman_THD, &sensor_pointers);
+    // chThdCreateStatic(dataLogger_WA, sizeof(dataLogger_WA), NORMALPRIO + 1, dataLogger_THD, &sensor_pointers);
+    // chThdCreateStatic(voltage_WA, sizeof(voltage_WA), NORMALPRIO + 1, voltage_THD, &sensor_pointers);
+    // chThdCreateStatic(kalman_WA, sizeof(kalman_WA), NORMALPRIO + 1, kalman_THD, &sensor_pointers);
 
     while (true)
         ;
@@ -368,35 +452,36 @@ void chSetup() {
 
 void setup() {
     Serial.begin(9600);
-    pinMode(LED_BLUE, OUTPUT);
-    pinMode(LED_RED, OUTPUT);
-    pinMode(LED_ORANGE, OUTPUT);
-    pinMode(LED_GREEN, OUTPUT);
+    while(!Serial);
+    // pinMode(LED_BLUE, OUTPUT);
+    // pinMode(LED_RED, OUTPUT);
+    // pinMode(LED_ORANGE, OUTPUT);
+    // pinMode(LED_GREEN, OUTPUT);
 
-    pinMode(LSM9DS1_AG_CS, OUTPUT);
-    digitalWrite(LSM9DS1_AG_CS, HIGH);
-    pinMode(LSM9DS1_M_CS, OUTPUT);
-    digitalWrite(LSM9DS1_M_CS, HIGH);
-    pinMode(ZOEM8Q0_CS, OUTPUT);
-    digitalWrite(ZOEM8Q0_CS, HIGH);
-    pinMode(MS5611_CS, OUTPUT);
-    digitalWrite(MS5611_CS, HIGH);
-    pinMode(KX134_CS, OUTPUT);
-    digitalWrite(KX134_CS, HIGH);
-    pinMode(H3LIS331DL_CS, OUTPUT);
-    digitalWrite(H3LIS331DL_CS, HIGH);
-    pinMode(RFM95_CS, OUTPUT);
-    digitalWrite(RFM95_CS, HIGH);
+    // pinMode(LSM9DS1_AG_CS, OUTPUT);
+    // digitalWrite(LSM9DS1_AG_CS, HIGH);
+    // pinMode(LSM9DS1_M_CS, OUTPUT);
+    // digitalWrite(LSM9DS1_M_CS, HIGH);
+    // pinMode(ZOEM8Q0_CS, OUTPUT);
+    // digitalWrite(ZOEM8Q0_CS, HIGH);
+    // pinMode(MS5611_CS, OUTPUT);
+    // digitalWrite(MS5611_CS, HIGH);
+    // pinMode(KX134_CS, OUTPUT);
+    // digitalWrite(KX134_CS, HIGH);
+    // pinMode(H3LIS331DL_CS, OUTPUT);
+    // digitalWrite(H3LIS331DL_CS, HIGH);
+    // pinMode(RFM95_CS, OUTPUT);
+    // digitalWrite(RFM95_CS, HIGH);
 
-    pinMode(LSM9DS1_AG_CS, OUTPUT);
-    pinMode(LSM9DS1_M_CS, OUTPUT);
-    pinMode(ZOEM8Q0_CS, OUTPUT);
-    pinMode(MS5611_CS, OUTPUT);
+    // pinMode(LSM9DS1_AG_CS, OUTPUT);
+    // pinMode(LSM9DS1_M_CS, OUTPUT);
+    // pinMode(ZOEM8Q0_CS, OUTPUT);
+    // pinMode(MS5611_CS, OUTPUT);
 
-    digitalWrite(LSM9DS1_AG_CS, HIGH);
-    digitalWrite(LSM9DS1_M_CS, HIGH);
-    digitalWrite(ZOEM8Q0_CS, HIGH);
-    digitalWrite(MS5611_CS, HIGH);
+    // digitalWrite(LSM9DS1_AG_CS, HIGH);
+    // digitalWrite(LSM9DS1_M_CS, HIGH);
+    // digitalWrite(ZOEM8Q0_CS, HIGH);
+    // digitalWrite(MS5611_CS, HIGH);
 
     sensor_pointers.lowGimuPointer = &lowGimu;
     sensor_pointers.highGimuPointer = &highGimu;
@@ -405,95 +490,94 @@ void setup() {
     sensor_pointers.sensorDataPointer = &sensorData;
     sensor_pointers.abort = false;
 
-    SPI.begin();
-    SPI1.setMISO(39);
+    // SPI.begin();
+    // SPI1.setMISO(39);
 
-    if (!highGimu.beginSPICore(KX134_CS, 1000000, SPI)) {
-        Serial.println("Failed to communicate with KX134. Stalling Program");
-        digitalWrite(LED_RED, HIGH);
-        while (true)
-            ;
-    }
+    // if (!highGimu.beginSPICore(KX134_CS, 1000000, SPI)) {
+    //     Serial.println("Failed to communicate with KX134. Stalling Program");
+    //     digitalWrite(LED_RED, HIGH);
+    //     while (true)
+    //         ;
+    // }
 
-    if (!highGimu.initialize(DEFAULT_SETTINGS)) {
-        Serial.println("Could not initialize KX134. Stalling Program");
-        digitalWrite(LED_BLUE, HIGH);
-        while (true)
-            ;
-    }
+    // if (!highGimu.initialize(DEFAULT_SETTINGS)) {
+    //     Serial.println("Could not initialize KX134. Stalling Program");
+    //     digitalWrite(LED_BLUE, HIGH);
+    //     while (true)
+    //         ;
+    // }
 
-    highGimu.setRange(3);  // set range to 3 = 64 g range
-    // lowGimu setup
-    if (lowGimu.beginSPI(LSM9DS1_AG_CS, LSM9DS1_M_CS) ==
-        false)  // note, we need to sent this our CS pins (defined above)
-    {
-        digitalWrite(LED_ORANGE, HIGH);
-        Serial.println("Failed to communicate with LSM9DS1. Stalling Program");
-        while (true)
-            ;
-    }
+    // highGimu.setRange(3);  // set range to 3 = 64 g range
+    // // lowGimu setup
+    // if (lowGimu.beginSPI(LSM9DS1_AG_CS, LSM9DS1_M_CS) ==
+    //     false)  // note, we need to sent this our CS pins (defined above)
+    // {
+    //     digitalWrite(LED_ORANGE, HIGH);
+    //     Serial.println("Failed to communicate with LSM9DS1. Stalling Program");
+    //     while (true)
+    //         ;
+    // }
 
-    // Initialize barometer
-    barometer.init();
+    // // Initialize barometer
+    // barometer.init();
 
-    // GPS Setup
-    SPI1.begin();
-    digitalWrite(LED_RED, HIGH);
-    digitalWrite(LED_ORANGE, HIGH);
+    // // GPS Setup
+    // SPI1.begin();
+    // digitalWrite(LED_RED, HIGH);
+    // digitalWrite(LED_ORANGE, HIGH);
 
-    if (!gps.begin(SPI1, ZOEM8Q0_CS, 4000000)) {
-        Serial.println("Failed to communicate with ZOEM8Q0 gps. Stalling Program");
-        while (true)
-            ;
-    } else {
-    }
-    digitalWrite(LED_RED, LOW);
-    digitalWrite(LED_ORANGE, LOW);
+    // if (!gps.begin(SPI1, ZOEM8Q0_CS, 4000000)) {
+    //     Serial.println("Failed to communicate with ZOEM8Q0 gps. Stalling Program");
+    //     while (true)
+    //         ;
+    // } else {
+    // }
+    // digitalWrite(LED_RED, LOW);
+    // digitalWrite(LED_ORANGE, LOW);
 
-    gps.setPortOutput(COM_PORT_SPI,
-                      COM_TYPE_UBX);                 // Set the SPI port to output UBX only
-                                                     // (turn off NMEA noise)
-    gps.saveConfigSelective(VAL_CFG_SUBSEC_IOPORT);  // Save (only) the communications port settings
-                                                     // to flash and BBR
-    gps.setNavigationFrequency(5);                   // set sampling rate to 5hz
+    // gps.setPortOutput(COM_PORT_SPI,
+    //                   COM_TYPE_UBX);                 // Set the SPI port to output UBX only
+    //                                                  // (turn off NMEA noise)
+    // gps.saveConfigSelective(VAL_CFG_SUBSEC_IOPORT);  // Save (only) the communications port settings
+    //                                                  // to flash and BBR
+    // gps.setNavigationFrequency(5);                   // set sampling rate to 5hz
 
-    // Telemetry tlm;
-    // sensor_pointers.telemetry = &tlm;
-    // SD Card Setup
-    if (SD.begin(BUILTIN_SDCARD)) {
-        char file_extension[6] = ".dat";
+    // // Telemetry tlm;
+    // // sensor_pointers.telemetry = &tlm;
+    // // SD Card Setup
+    // if (SD.begin(BUILTIN_SDCARD)) {
+    //     char file_extension[6] = ".dat";
 
-        char data_name[16] = "data";
-        // Initialize SD card
-        sensor_pointers.dataloggerTHDVarsPointer.dataFile =
-            SD.open(sd_file_namer(data_name, file_extension), O_CREAT | O_WRITE | O_TRUNC);
+    //     char data_name[16] = "data";
+    //     // Initialize SD card
+    //     sensor_pointers.dataloggerTHDVarsPointer.dataFile =
+    //         SD.open(sd_file_namer(data_name, file_extension), O_CREAT | O_WRITE | O_TRUNC);
 
-        // print header to file on sd card that lists each variable that is
-        // logged
-        // auto written =
-        // sensor_pointers.dataloggerTHDVarsPointer.dataFile.println(
-        //     "binary logging of sensor_data_t");
-        sensor_pointers.dataloggerTHDVarsPointer.dataFile.flush();
-        //
-        Serial.println(sensor_pointers.dataloggerTHDVarsPointer.dataFile.name());
-    } else {
-        digitalWrite(LED_RED, HIGH);
-        digitalWrite(LED_ORANGE, HIGH);
-        digitalWrite(LED_BLUE, HIGH);
-        Serial.println("SD Begin Failed. Stalling Program");
-        while (true) {
-            digitalWrite(LED_RED, HIGH);
-            delay(100);
-            digitalWrite(LED_RED, LOW);
-            delay(100);
-        }
-    }
+    //     // print header to file on sd card that lists each variable that is
+    //     // logged
+    //     // auto written =
+    //     // sensor_pointers.dataloggerTHDVarsPointer.dataFile.println(
+    //     //     "binary logging of sensor_data_t");
+    //     sensor_pointers.dataloggerTHDVarsPointer.dataFile.flush();
+    //     //
+    //     Serial.println(sensor_pointers.dataloggerTHDVarsPointer.dataFile.name());
+    // } else {
+    //     digitalWrite(LED_RED, HIGH);
+    //     digitalWrite(LED_ORANGE, HIGH);
+    //     digitalWrite(LED_BLUE, HIGH);
+    //     Serial.println("SD Begin Failed. Stalling Program");
+    //     while (true) {
+    //         digitalWrite(LED_RED, HIGH);
+    //         delay(100);
+    //         digitalWrite(LED_RED, LOW);
+    //         delay(100);
+    //     }
+    // }
 
-    digitalWrite(LED_ORANGE, HIGH);
-    digitalWrite(LED_BLUE, HIGH);
-    // Servo Setup
+    // digitalWrite(LED_ORANGE, HIGH);
+    // digitalWrite(LED_BLUE, HIGH);
+    // // Servo Setup
     ac_servo.attach(AC_SERVO_PIN, 770, 2250);
-    Serial.println("chibios begin");
     chBegin(chSetup);
     while (true)
         ;
