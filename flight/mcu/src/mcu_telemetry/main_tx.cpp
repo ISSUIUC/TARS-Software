@@ -11,10 +11,10 @@
 
 //Make sure to change these pinout depending on wiring
 //Don't forget to change the ini file to build the correct main file
-#define RFM95_CS 4
-#define RFM95_RST 2
-#define RFM95_INT 3
-#define RFM95_EN 14
+#define RFM95_CS 10
+#define RFM95_RST 35
+#define RFM95_INT 14
+#define RFM95_EN 1
 
 // Change to 434.0 or other frequency, must match RX's freq!
 #define RF95_FREQ 440.0
@@ -89,10 +89,19 @@ void setup()
   pinMode(RFM95_EN, OUTPUT);
   digitalWrite(RFM95_RST, HIGH);
   digitalWrite(RFM95_EN, HIGH);
-
-  //while (!Serial);
-  Serial.begin(115200);
+  Serial.begin(9600);
   delay(100);
+
+  digitalWrite(RGB_BUILTIN, HIGH);   // Turn the RGB LED white
+  delay(1000);
+  digitalWrite(RGB_BUILTIN, LOW);    // Turn the RGB LED off
+  delay(1000);
+
+  if (Serial){
+    neopixelWrite(RGB_BUILTIN, 0,0,255);
+    delay(1000);
+    neopixelWrite(RGB_BUILTIN, 0,0,0);
+  }
 
   Serial.println("Telemetry Test");
 
@@ -109,10 +118,9 @@ void setup()
     neopixelWrite(RGB_BUILTIN, 0,0,0);
     while (1);
   }
-  digitalWrite(RGB_BUILTIN, HIGH);   // Turn the RGB LED white
+  neopixelWrite(RGB_BUILTIN, 0,255,0);
   delay(1000);
-  digitalWrite(RGB_BUILTIN, LOW);    // Turn the RGB LED off
-  delay(1000);
+  neopixelWrite(RGB_BUILTIN, 0,0,0);
   Serial.println("Radio Initialized");
 
   // Defaults after init are 434.0MHz, modulation GFSK_Rb250Fd250, +13dbM
