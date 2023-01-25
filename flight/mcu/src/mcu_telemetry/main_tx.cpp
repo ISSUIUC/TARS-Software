@@ -90,17 +90,18 @@ void setup()
   digitalWrite(RFM95_RST, HIGH);
   digitalWrite(RFM95_EN, HIGH);
   Serial.begin(9600);
-  delay(100);
+  while(!Serial);
 
-  digitalWrite(RGB_BUILTIN, HIGH);   // Turn the RGB LED white
+  digitalWrite(RGB_BUILTIN, HIGH);   // white led on startup
   delay(1000);
-  digitalWrite(RGB_BUILTIN, LOW);    // Turn the RGB LED off
+  digitalWrite(RGB_BUILTIN, LOW);
   delay(1000);
 
   if (Serial){
-    neopixelWrite(RGB_BUILTIN, 0,0,255);
+    neopixelWrite(RGB_BUILTIN, 0,0,255); // blue led if serial initialized
     delay(1000);
     neopixelWrite(RGB_BUILTIN, 0,0,0);
+    delay(1000);
   }
 
   Serial.println("Telemetry Test");
@@ -113,12 +114,12 @@ void setup()
 
   while (!rf95.init()) {
     Serial.println("Radio Initialization Failed");
-    neopixelWrite(RGB_BUILTIN, 255,0,0);
+    neopixelWrite(RGB_BUILTIN, 255,0,0); //red led if radio failed
     delay(1000);
     neopixelWrite(RGB_BUILTIN, 0,0,0);
     while (1);
   }
-  neopixelWrite(RGB_BUILTIN, 0,255,0);
+  neopixelWrite(RGB_BUILTIN, 0,255,0); //blue led if radio success
   delay(1000);
   neopixelWrite(RGB_BUILTIN, 0,0,0);
   Serial.println("Radio Initialized");
