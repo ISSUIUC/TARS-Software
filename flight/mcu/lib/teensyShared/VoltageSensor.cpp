@@ -17,7 +17,11 @@ VoltageData VoltageSensor::read() {
     v_9 = read_voltage('9');
     timestamp = chVTGetSystemTime();
 
-    dataLogger.pushVoltageFifo((VoltageData) {v_battery, v_servo1, v_servo2, v_3_3, v_5, v_9, timestamp});
+    auto data = (VoltageData) {v_battery, v_servo1, v_servo2, v_3_3, v_5, v_9, timestamp};
+
+    dataLogger.pushVoltageFifo(data);
 
     chMtxUnlock(&mutex);
+
+    return data;
 }
