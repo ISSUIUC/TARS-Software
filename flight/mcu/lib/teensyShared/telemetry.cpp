@@ -165,7 +165,7 @@ void Telemetry::transmit(const sensorDataStruct_t& data_struct) {
     uint8_t buf[RH_RF95_MAX_MESSAGE_LEN];
     uint8_t len = sizeof(buf);
     if (rf95.available() && rf95.recv(buf, &len)) {
-        telemetry_command received;
+        telemetry_command received{};
         memcpy(&received, buf, sizeof(received));
 
         handle_command(received);
@@ -173,32 +173,32 @@ void Telemetry::transmit(const sensorDataStruct_t& data_struct) {
 }
 
 TelemetryPacket Telemetry::make_packet(const sensorDataStruct_t &data_struct) {
-    TelemetryPacket packet;
+    TelemetryPacket packet{};
     packet.gps_lat = data_struct.gps_data.latitude;
     packet.gps_long = data_struct.gps_data.longitude;
     packet.gps_alt = data_struct.gps_data.altitude;
 
-    packet.gnc_state_ax = data_struct.state_data.state_ax;
-    packet.gnc_state_vx = data_struct.state_data.state_vx;
-    packet.gnc_state_x = data_struct.state_data.state_x;
-    packet.gns_state_apo = data_struct.state_data.state_apo;
+    packet.gnc_state_ax = data_struct.kalman_data.kalman_ax;
+    packet.gnc_state_vx = data_struct.kalman_data.kalman_vx;
+    packet.gnc_state_x = data_struct.kalman_data.kalman_x;
+    packet.gns_state_apo = data_struct.kalman_data.kalman_apo;
 
     packet.response_ID = last_command_id;
     packet.rssi = rf95.lastRssi();
     packet.voltage_battery = inv_convert_range<uint8_t>(data_struct.voltage_data.v_battery, 16);
     packet.FSM_State = (uint8_t)data_struct.rocketState_data.rocketStates[0];
 
-    TelemetryDataLite data;
+    TelemetryDataLite data{};
     packet.datapoint_count = 0;
-    for (int i = 0; i < 4 && buffered_data.pop(&data); i++) {
+    for(int8_t i = 0; i < 4 && data_view.next(data); i++){
         packet.datapoints[i] = data;
-        packet.datapoint_count = i + 1;
+        packet.datapoint_count = i + (int8_t) 1;
     }
     return packet;
 }
 
 void Telemetry::buffer_data(const sensorDataStruct_t &sensor_data) {
-    TelemetryDataLite data;
+    TelemetryDataLite data{};
     data.timestamp = TIME_I2MS(chVTGetSystemTime());
     data.barometer_pressure = inv_convert_range<uint16_t>(sensor_data.barometer_data.pressure, 4096);
 

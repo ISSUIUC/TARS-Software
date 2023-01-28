@@ -120,7 +120,7 @@ class Telemetry {
 
    private:
     FifoBuffer<TelemetryDataLite, 4> buffered_data;
-    int packetnum;
+    FifoView<TelemetryDataLite, 4> data_view;
     telemetry_data d;
     RH_RF95 rf95;
 
@@ -128,7 +128,7 @@ class Telemetry {
     File write_file;
 
     // Initializing command ID
-    int last_command_id = -1;
+    int16_t last_command_id = -1;
 
     // Initializing callsign
     char callsign[8] = "NO SIGN";
