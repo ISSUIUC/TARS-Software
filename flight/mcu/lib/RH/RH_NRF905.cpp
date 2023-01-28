@@ -5,8 +5,7 @@
 
 #include <RH_NRF905.h>
 
-RH_NRF905::RH_NRF905(uint8_t chipEnablePin, uint8_t txEnablePin,
-                     uint8_t slaveSelectPin, RHGenericSPI& spi)
+RH_NRF905::RH_NRF905(uint8_t chipEnablePin, uint8_t txEnablePin, uint8_t slaveSelectPin, RHGenericSPI& spi)
     : RHNRFSPIDriver(slaveSelectPin, spi) {
     _chipEnablePin = chipEnablePin;
     _txEnablePin = txEnablePin;
@@ -29,9 +28,8 @@ bool RH_NRF905::init() {
 
     // Configure the chip
     // CRC 16 bits enabled. 16MHz crystal freq
-    spiWriteRegister(RH_NRF905_CONFIG_9, RH_NRF905_CONFIG_9_CRC_EN |
-                                             RH_NRF905_CONFIG_9_CRC_MODE_16BIT |
-                                             RH_NRF905_CONFIG_9_XOF_16MHZ);
+    spiWriteRegister(RH_NRF905_CONFIG_9,
+                     RH_NRF905_CONFIG_9_CRC_EN | RH_NRF905_CONFIG_9_CRC_MODE_16BIT | RH_NRF905_CONFIG_9_XOF_16MHZ);
 
     // Make sure we are powered down
     setModeIdle();
@@ -44,24 +42,18 @@ bool RH_NRF905::init() {
 }
 
 // Use the register commands to read and write the registers
-uint8_t RH_NRF905::spiReadRegister(uint8_t reg) {
-    return spiRead((reg & RH_NRF905_REG_MASK) | RH_NRF905_REG_R_CONFIG);
-}
+uint8_t RH_NRF905::spiReadRegister(uint8_t reg) { return spiRead((reg & RH_NRF905_REG_MASK) | RH_NRF905_REG_R_CONFIG); }
 
 uint8_t RH_NRF905::spiWriteRegister(uint8_t reg, uint8_t val) {
     return spiWrite((reg & RH_NRF905_REG_MASK) | RH_NRF905_REG_W_CONFIG, val);
 }
 
-uint8_t RH_NRF905::spiBurstReadRegister(uint8_t reg, uint8_t* dest,
-                                        uint8_t len) {
-    return spiBurstRead((reg & RH_NRF905_REG_MASK) | RH_NRF905_REG_R_CONFIG,
-                        dest, len);
+uint8_t RH_NRF905::spiBurstReadRegister(uint8_t reg, uint8_t* dest, uint8_t len) {
+    return spiBurstRead((reg & RH_NRF905_REG_MASK) | RH_NRF905_REG_R_CONFIG, dest, len);
 }
 
-uint8_t RH_NRF905::spiBurstWriteRegister(uint8_t reg, uint8_t* src,
-                                         uint8_t len) {
-    return spiBurstWrite((reg & RH_NRF905_REG_MASK) | RH_NRF905_REG_W_CONFIG,
-                         src, len);
+uint8_t RH_NRF905::spiBurstWriteRegister(uint8_t reg, uint8_t* src, uint8_t len) {
+    return spiBurstWrite((reg & RH_NRF905_REG_MASK) | RH_NRF905_REG_W_CONFIG, src, len);
 }
 
 uint8_t RH_NRF905::statusRead() {
@@ -169,8 +161,7 @@ bool RH_NRF905::printRegister(uint8_t reg) {
 }
 
 bool RH_NRF905::printRegisters() {
-    uint8_t registers[] = {0x00, 0x01, 0x02, 0x03, 0x04,
-                           0x05, 0x06, 0x07, 0x08, 0x09};
+    uint8_t registers[] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09};
 
     uint8_t i;
     for (i = 0; i < sizeof(registers); i++) printRegister(registers[i]);
@@ -188,11 +179,9 @@ void RH_NRF905::validateRxBuf() {
     _rxHeaderFrom = _buf[1];
     _rxHeaderId = _buf[2];
     _rxHeaderFlags = _buf[3];
-    if (_promiscuous || _rxHeaderTo == _thisAddress ||
-        _rxHeaderTo == RH_BROADCAST_ADDRESS) {
+    if (_promiscuous || _rxHeaderTo == _thisAddress || _rxHeaderTo == RH_BROADCAST_ADDRESS) {
         _rxGood++;
-        _bufLen =
-            len + RH_NRF905_HEADER_LEN;  // _buf still includes the headers
+        _bufLen = len + RH_NRF905_HEADER_LEN;  // _buf still includes the headers
         _rxBufValid = true;
     }
 }
@@ -204,8 +193,7 @@ bool RH_NRF905::available() {
         if (!(statusRead() & RH_NRF905_STATUS_DR)) return false;
         // Get the message into the RX buffer, so we can inspect the headers
         // we still dont know how long is the user message
-        spiBurstRead(RH_NRF905_REG_R_RX_PAYLOAD, _buf,
-                     RH_NRF905_MAX_PAYLOAD_LEN);
+        spiBurstRead(RH_NRF905_REG_R_RX_PAYLOAD, _buf, RH_NRF905_MAX_PAYLOAD_LEN);
         validateRxBuf();
         if (_rxBufValid) setModeIdle();  // Got one
     }
@@ -221,8 +209,7 @@ bool RH_NRF905::recv(uint8_t* buf, uint8_t* len) {
     if (!available()) return false;
     if (buf && len) {
         // Skip the 4 headers that are at the beginning of the rxBuf
-        if (*len > _bufLen - RH_NRF905_HEADER_LEN)
-            *len = _bufLen - RH_NRF905_HEADER_LEN;
+        if (*len > _bufLen - RH_NRF905_HEADER_LEN) *len = _bufLen - RH_NRF905_HEADER_LEN;
         memcpy(buf, _buf + RH_NRF905_HEADER_LEN, *len);
     }
     clearRxBuf();  // This message accepted and cleared

@@ -142,12 +142,8 @@ class RFM95 {
     uint8_t _spi_rxBuf[4];
 
     /* SPI struct as defined in spidev.h that dicates transaction params */
-    struct spi_ioc_transfer _spi_transfer = {(unsigned long)_spi_txBuf,
-                                             (unsigned long)_spi_rxBuf,
-                                             _len,
-                                             _speed,
-                                             _delay,
-                                             _bits};
+    struct spi_ioc_transfer _spi_transfer = {
+        (unsigned long)_spi_txBuf, (unsigned long)_spi_rxBuf, _len, _speed, _delay, _bits};
 };
 
 #endif

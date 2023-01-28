@@ -37,27 +37,23 @@ bool RH_NRF51::init() {
     }
 
     // Physical on-air address is set in PREFIX0 + BASE0 by setNetworkAddress
-    NRF_RADIO->TXADDRESS = 0x00;  // Use logical address 0 (PREFIX0 + BASE0)
-    NRF_RADIO->RXADDRESSES =
-        0x01;  // Enable reception on logical address 0 (PREFIX0 + BASE0)
+    NRF_RADIO->TXADDRESS = 0x00;    // Use logical address 0 (PREFIX0 + BASE0)
+    NRF_RADIO->RXADDRESSES = 0x01;  // Enable reception on logical address 0 (PREFIX0 + BASE0)
 
     // Configure the CRC
-    NRF_RADIO->CRCCNF = (RADIO_CRCCNF_LEN_Two
-                         << RADIO_CRCCNF_LEN_Pos);  // Number of checksum bits
-    NRF_RADIO->CRCINIT = 0xFFFFUL;                  // Initial value
-    NRF_RADIO->CRCPOLY = 0x11021UL;                 // CRC poly: x^16+x^12^x^5+1
+    NRF_RADIO->CRCCNF = (RADIO_CRCCNF_LEN_Two << RADIO_CRCCNF_LEN_Pos);  // Number of checksum bits
+    NRF_RADIO->CRCINIT = 0xFFFFUL;                                       // Initial value
+    NRF_RADIO->CRCPOLY = 0x11021UL;                                      // CRC poly: x^16+x^12^x^5+1
 
     // These shorts will make the radio transition from Ready to Start to
     // Disable automatically for both TX and RX, which makes for much shorter
     // on-air times
-    NRF_RADIO->SHORTS =
-        (RADIO_SHORTS_READY_START_Enabled << RADIO_SHORTS_READY_START_Pos) |
-        (RADIO_SHORTS_END_DISABLE_Enabled << RADIO_SHORTS_END_DISABLE_Pos);
+    NRF_RADIO->SHORTS = (RADIO_SHORTS_READY_START_Enabled << RADIO_SHORTS_READY_START_Pos) |
+                        (RADIO_SHORTS_END_DISABLE_Enabled << RADIO_SHORTS_END_DISABLE_Pos);
 
-    NRF_RADIO->PCNF0 =
-        (8 << RADIO_PCNF0_LFLEN_Pos)     // Payload size length in bits
-        | (1 << RADIO_PCNF0_S0LEN_Pos)   // S0 is 1 octet
-        | (8 << RADIO_PCNF0_S1LEN_Pos);  // S1 is 1 octet
+    NRF_RADIO->PCNF0 = (8 << RADIO_PCNF0_LFLEN_Pos)     // Payload size length in bits
+                       | (1 << RADIO_PCNF0_S0LEN_Pos)   // S0 is 1 octet
+                       | (8 << RADIO_PCNF0_S1LEN_Pos);  // S1 is 1 octet
 
     // Make sure we are powered down
     setModeIdle();
@@ -74,8 +70,7 @@ bool RH_NRF51::init() {
 }
 
 bool RH_NRF51::setChannel(uint8_t channel) {
-    NRF_RADIO->FREQUENCY = ((channel << RADIO_FREQUENCY_FREQUENCY_Pos) &
-                            RADIO_FREQUENCY_FREQUENCY_Msk);
+    NRF_RADIO->FREQUENCY = ((channel << RADIO_FREQUENCY_FREQUENCY_Pos) & RADIO_FREQUENCY_FREQUENCY_Msk);
     return true;
 }
 
@@ -83,19 +78,15 @@ bool RH_NRF51::setNetworkAddress(uint8_t* address, uint8_t len) {
     if (len < 3 || len > 5) return false;
 
     // First byte is the prefix, remainder are base
-    NRF_RADIO->PREFIX0 =
-        ((address[0] << RADIO_PREFIX0_AP0_Pos) & RADIO_PREFIX0_AP0_Msk);
+    NRF_RADIO->PREFIX0 = ((address[0] << RADIO_PREFIX0_AP0_Pos) & RADIO_PREFIX0_AP0_Msk);
     uint32_t base;
     memcpy(&base, address + 1, len - 1);
     NRF_RADIO->BASE0 = base;
 
     NRF_RADIO->PCNF1 =
-        ((((sizeof(_buf)) << RADIO_PCNF1_MAXLEN_Pos) &
-          RADIO_PCNF1_MAXLEN_Msk)  // maximum length of payload
-         | (((0UL) << RADIO_PCNF1_STATLEN_Pos) &
-            RADIO_PCNF1_STATLEN_Msk)  // expand the payload with 0 bytes
-         | (((len - 1) << RADIO_PCNF1_BALEN_Pos) &
-            RADIO_PCNF1_BALEN_Msk));  // base address length in number of bytes.
+        ((((sizeof(_buf)) << RADIO_PCNF1_MAXLEN_Pos) & RADIO_PCNF1_MAXLEN_Msk)  // maximum length of payload
+         | (((0UL) << RADIO_PCNF1_STATLEN_Pos) & RADIO_PCNF1_STATLEN_Msk)       // expand the payload with 0 bytes
+         | (((len - 1) << RADIO_PCNF1_BALEN_Pos) & RADIO_PCNF1_BALEN_Msk));  // base address length in number of bytes.
 
     return true;
 }
@@ -132,8 +123,7 @@ bool RH_NRF51::setRF(DataRate data_rate, TransmitPower power) {
     else
         return false;  // Invalid
 
-    NRF_RADIO->TXPOWER =
-        ((p << RADIO_TXPOWER_TXPOWER_Pos) & RADIO_TXPOWER_TXPOWER_Msk);
+    NRF_RADIO->TXPOWER = ((p << RADIO_TXPOWER_TXPOWER_Pos) & RADIO_TXPOWER_TXPOWER_Msk);
     NRF_RADIO->MODE = ((mode << RADIO_MODE_MODE_Pos) & RADIO_MODE_MODE_Msk);
 
     return true;
@@ -156,9 +146,7 @@ void RH_NRF51::setModeRx() {
 
 #if RH_NRF51_HAVE_ENCRYPTION
         // Maybe set the AES CCA module for the correct encryption mode
-        if (_encrypting)
-            NRF_CCM->MODE =
-                (CCM_MODE_MODE_Decryption << CCM_MODE_MODE_Pos);  // Decrypt
+        if (_encrypting) NRF_CCM->MODE = (CCM_MODE_MODE_Decryption << CCM_MODE_MODE_Pos);  // Decrypt
         NRF_CCM->MICSTATUS = 0;
 #endif
 
@@ -185,9 +173,7 @@ void RH_NRF51::setModeTx() {
 
 #if RH_NRF51_HAVE_ENCRYPTION
         // Maybe set the AES CCA module for the correct encryption mode
-        if (_encrypting)
-            NRF_CCM->MODE =
-                (CCM_MODE_MODE_Encryption << CCM_MODE_MODE_Pos);  // Encrypt
+        if (_encrypting) NRF_CCM->MODE = (CCM_MODE_MODE_Encryption << CCM_MODE_MODE_Pos);  // Encrypt
 #endif
         // Radio will transition automatically to Disable state at the end of
         // transmission
@@ -239,9 +225,7 @@ bool RH_NRF51::waitPacketSent() {
     return true;
 }
 
-bool RH_NRF51::isSending() {
-    return (NRF_RADIO->STATE == RADIO_STATE_STATE_Tx) ? true : false;
-}
+bool RH_NRF51::isSending() { return (NRF_RADIO->STATE == RADIO_STATE_STATE_Tx) ? true : false; }
 
 bool RH_NRF51::printRegisters() {
 #ifdef RH_HAVE_SERIAL
@@ -260,16 +244,14 @@ bool RH_NRF51::printRegisters() {
 
 // Check whether the latest received message is complete and uncorrupted
 void RH_NRF51::validateRxBuf() {
-    if (_buf[1] < RH_NRF51_HEADER_LEN)
-        return;  // Too short to be a real message
+    if (_buf[1] < RH_NRF51_HEADER_LEN) return;  // Too short to be a real message
     // Extract the 4 headers following S0, LEN and S1
     _rxHeaderTo = _buf[3];
     _rxHeaderFrom = _buf[4];
     _rxHeaderId = _buf[5];
     _rxHeaderFlags = _buf[6];
 
-    if (_promiscuous || _rxHeaderTo == _thisAddress ||
-        _rxHeaderTo == RH_BROADCAST_ADDRESS) {
+    if (_promiscuous || _rxHeaderTo == _thisAddress || _rxHeaderTo == RH_BROADCAST_ADDRESS) {
         _rxGood++;
         _rxBufValid = true;
     }
@@ -297,12 +279,11 @@ void RH_NRF51::setEncryptionKey(uint8_t* key) {
 
         // SHORT from RADIO READY to AESCCM KSGEN using PPI predefined channel
         // 24 Also RADIO ADDRESS to AESCCM CRYPT using PPI predefined channel 25
-        NRF_PPI->CHENSET = (PPI_CHENSET_CH24_Enabled << PPI_CHENSET_CH24_Pos) |
-                           (PPI_CHENSET_CH25_Enabled << PPI_CHENSET_CH25_Pos);
+        NRF_PPI->CHENSET =
+            (PPI_CHENSET_CH24_Enabled << PPI_CHENSET_CH24_Pos) | (PPI_CHENSET_CH25_Enabled << PPI_CHENSET_CH25_Pos);
 
         // SHORT from AESCCM ENDKSGEN to AESCCM CRYPT
-        NRF_CCM->SHORTS = (CCM_SHORTS_ENDKSGEN_CRYPT_Enabled
-                           << CCM_SHORTS_ENDKSGEN_CRYPT_Pos);
+        NRF_CCM->SHORTS = (CCM_SHORTS_ENDKSGEN_CRYPT_Enabled << CCM_SHORTS_ENDKSGEN_CRYPT_Pos);
 
         // Enable the CCM module
         NRF_CCM->ENABLE = (CCM_ENABLE_ENABLE_Enabled << CCM_ENABLE_ENABLE_Pos);
@@ -350,8 +331,7 @@ bool RH_NRF51::recv(uint8_t* buf, uint8_t* len) {
     if (buf && len) {
         // Skip the 4 headers that are at the beginning of the rxBuf
         // the payload length is the first octet in _buf
-        if (*len > _buf[1] - RH_NRF51_HEADER_LEN)
-            *len = _buf[1] - RH_NRF51_HEADER_LEN;
+        if (*len > _buf[1] - RH_NRF51_HEADER_LEN) *len = _buf[1] - RH_NRF51_HEADER_LEN;
         memcpy(buf, _buf + RH_NRF51_HEADER_LEN, *len);
     }
     clearRxBuf();  // This message accepted and cleared

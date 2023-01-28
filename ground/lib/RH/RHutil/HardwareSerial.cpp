@@ -15,8 +15,7 @@
 #include <termios.h>
 #include <unistd.h>
 
-HardwareSerial::HardwareSerial(const char* deviceName)
-    : _deviceName(deviceName), _device(-1) {
+HardwareSerial::HardwareSerial(const char* deviceName) : _deviceName(deviceName), _device(-1) {
     // Override device name from environment
     char* e = getenv("RH_HARDWARESERIAL_DEVICE_NAME");
     if (e) _deviceName = e;
@@ -39,8 +38,7 @@ int HardwareSerial::available() {
     int bytes;
 
     if (ioctl(_device, FIONREAD, &bytes) != 0) {
-        fprintf(stderr, "HardwareSerial::available ioctl failed: %s\n",
-                strerror(errno));
+        fprintf(stderr, "HardwareSerial::available ioctl failed: %s\n", strerror(errno));
         return 0;
     }
     return bytes;
@@ -50,8 +48,7 @@ int HardwareSerial::read() {
     uint8_t data;
     ssize_t result = ::read(_device, &data, 1);
     if (result != 1) {
-        fprintf(stderr, "HardwareSerial::read read failed: %s\n",
-                strerror(errno));
+        fprintf(stderr, "HardwareSerial::read read failed: %s\n", strerror(errno));
         return 0;
     }
     //    printf("got: %02x\n", data);
@@ -73,8 +70,7 @@ bool HardwareSerial::openDevice() {
     _device = open(_deviceName, O_RDWR | O_NOCTTY | O_NDELAY);
     if (_device == -1) {
         // Could not open the port.
-        fprintf(stderr, "HardwareSerial::openDevice could not open %s: %s\n",
-                _deviceName, strerror(errno));
+        fprintf(stderr, "HardwareSerial::openDevice could not open %s: %s\n", _deviceName, strerror(errno));
         return false;
     }
 
@@ -142,16 +138,14 @@ bool HardwareSerial::setBaud(int baud) {
         speed = B921600;
 #endif
     else {
-        fprintf(stderr, "HardwareSerial::setBaud: unsupported baud rate %d\n",
-                baud);
+        fprintf(stderr, "HardwareSerial::setBaud: unsupported baud rate %d\n", baud);
         return false;
     }
 
     struct termios options;
     // Get current options
     if (tcgetattr(_device, &options) != 0) {
-        fprintf(stderr, "HardwareSerial::setBaud: could not tcgetattr %s\n",
-                strerror(errno));
+        fprintf(stderr, "HardwareSerial::setBaud: could not tcgetattr %s\n", strerror(errno));
         return false;
     }
 
@@ -179,8 +173,7 @@ bool HardwareSerial::setBaud(int baud) {
 
     // Set the options in the port
     if (tcsetattr(_device, TCSANOW, &options) != 0) {
-        fprintf(stderr, "HardwareSerial::setBaud: could not tcsetattr %s\n",
-                strerror(errno));
+        fprintf(stderr, "HardwareSerial::setBaud: could not tcsetattr %s\n", strerror(errno));
         return false;
     }
 
@@ -212,10 +205,7 @@ bool HardwareSerial::waitAvailableTimeout(uint16_t timeout) {
     } else {
         result = select(max_fd, &input, NULL, NULL, NULL);
     }
-    if (result < 0)
-        fprintf(stderr,
-                "HardwareSerial::waitAvailableTimeout: select failed %s\n",
-                strerror(errno));
+    if (result < 0) fprintf(stderr, "HardwareSerial::waitAvailableTimeout: select failed %s\n", strerror(errno));
     return result > 0;
 }
 

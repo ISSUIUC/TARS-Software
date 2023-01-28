@@ -5,6 +5,7 @@
 #include <SD.h>
 
 #include "FifoBuffer.h"
+#include "HistoryBuffer.h"
 #include "MS5611.h"                //Barometer Library
 #include "SparkFunLSM9DS1.h"       //Low-G IMU Library
 #include "SparkFun_Qwiic_KX13X.h"  //High-G IMU Library

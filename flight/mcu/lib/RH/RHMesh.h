@@ -129,42 +129,35 @@ class RHMesh : public RHRouter {
    public:
 /// The maximum length permitted for the application payload data in a RHMesh
 /// message
-#define RH_MESH_MAX_MESSAGE_LEN \
-    (RH_ROUTER_MAX_MESSAGE_LEN - sizeof(RHMesh::MeshMessageHeader))
+#define RH_MESH_MAX_MESSAGE_LEN (RH_ROUTER_MAX_MESSAGE_LEN - sizeof(RHMesh::MeshMessageHeader))
 
     /// Structure of the basic RHMesh header.
     typedef struct {
-        uint8_t
-            msgType;  ///< Type of RHMesh message, one of RH_MESH_MESSAGE_TYPE_*
+        uint8_t msgType;  ///< Type of RHMesh message, one of RH_MESH_MESSAGE_TYPE_*
     } MeshMessageHeader;
 
     /// Signals an application layer message for the caller of RHMesh
     typedef struct {
-        MeshMessageHeader
-            header;  ///< msgType = RH_MESH_MESSAGE_TYPE_APPLICATION
-        uint8_t
-            data[RH_MESH_MAX_MESSAGE_LEN];  ///< Application layer payload data
+        MeshMessageHeader header;               ///< msgType = RH_MESH_MESSAGE_TYPE_APPLICATION
+        uint8_t data[RH_MESH_MAX_MESSAGE_LEN];  ///< Application layer payload data
     } MeshApplicationMessage;
 
     /// Signals a route discovery request or reply (At present only supports
     /// physical dest addresses of length 1 octet)
     typedef struct {
-        MeshMessageHeader
-            header;       ///< msgType = RH_MESH_MESSAGE_TYPE_ROUTE_DISCOVERY_*
-        uint8_t destlen;  ///< Reserved. Must be 1.g
-        uint8_t dest;  ///< The address of the destination node whose route is
-                       ///< being sought
-        uint8_t route[RH_MESH_MAX_MESSAGE_LEN -
-                      1];  ///< List of node addresses visited so far. Length is
-                           ///< implcit
+        MeshMessageHeader header;                    ///< msgType = RH_MESH_MESSAGE_TYPE_ROUTE_DISCOVERY_*
+        uint8_t destlen;                             ///< Reserved. Must be 1.g
+        uint8_t dest;                                ///< The address of the destination node whose route is
+                                                     ///< being sought
+        uint8_t route[RH_MESH_MAX_MESSAGE_LEN - 1];  ///< List of node addresses visited so far. Length is
+                                                     ///< implcit
     } MeshRouteDiscoveryMessage;
 
     /// Signals a route failure
     typedef struct {
-        MeshMessageHeader
-            header;    ///< msgType = RH_MESH_MESSAGE_TYPE_ROUTE_FAILURE
-        uint8_t dest;  ///< The address of the destination towards which the
-                       ///< route failed
+        MeshMessageHeader header;  ///< msgType = RH_MESH_MESSAGE_TYPE_ROUTE_FAILURE
+        uint8_t dest;              ///< The address of the destination towards which the
+                                   ///< route failed
     } MeshRouteFailureMessage;
 
     /// Constructor.
@@ -196,8 +189,7 @@ class RHMesh : public RHRouter {
     ///         next hop
     ///           (usually because it dod not acknowledge due to being off the
     ///           air or out of range
-    uint8_t sendtoWait(uint8_t* buf, uint8_t len, uint8_t dest,
-                       uint8_t flags = 0);
+    uint8_t sendtoWait(uint8_t* buf, uint8_t len, uint8_t dest, uint8_t flags = 0);
 
     /// Starts the receiver if it is not running already, processes and possibly
     /// routes any received messages addressed to other nodes and delivers any
@@ -221,8 +213,7 @@ class RHMesh : public RHRouter {
     /// uint8_t will be set to the FLAGS (not just those addressed to this
     /// node). \return true if a valid message was received for this node and
     /// copied to buf
-    bool recvfromAck(uint8_t* buf, uint8_t* len, uint8_t* source = NULL,
-                     uint8_t* dest = NULL, uint8_t* id = NULL,
+    bool recvfromAck(uint8_t* buf, uint8_t* len, uint8_t* source = NULL, uint8_t* dest = NULL, uint8_t* id = NULL,
                      uint8_t* flags = NULL);
 
     /// Starts the receiver if it is not running already.
@@ -238,8 +229,7 @@ class RHMesh : public RHRouter {
     /// \param[in] flags If present and not NULL, the referenced uint8_t will be
     /// set to the FLAGS (not just those addressed to this node). \return true
     /// if a valid message was copied to buf
-    bool recvfromAckTimeout(uint8_t* buf, uint8_t* len, uint16_t timeout,
-                            uint8_t* source = NULL, uint8_t* dest = NULL,
+    bool recvfromAckTimeout(uint8_t* buf, uint8_t* len, uint16_t timeout, uint8_t* source = NULL, uint8_t* dest = NULL,
                             uint8_t* id = NULL, uint8_t* flags = NULL);
 
    protected:

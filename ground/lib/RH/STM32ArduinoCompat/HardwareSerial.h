@@ -23,13 +23,12 @@ class RingBuffer {
     uint8_t read();
 
    private:
-    uint8_t
-        _buffer[ARDUINO_RINGBUFFER_SIZE];  // In fact we can hold up to
-                                           // ARDUINO_RINGBUFFER_SIZE-1 bytes
-    uint16_t _head;                        // Index of next write
-    uint16_t _tail;                        // Index of next read
-    uint32_t _overruns;                    // Write attempted when buffer full
-    uint32_t _underruns;                   // Read attempted when buffer empty
+    uint8_t _buffer[ARDUINO_RINGBUFFER_SIZE];  // In fact we can hold up to
+                                               // ARDUINO_RINGBUFFER_SIZE-1 bytes
+    uint16_t _head;                            // Index of next write
+    uint16_t _tail;                            // Index of next read
+    uint32_t _overruns;                        // Write attempted when buffer full
+    uint32_t _underruns;                       // Read attempted when buffer empty
 };
 
 // Mostly compatible wuith Arduino HardwareSerial

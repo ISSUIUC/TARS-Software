@@ -154,102 +154,6 @@ void Telemetry::transmit(const sensorDataStruct_t& data_struct) {
     chThdSleepMilliseconds(170);
 
     rf95.waitPacketSent();
-#ifdef SERIAL_PLOTTING
-    Serial.print(R"({"type": "data", "value": {)");
-    Serial.print(R"("response_ID":)");
-    Serial.print(d.response_ID);
-    Serial.print(',');
-    Serial.print(R"("gps_lat":)");
-    Serial.print(d.gps_lat, 5);
-    Serial.print(',');
-    Serial.print(R"("gps_long":)");
-    Serial.print(d.gps_long, 5);
-    Serial.print(',');
-    Serial.print(R"("gps_alt":)");
-    Serial.print(d.gps_alt, 5);
-    Serial.print(',');
-    Serial.print(R"("barometer_alt":)");
-    Serial.print(d.barometer_alt, 5);
-    Serial.print(',');
-    Serial.print(R"("KX_IMU_ax":)");
-    Serial.print(d.KX_IMU_ax, 5);
-    Serial.print(',');
-    Serial.print(R"("KX_IMU_ay":)");
-    Serial.print(d.KX_IMU_ay, 5);
-    Serial.print(',');
-    Serial.print(R"("KX_IMU_az":)");
-    Serial.print(d.KX_IMU_az, 5);
-    Serial.print(',');
-    // Serial.print(R"("H3L_IMU_ax":)"); Serial.print(data.H3L_IMU_ax);
-    // Serial.print(','); Serial.print(R"("H3L_IMU_ay":)");
-    // Serial.print(data.H3L_IMU_ay); Serial.print(',');
-    // Serial.print(R"("H3L_IMU_az":)"); Serial.print(data.H3L_IMU_az);
-    // Serial.print(',');
-    Serial.print(R"("LSM_IMU_ax":)");
-    Serial.print(d.LSM_IMU_ax, 5);
-    Serial.print(',');
-    Serial.print(R"("LSM_IMU_ay":)");
-    Serial.print(d.LSM_IMU_ay, 5);
-    Serial.print(',');
-    Serial.print(R"("LSM_IMU_az":)");
-    Serial.print(d.LSM_IMU_az, 5);
-    Serial.print(',');
-    Serial.print(R"("LSM_IMU_gx":)");
-    Serial.print(d.LSM_IMU_gx, 5);
-    Serial.print(',');
-    Serial.print(R"("LSM_IMU_gy":)");
-    Serial.print(d.LSM_IMU_gy, 5);
-    Serial.print(',');
-    Serial.print(R"("LSM_IMU_gz":)");
-    Serial.print(d.LSM_IMU_gz, 5);
-    Serial.print(',');
-    Serial.print(R"("LSM_IMU_mx":)");
-    Serial.print(d.LSM_IMU_mx, 5);
-    Serial.print(',');
-    Serial.print(R"("LSM_IMU_my":)");
-    Serial.print(d.LSM_IMU_my, 5);
-    Serial.print(',');
-    Serial.print(R"("LSM_IMU_mz":)");
-    Serial.print(d.LSM_IMU_mz, 5);
-    Serial.print(',');
-    Serial.print(R"("FSM_state":)");
-    Serial.print(d.FSM_state);
-    Serial.print(',');
-    Serial.print(R"("sign":")");
-    Serial.print("SIGN");
-    Serial.print("\",");
-    Serial.print(R"("RSSI":)");
-    Serial.print(rf95.lastRssi());
-    Serial.print(',');
-    Serial.print(R"("Voltage":)");
-    Serial.print(d.voltage_battry, 5);
-    Serial.print(',');
-    Serial.print(R"("frequency":)");
-    Serial.print(RF95_FREQ);
-    Serial.print(',');
-    Serial.print(R"("flap_extension":)");
-    Serial.print(d.flap_extension, 5);
-    Serial.print(",");
-    Serial.print(R"("STE_ALT":)");
-    Serial.print(d.state_x, 5);
-    Serial.print(",");
-    Serial.print(R"("STE_VEL":)");
-    Serial.print(d.state_vx, 5);
-    Serial.print(",");
-    Serial.print(R"("STE_ACC":)");
-    Serial.print(d.state_ax, 5);
-    Serial.print(",");
-    Serial.print(R"("TEMP":)");
-    Serial.print(d.barometer_temp);
-    Serial.print(",");
-    Serial.print(R"("pressure":)");
-    Serial.print(d.barometer_pressure, 5);
-    Serial.print(",");
-    Serial.print(R"("STE_APO":)");
-    Serial.print(d.state_apo, 5);
-    Serial.print("");
-    Serial.println("}}");
-#endif
 
     // change the freqencey after we acknowledge
     if (freq_status.should_change) {
@@ -261,39 +165,40 @@ void Telemetry::transmit(const sensorDataStruct_t& data_struct) {
     uint8_t buf[RH_RF95_MAX_MESSAGE_LEN];
     uint8_t len = sizeof(buf);
     if (rf95.available() && rf95.recv(buf, &len)) {
-        telemetry_command received{};
+        telemetry_command received;
         memcpy(&received, buf, sizeof(received));
 
         handle_command(received);
     }
 }
 
-TelemetryPacket Telemetry::make_packet(const sensorDataStruct_t& data_struct){
-    TelemetryPacket packet{};
+TelemetryPacket Telemetry::make_packet(const sensorDataStruct_t &data_struct) {
+    TelemetryPacket packet;
     packet.gps_lat = data_struct.gps_data.latitude;
     packet.gps_long = data_struct.gps_data.longitude;
     packet.gps_alt = data_struct.gps_data.altitude;
 
-    packet.gnc_state_ax = data_struct.kalman_data.kalman_ax;
-    packet.gnc_state_vx = data_struct.kalman_data.kalman_vx;
-    packet.gnc_state_x = data_struct.kalman_data.kalman_x;
-    packet.gns_state_apo = data_struct.kalman_data.kalman_apo;
+    packet.gnc_state_ax = data_struct.state_data.state_ax;
+    packet.gnc_state_vx = data_struct.state_data.state_vx;
+    packet.gnc_state_x = data_struct.state_data.state_x;
+    packet.gns_state_apo = data_struct.state_data.state_apo;
 
     packet.response_ID = last_command_id;
     packet.rssi = rf95.lastRssi();
     packet.voltage_battery = inv_convert_range<uint8_t>(data_struct.voltage_data.v_battery, 16);
     packet.FSM_State = (uint8_t)data_struct.rocketState_data.rocketStates[0];
 
-    TelemetryDataLite data{};
-    for(int8_t i = 0; i < 4 && data_view.next(data); i++){
+    TelemetryDataLite data;
+    packet.datapoint_count = 0;
+    for (int i = 0; i < 4 && buffered_data.pop(&data); i++) {
         packet.datapoints[i] = data;
-        packet.datapoint_count = i;
+        packet.datapoint_count = i + 1;
     }
     return packet;
 }
 
-void Telemetry::buffer_data(const sensorDataStruct_t &sensor_data){
-    TelemetryDataLite data{};
+void Telemetry::buffer_data(const sensorDataStruct_t &sensor_data) {
+    TelemetryDataLite data;
     data.timestamp = TIME_I2MS(chVTGetSystemTime());
     data.barometer_pressure = inv_convert_range<uint16_t>(sensor_data.barometer_data.pressure, 4096);
 
@@ -309,4 +214,101 @@ void Telemetry::buffer_data(const sensorDataStruct_t &sensor_data){
     data.barometer_temp = inv_convert_range<uint8_t>(sensor_data.barometer_data.temperature, 128);
 
     buffered_data.push(data);
+
+#ifdef SERIAL_PLOTTING
+    Serial.print(R"({"type": "data", "value": {)");
+    Serial.print(R"("response_ID":)");
+    Serial.print(000);
+    Serial.print(',');
+    Serial.print(R"("gps_lat":)");
+    Serial.print(sensor_data.gps_data.latitude, 5);
+    Serial.print(',');
+    Serial.print(R"("gps_long":)");
+    Serial.print(sensor_data.gps_data.longitude, 5);
+    Serial.print(',');
+    Serial.print(R"("gps_alt":)");
+    Serial.print(sensor_data.gps_data.altitude, 5);
+    Serial.print(',');
+    Serial.print(R"("barometer_alt":)");
+    Serial.print(sensor_data.barometer_data.altitude, 5);
+    Serial.print(',');
+    Serial.print(R"("KX_IMU_ax":)");
+    Serial.print(sensor_data.highG_data.hg_ax, 5);
+    Serial.print(',');
+    Serial.print(R"("KX_IMU_ay":)");
+    Serial.print(sensor_data.highG_data.hg_ay, 5);
+    Serial.print(',');
+    Serial.print(R"("KX_IMU_az":)");
+    Serial.print(sensor_data.highG_data.hg_az, 5);
+    Serial.print(',');
+    // Serial.print(R"("H3L_IMU_ax":)"); Serial.print(data.H3L_IMU_ax);
+    // Serial.print(','); Serial.print(R"("H3L_IMU_ay":)");
+    // Serial.print(data.H3L_IMU_ay); Serial.print(',');
+    // Serial.print(R"("H3L_IMU_az":)"); Serial.print(data.H3L_IMU_az);
+    // Serial.print(',');
+    Serial.print(R"("LSM_IMU_ax":)");
+    Serial.print(sensor_data.lowG_data.ax, 5);
+    Serial.print(',');
+    Serial.print(R"("LSM_IMU_ay":)");
+    Serial.print(sensor_data.lowG_data.ay, 5);
+    Serial.print(',');
+    Serial.print(R"("LSM_IMU_az":)");
+    Serial.print(sensor_data.lowG_data.az, 5);
+    Serial.print(',');
+    Serial.print(R"("LSM_IMU_gx":)");
+    Serial.print(sensor_data.lowG_data.gx, 5);
+    Serial.print(',');
+    Serial.print(R"("LSM_IMU_gy":)");
+    Serial.print(sensor_data.lowG_data.gy, 5);
+    Serial.print(',');
+    Serial.print(R"("LSM_IMU_gz":)");
+    Serial.print(sensor_data.lowG_data.gz, 5);
+    Serial.print(',');
+    Serial.print(R"("LSM_IMU_mx":)");
+    Serial.print(sensor_data.lowG_data.mx, 5);
+    Serial.print(',');
+    Serial.print(R"("LSM_IMU_my":)");
+    Serial.print(sensor_data.lowG_data.my, 5);
+    Serial.print(',');
+    Serial.print(R"("LSM_IMU_mz":)");
+    Serial.print(sensor_data.lowG_data.mz, 5);
+    Serial.print(',');
+    Serial.print(R"("FSM_state":)");
+    Serial.print(1);
+    Serial.print(',');
+    Serial.print(R"("sign":")");
+    Serial.print("SIGN");
+    Serial.print("\",");
+    Serial.print(R"("RSSI":)");
+    Serial.print(rf95.lastRssi());
+    Serial.print(',');
+    Serial.print(R"("Voltage":)");
+    Serial.print(sensor_data.voltage_data.v_battery, 5);
+    Serial.print(',');
+    Serial.print(R"("frequency":)");
+    Serial.print(RF95_FREQ);
+    Serial.print(',');
+    Serial.print(R"("flap_extension":)");
+    Serial.print(sensor_data.flap_data.extension, 5);
+    Serial.print(",");
+    Serial.print(R"("STE_ALT":)");
+    Serial.print(sensor_data.state_data.state_x, 5);
+    Serial.print(",");
+    Serial.print(R"("STE_VEL":)");
+    Serial.print(sensor_data.state_data.state_vx, 5);
+    Serial.print(",");
+    Serial.print(R"("STE_ACC":)");
+    Serial.print(sensor_data.state_data.state_ax, 5);
+    Serial.print(",");
+    Serial.print(R"("TEMP":)");
+    Serial.print(sensor_data.barometer_data.temperature);
+    Serial.print(",");
+    Serial.print(R"("pressure":)");
+    Serial.print(sensor_data.barometer_data.pressure, 5);
+    Serial.print(",");
+    Serial.print(R"("STE_APO":)");
+    Serial.print(sensor_data.state_data.state_apo, 5);
+    Serial.print("");
+    Serial.println("}}");
+#endif
 }

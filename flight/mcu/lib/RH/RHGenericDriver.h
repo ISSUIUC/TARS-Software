@@ -50,13 +50,13 @@ class RHGenericDriver {
     typedef enum {
         RHModeInitialising = 0,  ///< Transport is initialising. Initial default
                                  ///< value until init() is called..
-        RHModeSleep,  ///< Transport hardware is in low power sleep mode (if
-                      ///< supported)
-        RHModeIdle,   ///< Transport is idle.
-        RHModeTx,  ///< Transport is in the process of transmitting a message.
-        RHModeRx,  ///< Transport is in the process of receiving a message.
-        RHModeCad  ///< Transport is in the process of detecting channel
-                   ///< activity (if supported)
+        RHModeSleep,             ///< Transport hardware is in low power sleep mode (if
+                                 ///< supported)
+        RHModeIdle,              ///< Transport is idle.
+        RHModeTx,                ///< Transport is in the process of transmitting a message.
+        RHModeRx,                ///< Transport is in the process of receiving a message.
+        RHModeCad                ///< Transport is in the process of detecting channel
+                                 ///< activity (if supported)
     } RHMode;
 
     /// Constructor
@@ -197,8 +197,7 @@ class RHGenericDriver {
     /// RH_FLAGS_APPLICATION_SPECIFIC
     ///            which clears the application specific flags, resulting in new
     ///            application specific flags identical to the set.
-    virtual void setHeaderFlags(uint8_t set,
-                                uint8_t clear = RH_FLAGS_APPLICATION_SPECIFIC);
+    virtual void setHeaderFlags(uint8_t set, uint8_t clear = RH_FLAGS_APPLICATION_SPECIFIC);
 
     /// Tells the receiver to accept messages with any TO address, not just
     /// messages addressed to thisAddress or the broadcast address \param[in]
@@ -250,8 +249,7 @@ class RHGenericDriver {
     /// \param[in] prompt string to preface the print
     /// \param[in] buf Location of the buffer to print
     /// \param[in] len Length of the buffer in octets.
-    static void printBuffer(const char* prompt, const uint8_t* buf,
-                            uint8_t len);
+    static void printBuffer(const char* prompt, const uint8_t* buf, uint8_t len);
 
     /// Returns the count of the number of bad received packets (ie packets with
     /// bad lengths, checksum etc) which were rejected and not delivered to the

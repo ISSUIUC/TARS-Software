@@ -23,8 +23,7 @@ typedef enum SPIFrequency {
 
 class HardwareSPI {
    public:
-    HardwareSPI(
-        uint32_t spiPortNumber);  // Only port SPI1 is currently supported
+    HardwareSPI(uint32_t spiPortNumber);  // Only port SPI1 is currently supported
     void begin(SPIFrequency frequency, uint32_t bitOrder, uint32_t mode);
     void end(void);
     uint8_t transfer(uint8_t data);

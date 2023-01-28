@@ -75,8 +75,7 @@ void RFM95::RFM_init_RX() {
  */
 bool RFM95::RFM_write(uint8_t RegAddr, uint8_t data) {
 #ifdef DEBUG
-    printf("##### Write to RFM95 ADDRESS: 0x%.2X\tDATA: 0x%.2X #####\n",
-           RegAddr, data);
+    printf("##### Write to RFM95 ADDRESS: 0x%.2X\tDATA: 0x%.2X #####\n", RegAddr, data);
 #endif
 
     int ret;
@@ -193,7 +192,7 @@ uint8_t RFM95::RFM_receive(uint8_t* rxBuf, uint16_t maxLen) {
 
     uint8_t numBytes = RFM_read(REG_RX_NB_BYTES);          // get packet size
     uint8_t packetStart = RFM_read(FIFO_RX_CURRENT_ADDR);  // packet start addr
-    RFM_write(REG_FIFO_ADDR_PTR, packetStart);  // read form packet start
+    RFM_write(REG_FIFO_ADDR_PTR, packetStart);             // read form packet start
 
     /* Copy <numBytes> bytes from RFM95 FIFO to rxBuf */
     for (uint8_t i = 0; (i < numBytes) && (i < maxLen); ++i) {

@@ -10,8 +10,7 @@
 #endif
 #include <RHCRC.h>
 
-RH_Serial::RH_Serial(HardwareSerial& serial)
-    : _serial(serial), _rxState(RxStateInitialising) {}
+RH_Serial::RH_Serial(HardwareSerial& serial) : _serial(serial), _rxState(RxStateInitialising) {}
 
 HardwareSerial& RH_Serial::serial() { return _serial; }
 
@@ -132,8 +131,7 @@ void RH_Serial::validateRxBuf() {
     _rxHeaderFrom = _rxBuf[1];
     _rxHeaderId = _rxBuf[2];
     _rxHeaderFlags = _rxBuf[3];
-    if (_promiscuous || _rxHeaderTo == _thisAddress ||
-        _rxHeaderTo == RH_BROADCAST_ADDRESS) {
+    if (_promiscuous || _rxHeaderTo == _thisAddress || _rxHeaderTo == RH_BROADCAST_ADDRESS) {
         _rxGood++;
         _rxBufValid = true;
     }
@@ -144,8 +142,7 @@ bool RH_Serial::recv(uint8_t* buf, uint8_t* len) {
 
     if (buf && len) {
         // Skip the 4 headers that are at the beginning of the rxBuf
-        if (*len > _rxBufLen - RH_SERIAL_HEADER_LEN)
-            *len = _rxBufLen - RH_SERIAL_HEADER_LEN;
+        if (*len > _rxBufLen - RH_SERIAL_HEADER_LEN) *len = _rxBufLen - RH_SERIAL_HEADER_LEN;
         memcpy(buf, _rxBuf + RH_SERIAL_HEADER_LEN, *len);
     }
     clearRxBuf();  // This message accepted and cleared

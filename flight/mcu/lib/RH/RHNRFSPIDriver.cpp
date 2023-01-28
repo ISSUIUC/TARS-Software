@@ -50,8 +50,7 @@ uint8_t RHNRFSPIDriver::spiWrite(uint8_t reg, uint8_t val) {
     digitalWrite(_slaveSelectPin, LOW);
     status = _spi.transfer(reg);  // Send the address
     _spi.transfer(val);           // New value follows
-#if (RH_PLATFORM == RH_PLATFORM_ARDUINO) && defined(__arm__) && \
-    defined(CORE_TEENSY)
+#if (RH_PLATFORM == RH_PLATFORM_ARDUINO) && defined(__arm__) && defined(CORE_TEENSY)
     // Sigh: some devices, such as MRF89XA dont work properly on Teensy 3.1:
     // At 1MHz, the clock returns low _after_ slave select goes high, which
     // prevents SPI write working. This delay gixes time for the clock to return
@@ -74,8 +73,7 @@ uint8_t RHNRFSPIDriver::spiBurstRead(uint8_t reg, uint8_t* dest, uint8_t len) {
     return status;
 }
 
-uint8_t RHNRFSPIDriver::spiBurstWrite(uint8_t reg, const uint8_t* src,
-                                      uint8_t len) {
+uint8_t RHNRFSPIDriver::spiBurstWrite(uint8_t reg, const uint8_t* src, uint8_t len) {
     uint8_t status = 0;
     ATOMIC_BLOCK_START;
     digitalWrite(_slaveSelectPin, LOW);
@@ -86,6 +84,4 @@ uint8_t RHNRFSPIDriver::spiBurstWrite(uint8_t reg, const uint8_t* src,
     return status;
 }
 
-void RHNRFSPIDriver::setSlaveSelectPin(uint8_t slaveSelectPin) {
-    _slaveSelectPin = slaveSelectPin;
-}
+void RHNRFSPIDriver::setSlaveSelectPin(uint8_t slaveSelectPin) { _slaveSelectPin = slaveSelectPin; }

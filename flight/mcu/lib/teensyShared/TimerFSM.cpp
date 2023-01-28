@@ -7,17 +7,20 @@
  *              Jusjeev Singh Bhurjee
  *              Rithvik Bhogavilli
  *              Nicholas Phillips
+ *              Aidan Costello
+ *              Aaditya Voruganti
+ *              Jessica Myers
  *
  * @brief      The implementation of the finite state machine class that governs
  * state transitions.
  *
- * The TimerFSM class encapsulates the finite state machine that dictates which
- * state the rocket is in throughout the mission. The class implements the logic
- * necessary to reliably transition between states along with hysteresis to
- * avoid premature state transitions.
+ * The TimerFSM is a collection of barebones logic that only uses vertical acceleration to detect BOOST and BURNOUT.
+ * After these states, the transitions are entirely dictated by predetermined time intervals that are calculated using
+ * OpenRocket and/or SILSIM simulations. This FSM is useful as a sort of control variable to compare against the other
+ * ones, and also ensures that the GNC flaps do not retract at the wrong time.
  *
  * This is a highly critical software module and should be tested throughly in
- * simulation and on hardware targets.:
+ * simulation and on hardware targets.
  *
  */
 
@@ -132,12 +135,54 @@ void TimerFSM::tickFSM() {
             coast_timer_ = chVTGetSystemTime() - burnout_time_;
 
             if (TIME_I2MS(coast_timer_) > coast_to_apogee_time_thresh) {
-                rocket_state_ = FSM_State::STATE_APOGEE;
+                rocket_state_ = FSM_State::STATE_APOGEE_DETECT;
+                apogee_time_ = chVTGetSystemTime();
             }
 
             break;
 
+        case FSM_State::STATE_APOGEE_DETECT:
+            rocket_state_ = FSM_State::STATE_APOGEE;
+            break;
         case FSM_State::STATE_APOGEE:
+            apogee_timer_ = chVTGetSystemTime() - apogee_time_;
+            if (TIME_I2MS(apogee_timer_) > apogee_time_thresh) {
+                rocket_state_ = FSM_State::STATE_DROGUE_DETECT;
+                drogue_time_ = chVTGetSystemTime();
+            }
+
+            break;
+
+        case FSM_State::STATE_DROGUE_DETECT:
+            rocket_state_ = FSM_State::STATE_DROGUE;
+            break;
+
+        case FSM_State::STATE_DROGUE:
+            drogue_timer_ = chVTGetSystemTime() - drogue_time_;
+            if (TIME_I2MS(drogue_timer_) > drogue_deploy_time_since_apogee_threshold) {
+                rocket_state_ = FSM_State::STATE_MAIN_DETECT;
+                main_time_ = chVTGetSystemTime();
+            }
+            break;
+
+        case FSM_State::STATE_MAIN_DETECT:
+            rocket_state_ = FSM_State::STATE_MAIN;
+            break;
+
+        case FSM_State::STATE_MAIN:
+            main_timer_ = chVTGetSystemTime() - main_time_;
+            if (TIME_I2MS(main_timer_) > main_deploy_time_since_drogue_threshold) {
+                rocket_state_ = FSM_State::STATE_LANDED_DETECT;
+            }
+            break;
+
+        case FSM_State::STATE_LANDED_DETECT:
+            rocket_state_ = FSM_State::STATE_LANDED;
+            break;
+
+        case FSM_State::STATE_LANDED:
+            break;
+
         default:
             break;
     }

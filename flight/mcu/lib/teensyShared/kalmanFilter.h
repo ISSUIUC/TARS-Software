@@ -19,8 +19,10 @@ public:
     void Initialize(float pos_f, float vel_f);
     void priori();
     void update();
+    void SetQ(float dt, float sd);
+    void SetF(float dt);
 
-    void kfTickFunction();
+    void kfTickFunction(float dt, float sd);
 
     KalmanState getState() const;
     void updateApogee(float estimate);

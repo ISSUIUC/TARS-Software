@@ -131,9 +131,7 @@ class SerialUSBClass {
         printf("%c\n", ch);
         return 0;
     }
-    size_t print(unsigned char ch, int base = DEC) {
-        return print((unsigned int)ch, base);
-    }
+    size_t print(unsigned char ch, int base = DEC) { return print((unsigned int)ch, base); }
     size_t println(unsigned char ch, int base = DEC) {
         print((unsigned int)ch, base);
         printf("\n");

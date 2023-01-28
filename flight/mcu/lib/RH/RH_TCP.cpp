@@ -20,8 +20,7 @@
 
 #include <string>
 
-RH_TCP::RH_TCP(const char* server)
-    : _server(server), _rxBufLen(0), _rxBufValid(false), _socket(-1) {}
+RH_TCP::RH_TCP(const char* server) : _server(server), _rxBufLen(0), _rxBufValid(false), _socket(-1) {}
 
 bool RH_TCP::init() {
     if (!connectToServer()) return false;
@@ -54,8 +53,7 @@ bool RH_TCP::connectToServer() {
 
     s = getaddrinfo(server.c_str(), port.c_str(), &hints, &result);
     if (s != 0) {
-        fprintf(stderr, "RH_TCP::connect getaddrinfo failed: %s\n",
-                gai_strerror(s));
+        fprintf(stderr, "RH_TCP::connect getaddrinfo failed: %s\n", gai_strerror(s));
         return false;
     }
 
@@ -68,8 +66,7 @@ bool RH_TCP::connectToServer() {
         _socket = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
         if (_socket == -1) continue;
 
-        if (connect(_socket, rp->ai_addr, rp->ai_addrlen) == 0)
-            break; /* Success */
+        if (connect(_socket, rp->ai_addr, rp->ai_addrlen) == 0) break; /* Success */
 
         close(_socket);
     }
@@ -85,8 +82,7 @@ bool RH_TCP::connectToServer() {
     int on = 1;
     int rc = ioctl(_socket, FIONBIO, (char*)&on);
     if (rc < 0) {
-        fprintf(stderr, "RH_TCP::init failed to set socket non-blocking: %s\n",
-                strerror(errno));
+        fprintf(stderr, "RH_TCP::init failed to set socket non-blocking: %s\n", strerror(errno));
         close(_socket);
         _socket = -1;
         return false;
@@ -101,23 +97,19 @@ void RH_TCP::clearRxBuf() {
 
 void RH_TCP::checkForEvents() {
 #define RH_TCP_SOCKETBUF_LEN 500
-    static uint8_t
-        socketBuf[RH_TCP_SOCKETBUF_LEN];  // Room for several messages
+    static uint8_t socketBuf[RH_TCP_SOCKETBUF_LEN];  // Room for several messages
     static uint16_t socketBufLen = 0;
 
     // Read at most the amount of space we have left in the buffer
-    ssize_t count = read(_socket, socketBuf + socketBufLen,
-                         sizeof(socketBuf) - socketBufLen);
+    ssize_t count = read(_socket, socketBuf + socketBufLen, sizeof(socketBuf) - socketBufLen);
     if (count < 0) {
         if (errno != EAGAIN) {
-            fprintf(stderr, "RH_TCP::checkForEvents read error: %s\n",
-                    strerror(errno));
+            fprintf(stderr, "RH_TCP::checkForEvents read error: %s\n", strerror(errno));
             exit(1);
         }
     } else if (count == 0) {
         // End of file
-        fprintf(stderr,
-                "RH_TCP::checkForEvents unexpected end of file on read\n");
+        fprintf(stderr, "RH_TCP::checkForEvents unexpected end of file on read\n");
         exit(1);
     } else {
         socketBufLen += count;
@@ -154,8 +146,7 @@ void RH_TCP::checkForEvents() {
                 // check for other message types here
                 // Now remove the used message by copying the trailing bytes
                 // (maybe start of a new message?) to the top of the buffer
-                memcpy(socketBuf, socketBuf + messageLen,
-                       sizeof(socketBuf) - messageLen);
+                memcpy(socketBuf, socketBuf + messageLen, sizeof(socketBuf) - messageLen);
                 socketBufLen -= messageLen;
             }
         }
@@ -164,8 +155,7 @@ void RH_TCP::checkForEvents() {
 
 void RH_TCP::validateRxBuf() {
     // The headers have already been extracted
-    if (_promiscuous || _rxHeaderTo == _thisAddress ||
-        _rxHeaderTo == RH_BROADCAST_ADDRESS) {
+    if (_promiscuous || _rxHeaderTo == _thisAddress || _rxHeaderTo == RH_BROADCAST_ADDRESS) {
         _rxGood++;
         _rxBufValid = true;
     }
@@ -205,9 +195,7 @@ bool RH_TCP::waitAvailableTimeout(uint16_t timeout) {
     } else {
         result = select(max_fd, &input, NULL, NULL, NULL);
     }
-    if (result < 0)
-        fprintf(stderr, "RH_TCP::waitAvailableTimeout: select failed %s\n",
-                strerror(errno));
+    if (result < 0) fprintf(stderr, "RH_TCP::waitAvailableTimeout: select failed %s\n", strerror(errno));
     return result > 0;
 }
 

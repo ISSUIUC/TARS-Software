@@ -1,7 +1,9 @@
 /**
  * @file kalmanFilter.cpp
  *
- * @brief Implementation of the AC team's Kalman Filter
+ * @brief Implementation of a Linear Kalman Filter to estimate position, velocity, and acceleration.
+ *
+ * @details This class takes input data from a barometer and accelerometer to estimate state data for the rocket.
  */
 
 #include "kalmanFilter.h"
@@ -10,11 +12,55 @@
 #define EIGEN_MATRIX_PLUGIN "MatrixAddons.h"
 
 /**
+ * @brief Sets the Q matrix given time step and spectral density.
+ *
+ * @param dt Time step calculated by the Kalman Filter Thread
+ * @param sd Spectral density of the noise
+ *
+ * The Q matrix is the covariance matrix for the process noise and is
+ * updated based on the time taken per cycle of the Kalman Filter Thread.
+ */
+void KalmanFilter::SetQ(float dt, float sd) {
+    Q(0, 0) = pow(dt, 5) / 20;
+    Q(0, 1) = pow(dt, 4) / 8 * 80;
+    Q(0, 2) = pow(dt, 3) / 6;
+    Q(1, 1) = pow(dt, 3) / 8;
+    Q(1, 2) = pow(dt, 2) / 2;
+    Q(2, 2) = dt;
+    Q(1, 0) = Q(0, 1);
+    Q(2, 0) = Q(0, 2);
+    Q(2, 1) = Q(1, 2);
+    Q *= sd;
+}
+
+/**
+ * @brief Sets the F matrix given time step.
+ *
+ * @param dt Time step calculated by the Kalman Filter Thread
+ *
+ * The F matrix is the state transition matrix and is defined
+ * by how the states change over time.
+ */
+void KalmanFilter::SetF(float dt) {
+    F_mat(0, 1) = dt;
+    F_mat(0, 2) = (s_dt * dt) / 2;
+    F_mat(1, 2) = dt;
+
+    F_mat(0, 0) = 1;
+    F_mat(1, 1) = 1;
+    F_mat(2, 2) = 1;
+}
+
+/**
  * @brief Run Kalman filter calculations as long as FSM has passed IDLE
  *
+ * @param dt Time step calculated by the Kalman Filter Thread
+ * @param sd Spectral density of the noise
  */
-void KalmanFilter::kfTickFunction() {
+void KalmanFilter::kfTickFunction(float dt, float sd) {
     if (getActiveFSM().getFSMState() > FSM_State::STATE_IDLE) {
+        SetF(float(dt) / 1000);
+        SetQ(float(dt) / 1000, sd);
         priori();
         update();
     }
@@ -82,7 +128,7 @@ void KalmanFilter::Initialize() {
 
     // set Q
     Q(0, 0) = pow(s_dt, 5) / 20;
-    Q(0, 1) = (pow(s_dt, 4) / 8 * 80);
+    Q(0, 1) = pow(s_dt, 4) / 8 * 80;
     Q(0, 2) = pow(s_dt, 3) / 6;
     Q(1, 1) = pow(s_dt, 3) / 8;
     Q(1, 2) = pow(s_dt, 2) / 2;
@@ -99,13 +145,20 @@ void KalmanFilter::Initialize() {
 
     // set R
     R(0, 0) = 2.0;
-    R(1, 1) = 0.01;
+    R(1, 1) = 0.1;
     // R(0,0) = 2.;
     // R(1,1) = .01;
 
     // set B
     B(2, 0) = -1;
 }
+
+/**
+ * @brief Initializes the Kalman Filter with an initial position and velocity estimate
+ *
+ * @param pos_f Initial position estimate
+ * @param vel_f Initial velocity estimate
+ */
 
 void KalmanFilter::Initialize(float pos_f, float vel_f) {
     // set x_k
@@ -128,6 +181,14 @@ void KalmanFilter::Initialize(float pos_f, float vel_f) {
     B(2, 0) = -1;
 }
 
+/**
+ * @brief Estimates current state of the rocket without current sensor data
+ *
+ * The priori step of the Kalman filter is used to estimate the current state
+ * of the rocket without knowledge of the current sensor data. In other words,
+ * it extrapolates the state at time n+1 based on the state at time n.
+ */
+
 void KalmanFilter::priori() {
     // x_priori = (F @ x_k) + ((B @ u).T) #* For some reason doesnt work when B
     // or u is = 0
@@ -136,10 +197,18 @@ void KalmanFilter::priori() {
 }
 
 /**
- * @brief Update Kalman Gain
+ * @brief Update Kalman Gain and state estimate with current sensor data
+ *
+ * After receiving new sensor data, the Kalman filter updates the state estimate
+ * and Kalman gain. The Kalman gain can be considered as a measure of how uncertain
+ * the new sensor data is. After updating the gain, the state estimate is updated.
  *
  */
 void KalmanFilter::update() {
+    if (getActiveFSM().getFSMState() >= FSM_State::STATE_APOGEE) {
+        H(1, 2) = 0;
+    }
+
     Eigen::Matrix<float, 2, 2> temp = Eigen::Matrix<float, 2, 2>::Zero();
     temp = (((H * P_priori * H.transpose()) + R)).inverse();
     Eigen::Matrix<float, 3, 3> identity = Eigen::Matrix<float, 3, 3>::Identity();
@@ -148,7 +217,7 @@ void KalmanFilter::update() {
     // TODO These mutex locks are almost certainly not necessary
     // Sensor Measurements
     chMtxLock(&highG.mutex);
-    y_k(1, 0) = highG.getAccel().az * 9.81;
+    y_k(1, 0) = highG.getAccel().az * 9.81 - 0.981 - 0.51;
     chMtxUnlock(&highG.mutex);
 
     chMtxLock(&barometer.mutex);

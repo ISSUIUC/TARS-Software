@@ -48,8 +48,7 @@ class RHSoftwareSPI : public RHGenericSPI {
     /// RHGenericSPI::BitOrderMSBFirst or RHGenericSPI::BitOrderLSBFirst.
     /// \param[in] dataMode Selects the SPI bus data mode. One of
     /// RHGenericSPI::DataMode
-    RHSoftwareSPI(Frequency frequency = Frequency1MHz,
-                  BitOrder bitOrder = BitOrderMSBFirst,
+    RHSoftwareSPI(Frequency frequency = Frequency1MHz, BitOrder bitOrder = BitOrderMSBFirst,
                   DataMode dataMode = DataMode0);
 
     /// Transfer a single octet to and from the SPI interface

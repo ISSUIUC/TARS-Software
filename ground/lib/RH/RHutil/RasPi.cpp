@@ -76,9 +76,7 @@ void pinMode(unsigned char pin, unsigned char mode) {
     }
 }
 
-void digitalWrite(unsigned char pin, unsigned char value) {
-    bcm2835_gpio_write(pin, value);
-}
+void digitalWrite(unsigned char pin, unsigned char value) { bcm2835_gpio_write(pin, value); }
 
 unsigned long millis() {
     // Declare a variable to store current time
@@ -86,8 +84,7 @@ unsigned long millis() {
     // Get current time
     gettimeofday(&RHCurrentTime, NULL);
     // Calculate the difference between our start time and the end time
-    unsigned long difference =
-        ((RHCurrentTime.tv_sec - RHStartTime.tv_sec) * 1000);
+    unsigned long difference = ((RHCurrentTime.tv_sec - RHStartTime.tv_sec) * 1000);
     difference += ((RHCurrentTime.tv_usec - RHStartTime.tv_usec) / 1000);
     // Return the calculated value
     return difference;
@@ -137,9 +134,7 @@ size_t SerialSimulator::print(char ch) { printf("%c", ch); }
 
 size_t SerialSimulator::println(char ch) { printf("%c\n", ch); }
 
-size_t SerialSimulator::print(unsigned char ch, int base) {
-    return print((unsigned int)ch, base);
-}
+size_t SerialSimulator::print(unsigned char ch, int base) { return print((unsigned int)ch, base); }
 
 size_t SerialSimulator::println(unsigned char ch, int base) {
     print((unsigned int)ch, base);

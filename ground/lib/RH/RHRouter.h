@@ -26,8 +26,7 @@
 // This size of RH_ROUTER_MAX_MESSAGE_LEN is OK for Arduino Mega, but too big
 // for Duemilanova. Size of 50 works with the sample router programs on
 // Duemilanova.
-#define RH_ROUTER_MAX_MESSAGE_LEN \
-    (RH_MAX_MESSAGE_LEN - sizeof(RHRouter::RoutedMessageHeader))
+#define RH_ROUTER_MAX_MESSAGE_LEN (RH_MAX_MESSAGE_LEN - sizeof(RHRouter::RoutedMessageHeader))
 //#define RH_ROUTER_MAX_MESSAGE_LEN 50
 
 // These allow us to define a simulated network topology for testing purposes
@@ -156,7 +155,7 @@ class RHRouter : public RHReliableDatagram {
 
     /// Defines the structure of a RHRouter message
     typedef struct {
-        RoutedMessageHeader header;  ///< end-to-end delivery header
+        RoutedMessageHeader header;               ///< end-to-end delivery header
         uint8_t data[RH_ROUTER_MAX_MESSAGE_LEN];  ///< Application payload data
     } RoutedMessage;
 
@@ -242,8 +241,7 @@ class RHRouter : public RHReliableDatagram {
     ///         next hop
     ///           (usually because it dod not acknowledge due to being off the
     ///           air or out of range
-    uint8_t sendtoWait(uint8_t* buf, uint8_t len, uint8_t dest,
-                       uint8_t flags = 0);
+    uint8_t sendtoWait(uint8_t* buf, uint8_t len, uint8_t dest, uint8_t flags = 0);
 
     /// Similar to sendtoWait() above, but spoofs the source address.
     /// For internal use only during routing
@@ -264,8 +262,7 @@ class RHRouter : public RHReliableDatagram {
     ///         next hop
     ///           (usually because it dod not acknowledge due to being off the
     ///           air or out of range
-    uint8_t sendtoFromSourceWait(uint8_t* buf, uint8_t len, uint8_t dest,
-                                 uint8_t source, uint8_t flags = 0);
+    uint8_t sendtoFromSourceWait(uint8_t* buf, uint8_t len, uint8_t dest, uint8_t source, uint8_t flags = 0);
 
     /// Starts the receiver if it is not running already.
     /// If there is a valid message available for this node (or
@@ -288,8 +285,7 @@ class RHRouter : public RHReliableDatagram {
     /// uint8_t will be set to the FLAGS (not just those addressed to this
     /// node). \return true if a valid message was recvived for this node copied
     /// to buf
-    bool recvfromAck(uint8_t* buf, uint8_t* len, uint8_t* source = NULL,
-                     uint8_t* dest = NULL, uint8_t* id = NULL,
+    bool recvfromAck(uint8_t* buf, uint8_t* len, uint8_t* source = NULL, uint8_t* dest = NULL, uint8_t* id = NULL,
                      uint8_t* flags = NULL);
 
     /// Starts the receiver if it is not running already.
@@ -304,8 +300,7 @@ class RHRouter : public RHReliableDatagram {
     /// will be set to the ID \param[in] flags If present and not NULL, the
     /// referenced uint8_t will be set to the FLAGS (not just those addressed to
     /// this node). \return true if a valid message was copied to buf
-    bool recvfromAckTimeout(uint8_t* buf, uint8_t* len, uint16_t timeout,
-                            uint8_t* source = NULL, uint8_t* dest = NULL,
+    bool recvfromAckTimeout(uint8_t* buf, uint8_t* len, uint16_t timeout, uint8_t* source = NULL, uint8_t* dest = NULL,
                             uint8_t* id = NULL, uint8_t* flags = NULL);
 
    protected:

@@ -27,8 +27,7 @@
 
 // This is the maximum RadioHead user message length that can be supported by
 // this library. Limited by the supported message lengths in the nRF51
-#define RH_NRF51_MAX_MESSAGE_LEN \
-    (RH_NRF51_MAX_PAYLOAD_LEN - RH_NRF51_HEADER_LEN)
+#define RH_NRF51_MAX_MESSAGE_LEN (RH_NRF51_MAX_PAYLOAD_LEN - RH_NRF51_HEADER_LEN)
 
 // Define to be 1 if you want to support AES CCA encryption using the built-in
 // encryption engine.

@@ -7,8 +7,8 @@
  *              Jusjeev Singh Bhurjee
  *              Rithvik Bhogavilli
  *              Nicholas Phillips
- * 
- * 
+ *
+ *
  *              Jessica Myers
  *              Aidan Costello
  *              Aaditya Voruganti
@@ -185,7 +185,7 @@ void KalmanFSM::tickFSM() {
             }
             //potentially add back state to put us back into coast
 
-            
+
             if (TIME_I2MS(apogee_timer_) < drogue_deploy_time_since_apogee_threshold) {
                 rocket_state_ = FSM_State::STATE_APOGEE;
             }
@@ -215,11 +215,11 @@ void KalmanFSM::tickFSM() {
                         break;
                 }
             }
-            
+
 
             if (TIME_I2MS(drogue_timer_) < main_deploy_time_since_drogue_threshold) {
                 rocket_state_ = FSM_State::STATE_DROGUE;
-                
+
             }
             else {
                 rocket_state_ = FSM_State::STATE_MAIN;
@@ -248,10 +248,10 @@ void KalmanFSM::tickFSM() {
                 break;
             }
             // }
-            
+
             if (TIME_I2MS(main_timer_) < main_deploy_time_since_drogue_threshold) {
                 rocket_state_ = FSM_State::STATE_MAIN;
-                
+
             }
             else {
                 rocket_state_ = FSM_State::STATE_LANDED;
