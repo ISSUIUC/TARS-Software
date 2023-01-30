@@ -18,6 +18,7 @@
 
 #define MAX_CMD_LEN 10
 
+
 struct TelemetryDataLite {
     systime_t timestamp;  //[0, 2^32]
 
@@ -117,6 +118,7 @@ class Telemetry {
     void handle_command(const telemetry_command& cmd);
     bool abort = false;
     void buffer_data(const sensorDataStruct_t&);
+    void serial_print(const sensorDataStruct_t&);
 
    private:
     FifoBuffer<TelemetryDataLite, 4> buffered_data;

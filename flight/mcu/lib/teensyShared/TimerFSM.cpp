@@ -144,6 +144,7 @@ void TimerFSM::tickFSM() {
         case FSM_State::STATE_APOGEE_DETECT:
             rocket_state_ = FSM_State::STATE_APOGEE;
             break;
+
         case FSM_State::STATE_APOGEE:
             apogee_timer_ = chVTGetSystemTime() - apogee_time_;
             if (TIME_I2MS(apogee_timer_) > apogee_time_thresh) {
