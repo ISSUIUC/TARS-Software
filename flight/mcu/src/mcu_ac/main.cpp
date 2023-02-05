@@ -39,7 +39,7 @@
 #include "Abort.h"
 #include "SDLogger.h"
 
-// #define THREAD_DEBUG
+#define THREAD_DEBUG
 //#define LOWGIMU_DEBUG
 //#define HIGHGIMU_DEBUG
 //#define GPS_DEBUG
@@ -302,6 +302,10 @@ void setup() {
 
     digitalWrite(LED_ORANGE, HIGH);
     digitalWrite(LED_BLUE, HIGH);
+
+    while (true) {
+        Serial.println("i am screming");
+    }
 
     activeController.init();
 

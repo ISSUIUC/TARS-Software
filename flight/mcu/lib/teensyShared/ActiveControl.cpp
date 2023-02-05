@@ -12,18 +12,7 @@
 #include "kalmanFilter.h"
 
 Controller::Controller() : activeControlServos(&controller_servo_) {
-    /*
-     * Startup sequence
-     * 15 degrees written to servo since this was
-     * experimentally determined to be the position in which
-     * the flaps are perfectly flush with the airframe.
-     */
-    controller_servo_.write(180);
-    chThdSleepMilliseconds(1000);
-    controller_servo_.write(15);
-    chThdSleepMilliseconds(1000);
 
-    setLaunchPadElevation();
 }
 
 void Controller::ctrlTickFunction() {
@@ -115,6 +104,19 @@ void Controller::setLaunchPadElevation() {
 
 void Controller::init() {
     controller_servo_.attach(AC_SERVO_PIN, 770, 2250);
+
+    /*
+     * Startup sequence
+     * 15 degrees written to servo since this was
+     * experimentally determined to be the position in which
+     * the flaps are perfectly flush with the airframe.
+     */
+    controller_servo_.write(180);
+    chThdSleepMilliseconds(1000);
+    controller_servo_.write(15);
+    chThdSleepMilliseconds(1000);
+
+    setLaunchPadElevation();
 }
 
 
