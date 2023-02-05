@@ -114,6 +114,7 @@ struct command_handler_struct {
 class Telemetry {
    public:
     Telemetry();
+    void init();
     void transmit(const sensorDataStruct_t&);
     void handle_command(const telemetry_command& cmd);
     bool abort = false;

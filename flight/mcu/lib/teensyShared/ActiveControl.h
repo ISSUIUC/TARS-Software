@@ -13,6 +13,8 @@ class Controller {
     Controller();
     void init();
 
+    void startup();
+
     void setLaunchPadElevation();
 
     PWMServo controller_servo_;

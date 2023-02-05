@@ -53,6 +53,9 @@ sensorDataStruct_t sensorData;
 
 static THD_FUNCTION(telemetry_buffering_THD, arg) {
     while (true) {
+#ifdef THREAD_DEBUG
+        Serial.println("### telemetry sending thread entrance");
+#endif
         tlm.buffer_data(sensorData);
         chThdSleepMilliseconds(80);
     }
@@ -63,6 +66,9 @@ static THD_FUNCTION(telemetry_buffering_THD, arg) {
 
 static THD_FUNCTION(telemetry_sending_THD, arg) {
     while (true) {
+#ifdef THREAD_DEBUG
+        Serial.println("### telemetry sending thread entrance");
+#endif
         tlm.transmit(sensorData);
         if (tlm.abort) {
             startAbort();
@@ -142,7 +148,6 @@ static THD_FUNCTION(highgIMU_THD, arg) {
 /* GPS THREAD                                                                 */
 
 static THD_FUNCTION(gps_THD, arg) {
-
     while (true) {
 #ifdef THREAD_DEBUG
         Serial.println("### GPS thread entrance");
@@ -177,6 +182,8 @@ static THD_FUNCTION(kalman_THD, arg) {
 /* SERVO CONTROL THREAD                                                       */
 
 static THD_FUNCTION(servo_THD, arg) {
+    activeController.startup();
+
     while (true) {
 #ifdef THREAD_DEBUG
         Serial.println("### Servo thread entrance");
@@ -299,13 +306,10 @@ void setup() {
     gps.init();
 
     sd_logger.init();
+    tlm.init();
 
     digitalWrite(LED_ORANGE, HIGH);
     digitalWrite(LED_BLUE, HIGH);
-
-    while (true) {
-        Serial.println("i am screming");
-    }
 
     activeController.init();
 

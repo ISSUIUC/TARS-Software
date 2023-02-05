@@ -104,7 +104,9 @@ void Controller::setLaunchPadElevation() {
 
 void Controller::init() {
     controller_servo_.attach(AC_SERVO_PIN, 770, 2250);
+}
 
+void Controller::startup() {
     /*
      * Startup sequence
      * 15 degrees written to servo since this was
