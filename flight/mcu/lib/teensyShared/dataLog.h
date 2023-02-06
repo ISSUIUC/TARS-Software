@@ -14,7 +14,6 @@
 #include "RocketFSMBase.h"
 #include "HistoryBuffer.h"
 
-
 #define FIFO_SIZE 1000
 
 class DataLogBuffer;
@@ -40,7 +39,7 @@ private:
  *
  */
 class DataLogBuffer {
-   private:
+public:
     FifoBuffer<LowGData, FIFO_SIZE> lowGFifo{};
     FifoBuffer<HighGData, FIFO_SIZE> highGFifo{};
     FifoBuffer<GpsData, FIFO_SIZE> gpsFifo{};
@@ -50,17 +49,8 @@ class DataLogBuffer {
     FifoBuffer<VoltageData, FIFO_SIZE> voltageFifo{};
     FifoBuffer<BarometerData, FIFO_SIZE> barometerFifo{};
 
-   public:
+public:
     friend class DataLogView;
-
-    HistoryBuffer<50> altitude_history_50 = HistoryBuffer<50>();
-    HistoryBuffer<50> IMU_acceleration_history_50 = HistoryBuffer<50>();
-
-    HistoryBuffer<6> altitude_history_6 = HistoryBuffer<6>();
-    HistoryBuffer<6> IMU_acceleration_history_6 = HistoryBuffer<6>();
-
-    HistoryBuffer<6> gnc_altitude_history_6 = HistoryBuffer<6>();
-    HistoryBuffer<6> gnc_IMU_acceleration_history_6 = HistoryBuffer<6>();
 
     void pushLowGFifo(LowGData const& lowG_Data);
     void pushHighGFifo(HighGData const& highG_Data);

@@ -36,9 +36,6 @@ void DataLogBuffer::pushLowGFifo(LowGData const& lowG_Data) {
 }
 
 void DataLogBuffer::pushHighGFifo(HighGData const& highG_Data) {
-    // Also push a copy to the IMU acceleration history fifo buffer:
-    IMU_acceleration_history_50.push(highG_Data.hg_az, highG_Data.timeStamp_highG);
-    IMU_acceleration_history_6.push(highG_Data.hg_az, highG_Data.timeStamp_highG);
     highGFifo.push(highG_Data);
 }
 
@@ -47,15 +44,10 @@ void DataLogBuffer::pushGpsFifo(GpsData const& gps_Data) {
 }
 
 void DataLogBuffer::pushKalmanFifo(KalmanData const& state_data) {
-    gnc_altitude_history_6.push(state_data.kalman_x, state_data.timeStamp_state);
-    gnc_IMU_acceleration_history_6.push(state_data.kalman_x, state_data.timeStamp_state);
     kalmanFifo.push(state_data);
 }
 
 void DataLogBuffer::pushBarometerFifo(BarometerData const& barometer_data) {
-    // Also push a copy to the alititude history fifo buffer:
-    altitude_history_50.push(barometer_data.altitude, barometer_data.timeStamp_barometer);
-    altitude_history_6.push(barometer_data.altitude, barometer_data.timeStamp_barometer);
     barometerFifo.push(barometer_data);
 }
 
