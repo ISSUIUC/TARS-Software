@@ -90,7 +90,9 @@ void setup()
   digitalWrite(RFM95_RST, HIGH);
   digitalWrite(RFM95_EN, HIGH);
   Serial.begin(9600);
-  while(!Serial);
+  //Serial.begin(9600, SERIAL_8N1, 19, 20);
+  //select ports to use for serial (usb are 19, 20?)
+  //while(!Serial);
 
   digitalWrite(RGB_BUILTIN, HIGH);   // white led on startup
   delay(1000);
@@ -119,7 +121,7 @@ void setup()
     neopixelWrite(RGB_BUILTIN, 0,0,0);
     while (1);
   }
-  neopixelWrite(RGB_BUILTIN, 0,255,0); //blue led if radio success
+  neopixelWrite(RGB_BUILTIN, 0,255,0); //green led if radio success
   delay(1000);
   neopixelWrite(RGB_BUILTIN, 0,0,0);
   Serial.println("Radio Initialized");
