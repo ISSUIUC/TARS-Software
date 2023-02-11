@@ -7,11 +7,13 @@
  */
 
 #include "dataLog.h"
-#include "sensors.h"
 
 DataLogBuffer dataLogger;
 
-
+/**
+ * @brief Reads one sensorDataStruct_t from the contained view and returns it. Also advances the view, naturally.
+ *
+ */
 sensorDataStruct_t DataLogView::read() {
     sensorDataStruct_t data;
     data.has_lowG_data = lowGView.next(data.lowG_data);

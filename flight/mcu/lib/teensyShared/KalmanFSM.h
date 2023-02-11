@@ -1,13 +1,15 @@
 #pragma once
 
 #include "RocketFSMBase.h"
-#include "dataLog.h"
+
 
 class KalmanFSM : public RocketFSMBase {
-   public:
+public:
+    KalmanFSM() = default;
+
     void tickFSM() override;
 
-   private:
+private:
     systime_t launch_time_{};
     sysinterval_t burn_timer_{};
     systime_t burnout_time_{};

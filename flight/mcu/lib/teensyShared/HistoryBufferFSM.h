@@ -1,5 +1,4 @@
-#ifndef MCU_HISTORYBUFFERFSM_H
-#define MCU_HISTORYBUFFERFSM_H
+#pragma once
 
 #include "RocketFSMBase.h"
 #include "sensors.h"
@@ -10,6 +9,9 @@
 
 template<size_t view>
 class HistoryBufferFSM : public RocketFSMBase {
+public:
+    HistoryBufferFSM() = default;
+
 private:
     systime_t launch_time_ = 0;
     sysinterval_t burn_timer_ = 0;
@@ -29,15 +31,17 @@ private:
     sysinterval_t landing_timer = 0;
 
     double getAltitudeAverage(size_t start, size_t end) {
-        return dataLogger.barometerFifo.getAverage([](BarometerData& b) { return b.altitude; }, start, end);
+        return dataLogger.barometerFifo.getAverage([](BarometerData& b) { return (double) b.altitude; }, start, end);
     }
 
     double getSecondDerivativeAltitudeAverage(size_t start, size_t end) {
-        return dataLogger.barometerFifo.getSecondDerivativeAverage([](BarometerData& b) { return b.altitude; }, [](BarometerData b) { return b.timeStamp_barometer; }, start, end);
+        return dataLogger.barometerFifo.getSecondDerivativeAverage([](BarometerData& b) { return (double) b.altitude; },
+                                                                   [](BarometerData& b) { return b.timeStamp_barometer; },
+                                                                   start, end);
     }
 
     double getAccelerationAverage(size_t start, size_t end) {
-        return dataLogger.highGFifo.getAverage([](HighGData& g) { return g.hg_az; }, start, end);
+        return dataLogger.highGFifo.getAverage([](HighGData& g) { return (double) g.hg_az; }, start, end);
     }
 
 public:
@@ -108,10 +112,7 @@ public:
                 // threshold
                 if (TIME_I2MS(burn_timer_) < burn_time_thresh_ms) {
                     rocket_state_ = FSM_State::STATE_BOOST;
-                }
-                    // Forcing rocket to go to FSM_State::STATE_COAST if threshold
-                    // crossed
-                else {
+                } else { // Forcing rocket to go to FSM_State::STATE_COAST if threshold crossed
                     rocket_state_ = FSM_State::STATE_COAST_PREGNC;
                     // Setting burnout time because we don't otherwise
                     burnout_time_ = chVTGetSystemTime();
@@ -147,7 +148,8 @@ public:
             case FSM_State::STATE_COAST_GNC:
                 coast_timer_ = chVTGetSystemTime() - burnout_time_;
 
-                if (fabs(getAltitudeAverage(0, view / 2) - getAltitudeAverage(view / 2, view)) < apogee_altimeter_threshold) {
+                if (fabs(getAltitudeAverage(0, view / 2) - getAltitudeAverage(view / 2, view)) <
+                    apogee_altimeter_threshold) {
                     rocket_state_ = FSM_State::STATE_APOGEE_DETECT;
                     apogee_time_ = chVTGetSystemTime();
                     break;
@@ -155,8 +157,7 @@ public:
 
                 if (TIME_I2MS(coast_timer_) < coast_to_apogee_time_thresh) {
                     rocket_state_ = FSM_State::STATE_COAST_GNC;
-                }
-                else {
+                } else {
                     rocket_state_ = FSM_State::STATE_APOGEE;
                     apogee_time_ = chVTGetSystemTime();
                 }
@@ -165,7 +166,8 @@ public:
 
             case FSM_State::STATE_APOGEE_DETECT:
                 // If the 0 velocity was too brief, go back to coast
-                if (fabs(getAltitudeAverage(0, view / 2) - getAltitudeAverage(view / 2, view)) > apogee_altimeter_threshold) {
+                if (fabs(getAltitudeAverage(0, view / 2) - getAltitudeAverage(view / 2, view)) >
+                    apogee_altimeter_threshold) {
                     rocket_state_ = FSM_State::STATE_COAST_GNC;
                     break;
                 }
@@ -180,62 +182,61 @@ public:
 
                 break;
 
-
             case FSM_State::STATE_APOGEE:
-                if (fabs(getAccelerationAverage(0, view / 2) - getAccelerationAverage(view / 2, view)) > drogue_acceleration_change_threshold_imu) {
-                    rocket_state_= FSM_State::STATE_DROGUE_DETECT;
+                if (fabs(getAccelerationAverage(0, view / 2) - getAccelerationAverage(view / 2, view)) >
+                    drogue_acceleration_change_threshold_imu) {
+                    rocket_state_ = FSM_State::STATE_DROGUE_DETECT;
                     break;
                 }
-                //potentially add back state to put us back into coast
+                // potentially add back state to put us back into coast
 
                 if (TIME_I2MS(apogee_timer_) < drogue_deploy_time_since_apogee_threshold) {
                     rocket_state_ = FSM_State::STATE_APOGEE;
-                }
-                else {
+                } else {
                     rocket_state_ = FSM_State::STATE_DROGUE;
                     drogue_time_ = chVTGetSystemTime();
                 }
                 break;
 
             case FSM_State::STATE_DROGUE_DETECT:
-                if (fabs(getSecondDerivativeAltitudeAverage(0, view / 2) - getSecondDerivativeAltitudeAverage(view / 2, view)) > drogue_acceleration_change_threshold_altimeter) {
+                if (fabs(getSecondDerivativeAltitudeAverage(0, view / 2) -
+                         getSecondDerivativeAltitudeAverage(view / 2, view)) >
+                    drogue_acceleration_change_threshold_altimeter) {
                     rocket_state_ = FSM_State::STATE_DROGUE;
                     drogue_time_ = chVTGetSystemTime();
                     break;
-                }
-
-                else{
+                } else {
                     rocket_state_ = FSM_State::STATE_APOGEE;
                 }
                 break;
 
             case FSM_State::STATE_DROGUE:
                 drogue_timer_ = chVTGetSystemTime() - drogue_time_;
-                if(TIME_I2MS(drogue_timer_) > refresh_timer){
-                    if (fabs(getAccelerationAverage(0, view / 2) - getAccelerationAverage(view / 2, view)) > main_acceleration_change_threshold_imu) {
-                        rocket_state_= FSM_State::STATE_MAIN_DETECT;
+                if (TIME_I2MS(drogue_timer_) > refresh_timer) {
+                    if (fabs(getAccelerationAverage(0, view / 2) - getAccelerationAverage(view / 2, view)) >
+                        main_acceleration_change_threshold_imu) {
+                        rocket_state_ = FSM_State::STATE_MAIN_DETECT;
                         break;
                     }
                 }
 
-
                 if (TIME_I2MS(drogue_timer_) < main_deploy_time_since_drogue_threshold) {
                     rocket_state_ = FSM_State::STATE_DROGUE;
 
-                }
-                else {
+                } else {
                     rocket_state_ = FSM_State::STATE_MAIN;
                     main_time_ = chVTGetSystemTime();
                 }
                 break;
 
             case FSM_State::STATE_MAIN_DETECT:
-                if (fabs(getSecondDerivativeAltitudeAverage(0, view / 2) - getSecondDerivativeAltitudeAverage(view / 2, view)) > main_acceleration_change_threshold_altimeter) {
+                if (fabs(getSecondDerivativeAltitudeAverage(0, view / 2) -
+                         getSecondDerivativeAltitudeAverage(view / 2, view)) >
+                    main_acceleration_change_threshold_altimeter) {
                     rocket_state_ = FSM_State::STATE_MAIN;
                     main_time_ = chVTGetSystemTime();
                     break;
-                }
-                else{
+                } else {
                     rocket_state_ = FSM_State::STATE_DROGUE;
                 }
                 break;
@@ -243,7 +244,8 @@ public:
             case FSM_State::STATE_MAIN:
                 main_timer_ = chVTGetSystemTime() - main_time_;
 
-                if (fabs(getAltitudeAverage(0, view / 2) - getAltitudeAverage(view / 2, view)) < landing_altimeter_threshold) {
+                if (fabs(getAltitudeAverage(0, view / 2) - getAltitudeAverage(view / 2, view)) <
+                    landing_altimeter_threshold) {
                     rocket_state_ = FSM_State::STATE_LANDED_DETECT;
                     landing_time_ = chVTGetSystemTime();
                     break;
@@ -252,9 +254,7 @@ public:
 
                 if (TIME_I2MS(main_timer_) < main_deploy_time_since_drogue_threshold) {
                     rocket_state_ = FSM_State::STATE_MAIN;
-
-                }
-                else {
+                } else {
                     rocket_state_ = FSM_State::STATE_LANDED;
                     landing_time_ = chVTGetSystemTime();
                 }
@@ -262,7 +262,8 @@ public:
 
             case FSM_State::STATE_LANDED_DETECT:
                 // If the 0 velocity was too brief, go back to main
-                if (fabs(getAltitudeAverage(0, view / 2) - getAltitudeAverage(view / 2, view)) > landing_altimeter_threshold) {
+                if (fabs(getAltitudeAverage(0, view / 2) - getAltitudeAverage(view / 2, view)) >
+                    landing_altimeter_threshold) {
                     rocket_state_ = FSM_State::STATE_MAIN;
                     break;
                 }
@@ -285,7 +286,4 @@ public:
         // Unlock mutexes used during the switch statement
         chMtxUnlock(&highG.mutex);
     }
-
 };
-
-#endif //MCU_HISTORYBUFFERFSM_H

@@ -1,6 +1,5 @@
 #include "HighGSensor.h"
 
-#include "packet.h"
 #include "dataLog.h"
 #include "pins.h"
 

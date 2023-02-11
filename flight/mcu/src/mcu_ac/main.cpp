@@ -22,6 +22,7 @@
  * Parth Shrotri
  * Jeffery Zhou
  * Karnap Patel
+ * Magilan Sendhil
  */
 
 #include <Arduino.h>
@@ -46,6 +47,7 @@
 //#define SERVO_DEBUG
 
 // Create a data struct to hold data from the sensors
+// TODO fix, this struct never gets updated but telemetry uses it
 sensorDataStruct_t sensorData;
 
 /******************************************************************************/

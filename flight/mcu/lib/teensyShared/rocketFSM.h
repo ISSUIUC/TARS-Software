@@ -1,5 +1,4 @@
-#ifndef MCU_ROCKETFSM_H
-#define MCU_ROCKETFSM_H
+#pragma once
 
 #include "TimerFSM.h"
 #include "HistoryBufferFSM.h"
@@ -15,5 +14,3 @@ extern KalmanFSM kalman_fsm;
 extern FSMCollection<4> fsmCollection;
 
 RocketFSMBase& getActiveFSM();
-
-#endif //MCU_ROCKETFSM_H

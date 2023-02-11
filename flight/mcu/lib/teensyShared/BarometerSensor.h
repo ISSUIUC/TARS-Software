@@ -1,5 +1,4 @@
-#ifndef BAROMETERSENSOR_H
-#define BAROMETERSENSOR_H
+#pragma once
 
 #include "MS5611.h"
 #include "pins.h"
@@ -20,5 +19,3 @@ struct BarometerSensor {
     float temperature = 0.0;
     float altitude = 0.0;
 };
-
-#endif

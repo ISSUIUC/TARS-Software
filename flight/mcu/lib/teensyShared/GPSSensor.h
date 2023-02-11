@@ -1,11 +1,12 @@
-#ifndef GPSSENSOR_H
-#define GPSSENSOR_H
+#pragma once
 
 #include "ChRt.h"
 #include "SparkFun_u-blox_GNSS_Arduino_Library.h"
 
 struct GPSSensor {
    public:
+    GPSSensor() = default;
+
     MUTEX_DECL(mutex);
 
     void init();
@@ -20,13 +21,11 @@ struct GPSSensor {
    private:
     SFE_UBLOX_GNSS GNSS;
 
-    systime_t timeStamp;
-    float latitude;
-    float longitude;
-    float altitude;
-    uint32_t fix_type;
-    bool pos_lock;
-    uint32_t SIV_count;
+    systime_t timeStamp{};
+    float latitude = 0.0;
+    float longitude = 0.0;
+    float altitude = 0.0;
+    uint32_t fix_type{};
+    bool pos_lock{};
+    uint32_t SIV_count{};
 };
-
-#endif

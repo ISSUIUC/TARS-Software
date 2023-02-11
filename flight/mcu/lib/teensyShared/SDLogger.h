@@ -1,5 +1,4 @@
-#ifndef MCU_SDLOGGER_H
-#define MCU_SDLOGGER_H
+#pragma once
 
 #include "dataLog.h"
 #include <ChRt.h>
@@ -12,6 +11,7 @@ public:
     void init();
 
     void update();
+
 private:
     template<typename T>
     void logData(T* data);
@@ -23,4 +23,3 @@ private:
 
 extern SDLogger sd_logger;
 
-#endif //MCU_SDLOGGER_H

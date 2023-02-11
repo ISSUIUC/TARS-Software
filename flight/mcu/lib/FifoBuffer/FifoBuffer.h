@@ -3,10 +3,10 @@
 
 #include <ChRt.h>
 
-template <typename T, size_t max_size>
+template<typename T, size_t max_size>
 class FifoView;
 
-template <typename T, size_t max_size>
+template<typename T, size_t max_size>
 class FifoBuffer {
 public:
     friend class FifoView<T, max_size>;
@@ -87,7 +87,7 @@ public:
         double second_derivatives[end - start - 2];
         for (size_t i = start; i < end - 2; i++) {
             double first = derivatives[i];
-            double second = derivatives[i+1];
+            double second = derivatives[i + 1];
             systime_t delta_t = access_time(*items[i + 1]) - access_time(*items[i]);
             derivatives[i] = (second - first) / (delta_t == 0 ? 0.02 : delta_t);
         }
@@ -111,12 +111,12 @@ private:
     T arr[max_size]{};
 };
 
-template <typename T, size_t max_size>
+template<typename T, size_t max_size>
 class FifoView {
 public:
     friend class FifoBuffer<T, max_size>;
 
-    explicit FifoView(FifoBuffer<T, max_size>& observed_) : observed(observed_) { }
+    explicit FifoView(FifoBuffer<T, max_size>& observed_) : observed(observed_) {}
 
     bool next(T& out) {
         chMtxLock(&observed.lock);

@@ -1,10 +1,11 @@
 #pragma once
 
 #include "RocketFSMBase.h"
-#include "ChRt.h"
 
 class TimerFSM : public RocketFSMBase {
 public:
+    TimerFSM() = default;
+
     void tickFSM() override;
 
 private:

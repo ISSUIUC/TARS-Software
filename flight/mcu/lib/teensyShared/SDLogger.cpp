@@ -1,11 +1,10 @@
 #include "SDLogger.h"
 #include "pins.h"
+#include "FS.h"
 
 SDLogger sd_logger(dataLogger); // NOLINT(cppcoreguidelines-interfaces-global-init)
 
-SDLogger::SDLogger(DataLogBuffer& buffer) : view(buffer) {
-
-}
+SDLogger::SDLogger(DataLogBuffer& buffer) : view(buffer) {}
 
 /**
  * @brief Creates the name for a file to be written to SD card.
@@ -31,7 +30,7 @@ char* sd_file_namer(char* fileName, char* fileExtensionParam) {
     if (SD.exists(fileName)) {
         bool fileExists = false;
         int i = 1;
-        while (fileExists == false) {
+        while (!fileExists) {
             if (i > 999) {
                 // max number of files reached. Don't want to overflow
                 // fileName[]. Will write new data to already existing
@@ -44,7 +43,7 @@ char* sd_file_namer(char* fileName, char* fileExtensionParam) {
 
             // converts int i to char[]
             char iStr[16];
-            __itoa(i, iStr, 10);
+            itoa(i, iStr, 10);
 
             // writes "(sensor)_data(number).csv to fileNameTemp"
             char fileNameTemp[strlen(inputName) + strlen(iStr) + 6];
@@ -61,7 +60,6 @@ char* sd_file_namer(char* fileName, char* fileExtensionParam) {
         }
     }
 
-    // Serial.println(fileName);
     return fileName;
 }
 
@@ -72,10 +70,7 @@ void SDLogger::init() {
         char data_name[16] = "data";
         sd_file_namer(data_name, file_extension);
         // Initialize SD card
-        // TODO this line is very wrong, the SD library we're using doesn't actually know these flags
-        //   we just ended up giving the right values on accident
-        //   also O_TRUNC is 0x0400, which is truncated off when we cast it to a uint8_t
-        sd_file = SD.open(data_name, O_CREAT | O_WRITE | O_TRUNC);
+        sd_file = SD.open(data_name, FILE_WRITE_BEGIN);
         // print header to file on sd card that lists each variable that is logged
         sd_file.println("binary logging of sensor_data_t");
         sd_file.flush();

@@ -1,13 +1,9 @@
 #include <ChRt.h>
 #include <RH_RF95.h>
-#include <SPI.h>
-#include <ServoControl.h>
-
 #include <array>
 
-#include "SD.h"
 #include "pins.h"
-#include "sensors.h"
+#include "packet.h"
 #include "FifoBuffer.h"
 
 // Make sure to change these pinout depending on wiring
@@ -15,8 +11,6 @@
 
 // Change to 434.0 or other frequency, must match RX's freq!
 #define RF95_FREQ 434.0
-
-#define MAX_CMD_LEN 10
 
 
 struct TelemetryDataLite {
@@ -78,7 +72,7 @@ struct telemetry_data {
     float LSM_IMU_mz;
 
     float flap_extension;
-    float voltage_battry;
+    float voltage_battery;
 
     float state_x;
     float state_vx;
@@ -93,7 +87,9 @@ struct telemetry_data {
 };
 
 // Commands transmitted from ground station to rocket
-enum CommandType { SET_FREQ, SET_CALLSIGN, ABORT, TEST_FLAPS, EMPTY };
+enum CommandType {
+    SET_FREQ, SET_CALLSIGN, ABORT, TEST_FLAPS, EMPTY
+};
 
 struct telemetry_command {
     CommandType command;
@@ -112,23 +108,26 @@ struct command_handler_struct {
 };
 
 class Telemetry {
-   public:
-    Telemetry();
-    void init();
-    void transmit(const sensorDataStruct_t&);
-    void handle_command(const telemetry_command& cmd);
+public:
     bool abort = false;
+
+    Telemetry();
+
+    void init();
+
+    void transmit(const sensorDataStruct_t&);
+
+    void handle_command(const telemetry_command& cmd);
+
     void buffer_data(const sensorDataStruct_t&);
+
     void serial_print(const sensorDataStruct_t&);
 
-   private:
-    FifoBuffer<TelemetryDataLite, 4> buffered_data;
-    FifoView<TelemetryDataLite, 4> data_view;
+private:
     telemetry_data d;
     RH_RF95 rf95;
-
-    File read_file;
-    File write_file;
+    FifoBuffer<TelemetryDataLite, 4> buffered_data;
+    FifoView<TelemetryDataLite, 4> data_view;
 
     // Initializing command ID
     int16_t last_command_id = -1;

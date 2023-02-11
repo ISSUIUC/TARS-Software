@@ -5,33 +5,35 @@
 #include <SD.h>
 
 #include "FifoBuffer.h"
-//#include "HistoryBuffer.h"
-#include "MS5611.h"                //Barometer Library
-#include "SparkFunLSM9DS1.h"       //Low-G IMU Library
-#include "SparkFun_Qwiic_KX13X.h"  //High-G IMU Library
-#include "SparkFun_u-blox_GNSS_Arduino_Library.h"
-#include "VoltageSensor.h"
-#include "RocketFSMBase.h"
-//#include "HistoryBuffer.h"
+#include "packet.h"
 
 #define FIFO_SIZE 1000
 
 class DataLogBuffer;
 
+/**
+ * @brief A class that hold a view of the buffers in DataLogBuffer.
+ *
+ * Since DataLogBuffer has no way to keep track of what values you've looked at and which you haven't by itself,
+ *   this helper class exists to do that for you. Each instance of DataLogView has a separate tracker, so create
+ *   a new instance for each time you need an updating view of DataLogBuffer (see telemetry.h for an example).
+ */
 class DataLogView {
 public:
     explicit DataLogView(DataLogBuffer& buffer);
 
     sensorDataStruct_t read();
+
 private:
+    // we use FifoViews of the buffer passed in the constructor to have a view
     FifoView<LowGData, FIFO_SIZE> lowGView;
     FifoView<HighGData, FIFO_SIZE> highGView;
     FifoView<GpsData, FIFO_SIZE> gpsView;
     FifoView<KalmanData, FIFO_SIZE> kalmanView;
     FifoView<rocketStateData<4>, FIFO_SIZE> rocketStateView;
+    FifoView<BarometerData, FIFO_SIZE> barometerView;
     FifoView<FlapData, FIFO_SIZE> flapView;
     FifoView<VoltageData, FIFO_SIZE> voltageView;
-    FifoView<BarometerData, FIFO_SIZE> barometerView;
 };
 
 /**
@@ -53,12 +55,19 @@ public:
     friend class DataLogView;
 
     void pushLowGFifo(LowGData const& lowG_Data);
+
     void pushHighGFifo(HighGData const& highG_Data);
+
     void pushGpsFifo(GpsData const& gps_Data);
+
     void pushKalmanFifo(KalmanData const& state_data);
+
     void pushRocketStateFifo(rocketStateData<4> const& rocket_data);
+
     void pushBarometerFifo(BarometerData const& barometer_data);
+
     void pushFlapsFifo(FlapData const& flap_data);
+
     void pushVoltageFifo(VoltageData const& voltage_data);
 };
 

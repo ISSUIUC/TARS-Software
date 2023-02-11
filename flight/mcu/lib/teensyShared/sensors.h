@@ -3,6 +3,7 @@
  * @authors     Jake Hawkins
  *              Anshuk Chigullapalli
  *              Ayberk Yaraneri
+ *              Magilan Sendhil
  *
  * @brief       Sensor (Low-G, High-G and GPS) struct definitions
  *
@@ -12,8 +13,7 @@
  *
  */
 
-#ifndef SENSORS_H
-#define SENSORS_H
+#pragma once
 
 #include "HighGSensor.h"
 #include "LowGSensor.h"
@@ -26,7 +26,3 @@ extern LowGSensor lowG;
 extern GPSSensor gps;
 extern BarometerSensor barometer;
 extern VoltageSensor voltage;
-
-//MUTEX_DECL(flaps_mutex);
-
-#endif

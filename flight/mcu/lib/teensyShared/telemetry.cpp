@@ -56,30 +56,6 @@ void Telemetry::init() {
     }
 
     /*
-     * Load previous frequency from freq.txt.
-     * If successful, the default frequency is
-     * disregarded.
-     */
-    // read_file = SD.open("freq.txt", O_READ);
-    // if (read_file) {
-    //     Serial.println("[DEBUG]: Reading data from freq.txt");
-    //     Serial.print("[DEBUG]: Frequency from SD freq.txt file: ");
-    //     float freq_to_set;
-    //     read_file.read(& freq_to_set, 4);
-    //     // memcpy(&freq_to_set, read_file.read(), sizeof(read_file.read()));
-    //     Serial.println(freq_to_set);
-    //     if (!rf95.setFrequency(freq_to_set)) {
-    //         Serial.println("[WARNING]: Failed to set saved frequency, going
-    //         back to default frequency.");
-    //     }
-
-    // } else {
-    //     Serial.println("[ERROR]: Failed to open freq file while read, using
-    //     default frequency.");
-    // }
-    // read_file.close();
-
-    /*
      * The default transmitter power is 13dBm, using PA_BOOST.
      * If you are using RFM95/96/97/98 modules which uses the PA_BOOST
      * transmitter pin, then you can set transmitter powers from 5 to 23 dBm:
@@ -159,7 +135,7 @@ void Telemetry::transmit(const sensorDataStruct_t& data_struct) {
 
     rf95.waitPacketSent();
 
-    // change the freqencey after we acknowledge
+    // change the frequency after we acknowledge
     if (freq_status.should_change) {
         rf95.setFrequency(freq_status.new_freq);
         freq_status.should_change = false;

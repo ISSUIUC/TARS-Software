@@ -11,9 +11,7 @@
 #include "rocketFSM.h"
 #include "kalmanFilter.h"
 
-Controller::Controller() : activeControlServos(&controller_servo_) {
-
-}
+Controller::Controller() : activeControlServos(&controller_servo_) { }
 
 void Controller::ctrlTickFunction() {
     chMtxLock(&kalmanFilter.mutex);

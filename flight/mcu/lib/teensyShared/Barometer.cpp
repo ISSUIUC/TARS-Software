@@ -1,8 +1,8 @@
 #include "ChRt.h"
 #include "MS5611.h"
-#include "dataLog.h"
 
 #include "BarometerSensor.h"
+#include "dataLog.h"
 
 BarometerSensor barometer{};
 

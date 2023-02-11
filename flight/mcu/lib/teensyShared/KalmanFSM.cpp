@@ -8,13 +8,13 @@
  *              Rithvik Bhogavilli
  *              Nicholas Phillips
  *
- *
  *              Jessica Myers
  *              Aidan Costello
  *              Aaditya Voruganti
  *
- * @brief      The implementation of the finite state machine class that governs
- * state transitions.
+ *              Magilan Sendhil
+ *
+ * @brief      The implementation of the finite state machine class that governs state transitions.
  *
  * The KalmanFSM class encapsulates the finite state machine that dictates which
  * state the rocket is in throughout the mission. The class implements the logic
@@ -41,7 +41,9 @@ double getAltitudeAverage(size_t start, size_t end) {
 }
 
 double getSecondDerivativeAltitudeAverage(size_t start, size_t end) {
-    return dataLogger.kalmanFifo.getSecondDerivativeAverage([](KalmanData& k) { return (double) k.kalman_x; }, [](KalmanData& k) { return k.timeStamp_state; }, start, end);
+    return dataLogger.kalmanFifo.getSecondDerivativeAverage([](KalmanData& k) { return (double) k.kalman_x; },
+                                                            [](KalmanData& k) { return k.timeStamp_state; }, start,
+                                                            end);
 }
 
 double getAccelerationAverage(size_t start, size_t end) {
@@ -57,8 +59,6 @@ double getAccelerationAverage(size_t start, size_t end) {
 void KalmanFSM::tickFSM() {
     // Lock mutexes for data used in switch
     chMtxLock(&highG.mutex);
-
-    //Serial.println(state_map[(int)rocket_state_]);
 
     // Links to abort for other states
     if (isAborted()) {
@@ -115,10 +115,7 @@ void KalmanFSM::tickFSM() {
             // threshold
             if (TIME_I2MS(burn_timer_) < burn_time_thresh_ms) {
                 rocket_state_ = FSM_State::STATE_BOOST;
-            }
-            // Forcing rocket to go to FSM_State::STATE_COAST if threshold
-            // crossed
-            else {
+            } else { // Forcing rocket to go to FSM_State::STATE_COAST if threshold crossed
                 rocket_state_ = FSM_State::STATE_COAST_PREGNC;
                 // Setting burnout time because we don't otherwise
                 burnout_time_ = chVTGetSystemTime();
@@ -154,18 +151,15 @@ void KalmanFSM::tickFSM() {
         case FSM_State::STATE_COAST_GNC:
             coast_timer_ = chVTGetSystemTime() - burnout_time_;
 
-            if (fabs(kalmanFilter.getState().vx)*0.02 < apogee_altimeter_threshold) {
-                    rocket_state_ = FSM_State::STATE_APOGEE_DETECT;
-                    apogee_time_ = chVTGetSystemTime();
-                    break;
+            if (fabs(kalmanFilter.getState().vx) * 0.02 < apogee_altimeter_threshold) {
+                rocket_state_ = FSM_State::STATE_APOGEE_DETECT;
+                apogee_time_ = chVTGetSystemTime();
+                break;
             }
-            // float changevelo = (fabs(dataLogger.gnc_altitude_history_6.getCurrentAverage() - dataLogger.gnc_altitude_history_6.getPastAverage()))/0.12;
-            // coast_to_apogee_time_thresh = changevelo/fabs(dataLogger.gnc_altitude_history_6.getCurrentSecondDerivativeAverage());
 
             if (TIME_I2MS(coast_timer_) < coast_to_apogee_time_thresh) {
                 rocket_state_ = FSM_State::STATE_COAST_GNC;
-            }
-            else {
+            } else {
                 rocket_state_ = FSM_State::STATE_APOGEE;
                 apogee_time_ = chVTGetSystemTime();
             }
@@ -189,63 +183,58 @@ void KalmanFSM::tickFSM() {
 
             break;
 
-
         case FSM_State::STATE_APOGEE:
-            if (fabs(getAccelerationAverage(0, 3) - getAccelerationAverage(3, 6)) > drogue_acceleration_change_threshold_imu) {
-                    rocket_state_= FSM_State::STATE_DROGUE_DETECT;
-                    break;
+            if (fabs(getAccelerationAverage(0, 3) - getAccelerationAverage(3, 6)) >
+                drogue_acceleration_change_threshold_imu) {
+                rocket_state_ = FSM_State::STATE_DROGUE_DETECT;
+                break;
             }
             //potentially add back state to put us back into coast
 
-
             if (TIME_I2MS(apogee_timer_) < drogue_deploy_time_since_apogee_threshold) {
                 rocket_state_ = FSM_State::STATE_APOGEE;
-            }
-            else {
+            } else {
                 rocket_state_ = FSM_State::STATE_DROGUE;
                 drogue_time_ = chVTGetSystemTime();
             }
             break;
 
         case FSM_State::STATE_DROGUE_DETECT:
-            if (fabs(getSecondDerivativeAltitudeAverage(0, 3) - getSecondDerivativeAltitudeAverage(3, 6)) > drogue_acceleration_change_threshold_altimeter) {
-                    rocket_state_ = FSM_State::STATE_DROGUE;
-                    drogue_time_ = chVTGetSystemTime();
-                    break;
-            }
-
-            else{
+            if (fabs(getSecondDerivativeAltitudeAverage(0, 3) - getSecondDerivativeAltitudeAverage(3, 6)) >
+                drogue_acceleration_change_threshold_altimeter) {
+                rocket_state_ = FSM_State::STATE_DROGUE;
+                drogue_time_ = chVTGetSystemTime();
+                break;
+            } else {
                 rocket_state_ = FSM_State::STATE_APOGEE;
             }
             break;
 
         case FSM_State::STATE_DROGUE:
             drogue_timer_ = chVTGetSystemTime() - drogue_time_;
-            if(TIME_I2MS(drogue_timer_) > refresh_timer){
-                if (fabs(getAccelerationAverage(0, 3) - getAccelerationAverage(3, 6)) > main_acceleration_change_threshold_imu) {
-                        rocket_state_= FSM_State::STATE_MAIN_DETECT;
-                        break;
+            if (TIME_I2MS(drogue_timer_) > refresh_timer) {
+                if (fabs(getAccelerationAverage(0, 3) - getAccelerationAverage(3, 6)) >
+                    main_acceleration_change_threshold_imu) {
+                    rocket_state_ = FSM_State::STATE_MAIN_DETECT;
+                    break;
                 }
             }
 
-
             if (TIME_I2MS(drogue_timer_) < main_deploy_time_since_drogue_threshold) {
                 rocket_state_ = FSM_State::STATE_DROGUE;
-
-            }
-            else {
+            } else {
                 rocket_state_ = FSM_State::STATE_MAIN;
                 main_time_ = chVTGetSystemTime();
             }
             break;
 
         case FSM_State::STATE_MAIN_DETECT:
-            if (fabs(getSecondDerivativeAltitudeAverage(0, 3) - getSecondDerivativeAltitudeAverage(3, 6)) > main_acceleration_change_threshold_altimeter) {
-                    rocket_state_ = FSM_State::STATE_MAIN;
-                    main_time_ = chVTGetSystemTime();
-                    break;
-            }
-            else{
+            if (fabs(getSecondDerivativeAltitudeAverage(0, 3) - getSecondDerivativeAltitudeAverage(3, 6)) >
+                main_acceleration_change_threshold_altimeter) {
+                rocket_state_ = FSM_State::STATE_MAIN;
+                main_time_ = chVTGetSystemTime();
+                break;
+            } else {
                 rocket_state_ = FSM_State::STATE_DROGUE;
             }
             break;
@@ -263,9 +252,7 @@ void KalmanFSM::tickFSM() {
 
             if (TIME_I2MS(main_timer_) < main_deploy_time_since_drogue_threshold) {
                 rocket_state_ = FSM_State::STATE_MAIN;
-
-            }
-            else {
+            } else {
                 rocket_state_ = FSM_State::STATE_LANDED;
                 landing_time_ = chVTGetSystemTime();
             }
