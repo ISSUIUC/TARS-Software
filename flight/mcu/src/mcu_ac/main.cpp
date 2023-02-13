@@ -41,14 +41,7 @@
 #include "SDLogger.h"
 
 #define THREAD_DEBUG
-//#define LOWGIMU_DEBUG
-//#define HIGHGIMU_DEBUG
-//#define GPS_DEBUG
 //#define SERVO_DEBUG
-
-// Create a data struct to hold data from the sensors
-// TODO fix, this struct never gets updated but telemetry uses it
-sensorDataStruct_t sensorData;
 
 /******************************************************************************/
 /* TELEMETRY THREAD                                         */
@@ -58,7 +51,7 @@ static THD_FUNCTION(telemetry_buffering_THD, arg) {
 #ifdef THREAD_DEBUG
         Serial.println("### telemetry sending thread entrance");
 #endif
-        tlm.buffer_data(sensorData);
+        tlm.buffer_data();
         chThdSleepMilliseconds(80);
     }
 }
@@ -71,7 +64,7 @@ static THD_FUNCTION(telemetry_sending_THD, arg) {
 #ifdef THREAD_DEBUG
         Serial.println("### telemetry sending thread entrance");
 #endif
-        tlm.transmit(sensorData);
+        tlm.transmit();
         if (tlm.abort) {
             startAbort();
         }
@@ -92,10 +85,9 @@ static THD_FUNCTION(rocket_FSM_THD, arg) {
         fsmCollection.tick();
 
         rocketStateData<4> fsm_state = fsmCollection.getStates();
-        for (auto& rocketState : fsm_state.rocketStates) {
-            Serial.println((int) rocketState);
-        }
-        sensorData.rocketState_data = fsm_state;
+//        for (auto& rocketState : fsm_state.rocketStates) {
+//            Serial.println((int) rocketState);
+//        }
         dataLogger.pushRocketStateFifo(fsm_state);
 
         chThdSleepMilliseconds(6);  // FSM runs at 100 Hz

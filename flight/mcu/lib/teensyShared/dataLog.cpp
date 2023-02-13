@@ -33,6 +33,19 @@ DataLogView::DataLogView(DataLogBuffer& buffer) :
         flapView(buffer.flapFifo), voltageView(buffer.voltageFifo)
         { }
 
+sensorDataStruct_t DataLogBuffer::read() {
+    sensorDataStruct_t data;
+    lowGFifo.read(data.lowG_data);
+    highGFifo.read(data.highG_data);
+    gpsFifo.read(data.gps_data);
+    kalmanFifo.read(data.kalman_data);
+    rocketStateFifo.read(data.rocketState_data);
+    barometerFifo.read(data.barometer_data);
+    flapFifo.read(data.flap_data);
+    voltageFifo.read(data.voltage_data);
+    return data;
+}
+
 void DataLogBuffer::pushLowGFifo(LowGData const& lowG_Data) {
     lowGFifo.push(lowG_Data);
 }

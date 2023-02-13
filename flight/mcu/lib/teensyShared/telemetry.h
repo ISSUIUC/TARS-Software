@@ -115,11 +115,11 @@ public:
 
     void init();
 
-    void transmit(const sensorDataStruct_t&);
+    void transmit();
 
     void handle_command(const telemetry_command& cmd);
 
-    void buffer_data(const sensorDataStruct_t&);
+    void buffer_data();
 
     void serial_print(const sensorDataStruct_t&);
 

@@ -26,6 +26,16 @@ public:
         return true;
     }
 
+    bool read(T& read_to) {
+        chMtxLock(&lock);
+        if (count < 1) {
+            return false;
+        }
+        read_to = arr[tail_idx];
+        chMtxUnlock(&lock);
+        return true;
+    }
+
     /**
      * @brief Reads a range of items into a passed array, which can be larger than the actual count of items.
      *

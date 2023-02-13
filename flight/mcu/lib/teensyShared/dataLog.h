@@ -51,6 +51,8 @@ public:
     FifoBuffer<VoltageData, FIFO_SIZE> voltageFifo{};
     FifoBuffer<BarometerData, FIFO_SIZE> barometerFifo{};
 
+    sensorDataStruct_t read();
+
 public:
     friend class DataLogView;
 

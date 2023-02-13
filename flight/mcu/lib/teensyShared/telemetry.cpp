@@ -18,6 +18,8 @@
 #include <telemetry.h>
 #include <limits>
 
+#include "dataLog.h"
+
 Telemetry tlm;
 
 template<typename T>
@@ -63,9 +65,7 @@ void Telemetry::init() {
     rf95.setTxPower(23, false);
 }
 
-Telemetry::Telemetry() : rf95(RFM95_CS, RFM95_INT), data_view(buffered_data) {
-    
-}
+Telemetry::Telemetry() : rf95(RFM95_CS, RFM95_INT), data_view(buffered_data) { }
 
 /**
  * @brief  This function handles commands sent from the ground station
@@ -123,12 +123,12 @@ void Telemetry::handle_command(const telemetry_command &cmd) {
  *
  * @return void
  */
-void Telemetry::transmit(const sensorDataStruct_t& data_struct) {
+void Telemetry::transmit() {
     static bool blue_state = false;
     digitalWrite(LED_BLUE, blue_state);
     blue_state = !blue_state;
 
-    TelemetryPacket packet = make_packet(data_struct);
+    TelemetryPacket packet = make_packet(dataLogger.read());
     rf95.send((uint8_t *)&packet, sizeof(packet));
 
     chThdSleepMilliseconds(170);
@@ -275,7 +275,8 @@ TelemetryPacket Telemetry::make_packet(const sensorDataStruct_t &data_struct) {
     return packet;
 }
 
-void Telemetry::buffer_data(const sensorDataStruct_t &sensor_data) {
+void Telemetry::buffer_data() {
+    sensorDataStruct_t sensor_data = dataLogger.read();
     TelemetryDataLite data{};
     data.timestamp = TIME_I2MS(chVTGetSystemTime());
     data.barometer_pressure = inv_convert_range<uint16_t>(sensor_data.barometer_data.pressure, 4096);
