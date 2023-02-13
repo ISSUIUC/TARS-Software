@@ -42,7 +42,7 @@ typedef uint32_t TZ_ModuleId_t;
 /// \details TZ Memory ID identifies an allocated memory slot.
 typedef uint32_t TZ_MemoryId_t;
   
-/// initialize secure context memory system
+/// Initialize secure context memory system
 /// \return execution status (1: success, 0: error)
 uint32_t TZ_InitContextSystem_S (void);
  
