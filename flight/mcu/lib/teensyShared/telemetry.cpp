@@ -295,6 +295,6 @@ void Telemetry::bufferData() {
     buffered_data.push(data);
 
 #ifdef SERIAL_PLOTTING
-    serial_print(sensor_data);
+    serialPrint(sensor_data);
 #endif
 }
