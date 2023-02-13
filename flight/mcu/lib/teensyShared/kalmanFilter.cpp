@@ -160,7 +160,7 @@ void KalmanFilter::Initialize() {
  * @param vel_f Initial velocity estimate
  */
 
-void KalmanFilter::Initialize(float pos_f, float vel_f) {
+void KalmanFilter::initialize(float pos_f, float vel_f) {
     // set x_k
     x_k(0, 0) = pos_f;
     x_k(1, 0) = vel_f;

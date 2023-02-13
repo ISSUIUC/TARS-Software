@@ -77,7 +77,7 @@ Telemetry::Telemetry() : rf95(RFM95_CS, RFM95_INT), data_view(buffered_data) { }
  *
  * @return void
  */
-void Telemetry::handle_command(const telemetry_command &cmd) {
+void Telemetry::handleCommand(const telemetry_command &cmd) {
     /* Check if the security code is present and matches on ground and on the
      * rocket */
     if (cmd.verify != std::array<char, 6>{'A', 'Y', 'B', 'E', 'R', 'K'}) {
@@ -128,7 +128,7 @@ void Telemetry::transmit() {
     digitalWrite(LED_BLUE, blue_state);
     blue_state = !blue_state;
 
-    TelemetryPacket packet = make_packet(dataLogger.read());
+    TelemetryPacket packet = makePacket(dataLogger.read());
     rf95.send((uint8_t *)&packet, sizeof(packet));
 
     chThdSleepMilliseconds(170);
@@ -148,11 +148,11 @@ void Telemetry::transmit() {
         telemetry_command received{};
         memcpy(&received, buf, sizeof(received));
 
-        handle_command(received);
+        handleCommand(received);
     }
 }
 
-void Telemetry::serial_print(const sensorDataStruct_t& sensor_data) {
+void Telemetry::serialPrint(const sensorDataStruct_t& sensor_data) {
     Serial.print(R"({"type": "data", "value": {)");
     Serial.print(R"("response_ID":)");
     Serial.print(000);
@@ -250,7 +250,7 @@ void Telemetry::serial_print(const sensorDataStruct_t& sensor_data) {
 }
 
 
-TelemetryPacket Telemetry::make_packet(const sensorDataStruct_t &data_struct) {
+TelemetryPacket Telemetry::makePacket(const sensorDataStruct_t &data_struct) {
     TelemetryPacket packet{};
     packet.gps_lat = data_struct.gps_data.latitude;
     packet.gps_long = data_struct.gps_data.longitude;

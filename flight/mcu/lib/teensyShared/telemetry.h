@@ -81,11 +81,11 @@ public:
 
     void transmit();
 
-    void handle_command(const telemetry_command& cmd);
+    void handleCommand(const telemetry_command& cmd);
 
     void bufferData();
 
-    void serial_print(const sensorDataStruct_t&);
+    void serialPrint(const sensorDataStruct_t& sensor_data);
 
 private:
     RH_RF95 rf95;
@@ -99,5 +99,5 @@ private:
     char callsign[8] = "NO SIGN";
     command_handler_struct freq_status = {};
 
-    TelemetryPacket make_packet(const sensorDataStruct_t&);
+    TelemetryPacket makePacket(const sensorDataStruct_t& data_struct);
 };

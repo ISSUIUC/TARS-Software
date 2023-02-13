@@ -21,9 +21,9 @@
  *
  * @param altitude Altitude above sea level in meters
  */
-double Atmosphere::get_temperature(double altitude) {
+double Atmosphere::getTemperature(double altitude) {
     double temperature;
-    double altitude_h = get_geometric_to_geopotential(altitude) / 1000;  // geopotential
+    double altitude_h = getGeometricToGeopotential(altitude) / 1000;  // geopotential
     double altitude_z = altitude / 1000;                                 // geometric
     if (altitude_h < 11.0) {
         temperature = 288.15 - (6.5 * altitude_h);
@@ -58,9 +58,9 @@ double Atmosphere::get_temperature(double altitude) {
  *
  * @param altitude Altitude above sea level in meters
  */
-double Atmosphere::get_pressure(double altitude) {
+double Atmosphere::getPressure(double altitude) {
     double pressure;
-    double altitude_h = get_geometric_to_geopotential(altitude) / 1000;
+    double altitude_h = getGeometricToGeopotential(altitude) / 1000;
     double altitude_z = altitude / 1000;
 
     if (altitude_h < 11) {
@@ -119,10 +119,10 @@ double Atmosphere::get_pressure(double altitude) {
  *
  * @param altitude Altitude above sea level in meters
  */
-double Atmosphere::get_density(double altitude) {
+double Atmosphere::getDensity(double altitude) {
     double R = 287.053;
-    double pressure = get_pressure(altitude);
-    double temperature = get_temperature(altitude);
+    double pressure = getPressure(altitude);
+    double temperature = getTemperature(altitude);
     double density;
     altitude = altitude / 1000;
 
@@ -171,14 +171,14 @@ double Atmosphere::get_density(double altitude) {
  * @param altitude Altitude above sea level in meters
  * @return double Speed of sound in m/s
  */
-double Atmosphere::get_speed_of_sound(double altitude) {
+double Atmosphere::getSpeedOfSound(double altitude) {
     constexpr double gamma = 1.4;            // Heat Capacity Ratio of air
     constexpr double gas_constant = 287.05;  // Gas constant of air
 
-    return sqrt(gamma * gas_constant * get_temperature(altitude));
+    return sqrt(gamma * gas_constant * getTemperature(altitude));
 }
 
-double Atmosphere::get_geometric_to_geopotential(double altitude) {
+double Atmosphere::getGeometricToGeopotential(double altitude) {
     double r = 6371000;  // r means the radius of Earth//
     double geopotential = (r * altitude) / (r + altitude);
 

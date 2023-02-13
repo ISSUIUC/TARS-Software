@@ -28,7 +28,7 @@ rk4::rk4() {
  * @return float the Coefficient of drag at the present estimated state
  */
 float rk4::cd(float alt, float vel) {
-    float mach = vel / (atmo_.get_speed_of_sound(alt));
+    float mach = vel / (atmo_.getSpeedOfSound(alt));
 
     double cd = 0;
 
@@ -108,7 +108,7 @@ array<float, 2> rk4::sim_apogee(array<float, 2> state, float dt) {
         // unused) float pos_f = state[0]; float vel_f = state[1];
 
         // Density varies with altitude
-        float rho = atmo_.get_density(state[0]);
+        float rho = atmo_.getDensity(state[0]);
 
         // rk4 iteration
         rk4_kp1 = rk4_step(state, dt, rho);

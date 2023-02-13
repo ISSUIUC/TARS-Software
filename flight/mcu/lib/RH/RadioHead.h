@@ -833,7 +833,7 @@
 ///              documentation to reflect.<br>
 /// \version 1.64 2016-12-10
 ///              RHReliableDatagram now initialises _seenids. Fix from Ben
-///              Lim.<br> In RH_NRF51, added get_temperature().<br> In RH_NRF51,
+///              Lim.<br> In RH_NRF51, added getTemperature().<br> In RH_NRF51,
 ///              added support for AES packet encryption, which required a
 ///              slight change to the on-air message format.<br>
 /// \version 1.65 2017-01-11

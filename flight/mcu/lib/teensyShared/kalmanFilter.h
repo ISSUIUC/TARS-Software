@@ -21,7 +21,7 @@ public:
     MUTEX_DECL(mutex);
 
     void Initialize();
-    void Initialize(float pos_f, float vel_f);
+    void initialize(float pos_f, float vel_f);
     void priori();
     void update();
     void SetQ(float dt, float sd);

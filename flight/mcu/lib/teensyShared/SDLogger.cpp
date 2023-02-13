@@ -19,7 +19,7 @@ SDLogger::SDLogger(DataLogBuffer& buffer) : view(buffer) {}
  * @return char* Pointer to inputted char[]. It now contains number (if
  * duplicate file existed) and .csv file extension.
  */
-char* sd_file_namer(char* fileName, char* fileExtensionParam) {
+char* sdFileNamer(char* fileName, char* fileExtensionParam) {
     char fileExtension[strlen(fileExtensionParam) + 1];
     strcpy(fileExtension, fileExtensionParam);
 
@@ -70,7 +70,7 @@ void SDLogger::init() {
         char file_extension[6] = ".dat";
 
         char data_name[16] = "data";
-        sd_file_namer(data_name, file_extension);
+        sdFileNamer(data_name, file_extension);
         // Initialize SD card
         sd_file = SD.open(data_name, FILE_WRITE_BEGIN);
         // print header to file on sd card that lists each variable that is logged
