@@ -22,6 +22,15 @@
 
 Telemetry tlm;
 
+/**
+ * @brief This function maps an input value onto within a particular range into a fixed point value of a certin binary size
+ *
+ * @param val: number to map into target range, values outside of the range will be clamped
+ * 
+ * @param range: range to map number into. For unsigned output, [0, range). For signed output [-range/2, range)
+ *
+ * @return fixed point value represing val mapped onto the target range
+ */
 template<typename T>
 T inv_convert_range(float val, float range){
   size_t numeric_range = (int64_t)std::numeric_limits<T>::max() - (int64_t)std::numeric_limits<T>::min() + 1;
