@@ -1,5 +1,4 @@
-#ifndef PINS_H
-#define PINS_H
+#pragma once
 
 #define AC_SERVO_PIN 14
 
@@ -33,5 +32,3 @@
 
 // kx chip select pin
 #define KX134_CS 4
-
-#endif

@@ -6,6 +6,8 @@ SDLogger sd_logger(dataLogger); // NOLINT(cppcoreguidelines-interfaces-global-in
 
 SDLogger::SDLogger(DataLogBuffer& buffer) : view(buffer) {}
 
+#define MAX_FILES 999
+
 /**
  * @brief Creates the name for a file to be written to SD card.
  *
@@ -31,7 +33,7 @@ char* sd_file_namer(char* fileName, char* fileExtensionParam) {
         bool fileExists = false;
         int i = 1;
         while (!fileExists) {
-            if (i > 999) {
+            if (i > MAX_FILES) {
                 // max number of files reached. Don't want to overflow
                 // fileName[]. Will write new data to already existing
                 // data999.csv
@@ -115,3 +117,5 @@ void SDLogger::logData(T* data) {
         writes_since_flush++;
     }
 }
+
+#undef MAX_FILES

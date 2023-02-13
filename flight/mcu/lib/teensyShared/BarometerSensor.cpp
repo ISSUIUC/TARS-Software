@@ -4,7 +4,7 @@
 #include "BarometerSensor.h"
 #include "dataLog.h"
 
-BarometerSensor barometer{};
+BarometerSensor barometer;
 
 void BarometerSensor::init() {
     MS.init();

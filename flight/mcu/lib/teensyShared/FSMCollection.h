@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ChRt.h"
-#include <initializer_list>
+#include <initializer_list>  // this is here to make initializing the FSMCollection a lot more convenient
 
 #include "RocketFSMBase.h"
 
@@ -33,14 +33,14 @@ class FSMCollection {
     }
 
     rocketStateData<count> getStates() {
-        rocketStateData<count> ret;
+        rocketStateData<count> states;
         // refresh FSM states and timestamps
         systime_t time = chVTGetSystemTime();
         for (size_t i = 0; i < count; i++) {
-            ret.rocketStates[i] = FSMs_[i]->getFSMState();
-            ret.timestamp = time;
+            states.rocketStates[i] = FSMs_[i]->getFSMState();
+            states.timestamp = time;
         }
-        return ret;
+        return states;
     }
 
    private:

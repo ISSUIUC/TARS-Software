@@ -3,6 +3,10 @@
 
 #include "ServoControl.h"
 
+class Controller;
+
+extern Controller activeController;
+
 class Controller {
    public:
     void ctrlTickFunction();
@@ -31,4 +35,3 @@ class Controller {
     ServoControl activeControlServos;
 };
 
-extern Controller activeController;

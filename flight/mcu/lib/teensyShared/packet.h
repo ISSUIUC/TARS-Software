@@ -1,5 +1,4 @@
-#ifndef MCU_PACKET_H
-#define MCU_PACKET_H
+#pragma once
 
 #include "ChRt.h"
 
@@ -172,5 +171,3 @@ struct sensorDataStruct_t {
                has_flap_data || has_voltage_data;
     }
 };
-
-#endif //MCU_PACKET_H

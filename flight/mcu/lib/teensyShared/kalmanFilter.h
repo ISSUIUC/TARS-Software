@@ -5,11 +5,16 @@
 #include "RocketFSMBase.h"
 #include "sensors.h"
 
+class KalmanFilter;
+extern KalmanFilter kalmanFilter;
+
+
 struct KalmanState {
     float x;
     float vx;
     float ax;
 };
+
 
 class KalmanFilter {
 public:
@@ -48,5 +53,3 @@ private:
 
     Eigen::Matrix<float, 3, 2> B = Eigen::Matrix<float, 3, 2>::Zero();
 };
-
-extern KalmanFilter kalmanFilter;

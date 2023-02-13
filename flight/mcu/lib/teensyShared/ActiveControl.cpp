@@ -11,6 +11,8 @@
 #include "rocketFSM.h"
 #include "kalmanFilter.h"
 
+Controller activeController;
+
 Controller::Controller() : activeControlServos(&controller_servo_) { }
 
 void Controller::ctrlTickFunction() {
@@ -118,6 +120,3 @@ void Controller::startup() {
 
     setLaunchPadElevation();
 }
-
-
-Controller activeController;

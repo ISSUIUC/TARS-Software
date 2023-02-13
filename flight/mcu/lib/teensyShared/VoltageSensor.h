@@ -1,5 +1,4 @@
-#ifndef VOLTAGESENSOR_H
-#define VOLTAGESENSOR_H
+#pragma once
 
 #include "Arduino.h"
 #include "ChRt.h"
@@ -63,5 +62,3 @@ private:
     float v_9 = 0.0;
     systime_t timestamp = 0;
 };
-
-#endif  // VOLTAGESENSOR_H

@@ -3,7 +3,7 @@
 #include "packet.h"
 #include "pins.h"
 
-LowGSensor lowG{};
+LowGSensor lowG;
 
 void LowGSensor::update() {
     chSysLock();

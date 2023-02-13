@@ -3,7 +3,7 @@
 #include "dataLog.h"
 #include "pins.h"
 
-HighGSensor highG{};
+HighGSensor highG;
 
 void HighGSensor::update() {
     chSysLock();

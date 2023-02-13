@@ -1,6 +1,4 @@
-
-#ifndef ROCKET_FSM_H
-#define ROCKET_FSM_H
+#pragma once
 
 #include "packet.h"
 
@@ -13,5 +11,3 @@ class RocketFSMBase {
    protected:
     FSM_State rocket_state_ = FSM_State::STATE_INIT;
 };
-
-#endif

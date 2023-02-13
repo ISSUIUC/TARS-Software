@@ -40,7 +40,7 @@
 #include "Abort.h"
 #include "SDLogger.h"
 
-#define THREAD_DEBUG
+//#define THREAD_DEBUG
 //#define SERVO_DEBUG
 
 /******************************************************************************/
@@ -51,7 +51,7 @@ static THD_FUNCTION(telemetry_buffering_THD, arg) {
 #ifdef THREAD_DEBUG
         Serial.println("### telemetry sending thread entrance");
 #endif
-        tlm.buffer_data();
+        tlm.bufferData();
         chThdSleepMilliseconds(80);
     }
 }
@@ -165,7 +165,7 @@ static THD_FUNCTION(kalman_THD, arg) {
     systime_t last = chVTGetSystemTime();
 
     while (true) {
-        kalmanFilter.kfTickFunction(TIME_I2MS(chVTGetSystemTime() - last), 13.0);;
+        kalmanFilter.kfTickFunction(TIME_I2MS(chVTGetSystemTime() - last), 13.0);
         last = chVTGetSystemTime();
 
         chThdSleepMilliseconds(50);
@@ -184,7 +184,7 @@ static THD_FUNCTION(servo_THD, arg) {
 #endif
         activeController.ctrlTickFunction();
 
-        chThdSleepMilliseconds(6);  // FSM runs at 100 Hz
+        chThdSleepMilliseconds(6);  // FSM runs at 166 Hz
     }
 }
 
@@ -232,7 +232,6 @@ static THD_WORKING_AREA(kalman_WA, 8192);
 #define START_THREAD(NAME) chThdCreateStatic(NAME##_WA, sizeof(NAME##_WA), NORMALPRIO + 1, NAME##_THD, nullptr)
 /**
  * @brief Starts all of the threads.
- *
  */
 void chSetup() {
     START_THREAD(telemetry_sending);

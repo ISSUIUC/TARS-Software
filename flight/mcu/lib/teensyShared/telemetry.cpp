@@ -275,7 +275,7 @@ TelemetryPacket Telemetry::make_packet(const sensorDataStruct_t &data_struct) {
     return packet;
 }
 
-void Telemetry::buffer_data() {
+void Telemetry::bufferData() {
     sensorDataStruct_t sensor_data = dataLogger.read();
     TelemetryDataLite data{};
     data.timestamp = TIME_I2MS(chVTGetSystemTime());

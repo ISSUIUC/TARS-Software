@@ -1,5 +1,4 @@
-#ifndef HIGHGSENSOR_H
-#define HIGHGSENSOR_H
+#pragma once
 
 #include <tuple>
 #include "ChRt.h"
@@ -12,6 +11,8 @@ struct Acceleration {
 
 struct HighGSensor {
 public:
+    HighGSensor() = default;
+
     MUTEX_DECL(mutex);
 
     void init();
@@ -23,5 +24,3 @@ private:
     systime_t timestamp = 0;
     QwiicKX132 KX{};
 };
-
-#endif

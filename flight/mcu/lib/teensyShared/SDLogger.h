@@ -4,6 +4,9 @@
 #include <ChRt.h>
 #include <SD.h>
 
+class SDLogger;
+extern SDLogger sd_logger;
+
 class SDLogger {
 public:
     explicit SDLogger(DataLogBuffer& buffer);
@@ -20,6 +23,3 @@ private:
     File sd_file;
     size_t writes_since_flush = 0;
 };
-
-extern SDLogger sd_logger;
-

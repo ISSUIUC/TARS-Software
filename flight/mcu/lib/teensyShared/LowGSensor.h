@@ -1,5 +1,4 @@
-#ifndef LOWGSENSOR_H
-#define LOWGSENSOR_H
+#pragma once
 
 #include "ChRt.h"
 #include "SparkFunLSM9DS1.h"
@@ -22,6 +21,8 @@ class LowGSensor {
    public:
     MUTEX_DECL(mutex);
 
+    LowGSensor() = default;
+
     void init();
     void update();
     Acceleration getAcceleration();
@@ -36,5 +37,3 @@ class LowGSensor {
 
     LSM9DS1 LSM;
 };
-
-#endif

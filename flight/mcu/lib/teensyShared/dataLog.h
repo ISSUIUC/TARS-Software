@@ -11,6 +11,8 @@
 
 class DataLogBuffer;
 
+extern DataLogBuffer dataLogger;
+
 /**
  * @brief A class that hold a view of the buffers in DataLogBuffer.
  *
@@ -74,7 +76,5 @@ public:
 };
 
 #undef FIFO_SIZE
-
-extern DataLogBuffer dataLogger;
 
 #endif
