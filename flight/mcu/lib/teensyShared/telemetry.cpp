@@ -13,7 +13,7 @@
  * Peter Giannetos
  */
 
-// #define SERIAL_PLOTTING
+#define SERIAL_PLOTTING
 
 #include <telemetry.h>
 #include <limits>
@@ -167,14 +167,14 @@ void Telemetry::serialPrint(const sensorDataStruct_t& sensor_data) {
     Serial.print(000);
     Serial.print(',');
     Serial.print(R"("gps_lat":)");
-    Serial.print(sensor_data.gps_data.latitude, 5);
-    Serial.print(',');
+    Serial.print(0);
+    Serial.print(",");
     Serial.print(R"("gps_long":)");
-    Serial.print(sensor_data.gps_data.longitude, 5);
-    Serial.print(',');
+    Serial.print(0);
+    Serial.print(",");
     Serial.print(R"("gps_alt":)");
-    Serial.print(sensor_data.gps_data.altitude, 5);
-    Serial.print(',');
+    Serial.print(0);
+    Serial.print(",");
     Serial.print(R"("barometer_alt":)");
     Serial.print(sensor_data.barometer_data.altitude, 5);
     Serial.print(',');
@@ -286,6 +286,7 @@ TelemetryPacket Telemetry::makePacket(const sensorDataStruct_t &data_struct) {
 
 void Telemetry::bufferData() {
     sensorDataStruct_t sensor_data = dataLogger.read();
+    // Serial.println(dataLogger.count);
     TelemetryDataLite data{};
     data.timestamp = TIME_I2MS(chVTGetSystemTime());
     data.barometer_pressure = inv_convert_range<uint16_t>(sensor_data.barometer_data.pressure, 4096);

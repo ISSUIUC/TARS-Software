@@ -40,7 +40,7 @@
 #include "Abort.h"
 #include "SDLogger.h"
 
-//#define THREAD_DEBUG
+// #define THREAD_DEBUG
 //#define SERVO_DEBUG
 
 /******************************************************************************/
@@ -49,7 +49,7 @@
 static THD_FUNCTION(telemetry_buffering_THD, arg) {
     while (true) {
 #ifdef THREAD_DEBUG
-        Serial.println("### telemetry sending thread entrance");
+        Serial.println("### telemetry buffering thread entrance");
 #endif
         tlm.bufferData();
         chThdSleepMilliseconds(80);
@@ -65,6 +65,7 @@ static THD_FUNCTION(telemetry_sending_THD, arg) {
         Serial.println("### telemetry sending thread entrance");
 #endif
         tlm.transmit();
+
         if (tlm.abort) {
             startAbort();
         }

@@ -29,9 +29,11 @@ public:
     bool read(T& read_to) {
         chMtxLock(&lock);
         if (count < 1) {
+            chMtxUnlock(&lock);
             return false;
         }
-        read_to = arr[tail_idx];
+        size_t head_idx = tail_idx == 0 ? max_size - 1 : tail_idx - 1;
+        read_to = arr[head_idx];
         chMtxUnlock(&lock);
         return true;
     }
@@ -109,6 +111,8 @@ public:
         return sum / (double) (end - start - 2);
     }
 
+    size_t count = 0;
+
 private:
     /**
      * @brief index of the next slot to write to
@@ -117,7 +121,7 @@ private:
     /**
      * @brief total number of items that have been pushed
      */
-    size_t count = 0;
+    
     T arr[max_size]{};
 };
 
