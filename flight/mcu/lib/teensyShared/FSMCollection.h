@@ -38,8 +38,8 @@ class FSMCollection {
         systime_t time = chVTGetSystemTime();
         for (size_t i = 0; i < count; i++) {
             states.rocketStates[i] = FSMs_[i]->getFSMState();
-            states.timestamp = time;
         }
+        states.timestamp = time;
         return states;
     }
 
