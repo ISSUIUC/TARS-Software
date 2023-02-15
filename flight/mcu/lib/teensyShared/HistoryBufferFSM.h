@@ -30,18 +30,18 @@ private:
     systime_t landing_time_ = 0;
     sysinterval_t landing_timer = 0;
 
-    double getAltitudeAverage(size_t start, size_t end) {
-        return HistoryBufferFSM::getAverage(dataLogger.barometerFifo, +[](BarometerData& b) { return (double) b.altitude; }, start, end);
+    double getAltitudeAverage(size_t start, size_t len) {
+        return HistoryBufferFSM::getAverage(dataLogger.barometerFifo, +[](BarometerData& b) { return (double) b.altitude; }, start, len);
     }
 
-    double getSecondDerivativeAltitudeAverage(size_t start, size_t end) {
+    double getSecondDerivativeAltitudeAverage(size_t start, size_t len) {
         return HistoryBufferFSM::getSecondDerivativeAverage(dataLogger.barometerFifo, +[](BarometerData& b) { return (double) b.altitude; },
                                                                    +[](BarometerData& b) { return b.timeStamp_barometer; },
-                                                                   start, end);
+                                                                   start, len);
     }
 
-    double getAccelerationAverage(size_t start, size_t end) {
-        return HistoryBufferFSM::getAverage(dataLogger.highGFifo, +[](HighGData& g) { return (double) g.hg_az; }, start, end);
+    double getAccelerationAverage(size_t start, size_t len) {
+        return HistoryBufferFSM::getAverage(dataLogger.highGFifo, +[](HighGData& g) { return (double) g.hg_az; }, start, len);
     }
 
 public:
@@ -148,7 +148,7 @@ public:
             case FSM_State::STATE_COAST_GNC:
                 coast_timer_ = chVTGetSystemTime() - burnout_time_;
 
-                if (fabs(getAltitudeAverage(0, view / 2) - getAltitudeAverage(view / 2, view)) <
+                if (fabs(getAltitudeAverage(0, view / 2) - getAltitudeAverage(view / 2, view / 2)) <
                     apogee_altimeter_threshold) {
                     rocket_state_ = FSM_State::STATE_APOGEE_DETECT;
                     apogee_time_ = chVTGetSystemTime();
@@ -166,7 +166,7 @@ public:
 
             case FSM_State::STATE_APOGEE_DETECT:
                 // If the 0 velocity was too brief, go back to coast
-                if (fabs(getAltitudeAverage(0, view / 2) - getAltitudeAverage(view / 2, view)) >
+                if (fabs(getAltitudeAverage(0, view / 2) - getAltitudeAverage(view / 2, view / 2)) >
                     apogee_altimeter_threshold) {
                     rocket_state_ = FSM_State::STATE_COAST_GNC;
                     break;
@@ -183,7 +183,7 @@ public:
                 break;
 
             case FSM_State::STATE_APOGEE:
-                if (fabs(getAccelerationAverage(0, view / 2) - getAccelerationAverage(view / 2, view)) >
+                if (fabs(getAccelerationAverage(0, view / 2) - getAccelerationAverage(view / 2, view / 2)) >
                     drogue_acceleration_change_threshold_imu) {
                     rocket_state_ = FSM_State::STATE_DROGUE_DETECT;
                     break;
@@ -200,7 +200,7 @@ public:
 
             case FSM_State::STATE_DROGUE_DETECT:
                 if (fabs(getSecondDerivativeAltitudeAverage(0, view / 2) -
-                         getSecondDerivativeAltitudeAverage(view / 2, view)) >
+                         getSecondDerivativeAltitudeAverage(view / 2, view / 2)) >
                     drogue_acceleration_change_threshold_altimeter) {
                     rocket_state_ = FSM_State::STATE_DROGUE;
                     drogue_time_ = chVTGetSystemTime();
@@ -213,7 +213,7 @@ public:
             case FSM_State::STATE_DROGUE:
                 drogue_timer_ = chVTGetSystemTime() - drogue_time_;
                 if (TIME_I2MS(drogue_timer_) > refresh_timer) {
-                    if (fabs(getAccelerationAverage(0, view / 2) - getAccelerationAverage(view / 2, view)) >
+                    if (fabs(getAccelerationAverage(0, view / 2) - getAccelerationAverage(view / 2, view / 2)) >
                         main_acceleration_change_threshold_imu) {
                         rocket_state_ = FSM_State::STATE_MAIN_DETECT;
                         break;
@@ -231,7 +231,7 @@ public:
 
             case FSM_State::STATE_MAIN_DETECT:
                 if (fabs(getSecondDerivativeAltitudeAverage(0, view / 2) -
-                         getSecondDerivativeAltitudeAverage(view / 2, view)) >
+                         getSecondDerivativeAltitudeAverage(view / 2, view / 2)) >
                     main_acceleration_change_threshold_altimeter) {
                     rocket_state_ = FSM_State::STATE_MAIN;
                     main_time_ = chVTGetSystemTime();
@@ -244,7 +244,7 @@ public:
             case FSM_State::STATE_MAIN:
                 main_timer_ = chVTGetSystemTime() - main_time_;
 
-                if (fabs(getAltitudeAverage(0, view / 2) - getAltitudeAverage(view / 2, view)) <
+                if (fabs(getAltitudeAverage(0, view / 2) - getAltitudeAverage(view / 2, view / 2)) <
                     landing_altimeter_threshold) {
                     rocket_state_ = FSM_State::STATE_LANDED_DETECT;
                     landing_time_ = chVTGetSystemTime();
@@ -262,7 +262,7 @@ public:
 
             case FSM_State::STATE_LANDED_DETECT:
                 // If the 0 velocity was too brief, go back to main
-                if (fabs(getAltitudeAverage(0, view / 2) - getAltitudeAverage(view / 2, view)) >
+                if (fabs(getAltitudeAverage(0, view / 2) - getAltitudeAverage(view / 2, view / 2)) >
                     landing_altimeter_threshold) {
                     rocket_state_ = FSM_State::STATE_MAIN;
                     break;

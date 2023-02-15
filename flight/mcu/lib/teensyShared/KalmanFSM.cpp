@@ -36,18 +36,18 @@
 
 #include <cmath>
 
-double getAltitudeAverage(size_t start, size_t end) {
-    return KalmanFSM::getAverage(dataLogger.kalmanFifo, +[](KalmanData& k) { return (double) k.kalman_x; }, start, end);
+double getAltitudeAverage(size_t start, size_t len) {
+    return KalmanFSM::getAverage(dataLogger.kalmanFifo, +[](KalmanData& k) { return (double) k.kalman_x; }, start, len);
 }
 
-double getSecondDerivativeAltitudeAverage(size_t start, size_t end) {
+double getSecondDerivativeAltitudeAverage(size_t start, size_t len) {
     return KalmanFSM::getSecondDerivativeAverage(dataLogger.kalmanFifo, +[](KalmanData& k) { return (double) k.kalman_x; },
                                                             +[](KalmanData& k) { return k.timeStamp_state; }, start,
-                                                            end);
+                                                            len);
 }
 
-double getAccelerationAverage(size_t start, size_t end) {
-    return KalmanFSM::getAverage(dataLogger.kalmanFifo, +[](KalmanData& k) { return (double) k.kalman_ax; }, start, end);
+double getAccelerationAverage(size_t start, size_t len) {
+    return KalmanFSM::getAverage(dataLogger.kalmanFifo, +[](KalmanData& k) { return (double) k.kalman_ax; }, start, len);
 }
 
 /**
@@ -168,7 +168,7 @@ void KalmanFSM::tickFSM() {
 
         case FSM_State::STATE_APOGEE_DETECT:
             // If the 0 velocity was too brief, go back to coast
-            if (fabs(getAltitudeAverage(0, 3) - getAltitudeAverage(3, 6)) > apogee_altimeter_threshold) {
+            if (fabs(getAltitudeAverage(0, 3) - getAltitudeAverage(3, 3)) > apogee_altimeter_threshold) {
                 rocket_state_ = FSM_State::STATE_COAST_GNC;
                 break;
             }
@@ -184,7 +184,7 @@ void KalmanFSM::tickFSM() {
             break;
 
         case FSM_State::STATE_APOGEE:
-            if (fabs(getAccelerationAverage(0, 3) - getAccelerationAverage(3, 6)) >
+            if (fabs(getAccelerationAverage(0, 3) - getAccelerationAverage(3, 3)) >
                 drogue_acceleration_change_threshold_imu) {
                 rocket_state_ = FSM_State::STATE_DROGUE_DETECT;
                 break;
@@ -200,7 +200,7 @@ void KalmanFSM::tickFSM() {
             break;
 
         case FSM_State::STATE_DROGUE_DETECT:
-            if (fabs(getSecondDerivativeAltitudeAverage(0, 3) - getSecondDerivativeAltitudeAverage(3, 6)) >
+            if (fabs(getSecondDerivativeAltitudeAverage(0, 3) - getSecondDerivativeAltitudeAverage(3, 3)) >
                 drogue_acceleration_change_threshold_altimeter) {
                 rocket_state_ = FSM_State::STATE_DROGUE;
                 drogue_time_ = chVTGetSystemTime();
@@ -213,7 +213,7 @@ void KalmanFSM::tickFSM() {
         case FSM_State::STATE_DROGUE:
             drogue_timer_ = chVTGetSystemTime() - drogue_time_;
             if (TIME_I2MS(drogue_timer_) > refresh_timer) {
-                if (fabs(getAccelerationAverage(0, 3) - getAccelerationAverage(3, 6)) >
+                if (fabs(getAccelerationAverage(0, 3) - getAccelerationAverage(3, 3)) >
                     main_acceleration_change_threshold_imu) {
                     rocket_state_ = FSM_State::STATE_MAIN_DETECT;
                     break;
@@ -229,7 +229,7 @@ void KalmanFSM::tickFSM() {
             break;
 
         case FSM_State::STATE_MAIN_DETECT:
-            if (fabs(getSecondDerivativeAltitudeAverage(0, 3) - getSecondDerivativeAltitudeAverage(3, 6)) >
+            if (fabs(getSecondDerivativeAltitudeAverage(0, 3) - getSecondDerivativeAltitudeAverage(3, 3)) >
                 main_acceleration_change_threshold_altimeter) {
                 rocket_state_ = FSM_State::STATE_MAIN;
                 main_time_ = chVTGetSystemTime();
@@ -243,7 +243,7 @@ void KalmanFSM::tickFSM() {
             main_timer_ = chVTGetSystemTime() - main_time_;
 
             // if(TIME_I2MS(main_timer_) > refresh_timer){
-            if (fabs(getAltitudeAverage(0, 3) - getAltitudeAverage(3, 6)) < landing_altimeter_threshold) {
+            if (fabs(getAltitudeAverage(0, 3) - getAltitudeAverage(3, 3)) < landing_altimeter_threshold) {
                 rocket_state_ = FSM_State::STATE_LANDED_DETECT;
                 landing_time_ = chVTGetSystemTime();
                 break;
@@ -260,7 +260,7 @@ void KalmanFSM::tickFSM() {
 
         case FSM_State::STATE_LANDED_DETECT:
             // If the 0 velocity was too brief, go back to main
-            if (fabs(getAltitudeAverage(0, 3) - getAltitudeAverage(3, 6)) > landing_altimeter_threshold) {
+            if (fabs(getAltitudeAverage(0, 3) - getAltitudeAverage(3, 3)) > landing_altimeter_threshold) {
                 rocket_state_ = FSM_State::STATE_MAIN;
                 break;
             }

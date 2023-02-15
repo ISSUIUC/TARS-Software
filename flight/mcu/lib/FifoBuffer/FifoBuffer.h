@@ -32,10 +32,17 @@ public:
             chMtxUnlock(&lock);
             return false;
         }
-        size_t head_idx = tail_idx == 0 ? max_size - 1 : tail_idx - 1;
-        read_to = arr[head_idx];
+        read_to = arr[head()];
         chMtxUnlock(&lock);
         return true;
+    }
+
+    size_t head() {
+        if (count <= max_size) {
+            return 0;
+        } else {
+            return tail_idx;
+        }
     }
 
     /**
@@ -46,16 +53,15 @@ public:
      *
      * @param write_to An array of at least n items to write to
      * @param start The index to start reading from (inclusive)
-     * @param end The index to stop reading at (exclusive)
+     * @param length the number of items to read
      * @return How many items were actually read
      */
     // TODO make this function return a std::array?
-    size_t readSlice(T* write_to[], size_t start, size_t end) {
+    size_t readSlice(T* write_to[], size_t start, size_t len) {
 //        chMtxLock(&lock);
         size_t i = 0;
-        size_t head_idx = tail_idx == 0 ? max_size - 1 : tail_idx - 1;
-        size_t idx = head_idx + start;
-        while (i < (end - start)) {
+        size_t idx = head() + start;
+        while (i < len) {
             write_to[i++] = &arr[(idx++) % max_size];  // TODO optimize this later
         }
 //        chMtxUnlock(&lock);
