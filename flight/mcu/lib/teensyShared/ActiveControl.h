@@ -26,8 +26,8 @@ class Controller {
     float prev_u = 0;
     float du_max = 0.01;
 
-    float launch_pad_alt{};
-    float apogee_des_msl{};
+    float launch_pad_alt = 0.0;
+    float apogee_des_msl = 0.0;
     float apogee_des_agl = 3962;
 
     ServoControl activeControlServos;

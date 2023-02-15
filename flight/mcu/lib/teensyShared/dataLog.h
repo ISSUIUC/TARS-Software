@@ -44,14 +44,14 @@ private:
  */
 class DataLogBuffer {
 public:
-    FifoBuffer<LowGData, FIFO_SIZE> lowGFifo{};
-    FifoBuffer<HighGData, FIFO_SIZE> highGFifo{};
-    FifoBuffer<GpsData, FIFO_SIZE> gpsFifo{};
-    FifoBuffer<KalmanData, FIFO_SIZE> kalmanFifo{};
-    FifoBuffer<rocketStateData<4>, FIFO_SIZE> rocketStateFifo{};
-    FifoBuffer<FlapData, FIFO_SIZE> flapFifo{};
-    FifoBuffer<VoltageData, FIFO_SIZE> voltageFifo{};
-    FifoBuffer<BarometerData, FIFO_SIZE> barometerFifo{};
+    FifoBuffer<LowGData, FIFO_SIZE> lowGFifo;
+    FifoBuffer<HighGData, FIFO_SIZE> highGFifo;
+    FifoBuffer<GpsData, FIFO_SIZE> gpsFifo;
+    FifoBuffer<KalmanData, FIFO_SIZE> kalmanFifo;
+    FifoBuffer<rocketStateData<4>, FIFO_SIZE> rocketStateFifo;
+    FifoBuffer<FlapData, FIFO_SIZE> flapFifo;
+    FifoBuffer<VoltageData, FIFO_SIZE> voltageFifo;
+    FifoBuffer<BarometerData, FIFO_SIZE> barometerFifo;
 
     sensorDataStruct_t read();
 

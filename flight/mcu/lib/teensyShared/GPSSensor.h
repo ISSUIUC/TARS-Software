@@ -22,9 +22,9 @@ struct GPSSensor {
     SFE_UBLOX_GNSS GNSS;
 
     systime_t timeStamp{};
-    float latitude = 0.0;
-    float longitude = 0.0;
-    float altitude = 0.0;
+    float latitude{};
+    float longitude{};
+    float altitude{};
     uint32_t fix_type{};
     bool pos_lock{};
     uint32_t SIV_count{};

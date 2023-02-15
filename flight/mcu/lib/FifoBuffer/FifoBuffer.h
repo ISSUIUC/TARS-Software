@@ -73,7 +73,7 @@ private:
      * @brief total number of items that have been pushed
      */
     
-    T arr[max_size]{};
+    T arr[max_size];
 };
 
 template<typename T, size_t max_size>

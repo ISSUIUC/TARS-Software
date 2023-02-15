@@ -15,7 +15,7 @@
 template <size_t count>
 class FSMCollection {
    public:
-    FSMCollection(std::initializer_list<RocketFSMBase*> fsms) {
+    FSMCollection(std::initializer_list<RocketFSMBase*> fsms) : FSMs_{} {
         size_t i = 0;
         for (auto& item : fsms) {
             if (i >= count) {
@@ -44,5 +44,5 @@ class FSMCollection {
     }
 
    private:
-    RocketFSMBase* FSMs_[count]{};
+    RocketFSMBase* FSMs_[count];
 };
