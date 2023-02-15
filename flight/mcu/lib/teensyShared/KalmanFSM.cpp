@@ -37,17 +37,17 @@
 #include <cmath>
 
 double getAltitudeAverage(size_t start, size_t end) {
-    return dataLogger.kalmanFifo.getAverage([](KalmanData& k) { return (double) k.kalman_x; }, start, end);
+    return KalmanFSM::getAverage(dataLogger.kalmanFifo, +[](KalmanData& k) { return (double) k.kalman_x; }, start, end);
 }
 
 double getSecondDerivativeAltitudeAverage(size_t start, size_t end) {
-    return dataLogger.kalmanFifo.getSecondDerivativeAverage([](KalmanData& k) { return (double) k.kalman_x; },
-                                                            [](KalmanData& k) { return k.timeStamp_state; }, start,
+    return KalmanFSM::getSecondDerivativeAverage(dataLogger.kalmanFifo, +[](KalmanData& k) { return (double) k.kalman_x; },
+                                                            +[](KalmanData& k) { return k.timeStamp_state; }, start,
                                                             end);
 }
 
 double getAccelerationAverage(size_t start, size_t end) {
-    return dataLogger.kalmanFifo.getAverage([](KalmanData& k) { return (double) k.kalman_ax; }, start, end);
+    return KalmanFSM::getAverage(dataLogger.kalmanFifo, +[](KalmanData& k) { return (double) k.kalman_ax; }, start, end);
 }
 
 /**

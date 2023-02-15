@@ -177,7 +177,7 @@ static THD_FUNCTION(kalman_THD, arg) {
 /* SERVO CONTROL THREAD                                                       */
 
 static THD_FUNCTION(servo_THD, arg) {
-    activeController.startup();
+    activeController.init();
 
     while (true) {
 #ifdef THREAD_DEBUG
@@ -304,8 +304,6 @@ void setup() {
 
     digitalWrite(LED_ORANGE, HIGH);
     digitalWrite(LED_BLUE, HIGH);
-
-    activeController.init();
 
     Serial.println("chibios begin");
     chBegin(chSetup);

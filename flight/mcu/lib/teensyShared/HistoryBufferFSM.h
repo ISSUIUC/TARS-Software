@@ -31,17 +31,17 @@ private:
     sysinterval_t landing_timer = 0;
 
     double getAltitudeAverage(size_t start, size_t end) {
-        return dataLogger.barometerFifo.getAverage([](BarometerData& b) { return (double) b.altitude; }, start, end);
+        return HistoryBufferFSM::getAverage(dataLogger.barometerFifo, +[](BarometerData& b) { return (double) b.altitude; }, start, end);
     }
 
     double getSecondDerivativeAltitudeAverage(size_t start, size_t end) {
-        return dataLogger.barometerFifo.getSecondDerivativeAverage([](BarometerData& b) { return (double) b.altitude; },
-                                                                   [](BarometerData& b) { return b.timeStamp_barometer; },
+        return HistoryBufferFSM::getSecondDerivativeAverage(dataLogger.barometerFifo, +[](BarometerData& b) { return (double) b.altitude; },
+                                                                   +[](BarometerData& b) { return b.timeStamp_barometer; },
                                                                    start, end);
     }
 
     double getAccelerationAverage(size_t start, size_t end) {
-        return dataLogger.highGFifo.getAverage([](HighGData& g) { return (double) g.hg_az; }, start, end);
+        return HistoryBufferFSM::getAverage(dataLogger.highGFifo, +[](HighGData& g) { return (double) g.hg_az; }, start, end);
     }
 
 public:

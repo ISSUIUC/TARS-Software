@@ -41,79 +41,30 @@ public:
     /**
      * @brief Reads a range of items into a passed array, which can be larger than the actual count of items.
      *
+     * Note that this function returns pointers to elements of the buffer, so this isn't thread safe. Lock and unlock
+     * the mutex yourself.
+     *
      * @param write_to An array of at least n items to write to
      * @param start The index to start reading from (inclusive)
      * @param end The index to stop reading at (exclusive)
      * @return How many items were actually read
      */
+    // TODO make this function return a std::array?
     size_t readSlice(T* write_to[], size_t start, size_t end) {
-        chMtxLock(&lock);
+//        chMtxLock(&lock);
         size_t i = 0;
-        if (count < max_size) {
-            size_t idx = start;
-            while (idx != tail_idx && idx < end) {
-                write_to[i++] = &arr[idx++];
-            }
-        } else {
-            // if we are already wrapping, head == tail
-            size_t idx = tail_idx + start;
-            if (idx >= max_size) {
-                idx -= max_size;
-            }
-            size_t end_idx = tail_idx + end;
-            if (end_idx >= max_size) {
-                end_idx -= max_size;
-            }
-            while (idx != tail_idx && idx < end_idx) {
-                write_to[i++] = &arr[idx++];
-            }
+        size_t head_idx = tail_idx == 0 ? max_size - 1 : tail_idx - 1;
+        size_t idx = head_idx + start;
+        while (i < (end - start)) {
+            write_to[i++] = &arr[(idx++) % max_size];  // TODO optimize this later
         }
-        chMtxUnlock(&lock);
+//        chMtxUnlock(&lock);
         return i;
     }
 
-    // i'd've made the function pointers template parameters so we could guarantee inlining, but using lambdas as template
-    //  parameters is a C++17 feature and platformio really doesn't want to use C++17
-    double getAverage(double (*access_value)(T&), size_t start, size_t end) {
-        T* items[end - start];
-        readSlice(items, start, end);
-        double sum = 0.0;
-        for (size_t i = start; i < end; i++) {
-            sum += access_value(*items[i]);
-        }
-        return sum / (double) (end - start);
-    }
-
-    double getSecondDerivativeAverage(double (*access_value)(T&), systime_t (*access_time)(T&), size_t start, size_t end) {
-        T* items[end - start];
-        readSlice(items, start, end);
-
-        double derivatives[end - start - 1];
-        for (size_t i = start; i < end - 1; i++) {
-            double first = access_value(*items[i]);
-            double second = access_value(*items[i + 1]);
-            systime_t delta_t = access_time(*items[i + 1]) - access_time(*items[i]);
-            derivatives[i] = (second - first) / (delta_t == 0 ? 0.02 : delta_t);
-        }
-
-        double second_derivatives[end - start - 2];
-        for (size_t i = start; i < end - 2; i++) {
-            double first = derivatives[i];
-            double second = derivatives[i + 1];
-            systime_t delta_t = access_time(*items[i + 1]) - access_time(*items[i]);
-            derivatives[i] = (second - first) / (delta_t == 0 ? 0.02 : delta_t);
-        }
-
-        double sum = 0.0;
-        for (size_t i = start; i < end - 2; i++) {
-            sum += second_derivatives[i];
-        }
-        return sum / (double) (end - start - 2);
-    }
-
+private:
     size_t count = 0;
 
-private:
     /**
      * @brief index of the next slot to write to
      */
