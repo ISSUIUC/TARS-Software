@@ -32,10 +32,10 @@ struct euler_t {
     float roll;
 };
 
-class IMU {
+class OrientationSensor {
    public:
-    IMU() = default;
-    IMU(Adafruit_BNO08x* imu);
+    OrientationSensor() = default;
+    OrientationSensor(Adafruit_BNO08x* imu);
     void readData();
     void setIMU(Adafruit_BNO08x* imu);
     Accelerations getAccelerations();

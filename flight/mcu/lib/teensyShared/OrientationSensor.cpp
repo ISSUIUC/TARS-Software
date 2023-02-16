@@ -1,4 +1,4 @@
-#include "IMU.h"
+#include "OrientationSensor.h"
 
 #ifdef FAST_MODE
 // Top frequency is reported to be 1000Hz (but freq is somewhat variable)
@@ -9,24 +9,24 @@ long reportIntervalUs = 2000;
 sh2_SensorId_t reportType = SH2_ARVR_STABILIZED_RV;
 long reportIntervalUs = 5000;
 #endif
-void IMU::setReports(sh2_SensorId_t reportType, long report_interval) {
+void OrientationSensor::setReports(sh2_SensorId_t reportType, long report_interval) {
     Serial.println("Setting desired reports");
     if (!_imu->enableReport(reportType, report_interval)) {
         Serial.println("Could not enable stabilized remote vector");
     }
 }
 
-IMU::IMU(Adafruit_BNO08x* bno) {
+OrientationSensor::OrientationSensor(Adafruit_BNO08x* bno) {
     _imu = bno;
     setReports(reportType, reportIntervalUs);
 }
 
-void IMU::setIMU(Adafruit_BNO08x* bno) {
+void OrientationSensor::setIMU(Adafruit_BNO08x* bno) {
     _imu = bno;
     setReports(reportType, reportIntervalUs);
 }
 
-void IMU::readData() {
+void OrientationSensor::readData() {
     sh2_SensorValue_t event;
     if (_imu->getSensorEvent(&event)) {
         switch (event.sensorId) {
@@ -55,7 +55,7 @@ void IMU::readData() {
     }
 }
 
-void IMU::quaternionToEuler(float qr, float qi, float qj, float qk,
+void OrientationSensor::quaternionToEuler(float qr, float qi, float qj, float qk,
                             bool degrees = false) {
     float sqr = sq(qr);
     float sqi = sq(qi);
@@ -70,26 +70,26 @@ void IMU::quaternionToEuler(float qr, float qi, float qj, float qk,
         atan2(2.0 * (qj * qk + qi * qr), (-sqi - sqj + sqk + sqr));
 }
 
-void IMU::quaternionToEulerRV(sh2_RotationVectorWAcc_t* rotational_vector,
+void OrientationSensor::quaternionToEulerRV(sh2_RotationVectorWAcc_t* rotational_vector,
                               bool degrees = false) {
     quaternionToEuler(rotational_vector->real, rotational_vector->i,
                       rotational_vector->j, rotational_vector->k, degrees);
 }
 
-void IMU::quaternionToEulerGI(sh2_GyroIntegratedRV_t* rotational_vector,
+void OrientationSensor::quaternionToEulerGI(sh2_GyroIntegratedRV_t* rotational_vector,
                               bool degrees = false) {
     quaternionToEuler(rotational_vector->real, rotational_vector->i,
                       rotational_vector->j, rotational_vector->k, degrees);
 }
 
-float IMU::getTemp() { return _temp; }
+float OrientationSensor::getTemp() { return _temp; }
 
-float IMU::getPressure() { return _pressure; }
+float OrientationSensor::getPressure() { return _pressure; }
 
-Gyroscope IMU::getGyroscope() { return _gyro; }
+Gyroscope OrientationSensor::getGyroscope() { return _gyro; }
 
-Magnetometer IMU::getMagnetometer() { return _magnetometer; }
+Magnetometer OrientationSensor::getMagnetometer() { return _magnetometer; }
 
-Accelerations IMU::getAccelerations() { return _accelerations; }
+Accelerations OrientationSensor::getAccelerations() { return _accelerations; }
 
-euler_t IMU::getEuler() { return _orientationEuler; }
+euler_t OrientationSensor::getEuler() { return _orientationEuler; }
