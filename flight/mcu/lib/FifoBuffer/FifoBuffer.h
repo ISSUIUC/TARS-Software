@@ -15,6 +15,7 @@ public:
         if (tail_idx == max_size) {
             tail_idx = 0;
         }
+        if (count < max_size) count++;
         chMtxUnlock(&lock);
         return true;
     }
