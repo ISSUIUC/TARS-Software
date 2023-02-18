@@ -16,11 +16,11 @@ public:
     template<typename T, size_t count>
     static double getAverage(FifoBuffer<T, count>& buffer, double (*access_value)(T&), size_t start, size_t len) {
         chMtxLock(&buffer.lock);
-        T* items[len];
+        T items[len];
         buffer.readSlice(items, start, len);
         double sum = 0.0;
         for (size_t i = start; i < start + len; i++) {
-            sum += access_value(*items[i]);
+            sum += access_value(items[i]);
         }
         chMtxUnlock(&buffer.lock);
         return sum / (double) len;
@@ -29,14 +29,14 @@ public:
     template<typename T, size_t count>
     static double getSecondDerivativeAverage(FifoBuffer<T, count>& buffer, double (*access_value)(T&), systime_t (*access_time)(T&), size_t start, size_t len) {
         chMtxLock(&buffer.lock);
-        T* items[len];
+        T items[len];
         buffer.readSlice(items, start, len);
 
         double derivatives[len - 1];
         for (size_t i = start; i < start + len - 1; i++) {
-            double first = access_value(*items[i]);
-            double second = access_value(*items[i + 1]);
-            systime_t delta_t = access_time(*items[i + 1]) - access_time(*items[i]);
+            double first = access_value(items[i]);
+            double second = access_value(items[i + 1]);
+            systime_t delta_t = access_time(items[i + 1]) - access_time(items[i]);
             derivatives[i] = (second - first) / (delta_t == 0 ? 0.02 : delta_t);
         }
 
@@ -44,7 +44,7 @@ public:
         for (size_t i = start; i < start + len - 2; i++) {
             double first = derivatives[i];
             double second = derivatives[i + 1];
-            systime_t delta_t = access_time(*items[i + 1]) - access_time(*items[i]);
+            systime_t delta_t = access_time(items[i + 1]) - access_time(items[i]);
             derivatives[i] = (second - first) / (delta_t == 0 ? 0.02 : delta_t);
         }
         chMtxUnlock(&buffer.lock);

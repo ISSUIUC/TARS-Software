@@ -2,9 +2,9 @@
 #include "pins.h"
 #include "FS.h"
 
-SDLogger sd_logger(dataLogger); // NOLINT(cppcoreguidelines-interfaces-global-init)
+SDLogger sd_logger; // NOLINT(cppcoreguidelines-interfaces-global-init)
 
-SDLogger::SDLogger(DataLogBuffer& buffer) : view(buffer) {}
+//SDLogger::SDLogger() { }
 
 #define MAX_FILES 999
 
@@ -66,6 +66,8 @@ char* sdFileNamer(char* fileName, char* fileExtensionParam) {
 }
 
 void SDLogger::init() {
+    queue.attach(dataLogger);
+
     if (SD.begin(BUILTIN_SDCARD)) {
         char file_extension[6] = ".dat";
 
@@ -94,7 +96,7 @@ void SDLogger::init() {
 
 void SDLogger::update() {
     while (true) {
-        sensorDataStruct_t current_data = view.read();
+        sensorDataStruct_t current_data = queue.next();
         if (!current_data.hasData()) {
             return;
         }

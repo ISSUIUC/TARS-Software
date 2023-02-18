@@ -74,7 +74,7 @@ void Telemetry::init() {
     rf95.setTxPower(23, false);
 }
 
-Telemetry::Telemetry() : rf95(RFM95_CS, RFM95_INT), data_view(buffered_data) { }
+Telemetry::Telemetry() : rf95(RFM95_CS, RFM95_INT) { }
 
 /**
  * @brief  This function handles commands sent from the ground station
@@ -277,7 +277,7 @@ TelemetryPacket Telemetry::makePacket(const sensorDataStruct_t &data_struct) {
 
     TelemetryDataLite data{};
     packet.datapoint_count = 0;
-    for(int8_t i = 0; i < 4 && data_view.next(data); i++){
+    for(int8_t i = 0; i < 4 && buffered_data.pop(data); i++){
         packet.datapoints[i] = data;
         packet.datapoint_count = i + (int8_t) 1;
     }

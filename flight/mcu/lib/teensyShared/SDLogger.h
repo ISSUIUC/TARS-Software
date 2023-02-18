@@ -9,8 +9,6 @@ extern SDLogger sd_logger;
 
 class SDLogger {
 public:
-    explicit SDLogger(DataLogBuffer& buffer);
-
     void init();
 
     void update();
@@ -19,7 +17,7 @@ private:
     template<typename T>
     void logData(T* data);
 
-    DataLogView view;
+    DataLogQueue queue;
     File sd_file;
     size_t writes_since_flush = 0;
 };

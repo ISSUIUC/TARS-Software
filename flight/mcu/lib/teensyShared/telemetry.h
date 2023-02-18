@@ -6,7 +6,7 @@
 
 #include "pins.h"
 #include "packet.h"
-#include "FifoBuffer.h"
+#include "MessageQueue.h"
 
 // Make sure to change these pinout depending on wiring
 // Don't forget to change the ini file to build the correct main file
@@ -89,8 +89,7 @@ public:
 
 private:
     RH_RF95 rf95;
-    FifoBuffer<TelemetryDataLite, 4> buffered_data;
-    FifoView<TelemetryDataLite, 4> data_view;
+    MessageQueue<TelemetryDataLite, 4> buffered_data;
 
     // Initializing command ID
     int16_t last_command_id = -1;
