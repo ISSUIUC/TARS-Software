@@ -26,7 +26,7 @@ public:
             chMtxUnlock(&lock);
             return false;
         }
-        item = arr[head()];
+        item = arr[newest()];
         chMtxUnlock(&lock);
         return true;
     }
@@ -65,6 +65,19 @@ private:
             return tail_idx + max_size - count;
         } else {
             return tail_idx - count;
+        }
+    }
+
+    /**
+     * @brief Returns the index of the newest element. Do not use if count == 0, and always lock before using.
+     *
+     * @return the index of the newest element you can read from
+     */
+    size_t newest() {
+        if (tail_idx == 0) {
+            return max_size - 1;
+        } else {
+            return tail_idx - 1;
         }
     }
 
