@@ -40,7 +40,7 @@
 #include "Abort.h"
 #include "SDLogger.h"
 
-// #define THREAD_DEBUG
+#define THREAD_DEBUG
 //#define SERVO_DEBUG
 
 /******************************************************************************/
@@ -86,9 +86,6 @@ static THD_FUNCTION(rocket_FSM_THD, arg) {
         fsmCollection.tick();
 
         rocketStateData<4> fsm_state = fsmCollection.getStates();
-//        for (auto& rocketState : fsm_state.rocketStates) {
-//            Serial.println((int) rocketState);
-//        }
         dataLogger.pushRocketStateFifo(fsm_state);
 
         chThdSleepMilliseconds(6);  // FSM runs at 100 Hz

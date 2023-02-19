@@ -38,6 +38,7 @@ public:
         }
         count--;
         chMtxUnlock(&lock);
+        return true;
     }
 
 private:

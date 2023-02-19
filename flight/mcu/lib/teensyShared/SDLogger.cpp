@@ -76,7 +76,7 @@ void SDLogger::init() {
         // Initialize SD card
         sd_file = SD.open(data_name, FILE_WRITE_BEGIN);
         // print header to file on sd card that lists each variable that is logged
-        sd_file.println("binary logging of sensor_data_t");
+        // sd_file.println("binary logging of sensor_data_t");
         sd_file.flush();
 
         Serial.println(sd_file.name());
@@ -95,14 +95,14 @@ void SDLogger::init() {
 }
 
 void SDLogger::update() {
-    while (true) {
-        sensorDataStruct_t current_data = queue.next();
-        if (!current_data.hasData()) {
-            return;
-        }
-
-        logData(&current_data);
+    sensorDataStruct_t current_data = queue.next();
+    Serial.print("Has Data?");
+    Serial.println(current_data.hasData());
+    if (!current_data.hasData()) {
+        return;
     }
+
+    logData(&current_data);
 }
 
 template<typename T>
