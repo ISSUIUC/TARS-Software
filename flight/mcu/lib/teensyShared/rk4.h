@@ -1,8 +1,8 @@
+#pragma once
+
 #include <array>
 
 #include "Atmosphere.h"
-
-#pragma once
 
 using std::array;
 

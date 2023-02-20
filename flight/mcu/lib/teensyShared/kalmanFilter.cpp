@@ -7,6 +7,9 @@
  */
 
 #include "kalmanFilter.h"
+
+#include "rocketFSM.h"
+
 #define EIGEN_MATRIX_PLUGIN "MatrixAddons.h"
 
 /**
@@ -49,20 +52,6 @@ void KalmanFilter::SetF(float dt) {
     F_mat(2, 2) = 1;
 }
 
-KalmanFilter::KalmanFilter(struct pointers* pointer_struct) {
-    gz_L = &pointer_struct->sensorDataPointer->lowG_data.gz;
-    gz_H = &pointer_struct->sensorDataPointer->highG_data.hg_az;
-    b_alt = &pointer_struct->sensorDataPointer->barometer_data.altitude;
-    mutex_lowG_ = &pointer_struct->dataloggerTHDVarsPointer.dataMutex_lowG;
-    mutex_highG_ = &pointer_struct->dataloggerTHDVarsPointer.dataMutex_highG;
-    dataMutex_barometer_ = &pointer_struct->dataloggerTHDVarsPointer.dataMutex_barometer;
-    dataMutex_state_ = &pointer_struct->dataloggerTHDVarsPointer.dataMutex_state;
-    stateData_ = &pointer_struct->sensorDataPointer->state_data;
-    data_logger_ = &pointer_struct->dataloggerTHDVarsPointer;
-    current_state_ =
-        &pointer_struct->sensorDataPointer->rocketState_data.rocketStates[0];  // TODO use all rocket states?
-}
-
 /**
  * @brief Run Kalman filter calculations as long as FSM has passed IDLE
  *
@@ -70,7 +59,7 @@ KalmanFilter::KalmanFilter(struct pointers* pointer_struct) {
  * @param sd Spectral density of the noise
  */
 void KalmanFilter::kfTickFunction(float dt, float sd) {
-    if (*current_state_ >= RocketFSM::FSM_State::STATE_IDLE) {
+    if (getActiveFSM().getFSMState() > FSM_State::STATE_IDLE) {
         SetF(float(dt) / 1000);
         SetQ(float(dt) / 1000, sd);
         priori();
@@ -97,12 +86,13 @@ void KalmanFilter::kfTickFunction(float dt, float sd) {
  */
 void KalmanFilter::Initialize() {
     // TODO: The altitude initialization is the same code as
-    // setLaunchPadElevation() in AC. Maybe use the same one?
+    //   setLaunchPadElevation() in AC. Maybe use the same one?
     float sum = 0;
     for (int i = 0; i < 30; i++) {
-        chMtxLock(dataMutex_barometer_);
-        sum += *b_alt;
-        chMtxUnlock(dataMutex_barometer_);
+        // TODO This mutex lock is almost certainly not necessary
+        chMtxLock(&barometer.mutex);
+        sum += barometer.getAltitude();
+        chMtxUnlock(&barometer.mutex);
         chThdSleepMilliseconds(100);
     }
 
@@ -171,7 +161,7 @@ void KalmanFilter::Initialize() {
  * @param vel_f Initial velocity estimate
  */
 
-void KalmanFilter::Initialize(float pos_f, float vel_f) {
+void KalmanFilter::initialize(float pos_f, float vel_f) {
     // set x_k
     x_k(0, 0) = pos_f;
     x_k(1, 0) = vel_f;
@@ -216,7 +206,7 @@ void KalmanFilter::priori() {
  *
  */
 void KalmanFilter::update() {
-    if (*current_state_ >= RocketFSM::FSM_State::STATE_APOGEE) {
+    if (getActiveFSM().getFSMState() >= FSM_State::STATE_APOGEE) {
         H(1, 2) = 0;
     }
 
@@ -225,24 +215,31 @@ void KalmanFilter::update() {
     Eigen::Matrix<float, 3, 3> identity = Eigen::Matrix<float, 3, 3>::Identity();
     K = (P_priori * H.transpose()) * temp;
 
+    // TODO These mutex locks are almost certainly not necessary
     // Sensor Measurements
-    chMtxLock(mutex_highG_);
-    y_k(1, 0) = ((*gz_H) * 9.81) - 9.81 - 0.51;
-    chMtxUnlock(mutex_highG_);
+    chMtxLock(&highG.mutex);
+    y_k(1, 0) = highG.getAccel().az * 9.81 - 0.981 - 0.51;
+    chMtxUnlock(&highG.mutex);
 
-    chMtxLock(dataMutex_barometer_);
-    y_k(0, 0) = *b_alt;
-    chMtxUnlock(dataMutex_barometer_);
+    chMtxLock(&barometer.mutex);
+    y_k(0, 0) = barometer.getAltitude();
+    chMtxUnlock(&barometer.mutex);
 
     // # Posteriori Update
     x_k = x_priori + K * (y_k - (H * x_priori));
     P_k = (identity - K * H) * P_priori;
 
-    chMtxLock(dataMutex_state_);
-    stateData_->state_x = x_k(0, 0);
-    stateData_->state_vx = x_k(1, 0);
-    stateData_->state_ax = x_k(2, 0);
-    stateData_->timeStamp_state = chVTGetSystemTime();
-    chMtxUnlock(dataMutex_state_);
-    data_logger_->pushStateFifo(stateData_);
+    chMtxLock(&mutex);
+    kalman_x = x_k(0, 0);
+    kalman_vx = x_k(1, 0);
+    kalman_ax = x_k(2, 0);
+    timestamp = chVTGetSystemTime();
+    chMtxUnlock(&mutex);
+    dataLogger.pushKalmanFifo((KalmanData){kalman_x, kalman_vx, kalman_ax, kalman_apo, timestamp});
 }
+
+KalmanState KalmanFilter::getState() const { return {kalman_x, kalman_vx, kalman_ax}; }
+
+void KalmanFilter::updateApogee(float estimate) { kalman_apo = estimate; }
+
+KalmanFilter kalmanFilter;

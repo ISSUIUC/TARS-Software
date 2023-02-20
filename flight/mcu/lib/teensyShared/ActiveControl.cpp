@@ -8,39 +8,23 @@
 
 #include "ActiveControl.h"
 
+#include "kalmanFilter.h"
 #include "rocketFSM.h"
-#include "thresholds.h"
 
-Controller::Controller(struct pointers* pointer_struct, PWMServo* controller_servo)
-    : activeControlServos(controller_servo) {
-    controller_servo_ = controller_servo;
-    stateData_ = &pointer_struct->sensorDataPointer->state_data;
-    current_state = &pointer_struct->sensorDataPointer->rocketState_data.rocketStates[0];
-    b_alt = &pointer_struct->sensorDataPointer->barometer_data.altitude;
-    dataMutex_barometer_ = &pointer_struct->dataloggerTHDVarsPointer.dataMutex_barometer;
-    dataMutex_state_ = &pointer_struct->dataloggerTHDVarsPointer.dataMutex_state;
+Controller activeController;
 
-    /*
-     * Startup sequence
-     * 15 degrees written to servo since this was
-     * experimentally determined to be the position in which
-     * the flaps are perfectly flush with the airframe.
-     */
-    controller_servo_->write(120);
-    chThdSleepMilliseconds(1000);
-    controller_servo_->write(12);
-    chThdSleepMilliseconds(1000);
+Controller::Controller() : activeControlServos(&controller_servo_) {}
 
-    setLaunchPadElevation();
-}
+void Controller::ctrlTickFunction() {
+    chMtxLock(&kalmanFilter.mutex);
+    array<float, 2> init = {kalmanFilter.getState().x, kalmanFilter.getState().vx};
+    chMtxUnlock(&kalmanFilter.mutex);
 
-void Controller::ctrlTickFunction(pointers* pointer_struct) {
-    chMtxLock(dataMutex_state_);
-    array<float, 2> init = {stateData_->state_x, stateData_->state_vx};
-    chMtxUnlock(dataMutex_state_);
     float apogee_est = rk4_.sim_apogee(init, 0.3)[0];
 
-    stateData_->state_apo = apogee_est;
+    chMtxLock(&kalmanFilter.mutex);
+    kalmanFilter.updateApogee(apogee_est);
+    chMtxUnlock(&kalmanFilter.mutex);
 
     float u = kp * (apogee_est - apogee_des_msl);
 
@@ -78,8 +62,7 @@ void Controller::ctrlTickFunction(pointers* pointer_struct) {
      */
     if (ActiveControl_ON()) {
         activeControlServos.servoActuation(u);
-        pointer_struct->sensorDataPointer->flap_data.extension = u;
-
+        dataLogger.pushFlapsFifo((FlapData){u, chVTGetSystemTime()});
     } else {
         activeControlServos.servoActuation(min_extension);
     }
@@ -90,7 +73,7 @@ void Controller::ctrlTickFunction(pointers* pointer_struct) {
  * based on FSM state
  * @returns boolean depending on whether flaps should actuate or not
  */
-bool Controller::ActiveControl_ON() { return *current_state == RocketFSM::FSM_State::STATE_COAST_GNC; }
+bool Controller::ActiveControl_ON() { return getActiveFSM().getFSMState() == FSM_State::STATE_COAST_GNC; }
 
 /**
  * @brief Initializes launchpad elevation through barometer measurement.
@@ -108,11 +91,28 @@ bool Controller::ActiveControl_ON() { return *current_state == RocketFSM::FSM_St
 void Controller::setLaunchPadElevation() {
     float sum = 0;
     for (int i = 0; i < 30; i++) {
-        chMtxLock(dataMutex_barometer_);
-        sum += *b_alt;
-        chMtxUnlock(dataMutex_barometer_);
+        chMtxLock(&barometer.mutex);
+        sum += barometer.getAltitude();
+        chMtxUnlock(&barometer.mutex);
         chThdSleepMilliseconds(100);
     }
     launch_pad_alt = sum / 30;
     apogee_des_msl = apogee_des_agl + launch_pad_alt;
+}
+
+void Controller::init() {
+    controller_servo_.attach(AC_SERVO_PIN, 770, 2250);
+
+    /*
+     * Startup sequence
+     * 15 degrees written to servo since this was
+     * experimentally determined to be the position in which
+     * the flaps are perfectly flush with the airframe.
+     */
+    controller_servo_.write(180);
+    chThdSleepMilliseconds(1000);
+    controller_servo_.write(15);
+    chThdSleepMilliseconds(1000);
+
+    setLaunchPadElevation();
 }

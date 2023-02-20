@@ -1,19 +1,29 @@
 #pragma once
-#include <ChRt.h>
 
-#include "rocketFSM.h"
+#include <initializer_list>  // this is here to make initializing the FSMCollection a lot more convenient
+
+#include "ChRt.h"
+#include "RocketFSMBase.h"
 
 /**
  * @brief Manager for all FSMs in the rocket
  *
- * @param FSMs Array of pointers to all FSMs which implement RocketFSM
+ * @param FSMs Array of pointers to all FSMs which implement RocketFSMBase
  * @param count Number of FSMs in FSMs array
  */
 
 template <size_t count>
 class FSMCollection {
    public:
-    FSMCollection(RocketFSM** FSMs) : FSMs_(FSMs) {}
+    FSMCollection(std::initializer_list<RocketFSMBase*> fsms) : FSMs_{} {
+        size_t i = 0;
+        for (auto& item : fsms) {
+            if (i >= count) {
+                break;
+            }
+            FSMs_[i++] = item;
+        }
+    }
 
     void tick() {
         // tick all FSMs
@@ -22,15 +32,17 @@ class FSMCollection {
         }
     }
 
-    void getStates(rocketStateData<count>& out) {
-        // update FSM states and timestamps
+    rocketStateData<count> getStates() {
+        rocketStateData<count> states;
+        // refresh FSM states and timestamps
         systime_t time = chVTGetSystemTime();
         for (size_t i = 0; i < count; i++) {
-            out.rocketStates[i] = FSMs_[i]->getFSMState();
-            out.timeStamp_RS = time;
+            states.rocketStates[i] = FSMs_[i]->getFSMState();
         }
+        states.timestamp = time;
+        return states;
     }
 
    private:
-    RocketFSM** FSMs_;  // array of pointers to FSMs
+    RocketFSMBase* FSMs_[count];
 };

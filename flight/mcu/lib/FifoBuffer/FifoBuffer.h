@@ -1,67 +1,88 @@
-//
-// Created by 16182 on 9/27/2021.
-//
+#pragma once
 
-#ifndef TARS_SOFTWARE_FIFO_H
-#define TARS_SOFTWARE_FIFO_H
-
-#include <cstdint>
-#include <cstring>
-
-#ifdef COMPILE_LOCAL
-#include <mutex>
-#endif
-
-#ifdef COMPILE_TARGET
 #include <ChRt.h>
-#endif
-
-// only works with types that can be copied with memcpy
-class GenericFifoBuffer {
-   public:
-    // buff_size = size of array in elements
-    // data_size = size of array element in bytes
-    GenericFifoBuffer(void* arr, uint16_t buff_size, uint16_t data_size) {
-        capacity_ = buff_size;
-        cur_length_ = 0;
-        head_idx_ = 0;
-        tail_idx_ = 0;
-        data_size_ = data_size;
-        arr_ = arr;
-    }
-
-    bool push(void* element);
-
-    // returns false on failure
-    bool pop(void* out);
-
-   private:
-    uint16_t capacity_, cur_length_, head_idx_, tail_idx_, data_size_;
-    void* arr_;
-
-#ifdef COMPILE_LOCAL
-    std::mutex lock_;
-#endif
-
-#ifdef COMPILE_TARGET
-    mutex_t lock_;
-#endif
-};
 
 template <typename T, size_t max_size>
 class FifoBuffer {
-    // static_assert(std::is_trivially_copyable<T>::value, "Only trivially
-    // copyable types are allowed");
    public:
-    FifoBuffer() : buffer(arr, max_size, sizeof(T)) {}
+    MUTEX_DECL(lock);
 
-    bool push(T element) { return buffer.push(&element); }
+    FifoBuffer() = default;
 
-    bool pop(T* out) { return buffer.pop(out); }
+    bool push(T const& element) {
+        chMtxLock(&lock);
+        arr[tail_idx++] = element;
+        if (tail_idx == max_size) {
+            tail_idx = 0;
+        }
+        if (count < max_size) count++;
+        chMtxUnlock(&lock);
+        return true;
+    }
+
+    bool read(T& item) {
+        chMtxLock(&lock);
+        if (count == 0) {
+            chMtxUnlock(&lock);
+            return false;
+        }
+        item = arr[newest()];
+        chMtxUnlock(&lock);
+        return true;
+    }
+
+    /**
+     * @brief Reads a range of items into a passed array, which can be larger than the actual count of items.
+     *
+     * @param write_to An array of at least n items to write to
+     * @param start The index to start reading from (inclusive)
+     * @param length the number of items to read
+     * @return How many items were actually read
+     */
+    // TODO make this function return a std::array?
+    size_t readSlice(T write_to[], size_t start, size_t len) {
+        chMtxLock(&lock);
+        size_t i = 0;
+        size_t idx = head() + start;
+        while (i < len) {
+            write_to[i++] = arr[idx++];
+            if (idx == max_size) {
+                idx = 0;
+            }
+        }
+        chMtxUnlock(&lock);
+        return i;
+    }
 
    private:
-    GenericFifoBuffer buffer;
-    T arr[max_size]{};
-};
+    /**
+     * @brief Returns the head index. Do not use if count == 0, and always lock before using.
+     *
+     * @return the index of the oldest element you can read from
+     */
+    size_t head() {
+        if (tail_idx < count) {
+            return tail_idx + max_size - count;
+        } else {
+            return tail_idx - count;
+        }
+    }
 
-#endif  // TARS_SOFTWARE_FIFO_H
+    /**
+     * @brief Returns the index of the newest element. Do not use if count == 0, and always lock before using.
+     *
+     * @return the index of the newest element you can read from
+     */
+    size_t newest() {
+        if (tail_idx == 0) {
+            return max_size - 1;
+        } else {
+            return tail_idx - 1;
+        }
+    }
+
+    size_t tail_idx = 0;  // index of the next slot to write to
+    size_t count = 0;     // number of items currently in the buffer
+
+    T arr[max_size];
+};

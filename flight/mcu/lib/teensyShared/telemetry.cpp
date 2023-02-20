@@ -13,12 +13,26 @@
  * Peter Giannetos
  */
 
-// #define SERIAL_PLOTTING
+#define SERIAL_PLOTTING
 
 #include <telemetry.h>
 
 #include <limits>
 
+#include "dataLog.h"
+
+Telemetry tlm;
+
+/**
+ * @brief This function maps an input value onto within a particular range into a fixed point value of a certin binary
+ * size
+ *
+ * @param val: number to map into target range, values outside of the range will be clamped
+ *
+ * @param range: range to map number into. For unsigned output, [0, range). For signed output [-range/2, range)
+ *
+ * @return fixed point value represing val mapped onto the target range
+ */
 template <typename T>
 T inv_convert_range(float val, float range) {
     size_t numeric_range = (int64_t)std::numeric_limits<T>::max() - (int64_t)std::numeric_limits<T>::min() + 1;
@@ -26,7 +40,7 @@ T inv_convert_range(float val, float range) {
     return std::max(std::min((float)std::numeric_limits<T>::max(), converted), (float)std::numeric_limits<T>::min());
 }
 
-Telemetry::Telemetry() : rf95(RFM95_CS, RFM95_INT) {
+void Telemetry::init() {
     pinMode(RFM95_RST, OUTPUT);
     digitalWrite(RFM95_RST, HIGH);
     delay(100);
@@ -39,9 +53,9 @@ Telemetry::Telemetry() : rf95(RFM95_CS, RFM95_INT) {
     delay(10);
 
     while (!rf95.init()) {
-        Serial.println("Radio Initialization Failed");
-        while (1)
-            ;
+        while (true) {
+            Serial.println("Radio Initialization Failed");
+        }
     }
     Serial.println("[DEBUG]: Radio Initialized");
 
@@ -49,34 +63,10 @@ Telemetry::Telemetry() : rf95(RFM95_CS, RFM95_INT) {
     // 128chips/symbol, CRC on
 
     if (!rf95.setFrequency(RF95_FREQ)) {
-        Serial.println("[ERROR]: Default setFrequency Failed");
-        while (1)
-            ;
+        while (true) {
+            Serial.println("[ERROR]: Default setFrequency Failed");
+        }
     }
-
-    /*
-     * Load previous frequency from freq.txt.
-     * If successful, the default frequency is
-     * disregarded.
-     */
-    // read_file = SD.open("freq.txt", O_READ);
-    // if (read_file) {
-    //     Serial.println("[DEBUG]: Reading data from freq.txt");
-    //     Serial.print("[DEBUG]: Frequency from SD freq.txt file: ");
-    //     float freq_to_set;
-    //     read_file.read(& freq_to_set, 4);
-    //     // memcpy(&freq_to_set, read_file.read(), sizeof(read_file.read()));
-    //     Serial.println(freq_to_set);
-    //     if (!rf95.setFrequency(freq_to_set)) {
-    //         Serial.println("[WARNING]: Failed to set saved frequency, going
-    //         back to default frequency.");
-    //     }
-
-    // } else {
-    //     Serial.println("[ERROR]: Failed to open freq file while read, using
-    //     default frequency.");
-    // }
-    // read_file.close();
 
     /*
      * The default transmitter power is 13dBm, using PA_BOOST.
@@ -85,6 +75,8 @@ Telemetry::Telemetry() : rf95(RFM95_CS, RFM95_INT) {
      */
     rf95.setTxPower(23, false);
 }
+
+Telemetry::Telemetry() : rf95(RFM95_CS, RFM95_INT) {}
 
 /**
  * @brief  This function handles commands sent from the ground station
@@ -96,7 +88,7 @@ Telemetry::Telemetry() : rf95(RFM95_CS, RFM95_INT) {
  *
  * @return void
  */
-void Telemetry::handle_command(const telemetry_command &cmd) {
+void Telemetry::handleCommand(const telemetry_command &cmd) {
     /* Check if the security code is present and matches on ground and on the
      * rocket */
     if (cmd.verify != std::array<char, 6>{'A', 'Y', 'B', 'E', 'R', 'K'}) {
@@ -106,7 +98,7 @@ void Telemetry::handle_command(const telemetry_command &cmd) {
     if (last_command_id == cmd.cmd_id) {
         return;
     }
-    last_command_id = cmd.cmd_id;
+    last_command_id = (int16_t)cmd.cmd_id;
 
     /*
      * Write frequency to SD card to save
@@ -123,7 +115,7 @@ void Telemetry::handle_command(const telemetry_command &cmd) {
     }
 
     if (cmd.command == ABORT) {
-        if (abort == false) {
+        if (!abort) {
             abort = !abort;
         }
         Serial.println("[DEBUG]: Got abort");
@@ -142,19 +134,19 @@ void Telemetry::handle_command(const telemetry_command &cmd) {
  *
  * @return void
  */
-void Telemetry::transmit(const sensorDataStruct_t &data_struct) {
+void Telemetry::transmit() {
     static bool blue_state = false;
     digitalWrite(LED_BLUE, blue_state);
     blue_state = !blue_state;
 
-    TelemetryPacket packet = make_packet(data_struct);
+    TelemetryPacket packet = makePacket(dataLogger.read());
     rf95.send((uint8_t *)&packet, sizeof(packet));
 
     chThdSleepMilliseconds(170);
 
     rf95.waitPacketSent();
 
-    // change the freqencey after we acknowledge
+    // change the frequency after we acknowledge
     if (freq_status.should_change) {
         rf95.setFrequency(freq_status.new_freq);
         freq_status.should_change = false;
@@ -164,70 +156,27 @@ void Telemetry::transmit(const sensorDataStruct_t &data_struct) {
     uint8_t buf[RH_RF95_MAX_MESSAGE_LEN];
     uint8_t len = sizeof(buf);
     if (rf95.available() && rf95.recv(buf, &len)) {
-        telemetry_command received;
+        telemetry_command received{};
         memcpy(&received, buf, sizeof(received));
 
-        handle_command(received);
+        handleCommand(received);
     }
 }
 
-TelemetryPacket Telemetry::make_packet(const sensorDataStruct_t &data_struct) {
-    TelemetryPacket packet;
-    packet.gps_lat = data_struct.gps_data.latitude;
-    packet.gps_long = data_struct.gps_data.longitude;
-    packet.gps_alt = data_struct.gps_data.altitude;
-
-    packet.gnc_state_ax = data_struct.state_data.state_ax;
-    packet.gnc_state_vx = data_struct.state_data.state_vx;
-    packet.gnc_state_x = data_struct.state_data.state_x;
-    packet.gns_state_apo = data_struct.state_data.state_apo;
-
-    packet.response_ID = last_command_id;
-    packet.rssi = rf95.lastRssi();
-    packet.voltage_battery = inv_convert_range<uint8_t>(data_struct.voltage_data.v_battery, 16);
-    packet.FSM_State = (uint8_t)data_struct.rocketState_data.rocketStates[0];
-
-    TelemetryDataLite data;
-    packet.datapoint_count = 0;
-    for (int i = 0; i < 4 && buffered_data.pop(&data); i++) {
-        packet.datapoints[i] = data;
-        packet.datapoint_count = i + 1;
-    }
-    return packet;
-}
-
-void Telemetry::buffer_data(const sensorDataStruct_t &sensor_data) {
-    TelemetryDataLite data;
-    data.timestamp = TIME_I2MS(chVTGetSystemTime());
-    data.barometer_pressure = inv_convert_range<uint16_t>(sensor_data.barometer_data.pressure, 4096);
-
-    data.highG_ax = inv_convert_range<int16_t>(sensor_data.highG_data.hg_ax, 256);
-    data.highG_ay = inv_convert_range<int16_t>(sensor_data.highG_data.hg_ay, 256);
-    data.highG_az = inv_convert_range<int16_t>(sensor_data.highG_data.hg_az, 256);
-
-    data.gyro_x = inv_convert_range<int16_t>(sensor_data.lowG_data.gx, 8192);
-    data.gyro_y = inv_convert_range<int16_t>(sensor_data.lowG_data.gy, 8192);
-    data.gyro_z = inv_convert_range<int16_t>(sensor_data.lowG_data.gz, 8192);
-
-    data.flap_extension = (uint8_t)sensor_data.flap_data.extension;
-    data.barometer_temp = inv_convert_range<uint8_t>(sensor_data.barometer_data.temperature, 128);
-
-    buffered_data.push(data);
-
-#ifdef SERIAL_PLOTTING
+void Telemetry::serialPrint(const sensorDataStruct_t &sensor_data) {
     Serial.print(R"({"type": "data", "value": {)");
     Serial.print(R"("response_ID":)");
     Serial.print(000);
     Serial.print(',');
     Serial.print(R"("gps_lat":)");
-    Serial.print(sensor_data.gps_data.latitude, 5);
-    Serial.print(',');
+    Serial.print(0);
+    Serial.print(",");
     Serial.print(R"("gps_long":)");
-    Serial.print(sensor_data.gps_data.longitude, 5);
-    Serial.print(',');
+    Serial.print(0);
+    Serial.print(",");
     Serial.print(R"("gps_alt":)");
-    Serial.print(sensor_data.gps_data.altitude, 5);
-    Serial.print(',');
+    Serial.print(0);
+    Serial.print(",");
     Serial.print(R"("barometer_alt":)");
     Serial.print(sensor_data.barometer_data.altitude, 5);
     Serial.print(',');
@@ -291,13 +240,13 @@ void Telemetry::buffer_data(const sensorDataStruct_t &sensor_data) {
     Serial.print(sensor_data.flap_data.extension, 5);
     Serial.print(",");
     Serial.print(R"("STE_ALT":)");
-    Serial.print(sensor_data.state_data.state_x, 5);
+    Serial.print(sensor_data.kalman_data.kalman_x, 5);
     Serial.print(",");
     Serial.print(R"("STE_VEL":)");
-    Serial.print(sensor_data.state_data.state_vx, 5);
+    Serial.print(sensor_data.kalman_data.kalman_vx, 5);
     Serial.print(",");
     Serial.print(R"("STE_ACC":)");
-    Serial.print(sensor_data.state_data.state_ax, 5);
+    Serial.print(sensor_data.kalman_data.kalman_ax, 5);
     Serial.print(",");
     Serial.print(R"("TEMP":)");
     Serial.print(sensor_data.barometer_data.temperature);
@@ -306,8 +255,57 @@ void Telemetry::buffer_data(const sensorDataStruct_t &sensor_data) {
     Serial.print(sensor_data.barometer_data.pressure, 5);
     Serial.print(",");
     Serial.print(R"("STE_APO":)");
-    Serial.print(sensor_data.state_data.state_apo, 5);
+    Serial.print(sensor_data.kalman_data.kalman_apo, 5);
     Serial.print("");
     Serial.println("}}");
+}
+
+TelemetryPacket Telemetry::makePacket(const sensorDataStruct_t &data_struct) {
+    TelemetryPacket packet{};
+    packet.gps_lat = data_struct.gps_data.latitude;
+    packet.gps_long = data_struct.gps_data.longitude;
+    packet.gps_alt = data_struct.gps_data.altitude;
+
+    packet.gnc_state_ax = data_struct.kalman_data.kalman_ax;
+    packet.gnc_state_vx = data_struct.kalman_data.kalman_vx;
+    packet.gnc_state_x = data_struct.kalman_data.kalman_x;
+    packet.gns_state_apo = data_struct.kalman_data.kalman_apo;
+
+    packet.response_ID = last_command_id;
+    packet.rssi = rf95.lastRssi();
+    packet.voltage_battery = inv_convert_range<uint8_t>(data_struct.voltage_data.v_battery, 16);
+    packet.FSM_State = (uint8_t)data_struct.rocketState_data.rocketStates[0];
+
+    TelemetryDataLite data{};
+    packet.datapoint_count = 0;
+    for (int8_t i = 0; i < 4 && buffered_data.pop(data); i++) {
+        packet.datapoints[i] = data;
+        packet.datapoint_count = i + (int8_t)1;
+    }
+    return packet;
+}
+
+void Telemetry::bufferData() {
+    sensorDataStruct_t sensor_data = dataLogger.read();
+    // Serial.println(dataLogger.count);
+    TelemetryDataLite data{};
+    data.timestamp = TIME_I2MS(chVTGetSystemTime());
+    data.barometer_pressure = inv_convert_range<uint16_t>(sensor_data.barometer_data.pressure, 4096);
+
+    data.highG_ax = inv_convert_range<int16_t>(sensor_data.highG_data.hg_ax, 256);
+    data.highG_ay = inv_convert_range<int16_t>(sensor_data.highG_data.hg_ay, 256);
+    data.highG_az = inv_convert_range<int16_t>(sensor_data.highG_data.hg_az, 256);
+
+    data.gyro_x = inv_convert_range<int16_t>(sensor_data.lowG_data.gx, 8192);
+    data.gyro_y = inv_convert_range<int16_t>(sensor_data.lowG_data.gy, 8192);
+    data.gyro_z = inv_convert_range<int16_t>(sensor_data.lowG_data.gz, 8192);
+
+    data.flap_extension = (uint8_t)sensor_data.flap_data.extension;
+    data.barometer_temp = inv_convert_range<uint8_t>(sensor_data.barometer_data.temperature, 128);
+
+    buffered_data.push(data);
+
+#ifdef SERIAL_PLOTTING
+    serialPrint(sensor_data);
 #endif
 }

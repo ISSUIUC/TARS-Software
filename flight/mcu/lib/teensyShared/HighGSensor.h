@@ -1,21 +1,26 @@
-#ifndef HIGHGSENSOR_H
-#define HIGHGSENSOR_H
+#pragma once
 
+#include <tuple>
+
+#include "ChRt.h"
 #include "SparkFun_Qwiic_KX13X.h"
 
-struct GForce {
-    float x_gforce;
-    float y_gforce;
-    float z_gforce;
+struct Acceleration {
+    float ax, ay, az;
 };
-class HighGSensor {
+
+struct HighGSensor {
    public:
-    void readReadings();
-    GForce getGForce();
+    HighGSensor() = default;
+
+    MUTEX_DECL(mutex);
+
+    void init();
+    void update();
+    Acceleration getAccel();
 
    private:
-    float ax, ay, az;
-    QwiicKX132* KX;
+    float ax = 0.0, ay = 0.0, az = 0.0;
+    systime_t timestamp = 0;
+    QwiicKX132 KX{};
 };
-
-#endif

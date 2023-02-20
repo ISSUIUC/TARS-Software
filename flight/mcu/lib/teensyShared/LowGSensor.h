@@ -1,13 +1,8 @@
-#ifndef LOWGSENSOR_H
-#define LOWGSENSOR_H
+#pragma once
 
-#include <SparkFunLSM9DS1.h>
-
-struct Acceleration {
-    float ax;
-    float ay;
-    float az;
-};
+#include "ChRt.h"
+#include "HighGSensor.h"
+#include "SparkFunLSM9DS1.h"
 
 struct Gyroscope {
     float gx;
@@ -23,13 +18,21 @@ struct Magnetometer {
 
 class LowGSensor {
    public:
-    void readReadings();
+    MUTEX_DECL(mutex);
+
+    LowGSensor() = default;
+
+    void init();
+    void update();
     Acceleration getAcceleration();
     Gyroscope getGyroscope();
     Magnetometer getMagnetometer();
 
    private:
-    LSM9DS1* LSM;
-};
+    float ax = 0.0, ay = 0.0, az = 0.0;
+    float gx = 0.0, gy = 0.0, gz = 0.0;
+    float mx = 0.0, my = 0.0, mz = 0.0;
+    systime_t timestamp = 0;
 
-#endif
+    LSM9DS1 LSM;
+};

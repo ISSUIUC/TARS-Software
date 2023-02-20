@@ -26,24 +26,9 @@
 
 #include "TimerFSM.h"
 
-#include "dataLog.h"
-#include "pins.h"
+#include "Abort.h"
+#include "sensors.h"
 #include "thresholds.h"
-
-/**
- * @brief Constructor for TimerFSM class
- * @param pointers
- *
- * Taking the pointer struct as an input, we define member variables that point
- * to different data members of pointer struct. This improves readability while
- * also allowing the rocketFSM class to modify values in the global pointer
- * struct.
- */
-TimerFSM::TimerFSM(pointers *ptr) {
-    pointer_struct = ptr;
-    // Get the linear accelration from the High-G IMU
-    linear_acceleration_ptr_ = &pointer_struct->sensorDataPointer->highG_data.hg_az;
-}
 
 /**
  * @brief TimerFSM tick function
@@ -53,13 +38,12 @@ TimerFSM::TimerFSM(pointers *ptr) {
  */
 void TimerFSM::tickFSM() {
     // Lock mutexes for data used in switch
-    chMtxLock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_highG);
-
-    // Serial.println("Timer: " + state_map[(int)rocket_state_]);
+    chMtxLock(&highG.mutex);
 
     // Links to abort for other states
-    if (pointer_struct->abort) {
+    if (isAborted()) {
         rocket_state_ = FSM_State::STATE_ABORT;
+        return;
     }
 
     switch (rocket_state_) {
@@ -70,21 +54,19 @@ void TimerFSM::tickFSM() {
         case FSM_State::STATE_INIT:
             // Go to state idle regardless of gps lock
             rocket_state_ = FSM_State::STATE_IDLE;
-
             break;
 
         case FSM_State::STATE_IDLE:
             // If high acceleration is observed in z direction...
-            if (*linear_acceleration_ptr_ > launch_linear_acceleration_thresh) {
+            if (highG.getAccel().az > launch_linear_acceleration_thresh) {
                 launch_time_ = chVTGetSystemTime();
                 rocket_state_ = FSM_State::STATE_LAUNCH_DETECT;
             }
-
             break;
 
         case FSM_State::STATE_LAUNCH_DETECT:
             // If the acceleration was too brief, go back to IDLE
-            if (*linear_acceleration_ptr_ < launch_linear_acceleration_thresh) {
+            if (highG.getAccel().az < launch_linear_acceleration_thresh) {
                 rocket_state_ = FSM_State::STATE_IDLE;
                 break;
             }
@@ -102,7 +84,7 @@ void TimerFSM::tickFSM() {
         case FSM_State::STATE_BOOST:
             burn_timer_ = chVTGetSystemTime() - launch_time_;
             // If low acceleration in the Z direction...
-            if (*linear_acceleration_ptr_ < coast_thresh) {
+            if (highG.getAccel().az < coast_thresh) {
                 // Serial.println("Acceleration below thresh");
                 burnout_time_ = chVTGetSystemTime();
                 rocket_state_ = FSM_State::STATE_BURNOUT_DETECT;
@@ -125,7 +107,7 @@ void TimerFSM::tickFSM() {
 
         case FSM_State::STATE_BURNOUT_DETECT:
             // If the 0 acceleration was too brief, go back to BOOST
-            if (*linear_acceleration_ptr_ > coast_thresh) {
+            if (highG.getAccel().az > coast_thresh) {
                 rocket_state_ = FSM_State::STATE_BOOST;
                 break;
             }
@@ -161,6 +143,7 @@ void TimerFSM::tickFSM() {
         case FSM_State::STATE_APOGEE_DETECT:
             rocket_state_ = FSM_State::STATE_APOGEE;
             break;
+
         case FSM_State::STATE_APOGEE:
             apogee_timer_ = chVTGetSystemTime() - apogee_time_;
             if (TIME_I2MS(apogee_timer_) > apogee_time_thresh) {
@@ -205,5 +188,5 @@ void TimerFSM::tickFSM() {
     }
 
     // Unlock mutexes used during the switch statement
-    chMtxUnlock(&pointer_struct->dataloggerTHDVarsPointer.dataMutex_highG);
+    chMtxUnlock(&highG.mutex);
 }

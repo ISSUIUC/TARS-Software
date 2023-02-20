@@ -1,16 +1,25 @@
 #include "../EigenArduino-Eigen30/Eigen30.h"
+#include "RocketFSMBase.h"
 #include "ServoControl.h"
 #include "dataLog.h"
 #include "rk4.h"
-#include "rocketFSM.h"
 #include "sensors.h"
+
+class KalmanFilter;
+extern KalmanFilter kalmanFilter;
+
+struct KalmanState {
+    float x;
+    float vx;
+    float ax;
+};
 
 class KalmanFilter {
    public:
-    KalmanFilter(struct pointers* pointer_struct);
+    MUTEX_DECL(mutex);
 
     void Initialize();
-    void Initialize(float pos_f, float vel_f);
+    void initialize(float pos_f, float vel_f);
     void priori();
     void update();
     void SetQ(float dt, float sd);
@@ -18,19 +27,17 @@ class KalmanFilter {
 
     void kfTickFunction(float dt, float sd);
 
+    KalmanState getState() const;
+    void updateApogee(float estimate);
+
    private:
     float s_dt = 0.050;
 
-    DataLogBuffer* data_logger_;
-    mutex_t* mutex_lowG_;
-    mutex_t* mutex_highG_;
-    mutex_t* dataMutex_barometer_;
-    mutex_t* dataMutex_state_;
-    stateData* stateData_;
-    RocketFSM::FSM_State* current_state_;
-    float* b_alt;
-    float* gz_L;
-    float* gz_H;
+    float kalman_x = 0;
+    float kalman_vx = 0;
+    float kalman_ax = 0;
+    float kalman_apo = 0;
+    systime_t timestamp = 0;
 
     Eigen::Matrix<float, 3, 1> x_k{0, 0, 0};
     Eigen::Matrix<float, 3, 3> F_mat = Eigen::Matrix<float, 3, 3>::Zero();

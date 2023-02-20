@@ -13,16 +13,11 @@
 
 #pragma once
 
-#ifndef _ATMOSPHERE_H_
-#define _ATMOSPHERE_H_
-
 class Atmosphere {
    public:
-    static double get_temperature(double altitude);
-    static double get_pressure(double altitude);
-    static double get_density(double altitude);
-    static double get_speed_of_sound(double altitude);
-    static double get_geometric_to_geopotential(double altitude);
+    static double getTemperature(double altitude);
+    static double getPressure(double altitude);
+    static double getDensity(double altitude);
+    static double getSpeedOfSound(double altitude);
+    static double getGeometricToGeopotential(double altitude);
 };
-
-#endif

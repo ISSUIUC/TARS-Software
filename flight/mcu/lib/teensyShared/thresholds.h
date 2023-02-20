@@ -4,8 +4,7 @@
  * are used to determine changes in FSM state.
  */
 
-#ifndef THRESHOLDS_H
-#define THRESHOLDS_H
+#pragma once
 
 // Transition from boost to coast if low accleration detected for 300 ms
 static const float coast_time_thresh = 300;
@@ -59,5 +58,3 @@ static const float landing_altimeter_threshold = .5;
 
 // how long we wait to let the buffers cycle
 static const float refresh_timer = 500;
-
-#endif
