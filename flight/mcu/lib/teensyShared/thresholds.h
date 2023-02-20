@@ -9,7 +9,7 @@
 // Transition from boost to coast if low accleration detected for 300 ms
 static const float coast_time_thresh = 300;
 
-//transition from coast to apogee if low velocity detected for 100ms
+// transition from coast to apogee if low velocity detected for 100ms
 static const float apogee_time_thresh = 100;
 
 static const float landing_time_thresh = 1000;

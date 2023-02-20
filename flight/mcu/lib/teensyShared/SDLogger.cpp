@@ -1,10 +1,11 @@
 #include "SDLogger.h"
-#include "pins.h"
+
 #include "FS.h"
+#include "pins.h"
 
-SDLogger sd_logger; // NOLINT(cppcoreguidelines-interfaces-global-init)
+SDLogger sd_logger;  // NOLINT(cppcoreguidelines-interfaces-global-init)
 
-//SDLogger::SDLogger() { }
+// SDLogger::SDLogger() { }
 
 #define MAX_FILES 999
 
@@ -105,9 +106,9 @@ void SDLogger::update() {
     logData(&current_data);
 }
 
-template<typename T>
+template <typename T>
 void SDLogger::logData(T* data) {
-    sd_file.write((const uint8_t*) data, sizeof(T));
+    sd_file.write((const uint8_t*)data, sizeof(T));
     // Flush data once for every 50 writes
     // Flushing data is the step that actually writes to the card
     // Flushing more frequently incurs more of a latency penalty, but less

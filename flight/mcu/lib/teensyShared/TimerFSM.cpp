@@ -26,10 +26,9 @@
 
 #include "TimerFSM.h"
 
-#include "thresholds.h"
-#include "sensors.h"
 #include "Abort.h"
-
+#include "sensors.h"
+#include "thresholds.h"
 
 /**
  * @brief TimerFSM tick function

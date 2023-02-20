@@ -1,9 +1,9 @@
 #pragma once
 
-#include "TimerFSM.h"
+#include "FSMCollection.h"
 #include "HistoryBufferFSM.h"
 #include "KalmanFSM.h"
-#include "FSMCollection.h"
+#include "TimerFSM.h"
 
 extern TimerFSM timer_fsm;
 extern HistoryBufferFSM<50> history_buffer_fsm_50;

@@ -10,24 +10,24 @@
 
 DataLogBuffer dataLogger;
 
-//sensorDataStruct_t DataLogView::read() {
-//    sensorDataStruct_t data;
-//    data.has_lowG_data = lowGView.next(data.lowG_data);
-//    data.has_highG_data = highGView.next(data.highG_data);
-//    data.has_gps_data = gpsView.next(data.gps_data);
-//    data.has_kalman_data = kalmanView.next(data.kalman_data);
-//    data.has_rocketState_data = rocketStateView.next(data.rocketState_data);
-//    data.has_barometer_data = barometerView.next(data.barometer_data);
-//    data.has_flap_data = flapView.next(data.flap_data);
-//    data.has_voltage_data = voltageView.next(data.voltage_data);
-//    return data;
-//}
+// sensorDataStruct_t DataLogView::read() {
+//     sensorDataStruct_t data;
+//     data.has_lowG_data = lowGView.next(data.lowG_data);
+//     data.has_highG_data = highGView.next(data.highG_data);
+//     data.has_gps_data = gpsView.next(data.gps_data);
+//     data.has_kalman_data = kalmanView.next(data.kalman_data);
+//     data.has_rocketState_data = rocketStateView.next(data.rocketState_data);
+//     data.has_barometer_data = barometerView.next(data.barometer_data);
+//     data.has_flap_data = flapView.next(data.flap_data);
+//     data.has_voltage_data = voltageView.next(data.voltage_data);
+//     return data;
+// }
 
-//DataLogView::DataLogView(DataLogBuffer& buffer) :
-//        lowGView(buffer.lowGFifo), highGView(buffer.highGFifo), gpsView(buffer.gpsFifo),
-//        kalmanView(buffer.kalmanFifo), rocketStateView(buffer.rocketStateFifo), barometerView(buffer.barometerFifo),
-//        flapView(buffer.flapFifo), voltageView(buffer.voltageFifo)
-//        { }
+// DataLogView::DataLogView(DataLogBuffer& buffer) :
+//         lowGView(buffer.lowGFifo), highGView(buffer.highGFifo), gpsView(buffer.gpsFifo),
+//         kalmanView(buffer.kalmanFifo), rocketStateView(buffer.rocketStateFifo), barometerView(buffer.barometerFifo),
+//         flapView(buffer.flapFifo), voltageView(buffer.voltageFifo)
+//         { }
 
 sensorDataStruct_t DataLogBuffer::read() {
     sensorDataStruct_t data;
@@ -42,7 +42,14 @@ sensorDataStruct_t DataLogBuffer::read() {
     return data;
 }
 
-#define UPDATE_QUEUE(queue, data) do { DataLogQueue* curr_ = first_queue; while (curr_) { curr_->queue.push((data)); curr_ = curr_->next_queue; } } while (false)
+#define UPDATE_QUEUE(queue, data)          \
+    do {                                   \
+        DataLogQueue* curr_ = first_queue; \
+        while (curr_) {                    \
+            curr_->queue.push((data));     \
+            curr_ = curr_->next_queue;     \
+        }                                  \
+    } while (false)
 
 void DataLogBuffer::pushLowGFifo(LowGData const& lowG_Data) {
     lowGFifo.push(lowG_Data);

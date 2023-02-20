@@ -50,7 +50,6 @@ struct VoltageData {
     systime_t timestamp;
 };
 
-
 /**
  * @brief Structure for all values collected from the low g sensor
  *
@@ -165,9 +164,7 @@ struct sensorDataStruct_t {
     VoltageData voltage_data;
 
     bool hasData() const {
-        return has_gps_data || has_highG_data ||
-               has_lowG_data || has_rocketState_data ||
-               has_kalman_data || has_barometer_data ||
-               has_flap_data || has_voltage_data;
+        return has_gps_data || has_highG_data || has_lowG_data || has_rocketState_data || has_kalman_data ||
+               has_barometer_data || has_flap_data || has_voltage_data;
     }
 };

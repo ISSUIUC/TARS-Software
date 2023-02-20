@@ -1,18 +1,17 @@
 #pragma once
 
-#include "RocketFSMBase.h"
-#include "sensors.h"
-#include "dataLog.h"
-#include "thresholds.h"
 #include "Abort.h"
+#include "RocketFSMBase.h"
+#include "dataLog.h"
+#include "sensors.h"
+#include "thresholds.h"
 
-
-template<size_t view>
+template <size_t view>
 class HistoryBufferFSM : public RocketFSMBase {
-public:
+   public:
     HistoryBufferFSM() = default;
 
-private:
+   private:
     systime_t launch_time_ = 0;
     sysinterval_t burn_timer_ = 0;
     systime_t burnout_time_ = 0;
@@ -31,20 +30,22 @@ private:
     sysinterval_t landing_timer = 0;
 
     double getAltitudeAverage(size_t start, size_t len) {
-        return HistoryBufferFSM::getAverage(dataLogger.barometerFifo, +[](BarometerData& b) { return (double) b.altitude; }, start, len);
+        return HistoryBufferFSM::getAverage(
+            dataLogger.barometerFifo, +[](BarometerData& b) { return (double)b.altitude; }, start, len);
     }
 
     double getSecondDerivativeAltitudeAverage(size_t start, size_t len) {
-        return HistoryBufferFSM::getSecondDerivativeAverage(dataLogger.barometerFifo, +[](BarometerData& b) { return (double) b.altitude; },
-                                                                   +[](BarometerData& b) { return b.timeStamp_barometer; },
-                                                                   start, len);
+        return HistoryBufferFSM::getSecondDerivativeAverage(
+            dataLogger.barometerFifo, +[](BarometerData& b) { return (double)b.altitude; },
+            +[](BarometerData& b) { return b.timeStamp_barometer; }, start, len);
     }
 
     double getAccelerationAverage(size_t start, size_t len) {
-        return HistoryBufferFSM::getAverage(dataLogger.highGFifo, +[](HighGData& g) { return (double) g.hg_az; }, start, len);
+        return HistoryBufferFSM::getAverage(
+            dataLogger.highGFifo, +[](HighGData& g) { return (double)g.hg_az; }, start, len);
     }
 
-public:
+   public:
     /**
      * @brief HistoryBufferFSM50 tick function
      *
@@ -55,7 +56,7 @@ public:
         // Lock mutexes for data used in switch
         chMtxLock(&highG.mutex);
 
-        //Serial.println(state_map[(int)rocket_state_]);
+        // Serial.println(state_map[(int)rocket_state_]);
 
         // Links to abort for other states
         if (isAborted()) {
@@ -112,7 +113,7 @@ public:
                 // threshold
                 if (TIME_I2MS(burn_timer_) < burn_time_thresh_ms) {
                     rocket_state_ = FSM_State::STATE_BOOST;
-                } else { // Forcing rocket to go to FSM_State::STATE_COAST if threshold crossed
+                } else {  // Forcing rocket to go to FSM_State::STATE_COAST if threshold crossed
                     rocket_state_ = FSM_State::STATE_COAST_PREGNC;
                     // Setting burnout time because we don't otherwise
                     burnout_time_ = chVTGetSystemTime();
@@ -250,7 +251,6 @@ public:
                     landing_time_ = chVTGetSystemTime();
                     break;
                 }
-
 
                 if (TIME_I2MS(main_timer_) < main_deploy_time_since_drogue_threshold) {
                     rocket_state_ = FSM_State::STATE_MAIN;

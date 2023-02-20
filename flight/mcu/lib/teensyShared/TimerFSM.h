@@ -3,12 +3,12 @@
 #include "RocketFSMBase.h"
 
 class TimerFSM : public RocketFSMBase {
-public:
+   public:
     TimerFSM() = default;
 
     void tickFSM() override;
 
-private:
+   private:
     systime_t launch_time_ = 0;
     sysinterval_t burn_timer_ = 0;
     systime_t burnout_time_ = 0;

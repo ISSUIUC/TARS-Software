@@ -15,22 +15,22 @@ class DataLogBuffer;
 extern DataLogBuffer dataLogger;
 
 class DataLogQueue {
-public:
+   public:
     friend class DataLogBuffer;
     void attach(DataLogBuffer& buffer);
 
     sensorDataStruct_t next();
 
-    MessageQueue<LowGData, QUEUE_SIZE>            lowGQueue;
-    MessageQueue<HighGData, QUEUE_SIZE>           highGQueue;
-    MessageQueue<GpsData, QUEUE_SIZE>             gpsQueue;
-    MessageQueue<KalmanData, QUEUE_SIZE>          kalmanQueue;
-    MessageQueue<rocketStateData<4>, QUEUE_SIZE>  rocketStateQueue;
-    MessageQueue<BarometerData, QUEUE_SIZE>       barometerQueue;
-    MessageQueue<FlapData, QUEUE_SIZE>            flapQueue;
-    MessageQueue<VoltageData, QUEUE_SIZE>         voltageQueue;
+    MessageQueue<LowGData, QUEUE_SIZE> lowGQueue;
+    MessageQueue<HighGData, QUEUE_SIZE> highGQueue;
+    MessageQueue<GpsData, QUEUE_SIZE> gpsQueue;
+    MessageQueue<KalmanData, QUEUE_SIZE> kalmanQueue;
+    MessageQueue<rocketStateData<4>, QUEUE_SIZE> rocketStateQueue;
+    MessageQueue<BarometerData, QUEUE_SIZE> barometerQueue;
+    MessageQueue<FlapData, QUEUE_SIZE> flapQueue;
+    MessageQueue<VoltageData, QUEUE_SIZE> voltageQueue;
 
-private:
+   private:
     DataLogQueue* next_queue = nullptr;
 };
 
@@ -41,10 +41,10 @@ private:
 class DataLogBuffer {
     friend class DataLogQueue;
 
-private:
+   private:
     DataLogQueue* first_queue = nullptr;
 
-public:
+   public:
     FifoBuffer<LowGData, FIFO_SIZE> lowGFifo;
     FifoBuffer<HighGData, FIFO_SIZE> highGFifo;
     FifoBuffer<GpsData, FIFO_SIZE> gpsFifo;

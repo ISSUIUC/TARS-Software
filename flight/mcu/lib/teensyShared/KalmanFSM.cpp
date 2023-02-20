@@ -28,26 +28,28 @@
 
 #include "KalmanFSM.h"
 
-#include "dataLog.h"
-#include "sensors.h"
-#include "Abort.h"
-#include "kalmanFilter.h"
-#include "thresholds.h"
-
 #include <cmath>
 
+#include "Abort.h"
+#include "dataLog.h"
+#include "kalmanFilter.h"
+#include "sensors.h"
+#include "thresholds.h"
+
 double getAltitudeAverage(size_t start, size_t len) {
-    return KalmanFSM::getAverage(dataLogger.kalmanFifo, +[](KalmanData& k) { return (double) k.kalman_x; }, start, len);
+    return KalmanFSM::getAverage(
+        dataLogger.kalmanFifo, +[](KalmanData& k) { return (double)k.kalman_x; }, start, len);
 }
 
 double getSecondDerivativeAltitudeAverage(size_t start, size_t len) {
-    return KalmanFSM::getSecondDerivativeAverage(dataLogger.kalmanFifo, +[](KalmanData& k) { return (double) k.kalman_x; },
-                                                            +[](KalmanData& k) { return k.timeStamp_state; }, start,
-                                                            len);
+    return KalmanFSM::getSecondDerivativeAverage(
+        dataLogger.kalmanFifo, +[](KalmanData& k) { return (double)k.kalman_x; },
+        +[](KalmanData& k) { return k.timeStamp_state; }, start, len);
 }
 
 double getAccelerationAverage(size_t start, size_t len) {
-    return KalmanFSM::getAverage(dataLogger.kalmanFifo, +[](KalmanData& k) { return (double) k.kalman_ax; }, start, len);
+    return KalmanFSM::getAverage(
+        dataLogger.kalmanFifo, +[](KalmanData& k) { return (double)k.kalman_ax; }, start, len);
 }
 
 /**
@@ -115,7 +117,7 @@ void KalmanFSM::tickFSM() {
             // threshold
             if (TIME_I2MS(burn_timer_) < burn_time_thresh_ms) {
                 rocket_state_ = FSM_State::STATE_BOOST;
-            } else { // Forcing rocket to go to FSM_State::STATE_COAST if threshold crossed
+            } else {  // Forcing rocket to go to FSM_State::STATE_COAST if threshold crossed
                 rocket_state_ = FSM_State::STATE_COAST_PREGNC;
                 // Setting burnout time because we don't otherwise
                 burnout_time_ = chVTGetSystemTime();
@@ -189,7 +191,7 @@ void KalmanFSM::tickFSM() {
                 rocket_state_ = FSM_State::STATE_DROGUE_DETECT;
                 break;
             }
-            //potentially add back state to put us back into coast
+            // potentially add back state to put us back into coast
 
             if (TIME_I2MS(apogee_timer_) < drogue_deploy_time_since_apogee_threshold) {
                 rocket_state_ = FSM_State::STATE_APOGEE;
@@ -277,7 +279,6 @@ void KalmanFSM::tickFSM() {
 
         case FSM_State::STATE_LANDED:
             break;
-
 
         default:
             break;

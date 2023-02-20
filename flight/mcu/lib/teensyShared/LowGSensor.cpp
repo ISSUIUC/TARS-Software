@@ -1,4 +1,5 @@
 #include "LowGSensor.h"
+
 #include "dataLog.h"
 #include "packet.h"
 #include "pins.h"
@@ -27,19 +28,13 @@ void LowGSensor::update() {
     chMtxUnlock(&mutex);
     chSysUnlock();
 
-    dataLogger.pushLowGFifo((LowGData) {ax, ay, az, gx, gy, gz, mx, my, mz, timestamp});
+    dataLogger.pushLowGFifo((LowGData){ax, ay, az, gx, gy, gz, mx, my, mz, timestamp});
 }
 
-Acceleration LowGSensor::getAcceleration() {
-    return Acceleration{ax, ay, az};
-}
+Acceleration LowGSensor::getAcceleration() { return Acceleration{ax, ay, az}; }
 
-Gyroscope LowGSensor::getGyroscope() {
-    return Gyroscope{gx, gy, gz};
-}
-Magnetometer LowGSensor::getMagnetometer() {
-    return Magnetometer{mx, my, mz};
-}
+Gyroscope LowGSensor::getGyroscope() { return Gyroscope{gx, gy, gz}; }
+Magnetometer LowGSensor::getMagnetometer() { return Magnetometer{mx, my, mz}; }
 
 void LowGSensor::init() {
     // note, we need to send this our CS pins (defined above)

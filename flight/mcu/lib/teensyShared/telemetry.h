@@ -2,11 +2,12 @@
 
 #include <ChRt.h>
 #include <RH_RF95.h>
+
 #include <array>
 
-#include "pins.h"
-#include "packet.h"
 #include "MessageQueue.h"
+#include "packet.h"
+#include "pins.h"
 
 // Make sure to change these pinout depending on wiring
 // Don't forget to change the ini file to build the correct main file
@@ -16,7 +17,6 @@
 
 class Telemetry;
 extern Telemetry tlm;
-
 
 struct TelemetryDataLite {
     systime_t timestamp;  //[0, 2^32]
@@ -49,11 +49,8 @@ struct TelemetryPacket {
     uint8_t FSM_State;        //[0,256]
 };
 
-
 // Commands transmitted from ground station to rocket
-enum CommandType {
-    SET_FREQ, SET_CALLSIGN, ABORT, TEST_FLAPS, EMPTY
-};
+enum CommandType { SET_FREQ, SET_CALLSIGN, ABORT, TEST_FLAPS, EMPTY };
 
 struct telemetry_command {
     CommandType command;
@@ -72,7 +69,7 @@ struct command_handler_struct {
 };
 
 class Telemetry {
-public:
+   public:
     bool abort = false;
 
     Telemetry();
@@ -87,7 +84,7 @@ public:
 
     void serialPrint(const sensorDataStruct_t& sensor_data);
 
-private:
+   private:
     RH_RF95 rf95;
     MessageQueue<TelemetryDataLite, 4> buffered_data;
 

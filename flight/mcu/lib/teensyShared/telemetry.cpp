@@ -16,6 +16,7 @@
 #define SERIAL_PLOTTING
 
 #include <telemetry.h>
+
 #include <limits>
 
 #include "dataLog.h"
@@ -23,19 +24,20 @@
 Telemetry tlm;
 
 /**
- * @brief This function maps an input value onto within a particular range into a fixed point value of a certin binary size
+ * @brief This function maps an input value onto within a particular range into a fixed point value of a certin binary
+ * size
  *
  * @param val: number to map into target range, values outside of the range will be clamped
- * 
+ *
  * @param range: range to map number into. For unsigned output, [0, range). For signed output [-range/2, range)
  *
  * @return fixed point value represing val mapped onto the target range
  */
-template<typename T>
-T inv_convert_range(float val, float range){
-  size_t numeric_range = (int64_t)std::numeric_limits<T>::max() - (int64_t)std::numeric_limits<T>::min() + 1;
-  float converted = val * (float)numeric_range / range;
-  return std::max(std::min((float)std::numeric_limits<T>::max(), converted), (float)std::numeric_limits<T>::min());
+template <typename T>
+T inv_convert_range(float val, float range) {
+    size_t numeric_range = (int64_t)std::numeric_limits<T>::max() - (int64_t)std::numeric_limits<T>::min() + 1;
+    float converted = val * (float)numeric_range / range;
+    return std::max(std::min((float)std::numeric_limits<T>::max(), converted), (float)std::numeric_limits<T>::min());
 }
 
 void Telemetry::init() {
@@ -74,7 +76,7 @@ void Telemetry::init() {
     rf95.setTxPower(23, false);
 }
 
-Telemetry::Telemetry() : rf95(RFM95_CS, RFM95_INT) { }
+Telemetry::Telemetry() : rf95(RFM95_CS, RFM95_INT) {}
 
 /**
  * @brief  This function handles commands sent from the ground station
@@ -96,7 +98,7 @@ void Telemetry::handleCommand(const telemetry_command &cmd) {
     if (last_command_id == cmd.cmd_id) {
         return;
     }
-    last_command_id = (int16_t) cmd.cmd_id;
+    last_command_id = (int16_t)cmd.cmd_id;
 
     /*
      * Write frequency to SD card to save
@@ -161,7 +163,7 @@ void Telemetry::transmit() {
     }
 }
 
-void Telemetry::serialPrint(const sensorDataStruct_t& sensor_data) {
+void Telemetry::serialPrint(const sensorDataStruct_t &sensor_data) {
     Serial.print(R"({"type": "data", "value": {)");
     Serial.print(R"("response_ID":)");
     Serial.print(000);
@@ -258,7 +260,6 @@ void Telemetry::serialPrint(const sensorDataStruct_t& sensor_data) {
     Serial.println("}}");
 }
 
-
 TelemetryPacket Telemetry::makePacket(const sensorDataStruct_t &data_struct) {
     TelemetryPacket packet{};
     packet.gps_lat = data_struct.gps_data.latitude;
@@ -277,9 +278,9 @@ TelemetryPacket Telemetry::makePacket(const sensorDataStruct_t &data_struct) {
 
     TelemetryDataLite data{};
     packet.datapoint_count = 0;
-    for(int8_t i = 0; i < 4 && buffered_data.pop(data); i++){
+    for (int8_t i = 0; i < 4 && buffered_data.pop(data); i++) {
         packet.datapoints[i] = data;
-        packet.datapoint_count = i + (int8_t) 1;
+        packet.datapoint_count = i + (int8_t)1;
     }
     return packet;
 }

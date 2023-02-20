@@ -24,7 +24,7 @@
 double Atmosphere::getTemperature(double altitude) {
     double temperature;
     double altitude_h = getGeometricToGeopotential(altitude) / 1000;  // geopotential
-    double altitude_z = altitude / 1000;                                 // geometric
+    double altitude_z = altitude / 1000;                              // geometric
     if (altitude_h < 11.0) {
         temperature = 288.15 - (6.5 * altitude_h);
     } else if (altitude_h < 20.0) {

@@ -2,14 +2,13 @@
 
 #include "RocketFSMBase.h"
 
-
 class KalmanFSM : public RocketFSMBase {
-public:
+   public:
     KalmanFSM() = default;
 
     void tickFSM() override;
 
-private:
+   private:
     systime_t launch_time_ = 0;
     sysinterval_t burn_timer_ = 0;
     systime_t burnout_time_ = 0;

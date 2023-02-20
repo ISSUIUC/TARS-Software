@@ -15,10 +15,10 @@
 
 #pragma once
 
+#include "BarometerSensor.h"
+#include "GPSSensor.h"
 #include "HighGSensor.h"
 #include "LowGSensor.h"
-#include "GPSSensor.h"
-#include "BarometerSensor.h"
 #include "VoltageSensor.h"
 
 extern HighGSensor highG;

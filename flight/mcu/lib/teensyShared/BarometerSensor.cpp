@@ -1,14 +1,12 @@
+#include "BarometerSensor.h"
+
 #include "ChRt.h"
 #include "MS5611.h"
-
-#include "BarometerSensor.h"
 #include "dataLog.h"
 
 BarometerSensor barometer;
 
-void BarometerSensor::init() {
-    MS.init();
-}
+void BarometerSensor::init() { MS.init(); }
 
 void BarometerSensor::refresh() {
     chMtxLock(&mutex);
@@ -16,18 +14,12 @@ void BarometerSensor::refresh() {
     pressure = static_cast<float>(MS.getPressure() * 0.01 + 26.03);
     temperature = static_cast<float>(MS.getTemperature() * 0.01);
     altitude = static_cast<float>(-log(pressure * 0.000987) * (temperature + 273.15) * 29.254);
-    dataLogger.pushBarometerFifo((BarometerData) {temperature, pressure, altitude, chVTGetSystemTime()});
+    dataLogger.pushBarometerFifo((BarometerData){temperature, pressure, altitude, chVTGetSystemTime()});
     chMtxUnlock(&mutex);
 }
 
-float BarometerSensor::getPressure() const {
-    return pressure;
-}
+float BarometerSensor::getPressure() const { return pressure; }
 
-float BarometerSensor::getTemperature() const {
-    return temperature;
-}
+float BarometerSensor::getTemperature() const { return temperature; }
 
-float BarometerSensor::getAltitude() const {
-    return altitude;
-}
+float BarometerSensor::getAltitude() const { return altitude; }

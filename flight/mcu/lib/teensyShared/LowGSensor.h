@@ -1,9 +1,8 @@
 #pragma once
 
 #include "ChRt.h"
-#include "SparkFunLSM9DS1.h"
-
 #include "HighGSensor.h"
+#include "SparkFunLSM9DS1.h"
 
 struct Gyroscope {
     float gx;

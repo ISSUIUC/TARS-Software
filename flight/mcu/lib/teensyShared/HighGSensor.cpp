@@ -13,15 +13,13 @@ void HighGSensor::update() {
     ay = data.yData;
     az = data.zData;
     timestamp = chVTGetSystemTime();
-    dataLogger.pushHighGFifo((HighGData) {ax, ay, az, timestamp });
+    dataLogger.pushHighGFifo((HighGData){ax, ay, az, timestamp});
 
     chMtxUnlock(&mutex);
     chSysUnlock();
 }
 
-Acceleration HighGSensor::getAccel() {
-    return { ax, ay, az };
-}
+Acceleration HighGSensor::getAccel() { return {ax, ay, az}; }
 
 void HighGSensor::init() {
     if (!KX.beginSPICore(KX134_CS, 1000000, SPI)) {

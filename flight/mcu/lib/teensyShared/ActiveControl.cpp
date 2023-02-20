@@ -8,12 +8,12 @@
 
 #include "ActiveControl.h"
 
-#include "rocketFSM.h"
 #include "kalmanFilter.h"
+#include "rocketFSM.h"
 
 Controller activeController;
 
-Controller::Controller() : activeControlServos(&controller_servo_) { }
+Controller::Controller() : activeControlServos(&controller_servo_) {}
 
 void Controller::ctrlTickFunction() {
     chMtxLock(&kalmanFilter.mutex);
@@ -62,7 +62,7 @@ void Controller::ctrlTickFunction() {
      */
     if (ActiveControl_ON()) {
         activeControlServos.servoActuation(u);
-        dataLogger.pushFlapsFifo((FlapData) {u, chVTGetSystemTime()});
+        dataLogger.pushFlapsFifo((FlapData){u, chVTGetSystemTime()});
     } else {
         activeControlServos.servoActuation(min_extension);
     }
@@ -73,9 +73,7 @@ void Controller::ctrlTickFunction() {
  * based on FSM state
  * @returns boolean depending on whether flaps should actuate or not
  */
-bool Controller::ActiveControl_ON() {
-    return getActiveFSM().getFSMState() == FSM_State::STATE_COAST_GNC;
-}
+bool Controller::ActiveControl_ON() { return getActiveFSM().getFSMState() == FSM_State::STATE_COAST_GNC; }
 
 /**
  * @brief Initializes launchpad elevation through barometer measurement.

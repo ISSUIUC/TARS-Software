@@ -1,13 +1,12 @@
 #include "../EigenArduino-Eigen30/Eigen30.h"
+#include "RocketFSMBase.h"
 #include "ServoControl.h"
 #include "dataLog.h"
 #include "rk4.h"
-#include "RocketFSMBase.h"
 #include "sensors.h"
 
 class KalmanFilter;
 extern KalmanFilter kalmanFilter;
-
 
 struct KalmanState {
     float x;
@@ -15,9 +14,8 @@ struct KalmanState {
     float ax;
 };
 
-
 class KalmanFilter {
-public:
+   public:
     MUTEX_DECL(mutex);
 
     void Initialize();
@@ -31,7 +29,8 @@ public:
 
     KalmanState getState() const;
     void updateApogee(float estimate);
-private:
+
+   private:
     float s_dt = 0.050;
 
     float kalman_x = 0;

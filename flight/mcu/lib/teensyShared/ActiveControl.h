@@ -32,4 +32,3 @@ class Controller {
 
     ServoControl activeControlServos;
 };
-

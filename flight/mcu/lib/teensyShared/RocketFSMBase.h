@@ -1,19 +1,19 @@
 #pragma once
 
-#include "packet.h"
 #include "FifoBuffer.h"
+#include "packet.h"
 
 class RocketFSMBase {
-public:
+   public:
     virtual void tickFSM() = 0;
 
     FSM_State getFSMState() const { return rocket_state_; }
 
-protected:
+   protected:
     FSM_State rocket_state_ = FSM_State::STATE_INIT;
 
-public:
-    template<typename T, size_t count>
+   public:
+    template <typename T, size_t count>
     static double getAverage(FifoBuffer<T, count>& buffer, double (*access_value)(T&), size_t start, size_t len) {
         chMtxLock(&buffer.lock);
         T items[len];
@@ -23,11 +23,12 @@ public:
             sum += access_value(items[i]);
         }
         chMtxUnlock(&buffer.lock);
-        return sum / (double) len;
+        return sum / (double)len;
     }
 
-    template<typename T, size_t count>
-    static double getSecondDerivativeAverage(FifoBuffer<T, count>& buffer, double (*access_value)(T&), systime_t (*access_time)(T&), size_t start, size_t len) {
+    template <typename T, size_t count>
+    static double getSecondDerivativeAverage(FifoBuffer<T, count>& buffer, double (*access_value)(T&),
+                                             systime_t (*access_time)(T&), size_t start, size_t len) {
         chMtxLock(&buffer.lock);
         T items[len];
         buffer.readSlice(items, start, len);
@@ -53,6 +54,6 @@ public:
         for (size_t i = start; i < start + len - 2; i++) {
             sum += second_derivatives[i];
         }
-        return sum / (double) (len - 2);
+        return sum / (double)(len - 2);
     }
 };

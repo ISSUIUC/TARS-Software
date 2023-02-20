@@ -1,8 +1,7 @@
 #include "VoltageSensor.h"
 
-#include "dataLog.h"
-
 #include "ChRt.h"
+#include "dataLog.h"
 
 VoltageSensor voltage{Serial1};
 
@@ -17,7 +16,7 @@ VoltageData VoltageSensor::read() {
     v_9 = read_voltage('9');
     timestamp = chVTGetSystemTime();
 
-    auto data = (VoltageData) {v_battery, v_servo1, v_servo2, v_3_3, v_5, v_9, timestamp};
+    auto data = (VoltageData){v_battery, v_servo1, v_servo2, v_3_3, v_5, v_9, timestamp};
 
     dataLogger.pushVoltageFifo(data);
 

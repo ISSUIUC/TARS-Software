@@ -30,15 +30,15 @@
 #include <PWMServo.h>
 #include <SPI.h>
 
+#include "Abort.h"
 #include "ActiveControl.h"
+#include "SDLogger.h"
 #include "dataLog.h"
 #include "kalmanFilter.h"
 #include "pins.h"
 #include "rocketFSM.h"
 #include "sensors.h"
 #include "telemetry.h"
-#include "Abort.h"
-#include "SDLogger.h"
 
 #define THREAD_DEBUG
 //#define SERVO_DEBUG

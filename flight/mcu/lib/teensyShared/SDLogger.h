@@ -1,20 +1,21 @@
 #pragma once
 
-#include "dataLog.h"
 #include <ChRt.h>
 #include <SD.h>
+
+#include "dataLog.h"
 
 class SDLogger;
 extern SDLogger sd_logger;
 
 class SDLogger {
-public:
+   public:
     void init();
 
     void update();
 
-private:
-    template<typename T>
+   private:
+    template <typename T>
     void logData(T* data);
 
     DataLogQueue queue;

@@ -2,9 +2,9 @@
 
 #include <ChRt.h>
 
-template<typename T, size_t max_count>
+template <typename T, size_t max_count>
 class MessageQueue {
-public:
+   public:
     MUTEX_DECL(lock);
 
     MessageQueue() = default;
@@ -41,9 +41,9 @@ public:
         return true;
     }
 
-private:
-    size_t count = 0;      // The number of items currently in the Queue.
-    size_t head_idx = 0;   // The index to for the next pop to read from.
-    size_t tail_idx = 0;   // The index to for the next push to write to.
+   private:
+    size_t count = 0;     // The number of items currently in the Queue.
+    size_t head_idx = 0;  // The index to for the next pop to read from.
+    size_t tail_idx = 0;  // The index to for the next push to write to.
     T buffer[max_count];
 };

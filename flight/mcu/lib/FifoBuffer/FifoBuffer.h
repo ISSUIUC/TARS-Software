@@ -2,9 +2,9 @@
 
 #include <ChRt.h>
 
-template<typename T, size_t max_size>
+template <typename T, size_t max_size>
 class FifoBuffer {
-public:
+   public:
     MUTEX_DECL(lock);
 
     FifoBuffer() = default;
@@ -54,7 +54,7 @@ public:
         return i;
     }
 
-private:
+   private:
     /**
      * @brief Returns the head index. Do not use if count == 0, and always lock before using.
      *
@@ -81,8 +81,8 @@ private:
         }
     }
 
-    size_t tail_idx = 0;   // index of the next slot to write to
-    size_t count = 0;   // number of items currently in the buffer
-    
+    size_t tail_idx = 0;  // index of the next slot to write to
+    size_t count = 0;     // number of items currently in the buffer
+
     T arr[max_size];
 };

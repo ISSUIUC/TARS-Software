@@ -3,7 +3,6 @@
 #include "dataLog.h"
 #include "pins.h"
 
-
 GPSSensor gps;
 
 void GPSSensor::init() {
@@ -12,9 +11,9 @@ void GPSSensor::init() {
     digitalWrite(LED_ORANGE, HIGH);
 
     if (!GNSS.begin(SPI1, ZOEM8Q0_CS, 4000000)) {
-        Serial.println(
-                "Failed to communicate with ZOEM8Q0 gps. Stalling Program");
-        while (true) { }
+        Serial.println("Failed to communicate with ZOEM8Q0 gps. Stalling Program");
+        while (true) {
+        }
     }
 
     digitalWrite(LED_RED, LOW);
@@ -42,30 +41,18 @@ void GPSSensor::update() {
     pos_lock = fix_type == 3;
     SIV_count = GNSS.getSIV();
 
-    dataLogger.pushGpsFifo((GpsData) {latitude, longitude, altitude, SIV_count, fix_type, pos_lock, timeStamp});
+    dataLogger.pushGpsFifo((GpsData){latitude, longitude, altitude, SIV_count, fix_type, pos_lock, timeStamp});
     chMtxUnlock(&mutex);
 }
 
-float GPSSensor::getLatitude() const {
-    return latitude;
-}
+float GPSSensor::getLatitude() const { return latitude; }
 
-float GPSSensor::getLongitude() const {
-    return longitude;
-}
+float GPSSensor::getLongitude() const { return longitude; }
 
-float GPSSensor::getAltitude() const {
-    return altitude;
-}
+float GPSSensor::getAltitude() const { return altitude; }
 
-uint32_t GPSSensor::getFixType() const {
-    return fix_type;
-}
+uint32_t GPSSensor::getFixType() const { return fix_type; }
 
-bool GPSSensor::getPosLock() const {
-    return pos_lock;
-}
+bool GPSSensor::getPosLock() const { return pos_lock; }
 
-uint32_t GPSSensor::getSIVCount() const {
-    return SIV_count;
-}
+uint32_t GPSSensor::getSIVCount() const { return SIV_count; }

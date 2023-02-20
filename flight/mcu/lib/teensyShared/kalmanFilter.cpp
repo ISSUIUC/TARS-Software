@@ -7,6 +7,7 @@
  */
 
 #include "kalmanFilter.h"
+
 #include "rocketFSM.h"
 
 #define EIGEN_MATRIX_PLUGIN "MatrixAddons.h"
@@ -234,15 +235,11 @@ void KalmanFilter::update() {
     kalman_ax = x_k(2, 0);
     timestamp = chVTGetSystemTime();
     chMtxUnlock(&mutex);
-    dataLogger.pushKalmanFifo((KalmanData) {kalman_x, kalman_vx, kalman_ax, kalman_apo, timestamp });
+    dataLogger.pushKalmanFifo((KalmanData){kalman_x, kalman_vx, kalman_ax, kalman_apo, timestamp});
 }
 
-KalmanState KalmanFilter::getState() const {
-    return {kalman_x, kalman_vx, kalman_ax};
-}
+KalmanState KalmanFilter::getState() const { return {kalman_x, kalman_vx, kalman_ax}; }
 
-void KalmanFilter::updateApogee(float estimate) {
-    kalman_apo = estimate;
-}
+void KalmanFilter::updateApogee(float estimate) { kalman_apo = estimate; }
 
 KalmanFilter kalmanFilter;

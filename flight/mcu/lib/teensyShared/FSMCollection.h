@@ -1,8 +1,8 @@
 #pragma once
 
-#include "ChRt.h"
 #include <initializer_list>  // this is here to make initializing the FSMCollection a lot more convenient
 
+#include "ChRt.h"
 #include "RocketFSMBase.h"
 
 /**

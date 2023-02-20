@@ -7,6 +7,4 @@ KalmanFSM kalman_fsm;
 
 FSMCollection<4> fsmCollection{&timer_fsm, &history_buffer_fsm_50, &history_buffer_fsm_6, &kalman_fsm};
 
-RocketFSMBase& getActiveFSM() {
-    return timer_fsm;
-}
+RocketFSMBase& getActiveFSM() { return timer_fsm; }
