@@ -4,6 +4,7 @@
 #include "rk4.h"
 #include "rocketFSM.h"
 #include "sensors.h"
+#include "OrientationSensor.h"
 
 class KalmanFilter {
    public:
@@ -15,6 +16,7 @@ class KalmanFilter {
     void update();
     void SetQ(float dt, float sd);
     void SetF(float dt);
+    Eigen::Matrix<float, 9, 1> BodyToGlobal(Eigen::Matrix<float, 9, 1> & x_k, euler_t angles);
 
     void kfTickFunction(float dt, float sd);
 
@@ -30,18 +32,20 @@ class KalmanFilter {
     RocketFSM::FSM_State* current_state_;
     float* b_alt;
     float* gz_L;
-    float* gz_H;
+    float* ax_H;
+    float* ay_H;
+    float* az_H;
 
-    Eigen::Matrix<float, 3, 1> x_k{0, 0, 0};
-    Eigen::Matrix<float, 3, 3> F_mat = Eigen::Matrix<float, 3, 3>::Zero();
-    Eigen::Matrix<float, 2, 3> H = Eigen::Matrix<float, 2, 3>::Zero();
-    Eigen::Matrix<float, 3, 3> P_k = Eigen::Matrix<float, 3, 3>::Zero();
-    Eigen::Matrix<float, 3, 3> Q = Eigen::Matrix<float, 3, 3>::Zero();
-    Eigen::Matrix<float, 2, 2> R = Eigen::Matrix<float, 2, 2>::Zero();
-    Eigen::Matrix<float, 3, 3> P_priori = Eigen::Matrix<float, 3, 3>::Zero();
-    Eigen::Matrix<float, 3, 1> x_priori = Eigen::Matrix<float, 3, 1>::Zero();
-    Eigen::Matrix<float, 3, 2> K = Eigen::Matrix<float, 3, 2>::Zero();
-    Eigen::Matrix<float, 2, 1> y_k = Eigen::Matrix<float, 2, 1>::Zero();
+    Eigen::Matrix<float, 9, 1> x_k = Eigen::Matrix<float, 9, 1>::Zero();
+    Eigen::Matrix<float, 9, 9> F_mat = Eigen::Matrix<float, 9, 9>::Zero();
+    Eigen::Matrix<float, 4, 9> H = Eigen::Matrix<float, 4, 9>::Zero();
+    Eigen::Matrix<float, 9, 9> P_k = Eigen::Matrix<float, 9, 9>::Zero();
+    Eigen::Matrix<float, 9, 9> Q = Eigen::Matrix<float, 9, 9>::Zero();
+    Eigen::Matrix<float, 4, 4> R = Eigen::Matrix<float, 4, 4>::Zero(); // Diagonal
+    Eigen::Matrix<float, 9, 9> P_priori = Eigen::Matrix<float, 9, 9>::Zero();
+    Eigen::Matrix<float, 9, 1> x_priori = Eigen::Matrix<float, 9, 1>::Zero();
+    Eigen::Matrix<float, 9, 4> K = Eigen::Matrix<float, 9, 4>::Zero();
+    Eigen::Matrix<float, 4, 1> y_k = Eigen::Matrix<float, 4, 1>::Zero();
 
-    Eigen::Matrix<float, 3, 2> B = Eigen::Matrix<float, 3, 2>::Zero();
+    Eigen::Matrix<float, 9, 4> B = Eigen::Matrix<float, 9, 4>::Zero();
 };

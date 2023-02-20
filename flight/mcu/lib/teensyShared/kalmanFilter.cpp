@@ -7,6 +7,7 @@
  */
 
 #include "kalmanFilter.h"
+#include <cmath>
 #define EIGEN_MATRIX_PLUGIN "MatrixAddons.h"
 
 /**
@@ -51,7 +52,9 @@ void KalmanFilter::SetF(float dt) {
 
 KalmanFilter::KalmanFilter(struct pointers* pointer_struct) {
     gz_L = &pointer_struct->sensorDataPointer->lowG_data.gz;
-    gz_H = &pointer_struct->sensorDataPointer->highG_data.hg_az;
+    ax_H = &pointer_struct->sensorDataPointer->highG_data.hg_ax; // dataLog.h has the infor and transform data
+    ay_H = &pointer_struct->sensorDataPointer->highG_data.hg_ay; // dataLog.h has the infor and transform data
+    az_H = &pointer_struct->sensorDataPointer->highG_data.hg_az; // dataLog.h has the infor and transform data
     b_alt = &pointer_struct->sensorDataPointer->barometer_data.altitude;
     mutex_lowG_ = &pointer_struct->dataloggerTHDVarsPointer.dataMutex_lowG;
     mutex_highG_ = &pointer_struct->dataloggerTHDVarsPointer.dataMutex_highG;
@@ -171,10 +174,14 @@ void KalmanFilter::Initialize() {
  * @param vel_f Initial velocity estimate
  */
 
-void KalmanFilter::Initialize(float pos_f, float vel_f) {
+void KalmanFilter::Initialize(float pos_x, float pos_y, float pos_z, float vel_x, float vel_y, float vel_z) {
     // set x_k
-    x_k(0, 0) = pos_f;
-    x_k(1, 0) = vel_f;
+    x_k(0, 0) = pos_x;
+    x_k(1, 0) = pos_y;
+    x_k(2, 0) = pos_z;
+    x_k(3, 0) = vel_x;
+    x_k(4, 0) = vel_y;
+    x_k(5, 0) = vel_z;
 
     // set F
     F_mat(0, 1) = s_dt;
@@ -220,14 +227,15 @@ void KalmanFilter::update() {
         H(1, 2) = 0;
     }
 
-    Eigen::Matrix<float, 2, 2> temp = Eigen::Matrix<float, 2, 2>::Zero();
+    Eigen::Matrix<float, 4, 4> temp = Eigen::Matrix<float, 4, 4>::Zero();
     temp = (((H * P_priori * H.transpose()) + R)).inverse();
-    Eigen::Matrix<float, 3, 3> identity = Eigen::Matrix<float, 3, 3>::Identity();
+    Eigen::Matrix<float, 9, 9> identity = Eigen::Matrix<float, 9, 9>::Identity();
     K = (P_priori * H.transpose()) * temp;
 
     // Sensor Measurements
     chMtxLock(mutex_highG_);
-    y_k(1, 0) = ((*gz_H) * 9.81) - 9.81 - 0.51;
+    
+    y_k(3, 0) = ((*az_H) * 9.81) - 9.81 - 0.51;
     chMtxUnlock(mutex_highG_);
 
     chMtxLock(dataMutex_barometer_);
@@ -239,10 +247,25 @@ void KalmanFilter::update() {
     P_k = (identity - K * H) * P_priori;
 
     chMtxLock(dataMutex_state_);
-    stateData_->state_x = x_k(0, 0);
-    stateData_->state_vx = x_k(1, 0);
-    stateData_->state_ax = x_k(2, 0);
+    stateData_->state_pos_x = x_k(0, 0);
+    stateData_->state_pos_y = x_k(1, 0);
+    stateData_->state_pos_z = x_k(2, 0);
+    stateData_->state_vel_x = x_k(3, 0);
+    stateData_->state_vel_y = x_k(4, 0);
+    stateData_->state_vel_z = x_k(5, 0);
+    stateData_->state_accel_x = x_k(6, 0);
+    stateData_->state_accel_y = x_k(7, 0);
+    stateData_->state_accel_z = x_k(8, 0);
+
     stateData_->timeStamp_state = chVTGetSystemTime();
     chMtxUnlock(dataMutex_state_);
     data_logger_->pushStateFifo(stateData_);
+}
+
+Eigen::Matrix<float, 9, 1> BodyToGlobal(euler_t angles, Eigen::Matrix<float, 3, 1> body_vect) {
+    Eigen::Matrix3f roll, pitch, yaw;
+    roll << 1., 0., 0., 0., cos(angles.roll), -sin(angles.roll ), 0., sin(angles.roll), cos(angles.roll);
+    pitch << cos(angles.pitch), 0., sin(angles.pitch), 0., 1., 0., -sin(angles.pitch), 0., cos(angles.pitch);
+    yaw << cos(angles.yaw), -sin(angles.yaw), 0., sin(angles.yaw), cos(angles.yaw), 0., 0., 0., 1.;
+    return roll*pitch*yaw*body_vect;
 }
