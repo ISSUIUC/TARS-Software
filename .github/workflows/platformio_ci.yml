@@ -29,6 +29,6 @@ jobs:
         pip install --upgrade platformio
     - name: Run PlatformIO
       run: |
-        cd flight/mcu/
-        pio platform install native
-        pio test -e mcu_ac
+        cd TARS
+        pio platform install teensy
+        pio run -e mcu_main
