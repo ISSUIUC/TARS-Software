@@ -32,9 +32,9 @@
 
 #include "mcu_main/Abort.h"
 #include "mcu_main/dataLog.h"
+#include "mcu_main/finite-state-machines/thresholds.h"
 #include "mcu_main/gnc/kalmanFilter.h"
 #include "mcu_main/sensors/sensors.h"
-#include "mcu_main/finite-state-machines/thresholds.h"
 
 double getAltitudeAverage(size_t start, size_t len) {
     return KalmanFSM::getAverage(

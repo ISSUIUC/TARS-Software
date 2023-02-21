@@ -27,8 +27,8 @@
 #include "mcu_main/finite-state-machines/TimerFSM.h"
 
 #include "mcu_main/Abort.h"
-#include "mcu_main/sensors/sensors.h"
 #include "mcu_main/finite-state-machines/thresholds.h"
+#include "mcu_main/sensors/sensors.h"
 
 /**
  * @brief TimerFSM tick function
