@@ -1,7 +1,7 @@
 #include "mcu_main/sensors/LowGSensor.h"
 
-#include "mcu_main/dataLog.h"
 #include "common/packet.h"
+#include "mcu_main/dataLog.h"
 #include "mcu_main/pins.h"
 
 LowGSensor lowG;

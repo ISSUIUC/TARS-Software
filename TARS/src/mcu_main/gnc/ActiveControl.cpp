@@ -8,8 +8,8 @@
 
 #include "mcu_main/gnc/ActiveControl.h"
 
-#include "mcu_main/gnc/kalmanFilter.h"
 #include "mcu_main/finite-state-machines/rocketFSM.h"
+#include "mcu_main/gnc/kalmanFilter.h"
 
 Controller activeController;
 

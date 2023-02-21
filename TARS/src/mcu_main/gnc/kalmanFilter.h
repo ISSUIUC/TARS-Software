@@ -1,7 +1,7 @@
 #include "../EigenArduino-Eigen30/Eigen30.h"
-#include "mcu_main/finite-state-machines/RocketFSMBase.h"
 #include "common/ServoControl.h"
 #include "mcu_main/dataLog.h"
+#include "mcu_main/finite-state-machines/RocketFSMBase.h"
 #include "mcu_main/gnc/rk4.h"
 #include "mcu_main/sensors/sensors.h"
 

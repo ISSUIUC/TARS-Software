@@ -1,10 +1,10 @@
 #pragma once
 
 #include "mcu_main/Abort.h"
-#include "mcu_main/finite-state-machines/RocketFSMBase.h"
 #include "mcu_main/dataLog.h"
-#include "mcu_main/sensors/sensors.h"
+#include "mcu_main/finite-state-machines/RocketFSMBase.h"
 #include "mcu_main/finite-state-machines/thresholds.h"
+#include "mcu_main/sensors/sensors.h"
 
 template <size_t view>
 class HistoryBufferFSM : public RocketFSMBase {
