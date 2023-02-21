@@ -1,7 +1,7 @@
 #include <PWMServo.h>
 #include <mcu_main/gnc/rk4.h>
 
-#include "ServoControl.h"
+#include "common/ServoControl.h"
 
 class Controller;
 

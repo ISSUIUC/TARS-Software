@@ -3,8 +3,8 @@
 //#include <ChRt.h>
 //#include <SD.h>
 
-#include "FifoBuffer.h"
-#include "MessageQueue.h"
+#include "common/FifoBuffer.h"
+#include "common/MessageQueue.h"
 #include "common/packet.h"
 
 #define FIFO_SIZE 1000

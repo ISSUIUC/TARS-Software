@@ -1,6 +1,6 @@
 #pragma once
 
-#include "FifoBuffer.h"
+#include "common/FifoBuffer.h"
 #include "common/packet.h"
 
 class RocketFSMBase {
