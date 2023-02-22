@@ -43,7 +43,7 @@ class OrientationSensor {
     
     OrientationSensor();
     OrientationSensor(Adafruit_BNO08x* imu);
-    void readData();
+    void update();
     void setIMU(Adafruit_BNO08x* imu);
     BNO_Accelerations getAccelerations();
     BNO_Gyroscope getGyroscope();

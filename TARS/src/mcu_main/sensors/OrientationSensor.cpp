@@ -31,7 +31,7 @@ void OrientationSensor::setIMU(Adafruit_BNO08x* bno) {
     setReports(reportType, reportIntervalUs);
 }
 
-void OrientationSensor::readData() {
+void OrientationSensor::update() {
     chSysLock();
     chMtxLock(&mutex);
     sh2_SensorValue_t event;
