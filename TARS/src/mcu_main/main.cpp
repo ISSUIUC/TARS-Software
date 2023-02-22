@@ -108,6 +108,21 @@ static THD_FUNCTION(lowgIMU_THD, arg) {
 }
 
 /******************************************************************************/
+/* BNO THREAD                                                           */
+
+static THD_FUNCTION(BNO_THD, arg) {
+    while (true) {
+#ifdef THREAD_DEBUG
+        Serial.println("### BNO thread entrance");
+#endif
+
+        orientation.readData();
+
+        chThdSleepMilliseconds(6);
+    }
+}
+
+/******************************************************************************/
 /* BAROMETER THREAD                                                           */
 
 static THD_FUNCTION(barometer_THD, arg) {
@@ -219,6 +234,7 @@ static THD_WORKING_AREA(barometer_WA, 8192);
 static THD_WORKING_AREA(gps_WA, 8192);
 static THD_WORKING_AREA(rocket_FSM_WA, 8192);
 static THD_WORKING_AREA(lowgIMU_WA, 8192);
+static THD_WORKING_AREA(BNO_WA, 8192);
 static THD_WORKING_AREA(highgIMU_WA, 8192);
 static THD_WORKING_AREA(servo_WA, 8192);
 static THD_WORKING_AREA(dataLogger_WA, 8192);
@@ -237,6 +253,7 @@ void chSetup() {
     START_THREAD(rocket_FSM);
     START_THREAD(gps);
     START_THREAD(lowgIMU);
+    START_THREAD(BNO);
     START_THREAD(barometer);
     START_THREAD(highgIMU);
     START_THREAD(servo);

@@ -268,17 +268,17 @@ void KalmanFilter::update() {
 
     // TODO These mutex locks are almost certainly not necessary
     // Sensor Measurements
-    Eigen::Matrix<float> accel = Eigen::Matrix<float, 3, 1>::Zero();
+    Eigen::Matrix<float, 3, 1> accel = Eigen::Matrix<float, 3, 1>::Zero();
     chMtxLock(&highG.mutex);
     accel(0, 0) = highG.getAccel().az;
     accel(1, 0) = highG.getAccel().ax;
     accel(2, 0) = highG.getAccel().ay;
     chMtxUnlock(&highG.mutex);
-    struct euler_t angles = {
-        orientation.yaw,
-        orientation.pitch,
-        orientation.roll
-    }
+
+    chMtxLock(&orientation.mutex);
+    struct euler_t angles = orientation.getEuler();
+    chMtxUnlock(&orientation.mutex);
+
     Eigen::Matrix<float, 3, 1> acc = BodyToGlobal(angles, accel);
     y_k(1, 0) = acc(0) - 9.81; // Maybe subtract 9.81 (ref: ekf.py)
     y_k(2, 0) = acc(1);
@@ -292,7 +292,7 @@ void KalmanFilter::update() {
     x_k = x_priori + K * (y_k - (H * x_priori));
     P_k = (identity - K * H) * P_priori;
 
-    chMtxLock(mutex);
+    chMtxLock(&mutex);
     kalman_state.state_est_pos_x = x_k(0, 0);
     kalman_state.state_est_vel_x = x_k(1, 0);
     kalman_state.state_est_accel_x = x_k(2, 0);
@@ -304,8 +304,22 @@ void KalmanFilter::update() {
     kalman_state.state_est_accel_z = x_k(8, 0);
 
     timestamp = chVTGetSystemTime();
-    chMtxUnlock(mutex);
-    dataLogger.pushKalmanFifo(kalman_state);
+    chMtxUnlock(&mutex);
+
+    struct KalmanData kalman_data;
+    kalman_data.kalman_acc_x = kalman_state.state_est_accel_x;
+    kalman_data.kalman_acc_y = kalman_state.state_est_accel_y;
+    kalman_data.kalman_acc_z = kalman_state.state_est_accel_z;
+    kalman_data.kalman_vel_x = kalman_state.state_est_vel_x;
+    kalman_data.kalman_vel_y = kalman_state.state_est_vel_y;
+    kalman_data.kalman_vel_z = kalman_state.state_est_vel_z;
+    kalman_data.kalman_pos_x = kalman_state.state_est_pos_x;
+    kalman_data.kalman_pos_y = kalman_state.state_est_pos_y;
+    kalman_data.kalman_pos_z = kalman_state.state_est_pos_z;
+    kalman_data.kalman_apo = kalman_apo;
+    kalman_data.timeStamp_state = timestamp;
+
+    dataLogger.pushKalmanFifo(kalman_data);
 }
 
 Eigen::Matrix<float, 3, 1> BodyToGlobal(euler_t angles, Eigen::Matrix<float, 3, 1> body_vect) {

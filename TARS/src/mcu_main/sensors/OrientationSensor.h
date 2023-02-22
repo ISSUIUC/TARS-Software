@@ -3,27 +3,28 @@
 #include "Adafruit_BNO08x.h"
 #include <Arduino.h>
 #include <Wire.h>
-#include "pins.h"
+#include "mcu_main/pins.h"
+#include <ChRt.h>
 
 #include <cmath>
 
 class OrientationSensor;
 extern OrientationSensor orientationSensor;
 
-struct Accelerations {
+struct BNO_Accelerations {
     float x;
     float y;
     float z;
 };
 
-struct Gyroscope {
+struct BNO_Gyroscope {
     // rad/s
     float x;
     float y;
     float z;
 };
 
-struct Magnetometer {
+struct BNO_Magnetometer {
     // uT
     float x;
     float y;
@@ -44,9 +45,9 @@ class OrientationSensor {
     OrientationSensor(Adafruit_BNO08x* imu);
     void readData();
     void setIMU(Adafruit_BNO08x* imu);
-    Accelerations getAccelerations();
-    Gyroscope getGyroscope();
-    Magnetometer getMagnetometer();
+    BNO_Accelerations getAccelerations();
+    BNO_Gyroscope getGyroscope();
+    BNO_Magnetometer getMagnetometer();
     euler_t getEuler();
     float getTemp();
     float getPressure();
@@ -63,9 +64,9 @@ class OrientationSensor {
 
     Adafruit_BNO08x* _imu;
     euler_t _orientationEuler;
-    Accelerations _accelerations;
-    Gyroscope _gyro;
-    Magnetometer _magnetometer;
+    BNO_Accelerations _accelerations;
+    BNO_Gyroscope _gyro;
+    BNO_Magnetometer _magnetometer;
     float _temp;
     float _pressure;
 };

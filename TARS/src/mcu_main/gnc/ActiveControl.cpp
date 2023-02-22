@@ -17,7 +17,7 @@ Controller::Controller() : activeControlServos(&controller_servo_) {}
 
 void Controller::ctrlTickFunction() {
     chMtxLock(&kalmanFilter.mutex);
-    array<float, 2> init = {kalmanFilter.getState().x, kalmanFilter.getState().vx};
+    array<float, 2> init = {kalmanFilter.getState().state_est_pos_x, kalmanFilter.getState().state_est_vel_x};
     chMtxUnlock(&kalmanFilter.mutex);
 
     float apogee_est = rk4_.sim_apogee(init, 0.3)[0];

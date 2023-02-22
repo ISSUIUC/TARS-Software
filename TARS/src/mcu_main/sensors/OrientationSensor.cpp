@@ -17,7 +17,7 @@ void OrientationSensor::setReports(sh2_SensorId_t reportType, long report_interv
 }
 
 OrientationSensor::OrientationSensor() {
-    _imu = new Adafruit_BNO08x*(BNO086_RESET);
+    _imu = new Adafruit_BNO08x(BNO086_RESET);
     setReports(reportType, reportIntervalUs);
 }
 
@@ -95,11 +95,11 @@ float OrientationSensor::getTemp() { return _temp; }
 
 float OrientationSensor::getPressure() { return _pressure; }
 
-Gyroscope OrientationSensor::getGyroscope() { return _gyro; }
+BNO_Gyroscope OrientationSensor::getGyroscope() { return _gyro; }
 
-Magnetometer OrientationSensor::getMagnetometer() { return _magnetometer; }
+BNO_Magnetometer OrientationSensor::getMagnetometer() { return _magnetometer; }
 
-Accelerations OrientationSensor::getAccelerations() { return _accelerations; }
+BNO_Accelerations OrientationSensor::getAccelerations() { return _accelerations; }
 
 euler_t OrientationSensor::getEuler() { return _orientationEuler; }
 
