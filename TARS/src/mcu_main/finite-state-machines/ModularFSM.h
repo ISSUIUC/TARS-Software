@@ -22,4 +22,22 @@ class ModularFSM : public RocketFSMBase {
         double getAltitudeAverage(size_t start, size_t len);
         double getAccelerationAverage(size_t start, size_t len);
 
+        bool idleEventCheck();
+        bool idleStateCheck();
+        bool boostEventCheck();
+        bool boostStateCheck();
+        bool coastPreGNCEventCheck();
+        bool coastPreGNCStateCheck();
+        bool coastGNCEventCheck();
+        bool coastGNCStateCheck();
+        bool apogeeEventCheck();
+        bool apogeeStateCheck();
+        bool separationEventCheck();
+        bool separationStateCheck();
+        bool drogueEventCheck();
+        bool drogueStateCheck();
+        bool mainEventCheck();
+        bool mainStateCheck();
+        bool landedStateCheck();
+
 };

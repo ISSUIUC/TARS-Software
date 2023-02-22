@@ -14,71 +14,71 @@ double ModularFSM::getAccelerationAverage(size_t start, size_t len) {
         dataLogger.highGFifo, +[](HighGData& g) { return (double)g.hg_az; }, start, len);
 }
 
-bool idleEventCheck(){
+bool ModularFSM::idleEventCheck(){
     return true;
 }
 
-bool idleStateCheck(){
+bool ModularFSM::idleStateCheck(){
     return true;
 }
 
-bool boostEventCheck(){
+bool ModularFSM::boostEventCheck(){
     return true;
 }
 
-bool boostStateCheck(){
+bool ModularFSM::boostStateCheck(){
     return true;
 }
 
-bool coastPreGNCEventCheck(){
+bool ModularFSM::coastPreGNCEventCheck(){
     return true;
 }
 
-bool coastPreGNCStateCheck(){
+bool ModularFSM::coastPreGNCStateCheck(){
     return true;
 }
 
-bool coastGNCEventCheck(){
+bool ModularFSM::coastGNCEventCheck(){
     return true;
 }
 
-bool coastGNCStateCheck(){
+bool ModularFSM::coastGNCStateCheck(){
     return true;
 }
 
-bool apogeeEventCheck(){
+bool ModularFSM::apogeeEventCheck(){
     return true;
 }
 
-bool apogeeStateCheck(){
+bool ModularFSM::apogeeStateCheck(){
     return true;
 }
 
-bool separationEventCheck(){
+bool ModularFSM::separationEventCheck(){
     return true;
 }
 
-bool separationStateCheck(){
+bool ModularFSM::separationStateCheck(){
     return true;
 }
 
-bool drogueEventCheck(){
+bool ModularFSM::drogueEventCheck(){
     return true;
 }
 
-bool drogueStateCheck(){
+bool ModularFSM::drogueStateCheck(){
     return true;
 }
 
-bool mainEventCheck(){
+bool ModularFSM::mainEventCheck(){
     return true;
 }
 
-bool mainStateCheck(){
+bool ModularFSM::mainStateCheck(){
     return true;
 }
 
-bool landedStateCheck(){
+bool ModularFSM::landedStateCheck(){
     return true;
 }
 
