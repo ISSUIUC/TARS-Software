@@ -22,6 +22,7 @@ enum class FSM_State {
     STATE_MAIN,
     STATE_LANDED_DETECT,
     STATE_LANDED,
+    STATE_UNKNOWN,
     STATE_ABORT
 };
 
