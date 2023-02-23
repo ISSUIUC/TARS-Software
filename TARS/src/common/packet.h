@@ -175,9 +175,9 @@ struct sensorDataStruct_t {
     }
 };
 
-typedef struct Acceleration {
+struct Acceleration {
     float ax, ay, az;
-} Acceleration;
+};
 
 struct Gyroscope {
     float gx;
