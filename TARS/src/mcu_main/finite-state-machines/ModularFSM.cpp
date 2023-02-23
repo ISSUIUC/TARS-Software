@@ -124,4 +124,6 @@ void ModularFSM::tickFSM(){
         default:
             break;
     }
+    //unlock mutexes used
+    chMtxUnlock(&highG.mutex);
 }
