@@ -11,22 +11,24 @@ long reportIntervalUs = 5000;
 #endif
 void OrientationSensor::setReports(sh2_SensorId_t reportType, long report_interval) {
     Serial.println("Setting desired reports");
-    if (!_imu->enableReport(reportType, report_interval)) {
+    if (!_imu.enableReport(reportType, report_interval)) {
         Serial.println("Could not enable stabilized remote vector");
     }
 }
 
+OrientationSensor orientation;
+
 OrientationSensor::OrientationSensor() {
-    _imu = new Adafruit_BNO08x(BNO086_RESET);
+    _imu = Adafruit_BNO08x(BNO086_RESET);
     setReports(reportType, reportIntervalUs);
 }
 
-OrientationSensor::OrientationSensor(Adafruit_BNO08x* bno) {
+OrientationSensor::OrientationSensor(Adafruit_BNO08x bno) {
     _imu = bno;
     setReports(reportType, reportIntervalUs);
 }
 
-void OrientationSensor::setIMU(Adafruit_BNO08x* bno) {
+void OrientationSensor::setIMU(Adafruit_BNO08x bno) {
     _imu = bno;
     setReports(reportType, reportIntervalUs);
 }
@@ -35,7 +37,7 @@ void OrientationSensor::update() {
     chSysLock();
     chMtxLock(&mutex);
     sh2_SensorValue_t event;
-    if (_imu->getSensorEvent(&event)) {
+    if (_imu.getSensorEvent(&event)) {
         switch (event.sensorId) {
             case SH2_ARVR_STABILIZED_RV:
                 quaternionToEulerRV(&event.un.arvrStabilizedRV, true);

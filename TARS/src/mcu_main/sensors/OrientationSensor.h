@@ -11,7 +11,7 @@
 #include <cmath>
 
 class OrientationSensor;
-extern OrientationSensor orientationSensor;
+extern OrientationSensor orientation;
 
 
 class OrientationSensor {
@@ -19,9 +19,9 @@ class OrientationSensor {
     MUTEX_DECL(mutex);
     
     OrientationSensor();
-    OrientationSensor(Adafruit_BNO08x* imu);
+    OrientationSensor(Adafruit_BNO08x imu);
     void update();
-    void setIMU(Adafruit_BNO08x* imu);
+    void setIMU(Adafruit_BNO08x imu);
     Acceleration getAccelerations();
     Gyroscope getGyroscope();
     Magnetometer getMagnetometer();
@@ -39,7 +39,7 @@ class OrientationSensor {
     void quaternionToEulerGI(sh2_GyroIntegratedRV_t* rotational_vector,
                              bool degrees = false);
 
-    Adafruit_BNO08x* _imu;
+    Adafruit_BNO08x _imu;
     euler_t _orientationEuler;
     Acceleration _accelerations;
     Gyroscope _gyro;

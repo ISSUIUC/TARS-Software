@@ -1,9 +1,10 @@
 #pragma once
 
 #include <array>
+#include <cmath>
 
-#include "mcu_main/gnc/Atmosphere.h"
 #include "../EigenArduino-Eigen30/Eigen30.h"
+#include "mcu_main/gnc/Atmosphere.h"
 
 using std::array;
 
@@ -177,39 +178,47 @@ class rk4 {
     array<float, 2> y3{{0, 0}};
     array<float, 2> y4{{0, 0}};
     array<float, 2> rk4_kp1{{0, 0}};
-    int n = 30;
+    // int n = 30;
 
     /**
-     * @brief Approximate the aerodynamic coefficients using a cubic spline interpolation. The coefficients are calculated in Pysim and pasted into this function.
-     * 
+     * @brief Approximate the aerodynamic coefficients using a cubic spline interpolation. The coefficients are
+     * calculated in Pysim and pasted into this function.
+     *
      * @param x_interpolate interpolation points
      * @param x point to evaluate the function at (Mach number)
      * @return float the estimated value of Cd at x
      */
-    float approximate_cubic_spline_(Eigen::Matrix<float, n, 1> x_interpolate, float x){
-        Eigen::Matrix<float, 120, 1> c = {0.0, 15.0, -1.2, 0.68, 15.0, -3.82, 0.29, 0.52, -3.82, 0.9, -0.09, 0.6, 0.9, 0.23, 0.0, 
-                                            0.57, 0.23, -0.02, 0.02, 0.56, -0.02, 2.25, 0.02, 0.56, 2.25, -4.17, 0.25, 0.42, -4.17, 
-                                            6.55, -0.17, 0.72, 6.55, 9.35, 0.49, 0.19, 9.35, -13.77, 1.42, -0.66, -13.77, -5.0, 0.04, 
-                                            0.73, -5.0, 1.16, -0.45, 1.28, 1.16, 0.34, -0.34, 1.14, 0.34, 0.48, -0.3, 1.09, 0.48, 0.76, 
-                                            -0.26, 1.03, 0.76, 0.11, -0.18, 0.91, 0.11, 0.61, -0.17, 0.89, 0.61, 0.46, -0.11, 0.79, 0.46, 
-                                            -0.05, -0.06, 0.71, -0.05, 0.95, -0.07, 0.72, 0.95, -0.12, 0.03, 0.53, -0.12, 1.35, 0.02, 0.55, 
-                                            1.35, -4.08, 0.15, 0.26, -4.08, 1.06, -0.26, 1.19, 1.06, -0.16, -0.15, 0.94, -0.16, 0.17, -0.17, 
-                                            0.98, 0.17, 0.07, -0.15, 0.93, 0.07, 0.14, -0.14, 0.91, 0.14, -0.04, -0.13, 0.87, -0.04, 0.0, -0.13, 0.88};
+    float approximate_cubic_spline_(float x) {
+        Eigen::Matrix<float, 120, 1> c;
+        c << 0.0, 15.0, -1.2, 0.68, 15.0, -3.82, 0.29, 0.52, -3.82, 0.9, -0.09, 0.6, 0.9, 0.23, 0.0, 0.57, 0.23, -0.02,
+            0.02, 0.56, -0.02, 2.25, 0.02, 0.56, 2.25, -4.17, 0.25, 0.42, -4.17, 6.55, -0.17, 0.72, 6.55, 9.35, 0.49,
+            0.19, 9.35, -13.77, 1.42, -0.66, -13.77, -5.0, 0.04, 0.73, -5.0, 1.16, -0.45, 1.28, 1.16, 0.34, -0.34, 1.14,
+            0.34, 0.48, -0.3, 1.09, 0.48, 0.76, -0.26, 1.03, 0.76, 0.11, -0.18, 0.91, 0.11, 0.61, -0.17, 0.89, 0.61,
+            0.46, -0.11, 0.79, 0.46, -0.05, -0.06, 0.71, -0.05, 0.95, -0.07, 0.72, 0.95, -0.12, 0.03, 0.53, -0.12, 1.35,
+            0.02, 0.55, 1.35, -4.08, 0.15, 0.26, -4.08, 1.06, -0.26, 1.19, 1.06, -0.16, -0.15, 0.94, -0.16, 0.17, -0.17,
+            0.98, 0.17, 0.07, -0.15, 0.93, 0.07, 0.14, -0.14, 0.91, 0.14, -0.04, -0.13, 0.87, -0.04, 0.0, -0.13, 0.88;
+
+        Eigen::Matrix<float, 30, 1> x_interpolate;
+        x_interpolate << 0.01, 0.11310345, 0.2162069 , 0.31931034, 0.42241379,
+       0.52551724, 0.62862069, 0.73172414, 0.83482759, 0.93793103,
+       1.04103448, 1.14413793, 1.24724138, 1.35034483, 1.45344828,
+       1.55655172, 1.65965517, 1.76275862, 1.86586207, 1.96896552,
+       2.07206897, 2.17517241, 2.27827586, 2.38137931, 2.48448276,
+       2.58758621, 2.69068966, 2.7937931 , 2.89689655, 3.0;
 
 
         int i = 0;
-        if(x == x_interpolate[x_interpolate.length-1]){
-            i = x_interpolate.length-1;
+        if(x == x_interpolate(x_interpolate.rows()-1, 0)){
+            i = x_interpolate.rows() - 1;
         }else{
-            i = floor(x*n/3.0);
+            i = floor(x * 10.0);
         }
 
         int ind = 4*i;
-        float fa_val = c[ind]/(6*(x_interpolate[i]-x_interpolate[i+1]))*(x-x_interpolate[i+1])**3 + 
-                    c[ind+1]/(6*(x_interpolate[i+1]-x_interpolate[i]))*(x-x_interpolate[i])**3 + 
-                    c[ind+2]*x + c[ind+3];
+        float fa_val = c(ind)/(6*(x_interpolate(i, 0)-x_interpolate(i+1, 0)))*pow((x-x_interpolate(i+1, 0)),3) + 
+                    c(ind+1)/(6*(x_interpolate(i+1, 0)-x_interpolate(i, 0)))*pow((x-x_interpolate(i, 0)),3) + 
+                    c(ind+2)*x + c(ind+3);
 
         return fa_val;
     }
-
 };

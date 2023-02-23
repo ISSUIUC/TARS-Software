@@ -276,11 +276,11 @@ void KalmanFilter::update() {
     chMtxUnlock(&highG.mutex);
 
     chMtxLock(&orientation.mutex);
-    struct euler_t angles = orientation.getEuler();
+    euler_t angles = orientation.getEuler();
     chMtxUnlock(&orientation.mutex);
 
     Eigen::Matrix<float, 3, 1> acc = BodyToGlobal(angles, accel);
-    y_k(1, 0) = acc(0) - 9.81; // Maybe subtract 9.81 (ref: ekf.py)
+    y_k(1, 0) = acc(0) - 9.81;
     y_k(2, 0) = acc(1);
     y_k(3, 0) = acc(2);
 
@@ -322,7 +322,7 @@ void KalmanFilter::update() {
     dataLogger.pushKalmanFifo(kalman_data);
 }
 
-Eigen::Matrix<float, 3, 1> BodyToGlobal(euler_t angles, Eigen::Matrix<float, 3, 1> body_vect) {
+Eigen::Matrix<float, 3, 1> KalmanFilter::BodyToGlobal(euler_t angles, Eigen::Matrix<float, 3, 1> body_vect) {
     Eigen::Matrix3f roll, pitch, yaw;
     roll << 1., 0., 0., 0., cos(angles.roll), -sin(angles.roll ), 0., sin(angles.roll), cos(angles.roll);
     pitch << cos(angles.pitch), 0., sin(angles.pitch), 0., 1., 0., -sin(angles.pitch), 0., cos(angles.pitch);
