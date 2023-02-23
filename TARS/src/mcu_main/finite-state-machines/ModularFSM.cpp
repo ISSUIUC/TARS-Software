@@ -92,33 +92,138 @@ void ModularFSM::tickFSM(){
         //include a case for init?
 
         case FSM_State::STATE_IDLE:
+
+            if(last_state_ == FSM_State::STATE_IDLE){
+                if(!idleEventCheck()){
+                    idleStateCheck();
+                }
+            }
+            else{
+                if(idleStateCheck()){
+                    idleEventCheck();
+                }
+            }
             break;
 
         case FSM_State::STATE_BOOST:
+
+            if(last_state_ == FSM_State::STATE_BOOST){
+                if(!boostEventCheck()){
+                    boostStateCheck();
+                }
+            }
+            else{
+                if(boostStateCheck()){
+                    boostEventCheck();
+                }
+            }
             break;
 
         case FSM_State::STATE_COAST_PREGNC:
+
+            if(last_state_ == FSM_State::STATE_COAST_PREGNC){
+                if(!coastPreGNCEventCheck()){
+                    coastPreGNCStateCheck();
+                }
+            }
+            else{
+                if(coastPreGNCStateCheck()){
+                    coastPreGNCEventCheck();
+                }
+            }
             break;
 
         case FSM_State::STATE_COAST_GNC:
+
+            if(last_state_ == FSM_State::STATE_COAST_GNC){
+                if(!coastGNCEventCheck()){
+                    coastGNCStateCheck();
+                }
+            }
+            else{
+                if(coastGNCStateCheck()){
+                    coastGNCEventCheck();
+                }
+            }
             break;
 
         case FSM_State::STATE_APOGEE:
+
+            if(last_state_ == FSM_State::STATE_APOGEE){
+                if(!apogeeEventCheck()){
+                    apogeeStateCheck();
+                }
+            }
+            else{
+                if(apogeeStateCheck()){
+                    apogeeEventCheck();
+                }
+            }
             break;
 
         case FSM_State::STATE_SEPARATION:
+
+            if(last_state_ == FSM_State::STATE_SEPARATION){
+                if(!separationEventCheck()){
+                    separationStateCheck();
+                }
+            }
+            else{
+                if(separationStateCheck()){
+                    separationEventCheck();
+                }
+            }
             break;
 
         case FSM_State::STATE_DROGUE:
+
+            if(last_state_ == FSM_State::STATE_DROGUE){
+                if(!drogueEventCheck()){
+                    drogueStateCheck();
+                }
+            }
+            else{
+                if(drogueStateCheck()){
+                    drogueEventCheck();
+                }
+            }
             break;
 
         case FSM_State::STATE_MAIN:
+
+            if(last_state_ == FSM_State::STATE_MAIN){
+                if(!mainEventCheck()){
+                    mainStateCheck();
+                }
+            }
+            else{
+                if(mainStateCheck()){
+                    mainEventCheck();
+                }
+            }
             break;
 
         case FSM_State::STATE_LANDED:
+        
+            landedStateCheck();
             break;
 
         case FSM_State::STATE_UNKNOWN:
+            
+            if(last_state_ == FSM_State::STATE_IDLE || last_state_ == FSM_State::STATE_BOOST){
+			    if(idleStateCheck()){
+				    break;
+			    }
+		    }
+
+            else{
+                if(separationStateCheck()){
+                    break;
+                }
+            }
+
+            boostStateCheck() || coastGNCStateCheck() || apogeeStateCheck() 
+            || drogueStateCheck() || mainStateCheck() || landedStateCheck();		
             break;
 
         default:

@@ -16,7 +16,7 @@ class ModularFSM : public RocketFSMBase {
         float apogee_altitude_ = 15000.0;
 
         //helps determine which checks to run
-        FSM_State previous_state_ = FSM_State::STATE_IDLE;
+        FSM_State last_state_ = FSM_State::STATE_IDLE;
 
         //used to average data
         double getAltitudeAverage(size_t start, size_t len);
