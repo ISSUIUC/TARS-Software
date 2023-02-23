@@ -119,12 +119,25 @@ struct BarometerData {
  *
  */
 struct KalmanData {
-    float kalman_x = 0;
-    float kalman_vx = 0;
-    float kalman_ax = 0;
+    float kalman_pos_x = 0;
+    float kalman_vel_x = 0;
+    float kalman_acc_x = 0;
+    float kalman_pos_y = 0;
+    float kalman_vel_y = 0;
+    float kalman_acc_y = 0;
+    float kalman_pos_z = 0;
+    float kalman_vel_z = 0;
+    float kalman_acc_z = 0;
     float kalman_apo = 0;
 
     systime_t timeStamp_state = 0;
+};
+
+struct OrientationData {
+    float yaw;
+    float pitch;
+    float roll;
+    systime_t timeStamp_orientation = 0;
 };
 
 /**
@@ -165,8 +178,34 @@ struct sensorDataStruct_t {
     bool has_voltage_data;
     VoltageData voltage_data;
 
+    bool has_orientation_data;
+    OrientationData orientation_data;
+
     bool hasData() const {
         return has_gps_data || has_highG_data || has_lowG_data || has_rocketState_data || has_kalman_data ||
-               has_barometer_data || has_flap_data || has_voltage_data;
+               has_barometer_data || has_flap_data || has_voltage_data || has_orientation_data;
     }
 };
+
+struct Acceleration {
+    float ax, ay, az;
+};
+
+struct Gyroscope {
+    float gx;
+    float gy;
+    float gz;
+};
+
+struct Magnetometer {
+    float mx;
+    float my;
+    float mz;
+};
+
+struct euler_t {
+    float yaw;
+    float pitch;
+    float roll;
+};
+
