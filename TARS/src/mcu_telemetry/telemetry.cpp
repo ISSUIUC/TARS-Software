@@ -15,11 +15,11 @@
 
 #define SERIAL_PLOTTING
 
-#include "mcu_main/telemetry.h"
+#include "mcu_telemetry/telemetry.h"
 
 #include <limits>
 
-#include "mcu_main/dataLog.h"
+
 
 Telemetry tlm;
 
@@ -139,11 +139,11 @@ void Telemetry::transmit() {
     digitalWrite(LED_BLUE, blue_state);
     blue_state = !blue_state;
 
-    TelemetryPacket packet = makePacket(dataLogger.read());
+    TelemetryPacket packet{};
     rf95.send((uint8_t *)&packet, sizeof(packet));
 
-    chThdSleepMilliseconds(170);
-    // delay(170);
+    // chThdSleepMilliseconds(170);
+    delay(170);
 
     rf95.waitPacketSent();
 
@@ -287,10 +287,10 @@ TelemetryPacket Telemetry::makePacket(const sensorDataStruct_t &data_struct) {
 }
 
 void Telemetry::bufferData() {
-    sensorDataStruct_t sensor_data = dataLogger.read();
+    sensorDataStruct_t sensor_data{};
     // Serial.println(dataLogger.count);
     TelemetryDataLite data{};
-    data.timestamp = TIME_I2MS(chVTGetSystemTime());
+    data.timestamp = 23423;
     data.barometer_pressure = inv_convert_range<uint16_t>(sensor_data.barometer_data.pressure, 4096);
 
     data.highG_ax = inv_convert_range<int16_t>(sensor_data.highG_data.hg_ax, 256);

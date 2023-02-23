@@ -1,6 +1,9 @@
 #pragma once
 
-#include "ChRt.h"
+// #include "ChRt.h"
+
+typedef uint32_t systime_t;
+typedef uint32_t sysinterval_t;
 
 /**
  * @brief Labels for each FSM state

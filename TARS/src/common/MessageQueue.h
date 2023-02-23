@@ -1,16 +1,18 @@
 #pragma once
 
-#include <ChRt.h>
+// #include <ChRt.h>
+typedef uint32_t systime_t;
+typedef uint32_t sysinterval_t;
 
 template <typename T, size_t max_count>
 class MessageQueue {
    public:
-    MUTEX_DECL(lock);
+    // MUTEX_DECL(lock);
 
     MessageQueue() = default;
 
     void push(T item) {
-        chMtxLock(&lock);
+        // chMtxLock(&lock);
         buffer[tail_idx++] = item;
         if (tail_idx == max_count) {
             tail_idx = 0;
@@ -23,13 +25,13 @@ class MessageQueue {
         } else {
             count++;
         }
-        chMtxUnlock(&lock);
+        // chMtxUnlock(&lock);
     }
 
     bool pop(T& item) {
-        chMtxLock(&lock);
+        // chMtxLock(&lock);
         if (count == 0) {
-            chMtxUnlock(&lock);
+            // chMtxUnlock(&lock);
             return false;
         }
         item = buffer[head_idx++];
@@ -37,7 +39,7 @@ class MessageQueue {
             head_idx = 0;
         }
         count--;
-        chMtxUnlock(&lock);
+        // chMtxUnlock(&lock);
         return true;
     }
 
