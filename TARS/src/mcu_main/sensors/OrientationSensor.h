@@ -5,37 +5,13 @@
 #include <Wire.h>
 #include "mcu_main/pins.h"
 #include <ChRt.h>
+#include "common/packet.h"
 
 #include <cmath>
 
 class OrientationSensor;
 extern OrientationSensor orientationSensor;
 
-struct BNO_Accelerations {
-    float x;
-    float y;
-    float z;
-};
-
-struct BNO_Gyroscope {
-    // rad/s
-    float x;
-    float y;
-    float z;
-};
-
-struct BNO_Magnetometer {
-    // uT
-    float x;
-    float y;
-    float z;
-};
-
-struct euler_t {
-    float yaw;
-    float pitch;
-    float roll;
-};
 
 class OrientationSensor {
    public:
@@ -45,9 +21,9 @@ class OrientationSensor {
     OrientationSensor(Adafruit_BNO08x* imu);
     void update();
     void setIMU(Adafruit_BNO08x* imu);
-    BNO_Accelerations getAccelerations();
-    BNO_Gyroscope getGyroscope();
-    BNO_Magnetometer getMagnetometer();
+    Acceleration getAccelerations();
+    Gyroscope getGyroscope();
+    Magnetometer getMagnetometer();
     euler_t getEuler();
     float getTemp();
     float getPressure();
@@ -64,9 +40,9 @@ class OrientationSensor {
 
     Adafruit_BNO08x* _imu;
     euler_t _orientationEuler;
-    BNO_Accelerations _accelerations;
-    BNO_Gyroscope _gyro;
-    BNO_Magnetometer _magnetometer;
+    Acceleration _accelerations;
+    Gyroscope _gyro;
+    Magnetometer _magnetometer;
     float _temp;
     float _pressure;
 };

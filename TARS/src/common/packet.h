@@ -174,3 +174,25 @@ struct sensorDataStruct_t {
                has_barometer_data || has_flap_data || has_voltage_data;
     }
 };
+
+typedef struct Acceleration {
+    float ax, ay, az;
+} Acceleration;
+
+struct Gyroscope {
+    float gx;
+    float gy;
+    float gz;
+};
+
+struct Magnetometer {
+    float mx;
+    float my;
+    float mz;
+};
+
+struct euler_t {
+    float yaw;
+    float pitch;
+    float roll;
+};

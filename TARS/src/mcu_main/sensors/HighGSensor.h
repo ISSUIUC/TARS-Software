@@ -4,10 +4,7 @@
 
 #include "ChRt.h"
 #include "SparkFun_Qwiic_KX13X.h"
-
-struct Acceleration {
-    float ax, ay, az;
-};
+#include "common/packet.h"
 
 struct HighGSensor {
    public:

@@ -3,18 +3,8 @@
 #include "ChRt.h"
 #include "SparkFunLSM9DS1.h"
 #include "mcu_main/sensors/HighGSensor.h"
+#include "common/packet.h"
 
-struct Gyroscope {
-    float gx;
-    float gy;
-    float gz;
-};
-
-struct Magnetometer {
-    float mx;
-    float my;
-    float mz;
-};
 
 class LowGSensor {
    public:

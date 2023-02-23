@@ -45,17 +45,17 @@ void OrientationSensor::update() {
                 break;
         }
 
-        _accelerations.x = event.un.accelerometer.x;
-        _accelerations.y = event.un.accelerometer.y;
-        _accelerations.z = event.un.accelerometer.z;
+        _accelerations.ax = event.un.accelerometer.x;
+        _accelerations.ay = event.un.accelerometer.y;
+        _accelerations.az = event.un.accelerometer.z;
 
-        _gyro.x = event.un.gyroscope.x;
-        _gyro.y = event.un.gyroscope.y;
-        _gyro.z = event.un.gyroscope.z;
+        _gyro.gx = event.un.gyroscope.x;
+        _gyro.gy = event.un.gyroscope.y;
+        _gyro.gz = event.un.gyroscope.z;
 
-        _magnetometer.x = event.un.magneticField.x;
-        _magnetometer.y = event.un.magneticField.y;
-        _magnetometer.z = event.un.magneticField.z;
+        _magnetometer.mx = event.un.magneticField.x;
+        _magnetometer.my = event.un.magneticField.y;
+        _magnetometer.mz = event.un.magneticField.z;
 
         _temp = event.un.temperature.value;
         _pressure = event.un.pressure.value;
@@ -95,11 +95,11 @@ float OrientationSensor::getTemp() { return _temp; }
 
 float OrientationSensor::getPressure() { return _pressure; }
 
-BNO_Gyroscope OrientationSensor::getGyroscope() { return _gyro; }
+Gyroscope OrientationSensor::getGyroscope() { return _gyro; }
 
-BNO_Magnetometer OrientationSensor::getMagnetometer() { return _magnetometer; }
+Magnetometer OrientationSensor::getMagnetometer() { return _magnetometer; }
 
-BNO_Accelerations OrientationSensor::getAccelerations() { return _accelerations; }
+Acceleration OrientationSensor::getAccelerations() { return _accelerations; }
 
 euler_t OrientationSensor::getEuler() { return _orientationEuler; }
 
