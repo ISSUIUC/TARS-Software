@@ -39,6 +39,7 @@ sensorDataStruct_t DataLogBuffer::read() {
     barometerFifo.read(data.barometer_data);
     flapFifo.read(data.flap_data);
     voltageFifo.read(data.voltage_data);
+    orientationFifo.read(data.orientation_data);
     return data;
 }
 
@@ -91,6 +92,11 @@ void DataLogBuffer::pushVoltageFifo(VoltageData const& voltage_data) {
     UPDATE_QUEUE(voltageQueue, voltage_data);
 }
 
+void DataLogBuffer::pushOrientationFifo(OrientationData const& orientation_data) {
+    orientationFifo.push(orientation_data);
+    UPDATE_QUEUE(orientationQueue, orientation_data);
+}
+
 #undef UPDATE_QUEUE
 
 void DataLogQueue::attach(DataLogBuffer& buffer) {
@@ -108,5 +114,6 @@ sensorDataStruct_t DataLogQueue::next() {
     data.has_barometer_data = barometerQueue.pop(data.barometer_data);
     data.has_flap_data = flapQueue.pop(data.flap_data);
     data.has_voltage_data = voltageQueue.pop(data.voltage_data);
+    data.has_orientation_data = orientationQueue.pop(data.orientation_data);
     return data;
 }
