@@ -1,0 +1,15 @@
+#pragma once
+
+enum ErrorCode {
+    NO_ERROR,
+    CANNOT_CONNECT_KX134_CS,
+    CANNOT_INIT_KX134_CS,
+    CANNOT_CONNECT_ZOEM8Q0,
+    CANNOT_CONECT_LSM9DS1,
+    SD_BEGIN_FAILED,
+    RADIO_INIT_FAILED,
+    RADIO_SET_FREQUENCY_FAILED
+};
+
+
+void handleError(ErrorCode);

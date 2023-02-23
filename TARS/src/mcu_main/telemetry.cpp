@@ -40,7 +40,7 @@ T inv_convert_range(float val, float range) {
     return std::max(std::min((float)std::numeric_limits<T>::max(), converted), (float)std::numeric_limits<T>::min());
 }
 
-void Telemetry::init() {
+ErrorCode Telemetry::init() {
     pinMode(RFM95_RST, OUTPUT);
     digitalWrite(RFM95_RST, HIGH);
     delay(100);
@@ -53,9 +53,7 @@ void Telemetry::init() {
     delay(10);
 
     while (!rf95.init()) {
-        while (true) {
-            Serial.println("Radio Initialization Failed");
-        }
+        return ErrorCode::RADIO_INIT_FAILED;
     }
     Serial.println("[DEBUG]: Radio Initialized");
 
@@ -63,9 +61,7 @@ void Telemetry::init() {
     // 128chips/symbol, CRC on
 
     if (!rf95.setFrequency(RF95_FREQ)) {
-        while (true) {
-            Serial.println("[ERROR]: Default setFrequency Failed");
-        }
+        return ErrorCode::RADIO_SET_FREQUENCY_FAILED;
     }
 
     /*
@@ -74,6 +70,7 @@ void Telemetry::init() {
      * transmitter pin, then you can set transmitter powers from 5 to 23 dBm:
      */
     rf95.setTxPower(23, false);
+    return ErrorCode::NO_ERROR;
 }
 
 Telemetry::Telemetry() : rf95(RFM95_CS, RFM95_INT) {}

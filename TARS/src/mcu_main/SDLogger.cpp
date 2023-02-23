@@ -5,8 +5,6 @@
 
 SDLogger sd_logger;  // NOLINT(cppcoreguidelines-interfaces-global-init)
 
-// SDLogger::SDLogger() { }
-
 #define MAX_FILES 999
 
 /**
@@ -66,7 +64,7 @@ char* sdFileNamer(char* fileName, char* fileExtensionParam) {
     return fileName;
 }
 
-void SDLogger::init() {
+ErrorCode SDLogger::init() {
     queue.attach(dataLogger);
 
     if (SD.begin(BUILTIN_SDCARD)) {
@@ -82,17 +80,9 @@ void SDLogger::init() {
 
         Serial.println(sd_file.name());
     } else {
-        digitalWrite(LED_RED, HIGH);
-        digitalWrite(LED_ORANGE, HIGH);
-        digitalWrite(LED_BLUE, HIGH);
-        Serial.println("SD Begin Failed. Stalling Program");
-        while (true) {
-            digitalWrite(LED_RED, HIGH);
-            delay(100);
-            digitalWrite(LED_RED, LOW);
-            delay(100);
-        }
+        return ErrorCode::SD_BEGIN_FAILED;
     }
+    return ErrorCode::NO_ERROR;
 }
 
 void SDLogger::update() {

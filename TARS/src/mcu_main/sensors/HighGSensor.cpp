@@ -21,20 +21,15 @@ void HighGSensor::update() {
 
 Acceleration HighGSensor::getAccel() { return {ax, ay, az}; }
 
-void HighGSensor::init() {
+ErrorCode HighGSensor::init() {
     if (!KX.beginSPICore(KX134_CS, 1000000, SPI)) {
-        Serial.println("Failed to communicate with KX134. Stalling Program");
-        digitalWrite(LED_RED, HIGH);
-        while (true)
-            ;
+        return ErrorCode::CANNOT_CONNECT_KX134_CS;
     }
 
     if (!KX.initialize(DEFAULT_SETTINGS)) {
-        Serial.println("Could not initialize KX134. Stalling Program");
-        digitalWrite(LED_BLUE, HIGH);
-        while (true)
-            ;
+        return ErrorCode::CANNOT_INIT_KX134_CS;
     }
 
     KX.setRange(3);  // set range to 3 = 64 g range
+    return ErrorCode::NO_ERROR;
 }

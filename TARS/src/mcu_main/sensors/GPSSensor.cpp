@@ -5,15 +5,13 @@
 
 GPSSensor gps;
 
-void GPSSensor::init() {
+ErrorCode GPSSensor::init() {
     SPI1.begin();  // TODO should this line be moved?
     digitalWrite(LED_RED, HIGH);
     digitalWrite(LED_ORANGE, HIGH);
 
     if (!GNSS.begin(SPI1, ZOEM8Q0_CS, 4000000)) {
-        Serial.println("Failed to communicate with ZOEM8Q0 gps. Stalling Program");
-        while (true) {
-        }
+        return ErrorCode::CANNOT_CONNECT_ZOEM8Q0;
     }
 
     digitalWrite(LED_RED, LOW);
@@ -24,6 +22,7 @@ void GPSSensor::init() {
     GNSS.saveConfigSelective(VAL_CFG_SUBSEC_IOPORT);  // Save (only) the communications port settings
     // to flash and BBR
     GNSS.setNavigationFrequency(5);  // set sampling rate to 5hz
+    return ErrorCode::NO_ERROR;
 }
 
 void GPSSensor::update() {

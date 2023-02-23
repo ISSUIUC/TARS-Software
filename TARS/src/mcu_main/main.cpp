@@ -39,6 +39,7 @@
 #include "mcu_main/pins.h"
 #include "mcu_main/sensors/sensors.h"
 #include "mcu_main/telemetry.h"
+#include "mcu_main/error.h"
 
 #define THREAD_DEBUG
 //#define SERVO_DEBUG
@@ -291,13 +292,13 @@ void setup() {
     SPI.begin();
     SPI1.setMISO(39);
 
-    highG.init();
-    lowG.init();
-    barometer.init();
-    gps.init();
+    handleError(highG.init());
+    handleError(lowG.init());
+    handleError(barometer.init());
+    handleError(gps.init());
 
-    sd_logger.init();
-    tlm.init();
+    handleError(sd_logger.init());
+    handleError(tlm.init());
 
     digitalWrite(LED_ORANGE, HIGH);
     digitalWrite(LED_BLUE, HIGH);

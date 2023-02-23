@@ -5,6 +5,8 @@
 #include "ChRt.h"
 #include "SparkFun_Qwiic_KX13X.h"
 
+#include "mcu_main/error.h"
+
 struct Acceleration {
     float ax, ay, az;
 };
@@ -15,7 +17,7 @@ struct HighGSensor {
 
     MUTEX_DECL(mutex);
 
-    void init();
+    ErrorCode __attribute__((warn_unused_result)) init();
     void update();
     Acceleration getAccel();
 

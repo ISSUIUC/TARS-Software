@@ -8,6 +8,7 @@
 #include "common/MessageQueue.h"
 #include "common/packet.h"
 #include "mcu_main/pins.h"
+#include "mcu_main/error.h"
 
 // Make sure to change these pinout depending on wiring
 // Don't forget to change the ini file to build the correct main file
@@ -74,7 +75,7 @@ class Telemetry {
 
     Telemetry();
 
-    void init();
+    ErrorCode __attribute__((warn_unused_result)) init();
 
     void transmit();
 

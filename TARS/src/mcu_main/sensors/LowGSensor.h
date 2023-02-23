@@ -3,6 +3,7 @@
 #include "ChRt.h"
 #include "SparkFunLSM9DS1.h"
 #include "mcu_main/sensors/HighGSensor.h"
+#include "mcu_main/error.h"
 
 struct Gyroscope {
     float gx;
@@ -22,7 +23,7 @@ class LowGSensor {
 
     LowGSensor() = default;
 
-    void init();
+    ErrorCode __attribute__((warn_unused_result)) init();
     void update();
     Acceleration getAcceleration();
     Gyroscope getGyroscope();
