@@ -131,6 +131,13 @@ struct KalmanData {
     systime_t timeStamp_state = 0;
 };
 
+struct OrientationData {
+    float yaw;
+    float pitch;
+    float roll;
+    systime_t timeStamp_orientation = 0;
+};
+
 /**
  * @brief A struct to hold all of the data that could come from any of the
  * sensors
@@ -169,9 +176,12 @@ struct sensorDataStruct_t {
     bool has_voltage_data;
     VoltageData voltage_data;
 
+    bool has_orientation_data;
+    OrientationData orientation_data;
+
     bool hasData() const {
         return has_gps_data || has_highG_data || has_lowG_data || has_rocketState_data || has_kalman_data ||
-               has_barometer_data || has_flap_data || has_voltage_data;
+               has_barometer_data || has_flap_data || has_voltage_data || has_orientation_data;
     }
 };
 
@@ -196,3 +206,5 @@ struct euler_t {
     float pitch;
     float roll;
 };
+
+

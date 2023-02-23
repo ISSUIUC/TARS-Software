@@ -6,6 +6,7 @@
 #include "mcu_main/pins.h"
 #include <ChRt.h>
 #include "common/packet.h"
+#include "mcu_main/dataLog.h"
 
 #include <cmath>
 
@@ -43,6 +44,7 @@ class OrientationSensor {
     Acceleration _accelerations;
     Gyroscope _gyro;
     Magnetometer _magnetometer;
+    systime_t time_stamp = 0;
     float _temp;
     float _pressure;
 };

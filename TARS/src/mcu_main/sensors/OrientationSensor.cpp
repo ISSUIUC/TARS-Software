@@ -60,6 +60,8 @@ void OrientationSensor::update() {
         _temp = event.un.temperature.value;
         _pressure = event.un.pressure.value;
     }
+    time_stamp = chVTGetSystemTime();
+    dataLogger.pushOrientationFifo((OrientationData){_orientationEuler.yaw, _orientationEuler.pitch, _orientationEuler.roll, time_stamp});
     chMtxUnlock(&mutex);
     chSysUnlock();
 }

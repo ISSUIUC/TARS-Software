@@ -29,6 +29,7 @@ class DataLogQueue {
     MessageQueue<BarometerData, QUEUE_SIZE> barometerQueue;
     MessageQueue<FlapData, QUEUE_SIZE> flapQueue;
     MessageQueue<VoltageData, QUEUE_SIZE> voltageQueue;
+    MessageQueue<OrientationData, QUEUE_SIZE> orientationQueue;
 
    private:
     DataLogQueue* next_queue = nullptr;
@@ -53,6 +54,7 @@ class DataLogBuffer {
     FifoBuffer<FlapData, FIFO_SIZE> flapFifo;
     FifoBuffer<VoltageData, FIFO_SIZE> voltageFifo;
     FifoBuffer<BarometerData, FIFO_SIZE> barometerFifo;
+    FifoBuffer<OrientationData, FIFO_SIZE> orientationFifo;
 
     void pushLowGFifo(LowGData const& lowG_Data);
 
@@ -69,6 +71,8 @@ class DataLogBuffer {
     void pushFlapsFifo(FlapData const& flap_data);
 
     void pushVoltageFifo(VoltageData const& voltage_data);
+
+    void pushOrientationFifo(OrientationData const& orientation_data);
 
     sensorDataStruct_t read();
 };
