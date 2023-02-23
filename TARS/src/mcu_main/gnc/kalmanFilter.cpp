@@ -159,6 +159,14 @@ void KalmanFilter::Initialize() {
     H(2, 5) = 1;
     H(3, 8) = 1;
 
+    H_r(0, 0) = 1;
+    H_r(0, 1) = 1;
+    H_r(1, 2) = 1;
+    H_r(1, 3) = 1;
+    H_r(2, 4) = 1;
+    H_r(2, 5) = 1;
+    
+
     // set P_k
     P_k(0, 0) = 0;
     P_k(0, 1) = 0;
@@ -184,6 +192,14 @@ void KalmanFilter::Initialize() {
     R(3, 3) = 1.9;
     // R(0,0) = 2.;
     // R(1,1) = .01;
+
+    R_r(0, 0) = 1.9;
+    R_r(1, 1) = 1.9;
+    R_r(2, 2) = 1.9;
+    R_r(3, 3) = 1.9;
+    R_r(4, 4) = 1.9;
+    R_r(5, 5) = 1.9;
+    
 
     // set B
     B(2, 0) = -1;
@@ -257,9 +273,9 @@ void KalmanFilter::priori() {
  *
  */
 void KalmanFilter::update() {
-    if (getActiveFSM().getFSMState() >= FSM_State::STATE_APOGEE) {
-        H(1, 2) = 0;
-    }
+    // if (getActiveFSM().getFSMState() >= FSM_State::STATE_APOGEE) {
+    //     H(1, 2) = 0;
+    // }
 
     Eigen::Matrix<float, 4, 4> temp = Eigen::Matrix<float, 4, 4>::Zero();
     temp = (((H * P_priori * H.transpose()) + R)).inverse();
@@ -328,6 +344,70 @@ Eigen::Matrix<float, 3, 1> KalmanFilter::BodyToGlobal(euler_t angles, Eigen::Mat
     pitch << cos(angles.pitch), 0., sin(angles.pitch), 0., 1., 0., -sin(angles.pitch), 0., cos(angles.pitch);
     yaw << cos(angles.yaw), -sin(angles.yaw), 0., sin(angles.yaw), cos(angles.yaw), 0., 0., 0., 1.;
     return yaw * pitch * roll * body_vect;
+}
+
+void KalmanFilter::priori_r() {
+    x_priori_r = (F_mat * x_k_r);
+    P_priori_r = (F_mat * P_k_r * F_mat.transpose()) + Q;
+}
+
+void KalmanFilter::update_r() {
+    Eigen::Matrix<float, 6, 6> temp = Eigen::Matrix<float, 6, 6>::Zero();
+    temp = (((H_r * P_priori_r * H_r.transpose()) + R_r)).inverse();
+    Eigen::Matrix<float, 9, 9> identity = Eigen::Matrix<float, 9, 9>::Identity();
+    K_r = (P_priori_r * H_r.transpose()) * temp;
+
+    // TODO These mutex locks are almost certainly not necessary
+    // Sensor Measurements
+    Eigen::Matrix<float, 3, 1> gyro = Eigen::Matrix<float, 3, 1>::Zero();
+    chMtxLock(&lowG.mutex);
+    gyro(0, 0) = lowG.getGyroscope().gz;
+    gyro(1, 0) = lowG.getGyroscope().gx;
+    gyro(2, 0) = lowG.getGyroscope().gy;
+    chMtxUnlock(&lowG.mutex);
+
+    euler_t angles;
+    angles.roll = x_k_r(0);
+    angles.pitch = x_k_r(1);
+    angles.yaw = x_k_r(2);
+    
+    Eigen::Matrix<float, 3, 1> euler = BodyToGlobal(angles, gyro);
+    y_k_r(0, 0) = euler(0);
+    y_k_r(2, 0) = euler(1);
+    y_k_r(4, 0) = euler(2);
+
+    // # Posteriori Update
+    x_k_r = x_priori_r + K_r * (y_k_r - (H_r * x_priori_r));
+    P_k_r = (identity - K_r * H_r) * P_priori_r;
+
+    chMtxLock(&mutex);
+    kalman_state.state_est_pos_x = x_k_r(0, 0);
+    kalman_state.state_est_vel_x = x_k_r(1, 0);
+    kalman_state.state_est_accel_x = x_k_r(2, 0);
+    kalman_state.state_est_pos_y = x_k_r(3, 0);
+    kalman_state.state_est_vel_y = x_k_r(4, 0);
+    kalman_state.state_est_accel_y = x_k_r(5, 0);
+    kalman_state.state_est_pos_z = x_k_r(6, 0);
+    kalman_state.state_est_vel_z = x_k_r(7, 0);
+    kalman_state.state_est_accel_z = x_k_r(8, 0);
+
+    timestamp = chVTGetSystemTime();
+    chMtxUnlock(&mutex);
+
+    // struct KalmanData kalman_data;
+    // kalman_data.kalman_acc_x = kalman_state.state_est_accel_x;
+    // kalman_data.kalman_acc_y = kalman_state.state_est_accel_y;
+    // kalman_data.kalman_acc_z = kalman_state.state_est_accel_z;
+    // kalman_data.kalman_vel_x = kalman_state.state_est_vel_x;
+    // kalman_data.kalman_vel_y = kalman_state.state_est_vel_y;
+    // kalman_data.kalman_vel_z = kalman_state.state_est_vel_z;
+    // kalman_data.kalman_pos_x = kalman_state.state_est_pos_x;
+    // kalman_data.kalman_pos_y = kalman_state.state_est_pos_y;
+    // kalman_data.kalman_pos_z = kalman_state.state_est_pos_z;
+    // kalman_data.kalman_apo = kalman_apo;
+    // kalman_data.timeStamp_state = timestamp;
+
+    // dataLogger.pushKalmanFifo(kalman_data);
 }
 
 KalmanState KalmanFilter::getState() const { return kalman_state; }

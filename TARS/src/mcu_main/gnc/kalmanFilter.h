@@ -31,6 +31,9 @@ class KalmanFilter {
     void Initialize(float pos_x, float vel_x, float pos_y, float vel_y, float pos_z, float vel_z);
     void priori();
     void update();
+    void priori_r();
+    void update_r();
+
     void SetQ(float dt, float sd);
     void SetF(float dt);
     Eigen::Matrix<float, 3, 1> BodyToGlobal(euler_t angles, Eigen::Matrix<float, 3, 1> x_k);
@@ -60,6 +63,15 @@ class KalmanFilter {
     Eigen::Matrix<float, 9, 1> x_priori = Eigen::Matrix<float, 9, 1>::Zero();
     Eigen::Matrix<float, 9, 4> K = Eigen::Matrix<float, 9, 4>::Zero();
     Eigen::Matrix<float, 4, 1> y_k = Eigen::Matrix<float, 4, 1>::Zero();
+
+    Eigen::Matrix<float, 9, 1> x_k_r = Eigen::Matrix<float, 9, 1>::Zero();
+    Eigen::Matrix<float, 6, 9> H_r = Eigen::Matrix<float, 6, 9>::Zero();
+    Eigen::Matrix<float, 9, 9> P_k_r = Eigen::Matrix<float, 9, 9>::Zero();
+    Eigen::Matrix<float, 6, 6> R_r = Eigen::Matrix<float, 6, 6>::Zero();  // Diagonal
+    Eigen::Matrix<float, 9, 9> P_priori_r = Eigen::Matrix<float, 9, 9>::Zero();
+    Eigen::Matrix<float, 9, 1> x_priori_r = Eigen::Matrix<float, 9, 1>::Zero();
+    Eigen::Matrix<float, 9, 6> K_r = Eigen::Matrix<float, 9, 6>::Zero();
+    Eigen::Matrix<float, 6, 1> y_k_r = Eigen::Matrix<float, 6, 1>::Zero();
 
     Eigen::Matrix<float, 9, 4> B = Eigen::Matrix<float, 9, 4>::Zero();
 };
