@@ -1,5 +1,6 @@
-#ifndef SERVO_H
-#define SERVO_H
+#pragma once
+
+// TODO why is this in common
 
 #include <PWMServo.h>
 
@@ -12,5 +13,3 @@ class ServoControl {
     PWMServo* servo_;
     void roundOffAngle(float& value);
 };
-
-#endif
