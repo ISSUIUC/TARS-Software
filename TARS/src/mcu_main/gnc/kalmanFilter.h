@@ -66,6 +66,9 @@ class KalmanFilter {
     systime_t timestamp = 0;
 
     FifoBuffer<float, 10> alt_buffer;
+    FifoBuffer<float, 10> x_r_buffer;
+    FifoBuffer<float, 10> y_r_buffer;
+    FifoBuffer<float, 10> z_r_buffer;
 
     Eigen::Matrix<float, 9, 1> x_k = Eigen::Matrix<float, 9, 1>::Zero();
     Eigen::Matrix<float, 9, 9> F_mat = Eigen::Matrix<float, 9, 9>::Zero();

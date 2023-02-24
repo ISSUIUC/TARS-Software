@@ -288,7 +288,29 @@ void KalmanFilter::update() {
             sum += cur_reading;
         }
         sum = sum / 10.0;
-        setState((KalmanState){sum, 0, 0, 0, 0, 0, 0, 0, 0});
+
+        float x_r_reading;
+        float x_r_sum = 0;
+        while (x_r_buffer.read(x_r_reading)) {
+            x_r_sum += x_r_reading;
+        }
+        x_r_sum = x_r_sum / 10.0;
+
+        float y_r_reading;
+        float y_r_sum = 0;
+        while (y_r_buffer.read(y_r_reading)) {
+            y_r_sum += y_r_reading;
+        }
+        y_r_sum = y_r_sum / 10.0;
+
+        float z_r_reading;
+        float z_r_sum = 0;
+        while (z_r_buffer.read(z_r_reading)) {
+            z_r_sum += z_r_reading;
+        }
+        z_r_sum = z_r_sum / 10.0;
+        
+        setState((KalmanState){sum, 0, 0, 0, 0, 0, 0, 0, 0, x_r_sum, 0, 0, y_r_sum, 0, 0, z_r_sum, 0, 0});
     }
     
     if (getActiveFSM().getFSMState() >= FSM_State::STATE_APOGEE) {
@@ -312,6 +334,11 @@ void KalmanFilter::update() {
     chMtxLock(&orientation.mutex);
     euler_t angles = orientation.getEuler();
     chMtxUnlock(&orientation.mutex);
+
+    x_r_buffer.push(angles.roll);
+    y_r_buffer.push(angles.pitch);
+    z_r_buffer.push(angles.yaw);
+
 
     Eigen::Matrix<float, 3, 1> acc = BodyToGlobal(angles, accel);
     y_k(1, 0) = acc(0) - 9.81;
