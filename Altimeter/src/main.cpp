@@ -1,8 +1,8 @@
 #include <Arduino.h>
 
-// #define BNO086
+#define BNO086
 // #define SCANNER_I2C
-#define KX134
+// #define KX134
 
 #ifdef BNO086
 // This demo explores two reports (SH2_ARVR_STABILIZED_RV and SH2_GYRO_INTEGRATED_RV) both can be used to give 
@@ -201,16 +201,19 @@ outputData a;
 
 void setup() {
   Serial.begin(9600);
-  while (!Serial);
+  while (!Serial){delay(10);}
   Serial.println("In kx");
   wire.begin();
-  IMU.begin(0x1e, wire);
+  Serial.println("IMU BEGIN CODE");
+  Serial.println(IMU.begin(0x1e, wire));
+  IMU.initialize();
+
 }
 
 void loop() {
   a = IMU.getAccelData();
-  Serial.println(a.yData);
-  Serial.println(a.xData);
+  // Serial.println(a.yData);
+  // Serial.println(a.xData);
   Serial.println(a.zData);
   delay(100);
 
