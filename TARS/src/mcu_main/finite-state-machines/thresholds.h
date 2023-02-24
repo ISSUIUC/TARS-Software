@@ -78,4 +78,10 @@ static const float idle_ang_error = 45;
 static const float idle_vel_error = 1;
 
 //boost acceleration tolerance
-static const float boost_to_coast_acceleration = 0.5;
+static const float boost_to_coast_acceleration = 1;
+
+//lower bound for allowable accerleation for boost
+static const float boost_acc_thresh = 1;
+
+//bounds for allowable angle for boost (degrees)
+static const float boost_ang_thresh = 80;

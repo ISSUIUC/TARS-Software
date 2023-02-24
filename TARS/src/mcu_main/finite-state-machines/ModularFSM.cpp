@@ -57,9 +57,9 @@ bool ModularFSM::boostStateCheck(){
 
 
     bool altitude_in_range = barometer.getAltitude() > launch_site_altitude;
-    bool acc_in_range = getAccelerationAverage(0,6);
-    bool ang_in_range_pitch = -80 <= orientation.getEuler().pitch && orientation.getEuler().pitch <= 80;
-    bool ang_in_range_yaw = -80 <= orientation.getEuler().yaw && orientation.getEuler().yaw <= 80;
+    bool acc_in_range = getAccelerationAverage(0,6) > boost_acc_thresh;
+    bool ang_in_range_pitch = -boost_ang_thresh <= orientation.getEuler().pitch && orientation.getEuler().pitch <= boost_ang_thresh;
+    bool ang_in_range_yaw = -boost_ang_thresh <= orientation.getEuler().yaw && orientation.getEuler().yaw <= boost_ang_thresh;
     bool vel_in_range = vel > idle_vel_error;
 
      if (altitude_in_range && acc_in_range && ang_in_range_pitch && ang_in_range_yaw && vel_in_range) {
@@ -125,14 +125,15 @@ bool ModularFSM::landedStateCheck(){
 }
 
 void ModularFSM::tickFSM(){
-    //lock high G mutex, all other mutexes are locked through buffers
-
+    //lock mutexes
     chMtxLock(&orientation.mutex);
     chMtxLock(&highG.mutex);
     chMtxLock(&barometer.mutex);
+
     switch(rocket_state_){
         //include a case for init?
         // cheeky bloke init
+
         case FSM_State::STATE_IDLE:
 
             if(last_state_ == FSM_State::STATE_IDLE){
@@ -169,7 +170,9 @@ void ModularFSM::tickFSM(){
                 }
             }
             else {
+                //log time at which we enter coast
                 coast_time_ = chVTGetSystemTime();
+
                 if(coastPreGNCStateCheck()){
                     coastPreGNCEventCheck();
                 }
@@ -193,6 +196,7 @@ void ModularFSM::tickFSM(){
         case FSM_State::STATE_APOGEE:
 
             if (last_state_ == FSM_State::STATE_APOGEE){
+                //record our apogee
                 apogee_altitude_ = barometer.getAltitude();
 
                 if (!apogeeEventCheck()){
@@ -274,6 +278,7 @@ void ModularFSM::tickFSM(){
         default:
             break;
     }
+
     //unlock mutexes used
     chMtxUnlock(&highG.mutex);
     chMtxUnlock(&barometer.mutex);
