@@ -273,9 +273,19 @@ void KalmanFilter::priori() {
  *
  */
 void KalmanFilter::update() {
-    // if (getActiveFSM().getFSMState() >= FSM_State::STATE_APOGEE) {
-    //     H(1, 2) = 0;
-    // }
+    if (getActiveFSM().getFSMState() == FSM_State::STATE_LAUNCH_DETECT) {
+        float cur_reading;
+        float sum;
+        while (alt_buffer.read(cur_reading)) {
+            sum += cur_reading;
+        }
+        sum = sum / 10.0;
+        setState((KalmanState){sum, 0, 0, 0, 0, 0, 0, 0, 0});
+    }
+    
+    if (getActiveFSM().getFSMState() >= FSM_State::STATE_APOGEE) {
+        H(1, 2) = 0;
+    }
 
     Eigen::Matrix<float, 4, 4> temp = Eigen::Matrix<float, 4, 4>::Zero();
     temp = (((H * P_priori * H.transpose()) + R)).inverse();
@@ -302,6 +312,7 @@ void KalmanFilter::update() {
 
     chMtxLock(&barometer.mutex);
     y_k(0, 0) = barometer.getAltitude();
+    alt_buffer.push(barometer.getAltitude());
     chMtxUnlock(&barometer.mutex);
 
     // # Posteriori Update
@@ -408,6 +419,8 @@ void KalmanFilter::update_r() {
 }
 
 KalmanState KalmanFilter::getState() const { return kalman_state; }
+
+void KalmanFilter::setState(KalmanState state) { kalman_state = state; }
 
 void KalmanFilter::updateApogee(float estimate) { kalman_apo = estimate; }
 

@@ -2,6 +2,7 @@
 
 #include "../EigenArduino-Eigen30/Eigen30.h"
 #include "common/ServoControl.h"
+#include "common/FifoBuffer.h"
 #include "mcu_main/dataLog.h"
 #include "mcu_main/finite-state-machines/RocketFSMBase.h"
 #include "mcu_main/gnc/rk4.h"
@@ -51,6 +52,7 @@ class KalmanFilter {
     void kfTickFunction(float dt, float sd);
 
     KalmanState getState() const;
+    void setState(KalmanState state);
     void updateApogee(float estimate);
 
    private:
@@ -62,6 +64,8 @@ class KalmanFilter {
     KalmanState kalman_state;
     float kalman_apo = 0;
     systime_t timestamp = 0;
+
+    FifoBuffer<float, 10> alt_buffer;
 
     Eigen::Matrix<float, 9, 1> x_k = Eigen::Matrix<float, 9, 1>::Zero();
     Eigen::Matrix<float, 9, 9> F_mat = Eigen::Matrix<float, 9, 9>::Zero();
