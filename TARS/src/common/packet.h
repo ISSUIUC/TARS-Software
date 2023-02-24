@@ -128,6 +128,16 @@ struct KalmanData {
     float kalman_acc_z = 0;
     float kalman_apo = 0;
 
+    float kalman_r_pos_x = 0;
+    float kalman_r_vel_x = 0;
+    float kalman_r_acc_x = 0;
+    float kalman_r_pos_y = 0;
+    float kalman_r_vel_y = 0;
+    float kalman_r_acc_y = 0;
+    float kalman_r_pos_z = 0;
+    float kalman_r_vel_z = 0;
+    float kalman_r_acc_z = 0;
+
     systime_t timeStamp_state = 0;
 };
 

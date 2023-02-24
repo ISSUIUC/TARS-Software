@@ -381,33 +381,30 @@ void KalmanFilter::update_r() {
     P_k_r = (identity - K_r * H_r) * P_priori_r;
 
     chMtxLock(&mutex);
-    kalman_state.state_est_pos_x = x_k_r(0, 0);
-    kalman_state.state_est_vel_x = x_k_r(1, 0);
-    kalman_state.state_est_accel_x = x_k_r(2, 0);
-    kalman_state.state_est_pos_y = x_k_r(3, 0);
-    kalman_state.state_est_vel_y = x_k_r(4, 0);
-    kalman_state.state_est_accel_y = x_k_r(5, 0);
-    kalman_state.state_est_pos_z = x_k_r(6, 0);
-    kalman_state.state_est_vel_z = x_k_r(7, 0);
-    kalman_state.state_est_accel_z = x_k_r(8, 0);
+    kalman_state.state_est_r_pos_x = x_k_r(0, 0);
+    kalman_state.state_est_r_vel_x = x_k_r(1, 0);
+    kalman_state.state_est_r_accel_x = x_k_r(2, 0);
+    kalman_state.state_est_r_pos_y = x_k_r(3, 0);
+    kalman_state.state_est_r_vel_y = x_k_r(4, 0);
+    kalman_state.state_est_r_accel_y = x_k_r(5, 0);
+    kalman_state.state_est_r_pos_z = x_k_r(6, 0);
+    kalman_state.state_est_r_vel_z = x_k_r(7, 0);
+    kalman_state.state_est_r_accel_z = x_k_r(8, 0);
 
-    timestamp = chVTGetSystemTime();
     chMtxUnlock(&mutex);
 
-    // struct KalmanData kalman_data;
-    // kalman_data.kalman_acc_x = kalman_state.state_est_accel_x;
-    // kalman_data.kalman_acc_y = kalman_state.state_est_accel_y;
-    // kalman_data.kalman_acc_z = kalman_state.state_est_accel_z;
-    // kalman_data.kalman_vel_x = kalman_state.state_est_vel_x;
-    // kalman_data.kalman_vel_y = kalman_state.state_est_vel_y;
-    // kalman_data.kalman_vel_z = kalman_state.state_est_vel_z;
-    // kalman_data.kalman_pos_x = kalman_state.state_est_pos_x;
-    // kalman_data.kalman_pos_y = kalman_state.state_est_pos_y;
-    // kalman_data.kalman_pos_z = kalman_state.state_est_pos_z;
-    // kalman_data.kalman_apo = kalman_apo;
-    // kalman_data.timeStamp_state = timestamp;
+    struct KalmanData kalman_data;
+    kalman_data.kalman_r_acc_x = kalman_state.state_est_accel_x;
+    kalman_data.kalman_r_acc_y = kalman_state.state_est_accel_y;
+    kalman_data.kalman_r_acc_z = kalman_state.state_est_accel_z;
+    kalman_data.kalman_r_vel_x = kalman_state.state_est_vel_x;
+    kalman_data.kalman_r_vel_y = kalman_state.state_est_vel_y;
+    kalman_data.kalman_r_vel_z = kalman_state.state_est_vel_z;
+    kalman_data.kalman_r_pos_x = kalman_state.state_est_pos_x;
+    kalman_data.kalman_r_pos_y = kalman_state.state_est_pos_y;
+    kalman_data.kalman_r_pos_z = kalman_state.state_est_pos_z;
 
-    // dataLogger.pushKalmanFifo(kalman_data);
+    dataLogger.pushKalmanFifo(kalman_data);
 }
 
 KalmanState KalmanFilter::getState() const { return kalman_state; }

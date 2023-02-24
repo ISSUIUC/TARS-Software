@@ -7,7 +7,7 @@
 #include "common/MessageQueue.h"
 #include "common/packet.h"
 
-#define FIFO_SIZE 1000
+#define FIFO_SIZE 200
 #define QUEUE_SIZE 5
 
 class DataLogBuffer;
