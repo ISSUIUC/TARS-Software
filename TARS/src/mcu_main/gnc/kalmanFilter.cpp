@@ -23,34 +23,19 @@
  * The Q matrix is the covariance matrix for the process noise and is
  * updated based on the time taken per cycle of the Kalman Filter Thread.
  */
-void KalmanFilter::SetQ(float dt, float sd) {
-    Q(0, 0) = pow(dt, 5) / 20;
-    Q(0, 1) = pow(dt, 4) / 8 * 80;
-    Q(0, 2) = pow(dt, 3) / 6;
-    Q(1, 0) = Q(0, 1);
-    Q(1, 1) = pow(dt, 3) / 8;
-    Q(1, 2) = pow(dt, 2) / 2;
-    Q(2, 2) = dt;
-    Q(2, 0) = Q(0, 2);
-    Q(2, 1) = Q(1, 2);
-    Q(3, 3) = Q(0, 0);
-    Q(3, 4) = Q(1, 0);
-    Q(3, 5) = Q(2, 0);
-    Q(4, 3) = Q(1, 0);
-    Q(4, 4) = Q(1, 1);
-    Q(4, 5) = Q(0, 2);
-    Q(5, 3) = Q(0, 2);
-    Q(5, 4) = Q(0, 0);
-    Q(5, 5) = dt;
-    Q(6, 6) = Q(0, 0);
-    Q(6, 7) = Q(0, 1);
-    Q(6, 8) = Q(0, 2);
-    Q(7, 6) = Q(0, 1);
-    Q(7, 7) = Q(1, 2);
-    Q(7, 8) = pow(dt, 2) / 2;
-    Q(8, 6) = pow(dt, 3) / 6;
-    Q(8, 7) = pow(dt, 2) / 2;
-    Q(8, 8) = dt;
+void KalmanFilter::SetQ(float dt, float sd) {    
+    for (int i = 0; i < 3; i++) {
+        Q(3 * i, 3 * i) = pow(dt, 5) / 20;
+        Q(3 * i, 3 * i + 1) = pow(dt, 4) / 8 * 80;
+        Q(3 * i, 3 * i + 2) = pow(dt, 3) / 6;
+        Q(3 * i + 1, 3 * i + 1) = pow(dt, 3) / 8;
+        Q(3 * i + 1, 3 * i + 2) = pow(dt, 2) / 2;
+        Q(3 * i + 2, 3 * i + 2) = dt;
+        Q(3 * i + 1, 3 * i) = Q(3 * i, 3 * i + 1);
+        Q(3 * i + 2, 3 * i) = Q(3 * i, 3 * i + 2);
+        Q(3 * i + 2, 3 * i + 1) = Q(3 * i + 1, 3 * i + 2);
+    }
+
     Q *= sd;
 }
 
@@ -63,13 +48,15 @@ void KalmanFilter::SetQ(float dt, float sd) {
  * by how the states change over time.
  */
 void KalmanFilter::SetF(float dt) {
-    F_mat(0, 1) = dt;
-    F_mat(0, 2) = (s_dt * dt) / 2;
-    F_mat(1, 2) = dt;
+    for (int i = 0; i < 3; i++) {
+        F_mat(3 * i, 3 * i + 1) = s_dt;
+        F_mat(3 * i, 3 * i + 1) = (s_dt * s_dt) / 2;
+        F_mat(3 * i + 1, 3 * i + 2) = s_dt;
 
-    F_mat(0, 0) = 1;
-    F_mat(1, 1) = 1;
-    F_mat(2, 2) = 1;
+        F_mat(3 * i, 3 * i) = 1;
+        F_mat(3 * i + 1, 3 * i + 1) = 1;
+        F_mat(3 * i + 2, 3 * i + 2) = 1;
+    }
 }
 
 /**
@@ -83,7 +70,9 @@ void KalmanFilter::kfTickFunction(float dt, float sd) {
         SetF(float(dt) / 1000);
         SetQ(float(dt) / 1000, sd);
         priori();
+        priori_r();
         update();
+        update_r();
     }
 }
 /**
