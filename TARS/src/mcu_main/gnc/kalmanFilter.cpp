@@ -182,6 +182,25 @@ void KalmanFilter::Initialize() {
     // R(0,0) = 2.;
     // R(1,1) = .01;
 
+    float x_sum = 0;
+    float y_sum = 0;
+    float z_sum = 0;
+
+    euler_t orientations;
+
+    for (int i = 0; i < 30; i++) {
+        chMtxLock(&orientation.mutex);
+        orientations = orientation.getEuler();
+        chMtxUnlock(&orientation.mutex);
+        x_sum += orientations.roll;
+        y_sum += orientations.pitch;
+        z_sum += orientations.yaw;
+    }
+
+    x_k(0, 0) = x_sum / 30;
+    x_k(3, 0) = y_sum / 30;
+    x_k(6, 0) = z_sum / 30;
+
     R_r(0, 0) = 1.9;
     R_r(1, 1) = 1.9;
     R_r(2, 2) = 1.9;
@@ -264,7 +283,7 @@ void KalmanFilter::priori() {
 void KalmanFilter::update() {
     if (getActiveFSM().getFSMState() == FSM_State::STATE_LAUNCH_DETECT) {
         float cur_reading;
-        float sum;
+        float sum = 0;
         while (alt_buffer.read(cur_reading)) {
             sum += cur_reading;
         }
