@@ -192,6 +192,12 @@ void KalmanFilter::Initialize(float pos_f, float vel_f) {
     B(2, 0) = -1;
 }
 
+void KalmanFilter::setState(float pos_f, float vel_f, float accel_f) {
+    x_k(0, 0) = pos_f;
+    x_k(1, 0) = vel_f;
+    x_k(2, 0) = accel_f;
+}
+
 /**
  * @brief Estimates current state of the rocket without current sensor data
  *
@@ -216,10 +222,35 @@ void KalmanFilter::priori() {
  *
  */
 void KalmanFilter::update() {
+    // chMtxLock(dataMutex_state_);
     if (*current_state_ >= RocketFSM::FSM_State::STATE_APOGEE) {
         H(1, 2) = 0;
     }
 
+    if (*current_state_ == RocketFSM::FSM_State::STATE_LAUNCH_DETECT) {
+    // if (TIME_I2MS(chVTGetSystemTime() - joe_mama) > 5000) {
+        float cur_reading;
+        float sum;
+        while (alt_buffer.pop(&cur_reading)) {
+            sum += cur_reading;
+        }
+        sum = sum / 10.0;
+        setState(sum, 0, 0);
+        // Serial.println("Resetting Kalman Filter");
+    }
+    // if (*current_state == RocketFSM::FSM_State::STATE_LAUNCH_DETECT) {
+    //     float cur_reading;
+    //     float sum;
+    //     while (alt_buffer.size() > 0) {
+    //         alt_buffer.pop(&cur_reading);
+    //         sum += cur_reading;
+    //     }
+    //     sum = sum / 10;
+    //     setState(sum, 0, 0);
+    // }
+
+    // }
+    // chMtxUnlock(dataMutex_state_);
     Eigen::Matrix<float, 2, 2> temp = Eigen::Matrix<float, 2, 2>::Zero();
     temp = (((H * P_priori * H.transpose()) + R)).inverse();
     Eigen::Matrix<float, 3, 3> identity = Eigen::Matrix<float, 3, 3>::Identity();
@@ -232,6 +263,7 @@ void KalmanFilter::update() {
 
     chMtxLock(dataMutex_barometer_);
     y_k(0, 0) = *b_alt;
+    alt_buffer.push(*b_alt);
     chMtxUnlock(dataMutex_barometer_);
 
     // # Posteriori Update

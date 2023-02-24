@@ -4,6 +4,8 @@
 #include "rk4.h"
 #include "rocketFSM.h"
 #include "sensors.h"
+#include "../FifoBuffer/FifoBuffer.h"
+#include <ChRt.h>
 
 class KalmanFilter {
    public:
@@ -32,6 +34,8 @@ class KalmanFilter {
     float* gz_L;
     float* gz_H;
 
+    FifoBuffer<float, 10> alt_buffer;
+
     Eigen::Matrix<float, 3, 1> x_k{0, 0, 0};
     Eigen::Matrix<float, 3, 3> F_mat = Eigen::Matrix<float, 3, 3>::Zero();
     Eigen::Matrix<float, 2, 3> H = Eigen::Matrix<float, 2, 3>::Zero();
@@ -44,4 +48,10 @@ class KalmanFilter {
     Eigen::Matrix<float, 2, 1> y_k = Eigen::Matrix<float, 2, 1>::Zero();
 
     Eigen::Matrix<float, 3, 2> B = Eigen::Matrix<float, 3, 2>::Zero();
+
+    // void updateBuffer(float alt);
+
+    void setState(float pos_f, float vel_f, float acc_f);
+
+
 };
