@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ChRt.h"
-#include "SparkFunLSM9DS1.h"
+#include "SparkFunLSM6DS3.h"
 #include "mcu_main/sensors/HighGSensor.h"
 
 struct Gyroscope {
@@ -34,5 +34,5 @@ class LowGSensor {
     float mx = 0.0, my = 0.0, mz = 0.0;
     systime_t timestamp = 0;
 
-    LSM9DS1 LSM;
+    LSM6DS3 LSM;
 };

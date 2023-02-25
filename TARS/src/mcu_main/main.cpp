@@ -30,7 +30,7 @@
 #include <PWMServo.h>
 #include <SPI.h>
 // #include <LSM6.h>
-#include <SparkFunLSM6DS3.h>
+// #include <SparkFunLSM6DS3.h>
 
 #include "mcu_main/Abort.h"
 #include "mcu_main/SDLogger.h"
@@ -312,8 +312,7 @@ void setup() {
         Serial.println(data.zData);
     }
 
-    LSM6 lowG;
-=  
+    
 
     
 
