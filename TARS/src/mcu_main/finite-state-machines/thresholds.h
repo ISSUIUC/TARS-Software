@@ -66,16 +66,16 @@ static const float launch_site_altitude = 0;
 static const float ang_start = 0;
 
 // launch site error
-static const float idle_lsa_error = 5;
+static const float alt_error = 5;
 
 // idle acceleration error
-static const float idle_acc_error = 0.5;
+static const float acc_error = 0.5;
 
 // idle angle error
-static const float idle_ang_error = 45;
+static const float ang_error = 45;
 
 // idle velocity error
-static const float idle_vel_error = 1;
+static const float vel_error = 1;
 
 //boost acceleration tolerance
 static const float boost_to_coast_acceleration = 1;
@@ -84,4 +84,4 @@ static const float boost_to_coast_acceleration = 1;
 static const float boost_acc_thresh = 1;
 
 //bounds for allowable angle for boost (degrees)
-static const float boost_ang_thresh = 80;
+static const float boost_ang_thresh = 85;
