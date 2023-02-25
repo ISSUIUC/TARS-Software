@@ -85,7 +85,7 @@ static THD_FUNCTION(rocket_FSM_THD, arg) {
 
         fsmCollection.tick();
 
-        rocketStateData<4> fsm_state = fsmCollection.getStates();
+        rocketStateData<5> fsm_state = fsmCollection.getStates();
         dataLogger.pushRocketStateFifo(fsm_state);
 
         chThdSleepMilliseconds(6);  // FSM runs at 100 Hz

@@ -168,7 +168,7 @@ struct sensorDataStruct_t {
 
     // Rocket State
     bool has_rocketState_data;
-    rocketStateData<4> rocketState_data;
+    rocketStateData<5> rocketState_data;
 
     // Flap state
     bool has_flap_data;

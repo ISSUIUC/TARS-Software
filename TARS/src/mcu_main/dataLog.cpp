@@ -77,7 +77,7 @@ void DataLogBuffer::pushBarometerFifo(BarometerData const& barometer_data) {
     UPDATE_QUEUE(barometerQueue, barometer_data);
 }
 
-void DataLogBuffer::pushRocketStateFifo(rocketStateData<4> const& rocket_data) {
+void DataLogBuffer::pushRocketStateFifo(rocketStateData<5> const& rocket_data) {
     rocketStateFifo.push(rocket_data);
     UPDATE_QUEUE(rocketStateQueue, rocket_data);
 }

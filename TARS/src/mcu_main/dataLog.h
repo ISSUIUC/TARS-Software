@@ -25,7 +25,7 @@ class DataLogQueue {
     MessageQueue<HighGData, QUEUE_SIZE> highGQueue;
     MessageQueue<GpsData, QUEUE_SIZE> gpsQueue;
     MessageQueue<KalmanData, QUEUE_SIZE> kalmanQueue;
-    MessageQueue<rocketStateData<4>, QUEUE_SIZE> rocketStateQueue;
+    MessageQueue<rocketStateData<5>, QUEUE_SIZE> rocketStateQueue;
     MessageQueue<BarometerData, QUEUE_SIZE> barometerQueue;
     MessageQueue<FlapData, QUEUE_SIZE> flapQueue;
     MessageQueue<VoltageData, QUEUE_SIZE> voltageQueue;
@@ -50,7 +50,7 @@ class DataLogBuffer {
     FifoBuffer<HighGData, FIFO_SIZE> highGFifo;
     FifoBuffer<GpsData, FIFO_SIZE> gpsFifo;
     FifoBuffer<KalmanData, FIFO_SIZE> kalmanFifo;
-    FifoBuffer<rocketStateData<4>, FIFO_SIZE> rocketStateFifo;
+    FifoBuffer<rocketStateData<5>, FIFO_SIZE> rocketStateFifo;
     FifoBuffer<FlapData, FIFO_SIZE> flapFifo;
     FifoBuffer<VoltageData, FIFO_SIZE> voltageFifo;
     FifoBuffer<BarometerData, FIFO_SIZE> barometerFifo;
@@ -64,7 +64,7 @@ class DataLogBuffer {
 
     void pushKalmanFifo(KalmanData const& state_data);
 
-    void pushRocketStateFifo(rocketStateData<4> const& rocket_data);
+    void pushRocketStateFifo(rocketStateData<5> const& rocket_data);
 
     void pushBarometerFifo(BarometerData const& barometer_data);
 
