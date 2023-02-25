@@ -26,6 +26,9 @@
 #define RFM96_INT 33
 #define RFM96_RST 0
 
+#define MAXM10S_SCL 19
+#define MAXM10S_SDA 18
+
 
 
 

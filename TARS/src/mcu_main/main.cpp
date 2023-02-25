@@ -29,8 +29,13 @@
 #include <ChRt.h>
 #include <PWMServo.h>
 #include <SPI.h>
+#include <Wire.h>
+
 // #include <LSM6.h>
 // #include <SparkFunLSM6DS3.h>
+#include <Adafruit_LIS3MDL.h>
+#include <Adafruit_BME680.h>
+#include <SparkFun_u-blox_GNSS_Arduino_Library.h>
 
 #include "mcu_main/Abort.h"
 #include "mcu_main/SDLogger.h"
@@ -291,9 +296,86 @@ void setup() {
     pinMode(LIS3MDL_CS, OUTPUT);
     digitalWrite(LIS3MDL_CS, HIGH);
 
-    // MS5611 barometer{MS5611_CS};
-    // barometer.init();
+    //barometer setup
+    MS5611 barometer{MS5611_CS};
+    barometer.init();
     
+    char currentSensor = '0';
+
+    //lowG sensor setup
+    LSM6DS3 lowG(SPI_MODE, LSM6DSLTR); 
+    lowG.begin();
+
+    //magnetomer setup
+    Adafruit_LIS3MDL mag;
+    mag.begin_SPI(LIS3MDL_CS);
+    mag.setOperationMode(LIS3MDL_CONTINUOUSMODE);
+    mag.setDataRate(LIS3MDL_DATARATE_80_HZ);
+    mag.setRange(LIS3MDL_RANGE_4_GAUSS);
+    float x,y,z;
+
+    // Gas sensor setup
+    Adafruit_BME680 bme(BME688_CS);
+    bme.begin();
+
+    //highG setup
+    QwiicKX134 highG;
+
+    // highG.beginSPICore(KX134_CS, 1000000, SPI);
+    highG.beginSPI(KX134_CS);
+    highG.initialize(DEFAULT_SETTINGS);
+    highG.setRange(3);
+
+
+    while (1) {
+        if (Serial.available()) {
+            char serialData = Serial.read();
+            if (serialData != 10) {
+                // ignore new line data (10)
+                currentSensor = serialData;
+            }
+        }
+
+        switch (currentSensor) {
+            case 'm':
+                Serial.println("magnetometer");
+                mag.read();
+                Serial.print("x: ");
+                Serial.println(mag.x);
+                break;
+
+            case 'l':
+                Serial.println("lowg sensor");
+                Serial.print("az: ");
+                Serial.println(lowG.readFloatAccelZ());
+                break;
+
+            case 'g':
+                Serial.println("Gas sensor (useless): ");
+                Serial.println(bme.readTemperature());
+                break;
+
+            case 'b':
+                Serial.println("Barometer: ");
+                barometer.read(12);
+                float temp = barometer.getTemperature() * 0.01;
+                float pressure = barometer.getPressure()*0.01;
+                Serial.println(pressure);
+                break;
+
+            case 'p':
+                 Serial.println("Case 1");
+                 auto data = highG.getAccelData();
+                 Serial.println("Case 2");
+                 Serial.println(data.zData);
+                 Serial.println("Case 3");
+                 break;
+
+            default:
+                Serial.println("Default");
+        }
+    }
+
     // while (1) {
     //     barometer.read(12);
     //     float temp = barometer.getTemperature() *
@@ -302,24 +384,47 @@ void setup() {
     //     Serial.println(pressure);
     // }
 
-    QwiicKX134 highG;
-    // highG.beginSPICore(KX134_CS, 1000000, SPI);
-    highG.beginSPI(KX134_CS);
-    highG.initialize(DEFAULT_SETTINGS);
-    highG.setRange(3);
-    while (1) {
-        auto data = highG.getAccelData();
-        Serial.println(data.zData);
-    }
+    // QwiicKX134 highG;
+    // // highG.beginSPICore(KX134_CS, 1000000, SPI);
+    // highG.beginSPI(KX134_CS);
+    // highG.initialize(DEFAULT_SETTINGS);
+    // highG.setRange(3);
+    // while (1) {
+    //     auto data = highG.getAccelData();
+    //     Serial.println(data.zData);
+        
+
+    // }
+    // LSM6DS3 lowG(SPI_MODE, LSM6DSLTR); 
+    // lowG.begin();
+    // while(1){
+    //     Serial.print("az: ");
+    //     Serial.println(lowG.readFloatAccelZ());
+
+    // }
 
     
-
+    // Adafruit_LIS3MDL mag;
+    // mag.begin_SPI(LIS3MDL_CS);
+    // mag.setOperationMode(LIS3MDL_CONTINUOUSMODE);
+    // mag.setDataRate(LIS3MDL_DATARATE_80_HZ);
+    // mag.setRange(LIS3MDL_RANGE_4_GAUSS);
+    // float x,y,z;
     
+    // while(1){
+    //     mag.read();
+    //     Serial.print("x: ");
+    //     Serial.println(mag.x);
 
+    // }
 
+    // Adafruit_BME680 bme(BME688_CS);
+    // bme.begin();
 
-
-
+    // while(1){
+    //     Serial.println(bme.readTemperature());
+    // }
+    
 
 
     Serial.println("chibios begin");
@@ -331,3 +436,4 @@ void setup() {
 void loop() {
     // not used
 }
+
