@@ -105,23 +105,74 @@ bool ModularFSM::separationStateCheck(){
 }
 
 bool ModularFSM::drogueEventCheck(){
-    return true;
+    if (highG.getAccel().az < drogue_to_main_acceleration) {
+        last_state_ = rocket_state_;
+        rocket_state_ = FSM_State::STATE_MAIN;
+        return true;
+    }
+    return false;
 }
 
 bool ModularFSM::drogueStateCheck(){
-    return true;
+    float velocity = getAltitudeAverage(0, 3) - getAltitudeAverage(3, 3);
+
+    bool altitude_in_range = (launch_site_altitude < barometer.getAltitude()) && (barometer.getAltitude() < apogee_altitude_);
+    bool acceleration_in_range = (drogue_ang_acc_bottom < getAccelerationAverage(0,6)) && (getAccelerationAverage(0,6) < drogue_ang_acc_top);
+    bool velocity_in_range = velocity < vel_error;
+    bool ang_in_range_pitch = drogue_ang_thresh_bottom <= orientation.getEuler().pitch && orientation.getEuler().pitch <= drogue_ang_thresh_top;
+    bool ang_in_range_yaw = drogue_ang_thresh_bottom <= orientation.getEuler().yaw && orientation.getEuler().yaw <= drogue_ang_thresh_top;
+
+    if (altitude_in_range && acceleration_in_range && velocity_in_range && ang_in_range_pitch && ang_in_range_yaw) {
+        last_state_ = rocket_state_;
+        rocket_state_ = FSM_State::STATE_DROGUE;
+        return true;
+    }
+
+    rocket_state_ = FSM_State::STATE_UNKNOWN;
+    return false;
 }
 
 bool ModularFSM::mainEventCheck(){
-    return true;
+    float velocity = getAltitudeAverage(0, 3) - getAltitudeAverage(3, 3);
+
+    if (-vel_error < velocity && velocity < vel_error) {
+        last_state_ = FSM_State::STATE_LANDED;
+        return true;
+    }
+    return false;
 }
 
 bool ModularFSM::mainStateCheck(){
-    return true;
+    float velocity = getAltitudeAverage(0, 3) - getAltitudeAverage(3, 3);
+
+    bool altitude_in_range = (launch_site_altitude < barometer.getAltitude()) && (barometer.getAltitude() < apogee_altitude_);
+    bool acceleration_in_range = (getAccelerationAverage(0,6) < main_ang_acc_top);
+    bool velocity_in_range = velocity < vel_error;
+    bool ang_in_range_pitch = main_ang_thresh_bottom <= orientation.getEuler().pitch && orientation.getEuler().pitch <= main_ang_thresh_top;
+    bool ang_in_range_yaw = main_ang_thresh_bottom <= orientation.getEuler().yaw && orientation.getEuler().yaw <= main_ang_thresh_top;
+
+    if (altitude_in_range && acceleration_in_range && velocity_in_range && ang_in_range_yaw && ang_in_range_pitch) {
+        last_state_ = rocket_state_;
+        rocket_state_ = FSM_State::STATE_MAIN;
+        return true;
+    }
+    return false;
 }
 
 bool ModularFSM::landedStateCheck(){
-    return true;
+    float velocity = getAltitudeAverage(0, 3) - getAltitudeAverage(3, 3);
+
+    bool altitude_in_range = (launch_site_altitude - alt_error < barometer.getAltitude()) && (barometer.getAltitude() < alt_error + launch_site_altitude);
+    bool acceleration_in_range = (1 - acc_error < getAccelerationAverage(0,6)) && (getAccelerationAverage(0,6) < 1 + acc_error);
+    bool velocity_in_range = (-vel_error < velocity) && (velocity < vel_error);
+    
+    if (altitude_in_range && acceleration_in_range && velocity_in_range) {
+        last_state_ = rocket_state_;
+        rocket_state_ = FSM_State::STATE_LANDED;
+        return true;
+    }
+    rocket_state_ = FSM_State::STATE_UNKNOWN;
+    return false;
 }
 
 void ModularFSM::tickFSM(){
