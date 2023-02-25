@@ -81,6 +81,9 @@ static const float vel_error = 1;
 static const float boost_to_coast_acceleration = 1;
 
 //lower bound for allowable acceleration for boost
+
+static const float drogue_to_main_acceleration = -4;
+//lower bound for allowable accerleation for boost
 static const float boost_acc_thresh = 1;
 
 //bounds for allowable angle for boost (degrees)
@@ -88,3 +91,28 @@ static const float boost_ang_thresh = 85;
 
 // coast gnc angle threshold
 static const float coast_gnc_thresh = 30;
+// main angle bottom threshold
+static const float main_ang_thresh_bottom = 95;
+
+// main angle bottom threshold
+static const float main_ang_thresh_top = -95;
+
+// drogue angle bottom threshold
+static const float drogue_ang_thresh_bottom = 95;
+
+// drogue angle bottom threshold
+static const float drogue_ang_thresh_top = -95;
+
+// drogue acceleration bottom threshold
+static const float drogue_ang_acc_bottom = -4;
+
+// drogue acceleration bottom threshold
+static const float drogue_ang_acc_top = 1;
+
+// main acceleration top threshold
+static const float main_ang_acc_top = -4;
+
+
+
+
+
