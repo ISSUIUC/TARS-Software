@@ -5,7 +5,7 @@
  */
 
 #pragma once
-
+#include <cmath>
 // Transition from boost to coast if low acceleration detected for 300 ms
 static const float coast_time_thresh = 300;
 
@@ -92,16 +92,16 @@ static const float boost_ang_thresh = 85;
 // coast gnc angle threshold
 static const float coast_gnc_thresh = 30;
 // main angle bottom threshold
-static const float main_ang_thresh_bottom = 95;
+static const float main_ang_thresh_bottom = 95/180 * M_PI;
 
 // main angle bottom threshold
-static const float main_ang_thresh_top = -95;
+static const float main_ang_thresh_top = -95/180 * M_PI;
 
 // drogue angle bottom threshold
-static const float drogue_ang_thresh_bottom = 95;
+static const float drogue_ang_thresh_bottom = 95/180 * M_PI;
 
 // drogue angle bottom threshold
-static const float drogue_ang_thresh_top = -95;
+static const float drogue_ang_thresh_top = -95/180 * M_PI;
 
 // drogue acceleration bottom threshold
 static const float drogue_ang_acc_bottom = -4;
