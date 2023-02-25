@@ -5,7 +5,7 @@
 
 GPSSensor gps;
 
-void GPSSensor::init() {
+ErrorCode GPSSensor::init() {
     // SPI1.begin();  // TODO should this line be moved?
     // digitalWrite(LED_RED, HIGH);
     // digitalWrite(LED_ORANGE, HIGH);
@@ -24,6 +24,7 @@ void GPSSensor::init() {
     // GNSS.saveConfigSelective(VAL_CFG_SUBSEC_IOPORT);  // Save (only) the communications port settings
     // // to flash and BBR
     // GNSS.setNavigationFrequency(5);  // set sampling rate to 5hz
+    return ErrorCode::NO_ERROR;
 }
 
 void GPSSensor::update() {

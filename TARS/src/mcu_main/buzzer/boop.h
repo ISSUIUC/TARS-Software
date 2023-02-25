@@ -2,7 +2,7 @@
 
 #include <mcu_main/buzzer/notes.h>
 
-int melody[] = {
+const int8_t melody[] = {
     // Cantina BAnd - Star wars
     // Score available at https://musescore.com/user/6795541/scores/1606876
     NOTE_B4,-4, NOTE_E5,-4, NOTE_B4,-4, NOTE_E5,-4,

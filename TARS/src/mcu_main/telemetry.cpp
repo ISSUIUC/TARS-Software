@@ -40,7 +40,7 @@ T inv_convert_range(float val, float range) {
     return std::max(std::min((float)std::numeric_limits<T>::max(), converted), (float)std::numeric_limits<T>::min());
 }
 
-void Telemetry::init() {
+ErrorCode Telemetry::init() {
     pinMode(50, OUTPUT);
     digitalWrite(50, HIGH);
     delay(100);
@@ -74,6 +74,8 @@ void Telemetry::init() {
      * transmitter pin, then you can set transmitter powers from 5 to 23 dBm:
      */
     rf95.setTxPower(23, false);
+
+    return ErrorCode::NO_ERROR;
 }
 
 Telemetry::Telemetry() : rf95(50, 50) {}

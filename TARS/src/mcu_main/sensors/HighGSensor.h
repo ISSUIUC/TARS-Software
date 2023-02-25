@@ -6,6 +6,7 @@
 #include "SparkFun_Qwiic_KX13X.h"
 
 #include "common/packet.h"
+#include "mcu_main/error.h"
 
 
 struct HighGSensor {
@@ -14,7 +15,7 @@ struct HighGSensor {
 
     MUTEX_DECL(mutex);
 
-    void init();
+    ErrorCode init();
     void update();
     Acceleration getAccel();
 
