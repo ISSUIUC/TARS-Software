@@ -689,12 +689,14 @@ arduino::MbedSPI SD_SPI(12, 15, 14);
 void setup() {
   // Open serial communications and wait for port to open:
   SD_SPI.begin();
+  pinMode(13, OUTPUT);
   // SD_SPI.begin();
   Serial.begin(9600);
   while (!Serial) {
     ; // wait for serial port to connect. Needed for native USB port only
   }
 
+  
   Serial.print("Initializing SD card...");
 
   if (!SD.begin(13)) {
@@ -737,6 +739,10 @@ void setup() {
 }
 
 void loop() {
+  // digitalWrite(13, HIGH);
+  // delay(100);
+  // digitalWrite(13, LOW);
+  // delay(100);
   // nothing happens after setup
 }
 
