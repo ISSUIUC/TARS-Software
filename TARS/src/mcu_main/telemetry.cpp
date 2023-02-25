@@ -237,13 +237,13 @@ void Telemetry::serialPrint(const sensorDataStruct_t &sensor_data) {
     Serial.print(sensor_data.flap_data.extension, 5);
     Serial.print(",");
     Serial.print(R"("STE_ALT":)");
-    Serial.print(sensor_data.kalman_data.kalman_x, 5);
+    Serial.print(sensor_data.kalman_data.kalman_pos_x, 5);
     Serial.print(",");
     Serial.print(R"("STE_VEL":)");
-    Serial.print(sensor_data.kalman_data.kalman_vx, 5);
+    Serial.print(sensor_data.kalman_data.kalman_vel_x, 5);
     Serial.print(",");
     Serial.print(R"("STE_ACC":)");
-    Serial.print(sensor_data.kalman_data.kalman_ax, 5);
+    Serial.print(sensor_data.kalman_data.kalman_acc_x, 5);
     Serial.print(",");
     Serial.print(R"("TEMP":)");
     Serial.print(sensor_data.barometer_data.temperature);
@@ -263,9 +263,9 @@ TelemetryPacket Telemetry::makePacket(const sensorDataStruct_t &data_struct) {
     packet.gps_long = data_struct.gps_data.longitude;
     packet.gps_alt = data_struct.gps_data.altitude;
 
-    packet.gnc_state_ax = data_struct.kalman_data.kalman_ax;
-    packet.gnc_state_vx = data_struct.kalman_data.kalman_vx;
-    packet.gnc_state_x = data_struct.kalman_data.kalman_x;
+    packet.gnc_state_ax = data_struct.kalman_data.kalman_acc_x;
+    packet.gnc_state_vx = data_struct.kalman_data.kalman_vel_x;
+    packet.gnc_state_x = data_struct.kalman_data.kalman_pos_x;
     packet.gns_state_apo = data_struct.kalman_data.kalman_apo;
 
     packet.response_ID = last_command_id;

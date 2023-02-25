@@ -32,3 +32,6 @@
 
 // kx chip select pin
 #define KX134_CS 4
+
+// BNO086 reset pin
+#define BNO086_RESET 11
