@@ -41,15 +41,15 @@ T inv_convert_range(float val, float range) {
 }
 
 void Telemetry::init() {
-    pinMode(RFM95_RST, OUTPUT);
-    digitalWrite(RFM95_RST, HIGH);
+    pinMode(50, OUTPUT);
+    digitalWrite(50, HIGH);
     delay(100);
 
     // manual reset
 
-    digitalWrite(RFM95_RST, LOW);
+    digitalWrite(50, LOW);
     delay(10);
-    digitalWrite(RFM95_RST, HIGH);
+    digitalWrite(50, HIGH);
     delay(10);
 
     while (!rf95.init()) {
@@ -76,7 +76,7 @@ void Telemetry::init() {
     rf95.setTxPower(23, false);
 }
 
-Telemetry::Telemetry() : rf95(RFM95_CS, RFM95_INT) {}
+Telemetry::Telemetry() : rf95(50, 50) {}
 
 /**
  * @brief  This function handles commands sent from the ground station

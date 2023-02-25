@@ -38,10 +38,10 @@ Magnetometer LowGSensor::getMagnetometer() { return Magnetometer{mx, my, mz}; }
 
 void LowGSensor::init() {
     // note, we need to send this our CS pins (defined above)
-    if (!LSM.beginSPI(LSM9DS1_AG_CS, LSM9DS1_M_CS)) {
-        digitalWrite(LED_ORANGE, HIGH);
-        Serial.println("Failed to communicate with LSM9DS1. Stalling Program");
-        while (true)
-            ;
-    }
+    // if (!LSM.beginSPI(LSM9DS1_AG_CS, LSM9DS1_M_CS)) {
+    //     digitalWrite(LED_ORANGE, HIGH);
+    //     Serial.println("Failed to communicate with LSM9DS1. Stalling Program");
+    //     while (true)
+    //         ;
+    // }
 }
