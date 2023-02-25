@@ -6,6 +6,7 @@
  * @brief Labels for each FSM state
  */
 enum class FSM_State {
+    STATE_UNKNOWN,
     STATE_INIT,
     STATE_IDLE,
     STATE_LAUNCH_DETECT,
@@ -22,7 +23,6 @@ enum class FSM_State {
     STATE_MAIN,
     STATE_LANDED_DETECT,
     STATE_LANDED,
-    STATE_UNKNOWN,
     STATE_ABORT
 };
 

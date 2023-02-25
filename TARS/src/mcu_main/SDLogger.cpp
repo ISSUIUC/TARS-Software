@@ -97,8 +97,8 @@ void SDLogger::init() {
 
 void SDLogger::update() {
     sensorDataStruct_t current_data = queue.next();
-    Serial.print("Has Data?");
-    Serial.println(current_data.hasData());
+    // Serial.print("Has Data?");
+    // Serial.println(current_data.hasData());
     if (!current_data.hasData()) {
         return;
     }

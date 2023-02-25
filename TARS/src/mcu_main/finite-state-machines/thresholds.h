@@ -60,7 +60,7 @@ static const float landing_altimeter_threshold = .5;
 static const float refresh_timer = 500;
 
 // launch site altitude as used in modular fsm
-static const float launch_site_altitude = 0;
+static const float launch_site_altitude = -70;
 
 // start angle
 static const float ang_start = 0;
@@ -72,7 +72,7 @@ static const float alt_error = 5;
 static const float acc_error = 0.5;
 
 // idle angle error
-static const float ang_error = 45;
+static const float ang_error = 45/180.0 * M_PI;
 
 // idle velocity error
 static const float vel_error = 1;
@@ -87,30 +87,31 @@ static const float drogue_to_main_acceleration = -4;
 static const float boost_acc_thresh = 1;
 
 //bounds for allowable angle for boost (radians)
-static const float boost_ang_thresh = 85;
+static const float boost_ang_thresh = 85/180.0 * M_PI;
 
 // coast gnc angle threshold
-static const float coast_gnc_thresh = 30;
-// main angle bottom threshold
-static const float main_ang_thresh_bottom = 95/180 * M_PI;
+static const float coast_gnc_thresh = 30/180.0 * M_PI;
 
 // main angle bottom threshold
-static const float main_ang_thresh_top = -95/180 * M_PI;
+static const float main_ang_thresh_bottom = 95/180.0 * M_PI;
+
+// main angle bottom threshold
+static const float main_ang_thresh_top = -95/180.0 * M_PI;
 
 // drogue angle bottom threshold
-static const float drogue_ang_thresh_bottom = 95/180 * M_PI;
+static const float drogue_ang_thresh_bottom = 95/180.0 * M_PI;
 
 // drogue angle bottom threshold
-static const float drogue_ang_thresh_top = -95/180 * M_PI;
+static const float drogue_ang_thresh_top = -95/180.0 * M_PI;
 
 // drogue acceleration bottom threshold
-static const float drogue_ang_acc_bottom = -4;
+static const float drogue_acc_bottom = -4;
 
 // drogue acceleration bottom threshold
-static const float drogue_ang_acc_top = 1;
+static const float drogue_acc_top = 1;
 
 // main acceleration top threshold
-static const float main_ang_acc_top = -4;
+static const float main_acc_top = -4;
 
 //acceleration to go from apogee to separation
 static const float apogee_to_separation_acceleration = 4;

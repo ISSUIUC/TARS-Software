@@ -40,7 +40,7 @@
 #include "mcu_main/sensors/sensors.h"
 #include "mcu_main/telemetry.h"
 
-#define THREAD_DEBUG
+//#define THREAD_DEBUG
 // #define SERVO_DEBUG
 
 /******************************************************************************/
@@ -82,8 +82,8 @@ static THD_FUNCTION(rocket_FSM_THD, arg) {
 #ifdef THREAD_DEBUG
         Serial.println("### Rocket FSM thread entrance");
 #endif
-
         fsmCollection.tick();
+        
 
         rocketStateData<5> fsm_state = fsmCollection.getStates();
         dataLogger.pushRocketStateFifo(fsm_state);

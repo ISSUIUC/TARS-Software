@@ -1,5 +1,3 @@
-//DONT FORGET TO ADD TO FSM COLLECTIONS
-
 #include "mcu_main/finite-state-machines/ModularFSM.h"
 
 #include "mcu_main/finite-state-machines/thresholds.h"
@@ -34,6 +32,22 @@ bool ModularFSM::idleStateCheck(){
     bool ang_in_range_pitch = (ang_start - ang_error) <= orientation.getEuler().pitch && orientation.getEuler().pitch <= (ang_start + ang_error);
     bool ang_in_range_yaw = (ang_start - ang_error) <= orientation.getEuler().yaw && orientation.getEuler().yaw <= (ang_start + ang_error);
     bool vel_in_range = -vel_error <= vel && vel <= vel_error;
+
+    Serial.print("altitude: ");
+    Serial.println(barometer.getAltitude());
+    Serial.println(altitude_in_range);
+    Serial.print("acceleration: ");
+    Serial.println(highG.getAccel().az);
+    Serial.println(acc_in_range);
+    Serial.print("pitch: ");
+    Serial.println(orientation.getEuler().pitch);
+    Serial.println(ang_in_range_pitch);
+    Serial.print("yaw: ");
+    Serial.println(orientation.getEuler().yaw);
+    Serial.println(ang_in_range_yaw);
+    Serial.print("velocity: ");
+    Serial.println(vel);
+    Serial.println(vel_in_range);
 
     if (altitude_in_range && acc_in_range && ang_in_range_pitch && ang_in_range_yaw && vel_in_range) {
         last_state_ = rocket_state_;
@@ -202,7 +216,7 @@ bool ModularFSM::drogueStateCheck(){
     float velocity = getAltitudeAverage(0, 3) - getAltitudeAverage(3, 3);
 
     bool altitude_in_range = (launch_site_altitude < barometer.getAltitude()) && (barometer.getAltitude() < apogee_altitude_);
-    bool acceleration_in_range = (drogue_ang_acc_bottom < getAccelerationAverage(0,6)) && (getAccelerationAverage(0,6) < drogue_ang_acc_top);
+    bool acceleration_in_range = (drogue_acc_bottom < getAccelerationAverage(0,6)) && (getAccelerationAverage(0,6) < drogue_acc_top);
     bool velocity_in_range = velocity < vel_error;
     bool ang_in_range_pitch = drogue_ang_thresh_bottom <= orientation.getEuler().pitch && orientation.getEuler().pitch <= drogue_ang_thresh_top;
     bool ang_in_range_yaw = drogue_ang_thresh_bottom <= orientation.getEuler().yaw && orientation.getEuler().yaw <= drogue_ang_thresh_top;
@@ -231,7 +245,7 @@ bool ModularFSM::mainStateCheck(){
     float velocity = getAltitudeAverage(0, 3) - getAltitudeAverage(3, 3);
 
     bool altitude_in_range = (launch_site_altitude < barometer.getAltitude()) && (barometer.getAltitude() < apogee_altitude_);
-    bool acceleration_in_range = (getAccelerationAverage(0,6) < main_ang_acc_top);
+    bool acceleration_in_range = (getAccelerationAverage(0,6) < main_acc_top);
     bool velocity_in_range = velocity < vel_error;
     bool ang_in_range_pitch = main_ang_thresh_bottom <= orientation.getEuler().pitch && orientation.getEuler().pitch <= main_ang_thresh_top;
     bool ang_in_range_yaw = main_ang_thresh_bottom <= orientation.getEuler().yaw && orientation.getEuler().yaw <= main_ang_thresh_top;
@@ -261,6 +275,7 @@ bool ModularFSM::landedStateCheck(){
 }
 
 void ModularFSM::tickFSM(){
+    Serial.println((int) rocket_state_);
     //lock mutexes
     chMtxLock(&orientation.mutex);
     chMtxLock(&highG.mutex);
