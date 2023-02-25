@@ -1,3 +1,5 @@
+//DONT FORGET TO ADD TO FSM COLLECTIONS
+
 #include "mcu_main/finite-state-machines/ModularFSM.h"
 
 #include "mcu_main/finite-state-machines/thresholds.h"
@@ -132,19 +134,59 @@ bool ModularFSM::coastGNCStateCheck(){
 }
 
 bool ModularFSM::apogeeEventCheck(){
-    return true;
+
+    if(highG.getAccel().az > apogee_to_separation_acceleration){
+		last_state_ = rocket_state_;
+		rocket_state_ = FSM_State::STATE_SEPARATION;
+		return true;
+	}
+    return false;
+
 }
 
 bool ModularFSM::apogeeStateCheck(){
-    return true;
+    float vel = getAltitudeAverage(0, 3) - getAltitudeAverage(3, 3);
+
+
+    bool altitude_in_range = barometer.getAltitude() > launch_site_altitude + alt_error;
+    bool acc_in_range = -acc_error < getAccelerationAverage(0,6) && getAccelerationAverage(0,6) < acc_error;
+    bool vel_in_range = -vel_error < vel && vel < vel_error;
+
+    if (altitude_in_range && acc_in_range && vel_in_range) {
+        last_state_ = rocket_state_;
+        rocket_state_ = FSM_State::STATE_APOGEE;
+        return true;
+    }
+
+    rocket_state_ = FSM_State::STATE_UNKNOWN;
+    return false;
 }
 
 bool ModularFSM::separationEventCheck(){
-    return true;
+    if(highG.getAccel().az < separation_to_drogue_acceleration){
+		last_state_ = rocket_state_;
+		rocket_state_ = FSM_State::STATE_DROGUE;
+		return true;
+	}
+    return false;
 }
 
 bool ModularFSM::separationStateCheck(){
-    return true;
+    float vel = getAltitudeAverage(0, 3) - getAltitudeAverage(3, 3);
+
+
+    bool altitude_in_range = barometer.getAltitude() > launch_site_altitude + alt_error;
+    bool acc_in_range = separation_acc_thresh < getAccelerationAverage(0,6);
+    bool vel_in_range = -vel_error < vel && vel < vel_error;
+
+    if (altitude_in_range && acc_in_range && vel_in_range) {
+        last_state_ = rocket_state_;
+        rocket_state_ = FSM_State::STATE_SEPARATION;
+        return true;
+    }
+
+    rocket_state_ = FSM_State::STATE_UNKNOWN;
+    return false;
 }
 
 bool ModularFSM::drogueEventCheck(){

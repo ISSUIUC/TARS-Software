@@ -86,7 +86,7 @@ static const float drogue_to_main_acceleration = -4;
 //lower bound for allowable accerleation for boost
 static const float boost_acc_thresh = 1;
 
-//bounds for allowable angle for boost (degrees)
+//bounds for allowable angle for boost (radians)
 static const float boost_ang_thresh = 85;
 
 // coast gnc angle threshold
@@ -112,7 +112,11 @@ static const float drogue_ang_acc_top = 1;
 // main acceleration top threshold
 static const float main_ang_acc_top = -4;
 
+//acceleration to go from apogee to separation
+static const float apogee_to_separation_acceleration = 4;
 
+//acceleration to go from separation to drogue
+static const float separation_to_drogue_acceleration = -0.5;
 
-
-
+//lower bound for allowable acceleration for separation
+static const float separation_acc_thresh = 4;
