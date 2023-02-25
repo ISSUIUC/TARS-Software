@@ -73,19 +73,62 @@ bool ModularFSM::boostStateCheck(){
 }
 
 bool ModularFSM::coastPreGNCEventCheck(){
-    return true;
+    if ((chVTGetSystemTime() - coast_time_) > coast_ac_delay_thresh) {
+        last_state_ = rocket_state_;
+        rocket_state_ = FSM_State::STATE_COAST_GNC;
+        return true;
+    }
+    return false;
 }
 
 bool ModularFSM::coastPreGNCStateCheck(){
-    return true;
+    float vel = getAltitudeAverage(0, 3) - getAltitudeAverage(3, 3);
+
+    bool altitude_in_range = barometer.getAltitude() > launch_site_altitude + alt_error;
+    bool acc_in_range = -4 < getAccelerationAverage(0, 6) && getAccelerationAverage(0, 6) < acc_error;
+    bool ang_in_range_pitch = -boost_ang_thresh <= orientation.getEuler().pitch && orientation.getEuler().pitch <= boost_ang_thresh;
+    bool ang_in_range_yaw = -boost_ang_thresh <= orientation.getEuler().yaw && orientation.getEuler().yaw <= -boost_ang_thresh;
+    bool vel_in_range =  vel > 0 + vel_error;
+
+    if (altitude_in_range && acc_in_range && ang_in_range_pitch && ang_in_range_yaw && vel_in_range) {
+        last_state_ = rocket_state_;
+        rocket_state_ = FSM_State::STATE_COAST_PREGNC;
+        return true;
+    }
+
+    rocket_state_ = FSM_State::STATE_UNKNOWN;
+    return false;
 }
 
 bool ModularFSM::coastGNCEventCheck(){
-    return true;
+    float vel = getAltitudeAverage(0, 3) - getAltitudeAverage(3, 3);
+
+    if (vel < 0 + vel_error) {
+        last_state_ = rocket_state_;
+        rocket_state_ = FSM_State::STATE_APOGEE;
+        return true;
+    }
+
+    return false;
 }
 
 bool ModularFSM::coastGNCStateCheck(){
-    return true;
+    float vel = getAltitudeAverage(0, 3) - getAltitudeAverage(3, 3);
+
+    bool altitude_in_range = barometer.getAltitude() > launch_site_altitude + alt_error;
+    bool acc_in_range = -4 < getAccelerationAverage(0, 6) && getAccelerationAverage(0, 6) < acc_error;
+    bool ang_in_range_pitch = -coast_gnc_thresh <= orientation.getEuler().pitch && orientation.getEuler().pitch <= coast_gnc_thresh;
+    bool ang_in_range_yaw = -coast_gnc_thresh <= orientation.getEuler().yaw && orientation.getEuler().yaw <= coast_gnc_thresh;
+    bool vel_in_range =  vel > 0 + vel_error;
+
+    if (altitude_in_range && acc_in_range && ang_in_range_pitch && ang_in_range_yaw && vel_in_range) {
+        last_state_ = rocket_state_;
+        rocket_state_ = FSM_State::STATE_COAST_GNC;
+        return true;
+    }
+
+    rocket_state_ = FSM_State::STATE_UNKNOWN;
+    return false;
 }
 
 bool ModularFSM::apogeeEventCheck(){

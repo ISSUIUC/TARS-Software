@@ -6,7 +6,7 @@
 
 #pragma once
 
-// Transition from boost to coast if low accleration detected for 300 ms
+// Transition from boost to coast if low acceleration detected for 300 ms
 static const float coast_time_thresh = 300;
 
 // transition from coast to apogee if low velocity detected for 100ms
@@ -47,7 +47,7 @@ static const float main_acceleration_change_threshold_imu = 1.53;
 
 static const float main_acceleration_change_threshold_altimeter = 25.02;
 
-// how long before we force droge deploy
+// how long before we force drogue deploy
 static const float drogue_deploy_time_since_apogee_threshold = 10000;
 
 // how long before we force main deploy
@@ -80,8 +80,11 @@ static const float vel_error = 1;
 //boost acceleration tolerance
 static const float boost_to_coast_acceleration = 1;
 
-//lower bound for allowable accerleation for boost
+//lower bound for allowable acceleration for boost
 static const float boost_acc_thresh = 1;
 
 //bounds for allowable angle for boost (degrees)
 static const float boost_ang_thresh = 85;
+
+// coast gnc angle threshold
+static const float coast_gnc_thresh = 30;
