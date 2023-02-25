@@ -29,6 +29,8 @@
 #include <ChRt.h>
 #include <PWMServo.h>
 #include <SPI.h>
+// #include <LSM6.h>
+// #include <SparkFunLSM6DS3.h>
 
 #include "mcu_main/Abort.h"
 #include "mcu_main/SDLogger.h"
@@ -39,10 +41,9 @@
 #include "mcu_main/pins.h"
 #include "mcu_main/sensors/sensors.h"
 #include "mcu_main/telemetry.h"
-#include "mcu_main/error.h"
 
 #define THREAD_DEBUG
-// #define SERVO_DEBUG
+//#define SERVO_DEBUG
 
 /******************************************************************************/
 /* TELEMETRY THREAD                                         */
@@ -103,21 +104,6 @@ static THD_FUNCTION(lowgIMU_THD, arg) {
 #endif
 
         lowG.update();
-
-        chThdSleepMilliseconds(6);
-    }
-}
-
-/******************************************************************************/
-/* ORIENTATION THREAD                                                           */
-
-static THD_FUNCTION(orientation_THD, arg) {
-    while (true) {
-#ifdef THREAD_DEBUG
-        Serial.println("### ORIENTATION thread entrance");
-#endif
-
-        orientation.update();
 
         chThdSleepMilliseconds(6);
     }
@@ -235,7 +221,6 @@ static THD_WORKING_AREA(barometer_WA, 8192);
 static THD_WORKING_AREA(gps_WA, 8192);
 static THD_WORKING_AREA(rocket_FSM_WA, 8192);
 static THD_WORKING_AREA(lowgIMU_WA, 8192);
-static THD_WORKING_AREA(orientation_WA, 8192);
 static THD_WORKING_AREA(highgIMU_WA, 8192);
 static THD_WORKING_AREA(servo_WA, 8192);
 static THD_WORKING_AREA(dataLogger_WA, 8192);
@@ -254,7 +239,6 @@ void chSetup() {
     START_THREAD(rocket_FSM);
     START_THREAD(gps);
     START_THREAD(lowgIMU);
-    START_THREAD(orientation);
     START_THREAD(barometer);
     START_THREAD(highgIMU);
     START_THREAD(servo);
@@ -274,51 +258,69 @@ void chSetup() {
  */
 
 void setup() {
+
+
     Serial.begin(9600);
+    // Stall until serial monitor opened
+    while (!Serial);
+    Serial.println("Starting SPI...");
+
+    SPI.begin();
+    SPI.setMOSI(11);
+    SPI.setMISO(12);
+    SPI.setSCK(13);
+
     pinMode(LED_BLUE, OUTPUT);
     pinMode(LED_RED, OUTPUT);
     pinMode(LED_ORANGE, OUTPUT);
     pinMode(LED_GREEN, OUTPUT);
 
-    pinMode(LSM9DS1_AG_CS, OUTPUT);
-    digitalWrite(LSM9DS1_AG_CS, HIGH);
-    pinMode(LSM9DS1_M_CS, OUTPUT);
-    digitalWrite(LSM9DS1_M_CS, HIGH);
-    pinMode(ZOEM8Q0_CS, OUTPUT);
-    digitalWrite(ZOEM8Q0_CS, HIGH);
     pinMode(MS5611_CS, OUTPUT);
     digitalWrite(MS5611_CS, HIGH);
+
     pinMode(KX134_CS, OUTPUT);
     digitalWrite(KX134_CS, HIGH);
-    pinMode(H3LIS331DL_CS, OUTPUT);
-    digitalWrite(H3LIS331DL_CS, HIGH);
-    pinMode(RFM95_CS, OUTPUT);
-    digitalWrite(RFM95_CS, HIGH);
+  
 
-    pinMode(LSM9DS1_AG_CS, OUTPUT);
-    pinMode(LSM9DS1_M_CS, OUTPUT);
-    pinMode(ZOEM8Q0_CS, OUTPUT);
-    pinMode(MS5611_CS, OUTPUT);
+    pinMode(RFM96_CS, OUTPUT);
+    digitalWrite(RFM96_CS, HIGH);
 
-    digitalWrite(LSM9DS1_AG_CS, HIGH);
-    digitalWrite(LSM9DS1_M_CS, HIGH);
-    digitalWrite(ZOEM8Q0_CS, HIGH);
-    digitalWrite(MS5611_CS, HIGH);
+    pinMode(LSM6DSLTR, OUTPUT);
+    digitalWrite(LSM6DSLTR, HIGH);
 
-    // TODO where do these two belong?
-    SPI.begin();
-    SPI1.setMISO(39);
+    pinMode(LIS3MDL_CS, OUTPUT);
+    digitalWrite(LIS3MDL_CS, HIGH);
 
-    handleError(highG.init());
-    handleError(lowG.init());
-    handleError(barometer.init());
-    handleError(gps.init());
+    // MS5611 barometer{MS5611_CS};
+    // barometer.init();
+    
+    // while (1) {
+    //     barometer.read(12);
+    //     float temp = barometer.getTemperature() *
+    //     0.01;
+    //     float pressure = barometer.getPressure()*0.01;
+    //     Serial.println(pressure);
+    // }
 
-    handleError(sd_logger.init());
-    handleError(tlm.init());
+    QwiicKX134 highG;
+    // highG.beginSPICore(KX134_CS, 1000000, SPI);
+    highG.beginSPI(KX134_CS);
+    highG.initialize(DEFAULT_SETTINGS);
+    highG.setRange(3);
+    while (1) {
+        auto data = highG.getAccelData();
+        Serial.println(data.zData);
+    }
 
-    digitalWrite(LED_ORANGE, HIGH);
-    digitalWrite(LED_BLUE, HIGH);
+    
+
+    
+
+
+
+
+
+
 
     Serial.println("chibios begin");
     chBegin(chSetup);

@@ -40,20 +40,22 @@ T inv_convert_range(float val, float range) {
     return std::max(std::min((float)std::numeric_limits<T>::max(), converted), (float)std::numeric_limits<T>::min());
 }
 
-ErrorCode Telemetry::init() {
-    pinMode(RFM95_RST, OUTPUT);
-    digitalWrite(RFM95_RST, HIGH);
+void Telemetry::init() {
+    pinMode(50, OUTPUT);
+    digitalWrite(50, HIGH);
     delay(100);
 
     // manual reset
 
-    digitalWrite(RFM95_RST, LOW);
+    digitalWrite(50, LOW);
     delay(10);
-    digitalWrite(RFM95_RST, HIGH);
+    digitalWrite(50, HIGH);
     delay(10);
 
     while (!rf95.init()) {
-        return ErrorCode::RADIO_INIT_FAILED;
+        while (true) {
+            Serial.println("Radio Initialization Failed");
+        }
     }
     Serial.println("[DEBUG]: Radio Initialized");
 
@@ -61,7 +63,9 @@ ErrorCode Telemetry::init() {
     // 128chips/symbol, CRC on
 
     if (!rf95.setFrequency(RF95_FREQ)) {
-        return ErrorCode::RADIO_SET_FREQUENCY_FAILED;
+        while (true) {
+            Serial.println("[ERROR]: Default setFrequency Failed");
+        }
     }
 
     /*
@@ -70,10 +74,9 @@ ErrorCode Telemetry::init() {
      * transmitter pin, then you can set transmitter powers from 5 to 23 dBm:
      */
     rf95.setTxPower(23, false);
-    return ErrorCode::NO_ERROR;
 }
 
-Telemetry::Telemetry() : rf95(RFM95_CS, RFM95_INT) {}
+Telemetry::Telemetry() : rf95(50, 50) {}
 
 /**
  * @brief  This function handles commands sent from the ground station
@@ -237,13 +240,13 @@ void Telemetry::serialPrint(const sensorDataStruct_t &sensor_data) {
     Serial.print(sensor_data.flap_data.extension, 5);
     Serial.print(",");
     Serial.print(R"("STE_ALT":)");
-    Serial.print(sensor_data.kalman_data.kalman_pos_x, 5);
+    Serial.print(sensor_data.kalman_data.kalman_x, 5);
     Serial.print(",");
     Serial.print(R"("STE_VEL":)");
-    Serial.print(sensor_data.kalman_data.kalman_vel_x, 5);
+    Serial.print(sensor_data.kalman_data.kalman_vx, 5);
     Serial.print(",");
     Serial.print(R"("STE_ACC":)");
-    Serial.print(sensor_data.kalman_data.kalman_acc_x, 5);
+    Serial.print(sensor_data.kalman_data.kalman_ax, 5);
     Serial.print(",");
     Serial.print(R"("TEMP":)");
     Serial.print(sensor_data.barometer_data.temperature);
@@ -263,9 +266,9 @@ TelemetryPacket Telemetry::makePacket(const sensorDataStruct_t &data_struct) {
     packet.gps_long = data_struct.gps_data.longitude;
     packet.gps_alt = data_struct.gps_data.altitude;
 
-    packet.gnc_state_ax = data_struct.kalman_data.kalman_acc_x;
-    packet.gnc_state_vx = data_struct.kalman_data.kalman_vel_x;
-    packet.gnc_state_x = data_struct.kalman_data.kalman_pos_x;
+    packet.gnc_state_ax = data_struct.kalman_data.kalman_ax;
+    packet.gnc_state_vx = data_struct.kalman_data.kalman_vx;
+    packet.gnc_state_x = data_struct.kalman_data.kalman_x;
     packet.gns_state_apo = data_struct.kalman_data.kalman_apo;
 
     packet.response_ID = last_command_id;
