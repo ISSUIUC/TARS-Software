@@ -33,21 +33,21 @@ bool ModularFSM::idleStateCheck(){
     bool ang_in_range_yaw = (ang_start - ang_error) <= orientation.getEuler().yaw && orientation.getEuler().yaw <= (ang_start + ang_error);
     bool vel_in_range = -vel_error <= vel && vel <= vel_error;
 
-    // Serial.print("altitude: ");
-    // Serial.println(barometer.getAltitude());
-    // Serial.println(altitude_in_range);
-    // Serial.print("acceleration: ");
-    // Serial.println(highG.getAccel().az);
-    // Serial.println(acc_in_range);
-    // Serial.print("pitch: ");
-    // Serial.println(orientation.getEuler().pitch);
-    // Serial.println(ang_in_range_pitch);
-    // Serial.print("yaw: ");
-    // Serial.println(orientation.getEuler().yaw);
-    // Serial.println(ang_in_range_yaw);
-    // Serial.print("velocity: ");
-    // Serial.print(vel);
-    // Serial.println(vel_in_range);
+    Serial.print("altitude: ");
+    Serial.println(barometer.getAltitude());
+    Serial.println(altitude_in_range);
+    Serial.print("acceleration: ");
+    Serial.println(highG.getAccel().az);
+    Serial.println(acc_in_range);
+    Serial.print("pitch: ");
+    Serial.println(orientation.getEuler().pitch);
+    Serial.println(ang_in_range_pitch);
+    Serial.print("yaw: ");
+    Serial.println(orientation.getEuler().yaw);
+    Serial.println(ang_in_range_yaw);
+    Serial.print("velocity: ");
+    Serial.print(vel);
+    Serial.println(vel_in_range);
 
     if (altitude_in_range && acc_in_range && ang_in_range_pitch && ang_in_range_yaw && vel_in_range) {
         last_state_ = rocket_state_;
@@ -275,7 +275,10 @@ bool ModularFSM::landedStateCheck(){
 }
 
 void ModularFSM::tickFSM(){
+    Serial.print("Current State: ");
     Serial.println((int) rocket_state_);
+    Serial.print("Last State: ");
+    Serial.println((int) last_state_);
     //lock mutexes
     chMtxLock(&orientation.mutex);
     chMtxLock(&highG.mutex);

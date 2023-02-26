@@ -19,7 +19,7 @@ class RocketFSMBase {
         T items[len];
         buffer.readSlice(items, start, len);
         double sum = 0.0;
-        for (size_t i = start; i < start + len; i++) {
+        for (size_t i = 0; i < len; i++) {
             sum += access_value(items[i]);
         }
         // chMtxUnlock(&buffer.lock);
@@ -51,7 +51,7 @@ class RocketFSMBase {
         // chMtxUnlock(&buffer.lock);
 
         double sum = 0.0;
-        for (size_t i = start; i < start + len - 2; i++) {
+        for (size_t i = 0; i < len - 2; i++) {
             sum += second_derivatives[i];
         }
         return sum / (double)(len - 2);
