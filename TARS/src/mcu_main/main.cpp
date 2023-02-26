@@ -29,6 +29,13 @@
 #include <ChRt.h>
 #include <PWMServo.h>
 #include <SPI.h>
+#include <Wire.h>
+
+// #include <LSM6.h>
+// #include <SparkFunLSM6DS3.h>
+#include <Adafruit_LIS3MDL.h>
+#include <Adafruit_BME680.h>
+#include <SparkFun_u-blox_GNSS_Arduino_Library.h>
 
 #include "mcu_main/Abort.h"
 #include "mcu_main/SDLogger.h"
@@ -41,7 +48,7 @@
 #include "mcu_main/telemetry.h"
 
 #define THREAD_DEBUG
-// #define SERVO_DEBUG
+//#define SERVO_DEBUG
 
 /******************************************************************************/
 /* TELEMETRY THREAD                                         */
@@ -274,50 +281,166 @@ void chSetup() {
 
 void setup() {
     Serial.begin(9600);
+    // Stall until serial monitor opened
+    while (!Serial);
+    Serial.println("Starting SPI...");
+
+    SPI.begin();
+    SPI.setMOSI(11);
+    SPI.setMISO(12);
+    SPI.setSCK(13);
+
     pinMode(LED_BLUE, OUTPUT);
     pinMode(LED_RED, OUTPUT);
     pinMode(LED_ORANGE, OUTPUT);
     pinMode(LED_GREEN, OUTPUT);
 
-    pinMode(LSM9DS1_AG_CS, OUTPUT);
-    digitalWrite(LSM9DS1_AG_CS, HIGH);
-    pinMode(LSM9DS1_M_CS, OUTPUT);
-    digitalWrite(LSM9DS1_M_CS, HIGH);
-    pinMode(ZOEM8Q0_CS, OUTPUT);
-    digitalWrite(ZOEM8Q0_CS, HIGH);
     pinMode(MS5611_CS, OUTPUT);
     digitalWrite(MS5611_CS, HIGH);
+
     pinMode(KX134_CS, OUTPUT);
     digitalWrite(KX134_CS, HIGH);
-    pinMode(H3LIS331DL_CS, OUTPUT);
-    digitalWrite(H3LIS331DL_CS, HIGH);
-    pinMode(RFM95_CS, OUTPUT);
-    digitalWrite(RFM95_CS, HIGH);
 
-    pinMode(LSM9DS1_AG_CS, OUTPUT);
-    pinMode(LSM9DS1_M_CS, OUTPUT);
-    pinMode(ZOEM8Q0_CS, OUTPUT);
-    pinMode(MS5611_CS, OUTPUT);
 
-    digitalWrite(LSM9DS1_AG_CS, HIGH);
-    digitalWrite(LSM9DS1_M_CS, HIGH);
-    digitalWrite(ZOEM8Q0_CS, HIGH);
-    digitalWrite(MS5611_CS, HIGH);
+    pinMode(RFM96_CS, OUTPUT);
+    digitalWrite(RFM96_CS, HIGH);
 
-    // TODO where do these two belong?
-    SPI.begin();
-    SPI1.setMISO(39);
+    pinMode(LSM6DSLTR, OUTPUT);
+    digitalWrite(LSM6DSLTR, HIGH);
 
-    highG.init();
-    lowG.init();
+    pinMode(LIS3MDL_CS, OUTPUT);
+    digitalWrite(LIS3MDL_CS, HIGH);
+
+    //barometer setup
+    MS5611 barometer{MS5611_CS};
     barometer.init();
-    gps.init();
 
-    sd_logger.init();
-    tlm.init();
+    char currentSensor = '0';
 
-    digitalWrite(LED_ORANGE, HIGH);
-    digitalWrite(LED_BLUE, HIGH);
+    //lowG sensor setup
+    LSM6DS3 lowG(SPI_MODE, LSM6DSLTR);
+    lowG.begin();
+
+    //magnetomer setup
+    Adafruit_LIS3MDL mag;
+    mag.begin_SPI(LIS3MDL_CS);
+    mag.setOperationMode(LIS3MDL_CONTINUOUSMODE);
+    mag.setDataRate(LIS3MDL_DATARATE_80_HZ);
+    mag.setRange(LIS3MDL_RANGE_4_GAUSS);
+    float x,y,z;
+
+    // Gas sensor setup
+    Adafruit_BME680 bme(BME688_CS);
+    bme.begin();
+
+    //highG setup
+    QwiicKX134 highG;
+
+    // highG.beginSPICore(KX134_CS, 1000000, SPI);
+    highG.beginSPI(KX134_CS);
+    highG.initialize(DEFAULT_SETTINGS);
+    highG.setRange(3);
+
+
+    while (1) {
+        if (Serial.available()) {
+            char serialData = Serial.read();
+            if (serialData != 10) {
+                // ignore new line data (10)
+                currentSensor = serialData;
+            }
+        }
+
+        switch (currentSensor) {
+            case 'm':
+                Serial.println("magnetometer");
+                mag.read();
+                Serial.print("x: ");
+                Serial.println(mag.x);
+                break;
+
+            case 'l':
+                Serial.println("lowg sensor");
+                Serial.print("az: ");
+                Serial.println(lowG.readFloatAccelZ());
+                break;
+
+            case 'g':
+                Serial.println("Gas sensor (useless): ");
+                Serial.println(bme.readTemperature());
+                break;
+
+            case 'b':
+                Serial.println("Barometer: ");
+                barometer.read(12);
+                float temp = barometer.getTemperature() * 0.01;
+                float pressure = barometer.getPressure()*0.01;
+                Serial.println(pressure);
+                break;
+
+            case 'p':
+                 Serial.println("Case 1");
+                 auto data = highG.getAccelData();
+                 Serial.println("Case 2");
+                 Serial.println(data.zData);
+                 Serial.println("Case 3");
+                 break;
+
+            default:
+                Serial.println("Default");
+        }
+    }
+
+    // while (1) {
+    //     barometer.read(12);
+    //     float temp = barometer.getTemperature() *
+    //     0.01;
+    //     float pressure = barometer.getPressure()*0.01;
+    //     Serial.println(pressure);
+    // }
+
+    // QwiicKX134 highG;
+    // // highG.beginSPICore(KX134_CS, 1000000, SPI);
+    // highG.beginSPI(KX134_CS);
+    // highG.initialize(DEFAULT_SETTINGS);
+    // highG.setRange(3);
+    // while (1) {
+    //     auto data = highG.getAccelData();
+    //     Serial.println(data.zData);
+
+
+    // }
+    // LSM6DS3 lowG(SPI_MODE, LSM6DSLTR);
+    // lowG.begin();
+    // while(1){
+    //     Serial.print("az: ");
+    //     Serial.println(lowG.readFloatAccelZ());
+
+    // }
+
+
+    // Adafruit_LIS3MDL mag;
+    // mag.begin_SPI(LIS3MDL_CS);
+    // mag.setOperationMode(LIS3MDL_CONTINUOUSMODE);
+    // mag.setDataRate(LIS3MDL_DATARATE_80_HZ);
+    // mag.setRange(LIS3MDL_RANGE_4_GAUSS);
+    // float x,y,z;
+
+    // while(1){
+    //     mag.read();
+    //     Serial.print("x: ");
+    //     Serial.println(mag.x);
+
+    // }
+
+    // Adafruit_BME680 bme(BME688_CS);
+    // bme.begin();
+
+    // while(1){
+    //     Serial.println(bme.readTemperature());
+    // }
+
+
 
     Serial.println("chibios begin");
     chBegin(chSetup);
