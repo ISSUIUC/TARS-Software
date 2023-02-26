@@ -33,8 +33,12 @@ Acceleration LowGSensor::getAcceleration() { return Acceleration{ax, ay, az}; }
 Gyroscope LowGSensor::getGyroscope() { return Gyroscope{gx, gy, gz}; }
 //Magnetometer LowGSensor::getMagnetometer() { return Magnetometer{mx, my, mz}; }
 
-void LowGSensor::init() {
-    LSM.begin();
+ErrorCode LowGSensor::init() {
+    // note, we need to send this our CS pins (defined above)
+    if (!LSM.begin()) {
+        return ErrorCode::CANNOT_CONECT_LSM9DS1;
+    }
+    return ErrorCode::NO_ERROR;
 }
 
 LowGSensor::LowGSensor() : LSM(SPI_MODE, LSM6DSLTR) { }

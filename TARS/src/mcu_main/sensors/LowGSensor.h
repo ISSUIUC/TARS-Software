@@ -4,6 +4,7 @@
 #include "SparkFunLSM6DS3.h"
 #include "mcu_main/sensors/HighGSensor.h"
 #include "common/packet.h"
+#include "mcu_main/error.h"
 
 class LowGSensor {
    public:
@@ -11,7 +12,7 @@ class LowGSensor {
 
     LowGSensor();
 
-    void init();
+    ErrorCode __attribute__((warn_unused_result)) init();
     void update();
     Acceleration getAcceleration();
     Gyroscope getGyroscope();

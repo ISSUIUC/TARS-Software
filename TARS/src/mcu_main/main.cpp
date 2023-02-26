@@ -40,6 +40,7 @@
 #include "mcu_main/pins.h"
 #include "mcu_main/sensors/sensors.h"
 #include "mcu_main/telemetry.h"
+#include "mcu_main/error.h"
 
 #define THREAD_DEBUG
 //#define SERVO_DEBUG
@@ -342,13 +343,16 @@ void setup() {
     Wire.setSCL(MAXM10S_SDA);
     Wire.begin();
 
-    barometer.init();
-    highG.init();
+    handleError(barometer.init());
+    handleError(highG.init());
     gas.init();
-    gps.init();
-    highG.init();
-    lowG.init();
+    handleError(gps.init());
+    handleError(highG.init());
+    handleError(lowG.init());
     magnetometer.init();
+
+    handleError(sd_logger.init());
+    handleError(tlm.init());
 
     Serial.println("chibios begin");
     chBegin(chSetup);

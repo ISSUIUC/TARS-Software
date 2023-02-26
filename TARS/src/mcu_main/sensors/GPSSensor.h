@@ -2,6 +2,7 @@
 
 #include "ChRt.h"
 #include "SparkFun_u-blox_GNSS_Arduino_Library.h"
+#include "mcu_main/error.h"
 
 struct GPSSensor {
    public:
@@ -9,7 +10,7 @@ struct GPSSensor {
 
     MUTEX_DECL(mutex);
 
-    void init();
+    ErrorCode __attribute__((warn_unused_result)) init();
     void update();
     float getLatitude() const;
     float getLongitude() const;

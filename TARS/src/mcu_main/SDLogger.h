@@ -4,17 +4,18 @@
 #include <SD.h>
 
 #include "mcu_main/dataLog.h"
+#include "mcu_main/error.h"
 
 class SDLogger;
 extern SDLogger sd_logger;
 
 class SDLogger {
-   public:
-    void init();
+public:
+    ErrorCode __attribute__((warn_unused_result)) init();
 
     void update();
 
-   private:
+private:
     template <typename T>
     void logData(T* data);
 

@@ -7,6 +7,7 @@
 
 #include "common/packet.h"
 
+#include "mcu_main/error.h"
 
 struct HighGSensor {
    public:
@@ -14,7 +15,7 @@ struct HighGSensor {
 
     MUTEX_DECL(mutex);
 
-    void init();
+    ErrorCode __attribute__((warn_unused_result)) init();
     void update();
     Acceleration getAccel();
 

@@ -6,7 +6,10 @@
 
 BarometerSensor barometer;
 
-void BarometerSensor::init() { MS.init(); }
+ErrorCode BarometerSensor::init() {
+    MS.init();
+    return ErrorCode::NO_ERROR;
+}
 
 void BarometerSensor::refresh() {
     chMtxLock(&mutex);
