@@ -7,41 +7,34 @@
 LowGSensor lowG;
 
 void LowGSensor::update() {
-    // chSysLock();
-    // chMtxLock(&mutex);
-    // LSM.readAccel();
-    // LSM.readGyro();
-    // LSM.readMag();
+     chSysLock();
+     chMtxLock(&mutex);
 
-    // ax = LSM.calcAccel(LSM.ax);
-    // ay = LSM.calcAccel(LSM.ay);
-    // az = LSM.calcAccel(LSM.az);
-    // gx = LSM.calcGyro(LSM.gx);
-    // gy = LSM.calcGyro(LSM.gy);
-    // gz = LSM.calcGyro(LSM.gz);
-    // mx = LSM.calcMag(LSM.mx);
-    // my = LSM.calcMag(LSM.my);
-    // mz = LSM.calcMag(LSM.mz);
+     ax = LSM.readFloatAccelX();
+     ay = LSM.readFloatAccelY();
+     az = LSM.readFloatAccelZ();
+     gx = LSM.readFloatGyroX();
+     gy = LSM.readFloatGyroY();
+     gz = LSM.readFloatGyroZ();
+//     mx = LSM.calcMag(LSM.mx);
+//     my = LSM.calcMag(LSM.my);
+//     mz = LSM.calcMag(LSM.mz);
 
-    // timestamp = chVTGetSystemTime();
+     timestamp = chVTGetSystemTime();
 
-    // chMtxUnlock(&mutex);
-    // chSysUnlock();
+     chMtxUnlock(&mutex);
+     chSysUnlock();
 
-    // dataLogger.pushLowGFifo((LowGData){ax, ay, az, gx, gy, gz, mx, my, mz, timestamp});
+     dataLogger.pushLowGFifo((LowGData){ax, ay, az, gx, gy, gz, timestamp});
 }
 
 Acceleration LowGSensor::getAcceleration() { return Acceleration{ax, ay, az}; }
 
 Gyroscope LowGSensor::getGyroscope() { return Gyroscope{gx, gy, gz}; }
-Magnetometer LowGSensor::getMagnetometer() { return Magnetometer{mx, my, mz}; }
+//Magnetometer LowGSensor::getMagnetometer() { return Magnetometer{mx, my, mz}; }
 
 void LowGSensor::init() {
-    // note, we need to send this our CS pins (defined above)
-    // if (!LSM.beginSPI(LSM9DS1_AG_CS, LSM9DS1_M_CS)) {
-    //     digitalWrite(LED_ORANGE, HIGH);
-    //     Serial.println("Failed to communicate with LSM9DS1. Stalling Program");
-    //     while (true)
-    //         ;
-    // }
+    LSM.begin();
 }
+
+LowGSensor::LowGSensor() : LSM(SPI_MODE, LSM6DSLTR) { }

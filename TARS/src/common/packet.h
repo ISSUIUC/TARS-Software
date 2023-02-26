@@ -61,9 +61,9 @@ struct LowGData {
     float gx;
     float gy;
     float gz;
-    float mx;
-    float my;
-    float mz;
+//    float mx;
+//    float my;
+//    float mz;
     systime_t timeStamp_lowG;
 };
 

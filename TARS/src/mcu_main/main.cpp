@@ -31,12 +31,6 @@
 #include <SPI.h>
 #include <Wire.h>
 
-// #include <LSM6.h>
-// #include <SparkFunLSM6DS3.h>
-#include <Adafruit_LIS3MDL.h>
-#include <Adafruit_BME680.h>
-#include <SparkFun_u-blox_GNSS_Arduino_Library.h>
-
 #include "mcu_main/Abort.h"
 #include "mcu_main/SDLogger.h"
 #include "mcu_main/dataLog.h"
@@ -124,6 +118,36 @@ static THD_FUNCTION(orientation_THD, arg) {
 #endif
 
         orientation.update();
+
+        chThdSleepMilliseconds(6);
+    }
+}
+
+/******************************************************************************/
+/* GAS SENSOR THREAD                                                           */
+
+static THD_FUNCTION(gas_THD, arg) {
+    while (true) {
+#ifdef THREAD_DEBUG
+        Serial.println("### Gas thread entrance");
+#endif
+
+        gas.refresh();
+
+        chThdSleepMilliseconds(6);
+    }
+}
+
+/******************************************************************************/
+/* MAGNETOMETER THREAD                                                           */
+
+static THD_FUNCTION(magnetometer_THD, arg) {
+    while (true) {
+#ifdef THREAD_DEBUG
+        Serial.println("### Magnetometer thread entrance");
+#endif
+
+        magnetometer.update();
 
         chThdSleepMilliseconds(6);
     }
@@ -242,6 +266,8 @@ static THD_WORKING_AREA(gps_WA, 8192);
 static THD_WORKING_AREA(rocket_FSM_WA, 8192);
 static THD_WORKING_AREA(lowgIMU_WA, 8192);
 static THD_WORKING_AREA(orientation_WA, 8192);
+static THD_WORKING_AREA(gas_WA, 8192);
+static THD_WORKING_AREA(magnetometer_WA, 8192);
 static THD_WORKING_AREA(highgIMU_WA, 8192);
 static THD_WORKING_AREA(servo_WA, 8192);
 static THD_WORKING_AREA(dataLogger_WA, 8192);
@@ -260,6 +286,8 @@ void chSetup() {
     START_THREAD(rocket_FSM);
     START_THREAD(gps);
     START_THREAD(lowgIMU);
+    START_THREAD(gas);
+    START_THREAD(magnetometer);
     START_THREAD(orientation);
     START_THREAD(barometer);
     START_THREAD(highgIMU);
@@ -301,7 +329,6 @@ void setup() {
     pinMode(KX134_CS, OUTPUT);
     digitalWrite(KX134_CS, HIGH);
 
-
     pinMode(RFM96_CS, OUTPUT);
     digitalWrite(RFM96_CS, HIGH);
 
@@ -310,137 +337,6 @@ void setup() {
 
     pinMode(LIS3MDL_CS, OUTPUT);
     digitalWrite(LIS3MDL_CS, HIGH);
-
-    //barometer setup
-    MS5611 barometer{MS5611_CS};
-    barometer.init();
-
-    char currentSensor = '0';
-
-    //lowG sensor setup
-    LSM6DS3 lowG(SPI_MODE, LSM6DSLTR);
-    lowG.begin();
-
-    //magnetomer setup
-    Adafruit_LIS3MDL mag;
-    mag.begin_SPI(LIS3MDL_CS);
-    mag.setOperationMode(LIS3MDL_CONTINUOUSMODE);
-    mag.setDataRate(LIS3MDL_DATARATE_80_HZ);
-    mag.setRange(LIS3MDL_RANGE_4_GAUSS);
-    float x,y,z;
-
-    // Gas sensor setup
-    Adafruit_BME680 bme(BME688_CS);
-    bme.begin();
-
-    //highG setup
-    QwiicKX134 highG;
-
-    // highG.beginSPICore(KX134_CS, 1000000, SPI);
-    highG.beginSPI(KX134_CS);
-    highG.initialize(DEFAULT_SETTINGS);
-    highG.setRange(3);
-
-
-    while (1) {
-        if (Serial.available()) {
-            char serialData = Serial.read();
-            if (serialData != 10) {
-                // ignore new line data (10)
-                currentSensor = serialData;
-            }
-        }
-
-        switch (currentSensor) {
-            case 'm':
-                Serial.println("magnetometer");
-                mag.read();
-                Serial.print("x: ");
-                Serial.println(mag.x);
-                break;
-
-            case 'l':
-                Serial.println("lowg sensor");
-                Serial.print("az: ");
-                Serial.println(lowG.readFloatAccelZ());
-                break;
-
-            case 'g':
-                Serial.println("Gas sensor (useless): ");
-                Serial.println(bme.readTemperature());
-                break;
-
-            case 'b':
-                Serial.println("Barometer: ");
-                barometer.read(12);
-                float temp = barometer.getTemperature() * 0.01;
-                float pressure = barometer.getPressure()*0.01;
-                Serial.println(pressure);
-                break;
-
-            case 'p':
-                 Serial.println("Case 1");
-                 auto data = highG.getAccelData();
-                 Serial.println("Case 2");
-                 Serial.println(data.zData);
-                 Serial.println("Case 3");
-                 break;
-
-            default:
-                Serial.println("Default");
-        }
-    }
-
-    // while (1) {
-    //     barometer.read(12);
-    //     float temp = barometer.getTemperature() *
-    //     0.01;
-    //     float pressure = barometer.getPressure()*0.01;
-    //     Serial.println(pressure);
-    // }
-
-    // QwiicKX134 highG;
-    // // highG.beginSPICore(KX134_CS, 1000000, SPI);
-    // highG.beginSPI(KX134_CS);
-    // highG.initialize(DEFAULT_SETTINGS);
-    // highG.setRange(3);
-    // while (1) {
-    //     auto data = highG.getAccelData();
-    //     Serial.println(data.zData);
-
-
-    // }
-    // LSM6DS3 lowG(SPI_MODE, LSM6DSLTR);
-    // lowG.begin();
-    // while(1){
-    //     Serial.print("az: ");
-    //     Serial.println(lowG.readFloatAccelZ());
-
-    // }
-
-
-    // Adafruit_LIS3MDL mag;
-    // mag.begin_SPI(LIS3MDL_CS);
-    // mag.setOperationMode(LIS3MDL_CONTINUOUSMODE);
-    // mag.setDataRate(LIS3MDL_DATARATE_80_HZ);
-    // mag.setRange(LIS3MDL_RANGE_4_GAUSS);
-    // float x,y,z;
-
-    // while(1){
-    //     mag.read();
-    //     Serial.print("x: ");
-    //     Serial.println(mag.x);
-
-    // }
-
-    // Adafruit_BME680 bme(BME688_CS);
-    // bme.begin();
-
-    // while(1){
-    //     Serial.println(bme.readTemperature());
-    // }
-
-
 
     Serial.println("chibios begin");
     chBegin(chSetup);

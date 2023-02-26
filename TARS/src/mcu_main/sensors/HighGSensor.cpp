@@ -22,7 +22,7 @@ void HighGSensor::update() {
 Acceleration HighGSensor::getAccel() { return {ax, ay, az}; }
 
 void HighGSensor::init() {
-    if (!KX.beginSPICore(KX134_CS, 1000000, SPI)) {
+    if (!KX.beginSPI(KX134_CS)) {
         Serial.println("Failed to communicate with KX134. Stalling Program");
         digitalWrite(LED_RED, HIGH);
         while (true)
