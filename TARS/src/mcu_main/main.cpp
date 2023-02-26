@@ -338,6 +338,18 @@ void setup() {
     pinMode(LIS3MDL_CS, OUTPUT);
     digitalWrite(LIS3MDL_CS, HIGH);
 
+    Wire.setSCL(MAXM10S_SCL);
+    Wire.setSCL(MAXM10S_SDA);
+    Wire.begin();
+
+    barometer.init();
+    highG.init();
+    gas.init();
+    gps.init();
+    highG.init();
+    lowG.init();
+    magnetometer.init();
+
     Serial.println("chibios begin");
     chBegin(chSetup);
     while (true)
