@@ -35,13 +35,12 @@ bool ModularFSM::idleStateCheck(){
 
 
     if (altitude_in_range && acc_in_range && ang_in_range_pitch && ang_in_range_yaw && vel_in_range) {
-        if(rocket_state_ != FSM_State::STATE_UNKNOWN){
-            last_state_ = rocket_state_;
-        }  
+        last_state_ = rocket_state_;
         rocket_state_ = FSM_State::STATE_IDLE;
         return true;
     }
 
+    rocket_state_ == FSM_State::STATE_UNKNOWN ? last_state_ = last_state_ : last_state_ = rocket_state_;
     rocket_state_ = FSM_State::STATE_UNKNOWN;
     return false;
 }
@@ -66,13 +65,12 @@ bool ModularFSM::boostStateCheck(){
     bool vel_in_range = vel > vel_error;
 
      if (altitude_in_range && acc_in_range && ang_in_range_pitch && ang_in_range_yaw && vel_in_range) {
-        if(rocket_state_ != FSM_State::STATE_UNKNOWN){
-            last_state_ = rocket_state_;
-        }
+        last_state_ = rocket_state_;
         rocket_state_ = FSM_State::STATE_BOOST;
         return true;
     }
 
+    rocket_state_ == FSM_State::STATE_UNKNOWN ? last_state_ = last_state_ : last_state_ = rocket_state_;
     rocket_state_ = FSM_State::STATE_UNKNOWN;
     return false;
 }
@@ -96,9 +94,7 @@ bool ModularFSM::coastPreGNCStateCheck(){
     bool vel_in_range =  vel > 0 + vel_error;
 
     if (altitude_in_range && acc_in_range && ang_in_range_pitch && ang_in_range_yaw && vel_in_range) {
-        if(rocket_state_ != FSM_State::STATE_UNKNOWN){
-            last_state_ = rocket_state_;
-        }
+        last_state_ = rocket_state_;
         rocket_state_ = FSM_State::STATE_COAST_PREGNC;
         return true;
     }
@@ -129,13 +125,12 @@ bool ModularFSM::coastGNCStateCheck(){
     bool vel_in_range =  vel > 0 + vel_error;
 
     if (altitude_in_range && acc_in_range && ang_in_range_pitch && ang_in_range_yaw && vel_in_range) {
-        if(rocket_state_ != FSM_State::STATE_UNKNOWN){
-            last_state_ = rocket_state_;
-        }
+        last_state_ = rocket_state_;
         rocket_state_ = FSM_State::STATE_COAST_GNC;
         return true;
     }
 
+    rocket_state_ == FSM_State::STATE_UNKNOWN ? last_state_ = last_state_ : last_state_ = rocket_state_;
     rocket_state_ = FSM_State::STATE_UNKNOWN;
     return false;
 }
@@ -160,13 +155,12 @@ bool ModularFSM::apogeeStateCheck(){
     bool vel_in_range = -vel_error < vel && vel < vel_error;
 
     if (altitude_in_range && acc_in_range && vel_in_range) {
-        if(rocket_state_ != FSM_State::STATE_UNKNOWN){
-            last_state_ = rocket_state_;
-        }
+        last_state_ = rocket_state_;
         rocket_state_ = FSM_State::STATE_APOGEE;
         return true;
     }
 
+    rocket_state_ == FSM_State::STATE_UNKNOWN ? last_state_ = last_state_ : last_state_ = rocket_state_;
     rocket_state_ = FSM_State::STATE_UNKNOWN;
     return false;
 }
@@ -189,13 +183,12 @@ bool ModularFSM::separationStateCheck(){
     bool vel_in_range = -vel_error < vel && vel < vel_error;
 
     if (altitude_in_range && acc_in_range && vel_in_range) {
-        if(rocket_state_ != FSM_State::STATE_UNKNOWN){
-            last_state_ = rocket_state_;
-        }
+        last_state_ = rocket_state_;
         rocket_state_ = FSM_State::STATE_SEPARATION;
         return true;
     }
 
+    rocket_state_ == FSM_State::STATE_UNKNOWN ? last_state_ = last_state_ : last_state_ = rocket_state_;
     rocket_state_ = FSM_State::STATE_UNKNOWN;
     return false;
 }
@@ -219,13 +212,12 @@ bool ModularFSM::drogueStateCheck(){
     bool ang_in_range_yaw = drogue_ang_thresh_bottom <= orientation.getEuler().yaw && orientation.getEuler().yaw <= drogue_ang_thresh_top;
 
     if (altitude_in_range && acceleration_in_range && velocity_in_range && ang_in_range_pitch && ang_in_range_yaw) {
-        if(rocket_state_ != FSM_State::STATE_UNKNOWN){
-            last_state_ = rocket_state_;
-        }
+        last_state_ = rocket_state_;
         rocket_state_ = FSM_State::STATE_DROGUE;
         return true;
     }
 
+    rocket_state_ == FSM_State::STATE_UNKNOWN ? last_state_ = last_state_ : last_state_ = rocket_state_;
     rocket_state_ = FSM_State::STATE_UNKNOWN;
     return false;
 }
@@ -250,12 +242,13 @@ bool ModularFSM::mainStateCheck(){
     bool ang_in_range_yaw = main_ang_thresh_bottom <= orientation.getEuler().yaw && orientation.getEuler().yaw <= main_ang_thresh_top;
 
     if (altitude_in_range && acceleration_in_range && velocity_in_range && ang_in_range_yaw && ang_in_range_pitch) {
-        if(rocket_state_ != FSM_State::STATE_UNKNOWN){
-            last_state_ = rocket_state_;
-        }
+        last_state_ = rocket_state_;
         rocket_state_ = FSM_State::STATE_MAIN;
         return true;
     }
+
+    rocket_state_ == FSM_State::STATE_UNKNOWN ? last_state_ = last_state_ : last_state_ = rocket_state_;
+    rocket_state_ = FSM_State::STATE_UNKNOWN;
     return false;
 }
 
@@ -267,12 +260,12 @@ bool ModularFSM::landedStateCheck(){
     bool velocity_in_range = (-vel_error < velocity) && (velocity < vel_error);
     
     if (altitude_in_range && acceleration_in_range && velocity_in_range) {
-        if(rocket_state_ != FSM_State::STATE_UNKNOWN){
-            last_state_ = rocket_state_;
-        }
+        last_state_ = rocket_state_;
         rocket_state_ = FSM_State::STATE_LANDED;
         return true;
     }
+
+    rocket_state_ == FSM_State::STATE_UNKNOWN ? last_state_ = last_state_ : last_state_ = rocket_state_;
     rocket_state_ = FSM_State::STATE_UNKNOWN;
     return false;
 }
