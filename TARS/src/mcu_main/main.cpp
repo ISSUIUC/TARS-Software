@@ -232,10 +232,10 @@
 //static THD_WORKING_AREA(kalman_WA, 8192);
 //
 //#define START_THREAD(NAME) chThdCreateStatic(NAME##_WA, sizeof(NAME##_WA), NORMALPRIO + 1, NAME##_THD, nullptr)
-///**
-// * @brief Starts all of the threads.
-// */
-//void chSetup() {
+/**
+ * @brief Starts all of the threads.
+ */
+void chSetup() {
 //    START_THREAD(telemetry_sending);
 //    START_THREAD(telemetry_buffering);
 //    START_THREAD(rocket_FSM);
@@ -247,11 +247,17 @@
 //    START_THREAD(dataLogger);
 //    START_THREAD(voltage);
 //    START_THREAD(kalman);
-//
-//    while (true)
-//        ;
-//}
-//
+
+    BuzzerController controller(15, melody);
+    controller.playSequence(0);
+    while (true) {
+        controller.tick();
+    }
+
+    while (true)
+        ;
+}
+
 //#undef START_THREAD
 
 /**
@@ -265,10 +271,10 @@ void setup() {
     while (!Serial);
     Serial.println("Starting SPI...");
 
-    SPI.begin();
-    SPI.setMOSI(11);
-    SPI.setMISO(12);
-    SPI.setSCK(13);
+//    SPI.begin();
+//    SPI.setMOSI(11);
+//    SPI.setMISO(12);
+//    SPI.setSCK(13);
 
     pinMode(LED_BLUE, OUTPUT);
     pinMode(LED_RED, OUTPUT);
@@ -312,14 +318,8 @@ void setup() {
 //        Serial.println(data.zData);
 //    }
 
-    BuzzerController controller(15, melody);
-    controller.playSequence(0);
-    while (true) {
-        controller.tick();
-    }
-
     Serial.println("chibios begin");
-//    chBegin(chSetup);
+    chBegin(chSetup);
     while (true)
         ;
 }

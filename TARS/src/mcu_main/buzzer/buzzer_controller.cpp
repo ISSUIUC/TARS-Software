@@ -106,22 +106,25 @@ void BuzzerController::playSequence(size_t sequence) {
 void BuzzerController::tick() {
     if (!playing) return;
 
-    uint16_t note = note_frequencies[sequences[idx]];
     if (sequences[idx] == STOP) {
         playing = false;
         return;
     }
+    uint16_t note = note_frequencies[sequences[idx]];
     int8_t duration_code = sequences[idx+1];
 
-    int note_duration;
+    float note_duration = 0.0;
     if (duration_code > 0) {
-        note_duration = (60000 * 2 / 140) / duration_code;
+        note_duration = (60000.0f * 2 / 140) / (float) duration_code;
     } else if (duration_code < 0) {
-        note_duration = (60000 * 2 / 140) / -duration_code * 1.5;
+        note_duration = (60000.0f * 2 / 140) / -(float) duration_code * 1.5f;
     }
+    Serial.println(idx);
     tone(pin, note, note_duration*0.9);
-    chThdSleep(note_duration);
+    chThdSleep((int) note_duration*100);
     noTone(pin);
+    idx++;
+
 }
 
 

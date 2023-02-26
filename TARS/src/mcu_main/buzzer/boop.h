@@ -21,6 +21,6 @@ const int8_t melody[] = {
     NOTE_E4, 2, NOTE_G4,2,
     NOTE_B4, 2, NOTE_D5,2,
 
-    NOTE_F5, -4, NOTE_E5,-4, NOTE_AS4,8, NOTE_AS4,8, NOTE_B4,4, NOTE_G4,4,
+    NOTE_F5, -4, NOTE_E5,-4, NOTE_AS4,8, NOTE_AS4,8, NOTE_B4,4, NOTE_G4,4, STOP, 0
 };
 
