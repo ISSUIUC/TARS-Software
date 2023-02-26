@@ -60,13 +60,13 @@ static const float landing_altimeter_threshold = .5;
 static const float refresh_timer = 500;
 
 // launch site altitude as used in modular fsm
-static const float launch_site_altitude = -70;
+static const float launch_site_altitude = -60;
 
 // start angle
 static const float ang_start = 0;
 
 // launch site error
-static const float alt_error = 5;
+static const float alt_error = 20;
 
 // idle acceleration error
 static const float acc_error = 0.5;
