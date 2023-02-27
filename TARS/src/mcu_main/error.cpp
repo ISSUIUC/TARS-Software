@@ -16,10 +16,10 @@ void handleError(ErrorCode code) {
             Serial.println("Could not initialize KX134. Stalling Program");
             digitalWrite(LED_BLUE, HIGH);
             while (true) { }
-        case CANNOT_CONNECT_ZOEM8Q0:
+        case CANNOT_CONNECT_GPS:
             Serial.println("Failed to communicate with ZOEM8Q0 gps. Stalling Program");
             while (true) { }
-        case CANNOT_CONECT_LSM9DS1:
+        case CANNOT_CONNECT_LSM9DS1:
             Serial.println("Failed to communicate with LSM9DS1 gps. Stalling Program");
             digitalWrite(LED_ORANGE, HIGH);
             while (true) { }

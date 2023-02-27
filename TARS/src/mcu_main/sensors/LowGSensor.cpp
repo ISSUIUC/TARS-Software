@@ -3,10 +3,12 @@
 #include "common/packet.h"
 #include "mcu_main/dataLog.h"
 #include "mcu_main/pins.h"
+#include "mcu_main/debug.h"
 
 LowGSensor lowG;
 
 void LowGSensor::update() {
+#ifdef ENABLE_LOW_G
      chSysLock();
      chMtxLock(&mutex);
 
@@ -26,6 +28,7 @@ void LowGSensor::update() {
      chSysUnlock();
 
      dataLogger.pushLowGFifo((LowGData){ax, ay, az, gx, gy, gz, timestamp});
+#endif
 }
 
 Acceleration LowGSensor::getAcceleration() { return Acceleration{ax, ay, az}; }
@@ -34,11 +37,17 @@ Gyroscope LowGSensor::getGyroscope() { return Gyroscope{gx, gy, gz}; }
 //Magnetometer LowGSensor::getMagnetometer() { return Magnetometer{mx, my, mz}; }
 
 ErrorCode LowGSensor::init() {
+#ifdef ENABLE_LOW_G
     // note, we need to send this our CS pins (defined above)
     if (!LSM.begin()) {
-        return ErrorCode::CANNOT_CONECT_LSM9DS1;
+        return ErrorCode::CANNOT_CONNECT_LSM9DS1;
     }
+#endif
     return ErrorCode::NO_ERROR;
 }
 
+#ifdef ENABLE_LOW_G
 LowGSensor::LowGSensor() : LSM(SPI_MODE, LSM6DSLTR) { }
+#else
+LowGSensor::LowGSensor() = default;
+#endif

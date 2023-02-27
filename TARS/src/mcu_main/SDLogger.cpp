@@ -2,6 +2,7 @@
 
 #include "FS.h"
 #include "mcu_main/pins.h"
+#include "mcu_main/debug.h"
 
 SDLogger sd_logger;  // NOLINT(cppcoreguidelines-interfaces-global-init)
 
@@ -65,6 +66,7 @@ char* sdFileNamer(char* fileName, char* fileExtensionParam) {
 }
 
 ErrorCode SDLogger::init() {
+#ifdef ENABLE_SD
     queue.attach(dataLogger);
 
     if (SD.begin(BUILTIN_SDCARD)) {
@@ -82,18 +84,19 @@ ErrorCode SDLogger::init() {
     } else {
         return ErrorCode::SD_BEGIN_FAILED;
     }
+#endif
     return ErrorCode::NO_ERROR;
 }
 
 void SDLogger::update() {
+#ifdef ENABLE_SD
     sensorDataStruct_t current_data = queue.next();
-    Serial.print("Has Data?");
-    Serial.println(current_data.hasData());
     if (!current_data.hasData()) {
         return;
     }
 
     logData(&current_data);
+#endif
 }
 
 template <typename T>

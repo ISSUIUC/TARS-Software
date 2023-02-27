@@ -83,7 +83,7 @@ void OrientationSensor::update() {
 #endif
 }
 
-void OrientationSensor::quaternionToEuler(float qr, float qi, float qj, float qk, bool degrees = false) {
+void OrientationSensor::quaternionToEuler(float qr, float qi, float qj, float qk, bool degrees) {
     float sqr = sq(qr);
     float sqi = sq(qi);
     float sqj = sq(qj);
@@ -94,11 +94,11 @@ void OrientationSensor::quaternionToEuler(float qr, float qi, float qj, float qk
     _orientationEuler.roll = atan2(2.0 * (qj * qk + qi * qr), (-sqi - sqj + sqk + sqr));
 }
 
-void OrientationSensor::quaternionToEulerRV(sh2_RotationVectorWAcc_t* rotational_vector, bool degrees = false) {
+void OrientationSensor::quaternionToEulerRV(sh2_RotationVectorWAcc_t* rotational_vector, bool degrees) {
     quaternionToEuler(rotational_vector->real, rotational_vector->i, rotational_vector->j, rotational_vector->k, degrees);
 }
 
-void OrientationSensor::quaternionToEulerGI(sh2_GyroIntegratedRV_t* rotational_vector, bool degrees = false) {
+void OrientationSensor::quaternionToEulerGI(sh2_GyroIntegratedRV_t* rotational_vector, bool degrees) {
     quaternionToEuler(rotational_vector->real, rotational_vector->i, rotational_vector->j, rotational_vector->k, degrees);
 }
 

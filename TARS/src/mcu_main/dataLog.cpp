@@ -97,6 +97,16 @@ void DataLogBuffer::pushOrientationFifo(OrientationData const& orientation_data)
     UPDATE_QUEUE(orientationQueue, orientation_data);
 }
 
+void DataLogBuffer::pushGasFifo(const GasData& gas_data) {
+    gasFifo.push(gas_data);
+    UPDATE_QUEUE(gasQueue, gas_data);
+}
+
+void DataLogBuffer::pushMagnetometerFifo(const MagnetometerData& magnetometer_data) {
+    magnetometerFifo.push(magnetometer_data);
+    UPDATE_QUEUE(magnetometerQueue, magnetometer_data);
+}
+
 #undef UPDATE_QUEUE
 
 void DataLogQueue::attach(DataLogBuffer& buffer) {

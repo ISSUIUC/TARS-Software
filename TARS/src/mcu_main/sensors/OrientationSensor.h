@@ -4,11 +4,11 @@
 #include <Arduino.h>
 #include <Wire.h>
 
+#include "mcu_main/debug.h"
 #include "Adafruit_BNO08x.h"
 #include "mcu_main/pins.h"
 #include "mcu_main/dataLog.h"
 #include "common/packet.h"
-
 
 
 class OrientationSensor {
@@ -16,7 +16,7 @@ class OrientationSensor {
     MUTEX_DECL(mutex);
     
     OrientationSensor();
-    OrientationSensor(Adafruit_BNO08x const& imu);
+    explicit OrientationSensor(Adafruit_BNO08x const& imu);
 
     void update();
     void init();

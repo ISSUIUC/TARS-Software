@@ -4,10 +4,11 @@
 #include "MS5611.h"
 #include "mcu_main/pins.h"
 #include "mcu_main/error.h"
+#include "mcu_main/debug.h"
 
 struct BarometerSensor {
    public:
-    BarometerSensor() = default;
+    BarometerSensor();
 
     MUTEX_DECL(mutex);
 
@@ -18,8 +19,9 @@ struct BarometerSensor {
     float getAltitude() const;
 
    private:
-    // We need to store the data of the sensor somewhere. Inside the wrapper class is the best way.
-    MS5611 MS{MS5611_CS};
+#ifdef ENABLE_BAROMETER
+    MS5611 MS;
+#endif
     float pressure = 0.0;
     float temperature = 0.0;
     float altitude = 0.0;

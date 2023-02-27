@@ -344,7 +344,7 @@ void setup() {
 
     handleError(barometer.init());
     handleError(highG.init());
-    gas.init();
+    handleError(gas.init());
     handleError(gps.init());
     handleError(highG.init());
     handleError(lowG.init());

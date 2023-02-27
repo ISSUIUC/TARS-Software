@@ -2,6 +2,28 @@
 
 #include "ChRt.h"
 
+struct Acceleration {
+    float ax, ay, az;
+};
+
+struct Gyroscope {
+    float gx;
+    float gy;
+    float gz;
+};
+
+struct Magnetometer {
+    float mx;
+    float my;
+    float mz;
+};
+
+struct euler_t {
+    float yaw;
+    float pitch;
+    float roll;
+};
+
 /**
  * @brief Labels for each FSM state
  */
@@ -132,10 +154,20 @@ struct KalmanData {
 };
 
 struct OrientationData {
-    float yaw;
-    float pitch;
-    float roll;
+    float yaw = 0.0;
+    float pitch = 0.0;
+    float roll = 0.0;
     systime_t timeStamp_orientation = 0;
+};
+
+struct GasData {
+    float temp = 0.0;
+    systime_t timestamp = 0;
+};
+
+struct MagnetometerData {
+    Magnetometer magnetometer{};
+    systime_t timestamp = 0;
 };
 
 /**
@@ -145,65 +177,51 @@ struct OrientationData {
  */
 struct sensorDataStruct_t {
     // data for lowGimu
-    bool has_lowG_data;
-    LowGData lowG_data;
+    bool has_lowG_data = false;
+    LowGData lowG_data{};
 
     // data for highGimu accel data (hg_x, hg_y, hg_z)
-    bool has_highG_data;
-    HighGData highG_data;
+    bool has_highG_data = false;
+    HighGData highG_data{};
 
     // GPS DATA
-    bool has_gps_data;
-    GpsData gps_data;
+    bool has_gps_data = false;
+    GpsData gps_data{};
 
     // Barometer data (temp and pres)
-    bool has_barometer_data;
-    BarometerData barometer_data;
+    bool has_barometer_data = false;
+    BarometerData barometer_data{};
 
     // State variables
-    bool has_kalman_data;
-    KalmanData kalman_data;
+    bool has_kalman_data = false;
+    KalmanData kalman_data{};
 
     // Rocket State
-    bool has_rocketState_data;
-    rocketStateData<4> rocketState_data;
+    bool has_rocketState_data = false;
+    rocketStateData<4> rocketState_data{};
 
     // Flap state
-    bool has_flap_data;
-    FlapData flap_data;
+    bool has_flap_data = false;
+    FlapData flap_data{};
 
     // Voltage state
-    bool has_voltage_data;
-    VoltageData voltage_data;
+    bool has_voltage_data = false;
+    VoltageData voltage_data{};
 
-    bool has_orientation_data;
-    OrientationData orientation_data;
+    bool has_orientation_data = false;
+    OrientationData orientation_data{};
+
+    bool has_magnetometer_data = false;
+    MagnetometerData magnetometer_data{};
+
+    bool has_gas_data = false;
+    GasData gas_data{};
 
     bool hasData() const {
         return has_gps_data || has_highG_data || has_lowG_data || has_rocketState_data || has_kalman_data ||
-               has_barometer_data || has_flap_data || has_voltage_data || has_orientation_data;
+               has_barometer_data || has_flap_data || has_voltage_data || has_orientation_data ||
+               has_magnetometer_data || has_gas_data;
     }
 };
 
-struct Acceleration {
-    float ax, ay, az;
-};
-
-struct Gyroscope {
-    float gx;
-    float gy;
-    float gz;
-};
-
-struct Magnetometer {
-    float mx;
-    float my;
-    float mz;
-};
-
-struct euler_t {
-    float yaw;
-    float pitch;
-    float roll;
-};
 

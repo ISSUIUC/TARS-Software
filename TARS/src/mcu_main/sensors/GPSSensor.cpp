@@ -2,16 +2,17 @@
 
 #include "mcu_main/dataLog.h"
 #include "mcu_main/pins.h"
+#include "mcu_main/debug.h"
 
 GPSSensor gps;
 
 ErrorCode GPSSensor::init() {
-//    SPI1.begin();  // TODO should this line be moved?
+#ifdef ENABLE_GPS
     digitalWrite(LED_RED, HIGH);
     digitalWrite(LED_ORANGE, HIGH);
 
     if (!GNSS.begin(Wire)) {
-     return ErrorCode::CANNOT_CONNECT_ZOEM8Q0;
+     return ErrorCode::CANNOT_CONNECT_GPS;
     }
 
     digitalWrite(LED_RED, LOW);
@@ -22,10 +23,12 @@ ErrorCode GPSSensor::init() {
     GNSS.saveConfigSelective(VAL_CFG_SUBSEC_IOPORT);  // Save (only) the communications port settings
     // to flash and BBR
     GNSS.setNavigationFrequency(5);  // set sampling rate to 5hz
+#endif
     return ErrorCode::NO_ERROR;
 }
 
 void GPSSensor::update() {
+#ifdef ENABLE_GPS
     chMtxLock(&mutex);
     bool succeed = GNSS.getPVT(20);
     if (!succeed) {
@@ -42,6 +45,7 @@ void GPSSensor::update() {
 
     dataLogger.pushGpsFifo((GpsData){latitude, longitude, altitude, SIV_count, fix_type, pos_lock, timeStamp});
     chMtxUnlock(&mutex);
+#endif
 }
 
 float GPSSensor::getLatitude() const { return latitude; }
