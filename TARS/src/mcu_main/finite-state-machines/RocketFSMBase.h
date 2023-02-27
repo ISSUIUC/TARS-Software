@@ -10,7 +10,7 @@ class RocketFSMBase {
     FSM_State getFSMState() const { return rocket_state_; }
 
    protected:
-    FSM_State rocket_state_ = FSM_State::STATE_IDLE;
+    FSM_State rocket_state_ = FSM_State::STATE_INIT;
 
    public:
     template <typename T, size_t count>

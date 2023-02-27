@@ -15,6 +15,8 @@ class ModularFSM : public RocketFSMBase {
         //we want a default very high number in case we never reach our apogee
         float apogee_altitude_ = 15000.0;
 
+        float launch_site_altitude_ = 0;
+
         //helps determine which checks to run
         FSM_State last_state_ = FSM_State::STATE_IDLE;
 

@@ -27,8 +27,8 @@ bool ModularFSM::idleStateCheck(){
     // vel subject to change pending derivative calculations
     float vel = getAltitudeAverage(0, 3) - getAltitudeAverage(3, 3);
 
-    bool altitude_in_range = (launch_site_altitude - alt_error) <= barometer.getAltitude() && barometer.getAltitude() <= (launch_site_altitude + alt_error);
-    bool acc_in_range = (1 - acc_error) <= highG.getAccel().az && highG.getAccel().az <= (1 + acc_error);
+    bool altitude_in_range = (launch_site_altitude_ - alt_error) <= barometer.getAltitude() && barometer.getAltitude() <= (launch_site_altitude_ + alt_error);
+    bool acc_in_range = (0 - acc_error) <= highG.getAccel().az && highG.getAccel().az <= (0 + acc_error);
     bool ang_in_range_pitch = (ang_start - ang_error) <= orientation.getEuler().pitch && orientation.getEuler().pitch <= (ang_start + ang_error);
     bool ang_in_range_yaw = (ang_start - ang_error) <= orientation.getEuler().yaw && orientation.getEuler().yaw <= (ang_start + ang_error);
     bool vel_in_range = -vel_error <= vel && vel <= vel_error;
@@ -58,7 +58,7 @@ bool ModularFSM::boostStateCheck(){
     float vel = getAltitudeAverage(0, 3) - getAltitudeAverage(3, 3);
 
 
-    bool altitude_in_range = barometer.getAltitude() > launch_site_altitude + alt_error;
+    bool altitude_in_range = barometer.getAltitude() > launch_site_altitude_ + alt_error;
     bool acc_in_range = getAccelerationAverage(0,6) > boost_acc_thresh;
     bool ang_in_range_pitch = -boost_ang_thresh <= orientation.getEuler().pitch && orientation.getEuler().pitch <= boost_ang_thresh;
     bool ang_in_range_yaw = -boost_ang_thresh <= orientation.getEuler().yaw && orientation.getEuler().yaw <= boost_ang_thresh;
@@ -87,7 +87,7 @@ bool ModularFSM::coastPreGNCEventCheck(){
 bool ModularFSM::coastPreGNCStateCheck(){
     float vel = getAltitudeAverage(0, 3) - getAltitudeAverage(3, 3);
 
-    bool altitude_in_range = barometer.getAltitude() > launch_site_altitude + alt_error;
+    bool altitude_in_range = barometer.getAltitude() > launch_site_altitude_ + alt_error;
     bool acc_in_range = -4 < getAccelerationAverage(0, 6) && getAccelerationAverage(0, 6) < acc_error;
     bool ang_in_range_pitch = -boost_ang_thresh <= orientation.getEuler().pitch && orientation.getEuler().pitch <= boost_ang_thresh;
     bool ang_in_range_yaw = -boost_ang_thresh <= orientation.getEuler().yaw && orientation.getEuler().yaw <= -boost_ang_thresh;
@@ -118,7 +118,7 @@ bool ModularFSM::coastGNCEventCheck(){
 bool ModularFSM::coastGNCStateCheck(){
     float vel = getAltitudeAverage(0, 3) - getAltitudeAverage(3, 3);
 
-    bool altitude_in_range = barometer.getAltitude() > launch_site_altitude + alt_error;
+    bool altitude_in_range = barometer.getAltitude() > launch_site_altitude_ + alt_error;
     bool acc_in_range = -4 < getAccelerationAverage(0, 6) && getAccelerationAverage(0, 6) < acc_error;
     bool ang_in_range_pitch = -coast_gnc_thresh <= orientation.getEuler().pitch && orientation.getEuler().pitch <= coast_gnc_thresh;
     bool ang_in_range_yaw = -coast_gnc_thresh <= orientation.getEuler().yaw && orientation.getEuler().yaw <= coast_gnc_thresh;
@@ -150,7 +150,7 @@ bool ModularFSM::apogeeStateCheck(){
     float vel = getAltitudeAverage(0, 3) - getAltitudeAverage(3, 3);
 
 
-    bool altitude_in_range = barometer.getAltitude() > launch_site_altitude + alt_error;
+    bool altitude_in_range = barometer.getAltitude() > launch_site_altitude_ + alt_error;
     bool acc_in_range = -acc_error < getAccelerationAverage(0,6) && getAccelerationAverage(0,6) < acc_error;
     bool vel_in_range = -vel_error < vel && vel < vel_error;
 
@@ -178,7 +178,7 @@ bool ModularFSM::separationStateCheck(){
     float vel = getAltitudeAverage(0, 3) - getAltitudeAverage(3, 3);
 
 
-    bool altitude_in_range = barometer.getAltitude() > launch_site_altitude + alt_error;
+    bool altitude_in_range = barometer.getAltitude() > launch_site_altitude_ + alt_error;
     bool acc_in_range = separation_acc_thresh < getAccelerationAverage(0,6);
     bool vel_in_range = -vel_error < vel && vel < vel_error;
 
@@ -205,7 +205,7 @@ bool ModularFSM::drogueEventCheck(){
 bool ModularFSM::drogueStateCheck(){
     float velocity = getAltitudeAverage(0, 3) - getAltitudeAverage(3, 3);
 
-    bool altitude_in_range = (launch_site_altitude < barometer.getAltitude()) && (barometer.getAltitude() < apogee_altitude_);
+    bool altitude_in_range = (launch_site_altitude_ < barometer.getAltitude()) && (barometer.getAltitude() < apogee_altitude_);
     bool acceleration_in_range = (drogue_acc_bottom < getAccelerationAverage(0,6)) && (getAccelerationAverage(0,6) < drogue_acc_top);
     bool velocity_in_range = velocity < vel_error;
     bool ang_in_range_pitch = drogue_ang_thresh_bottom <= orientation.getEuler().pitch && orientation.getEuler().pitch <= drogue_ang_thresh_top;
@@ -235,7 +235,7 @@ bool ModularFSM::mainEventCheck(){
 bool ModularFSM::mainStateCheck(){
     float velocity = getAltitudeAverage(0, 3) - getAltitudeAverage(3, 3);
 
-    bool altitude_in_range = (launch_site_altitude < barometer.getAltitude()) && (barometer.getAltitude() < apogee_altitude_);
+    bool altitude_in_range = (launch_site_altitude_ < barometer.getAltitude()) && (barometer.getAltitude() < apogee_altitude_);
     bool acceleration_in_range = (getAccelerationAverage(0,6) < main_acc_top);
     bool velocity_in_range = velocity < vel_error;
     bool ang_in_range_pitch = main_ang_thresh_bottom <= orientation.getEuler().pitch && orientation.getEuler().pitch <= main_ang_thresh_top;
@@ -255,8 +255,8 @@ bool ModularFSM::mainStateCheck(){
 bool ModularFSM::landedStateCheck(){
     float velocity = getAltitudeAverage(0, 3) - getAltitudeAverage(3, 3);
 
-    bool altitude_in_range = (launch_site_altitude - alt_error < barometer.getAltitude()) && (barometer.getAltitude() < alt_error + launch_site_altitude);
-    bool acceleration_in_range = (1 - acc_error < getAccelerationAverage(0,6)) && (getAccelerationAverage(0,6) < 1 + acc_error);
+    bool altitude_in_range = (launch_site_altitude_ - alt_error < barometer.getAltitude()) && (barometer.getAltitude() < alt_error + launch_site_altitude_);
+    bool acceleration_in_range = (0 - acc_error < getAccelerationAverage(0,6)) && (getAccelerationAverage(0,6) < 0 + acc_error);
     bool velocity_in_range = (-vel_error < velocity) && (velocity < vel_error);
     
     if (altitude_in_range && acceleration_in_range && velocity_in_range) {
@@ -291,9 +291,19 @@ void ModularFSM::tickFSM(){
     Serial.print("velocity: ");
     Serial.println(getAltitudeAverage(0, 3) - getAltitudeAverage(3, 3));
 
+    Serial.print("launch site altitude: ");
+    Serial.println(launch_site_altitude_);
+
     switch(rocket_state_){
         //include a case for init?
         // cheeky bloke init
+
+        case FSM_State::STATE_INIT:
+            if(barometer.getAltitude() != 0.00){
+                launch_site_altitude_ = barometer.getAltitude();
+                rocket_state_ = FSM_State::STATE_IDLE;
+            }
+            break;
 
         case FSM_State::STATE_IDLE:
 

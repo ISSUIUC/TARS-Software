@@ -59,9 +59,6 @@ static const float landing_altimeter_threshold = .5;
 // how long we wait to let the buffers cycle
 static const float refresh_timer = 500;
 
-// launch site altitude as used in modular fsm
-static const float launch_site_altitude = -60;
-
 // start angle
 static const float ang_start = 0;
 
