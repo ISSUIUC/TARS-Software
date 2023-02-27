@@ -8,6 +8,7 @@
 #include "Adafruit_BNO08x.h"
 #include "mcu_main/pins.h"
 #include "mcu_main/dataLog.h"
+#include "mcu_main/error.h"
 #include "common/packet.h"
 
 
@@ -19,7 +20,7 @@ class OrientationSensor {
     explicit OrientationSensor(Adafruit_BNO08x const& imu);
 
     void update();
-    void init();
+    ErrorCode init();
 
     void setIMU(Adafruit_BNO08x const& imu);
     Acceleration getAccelerations();

@@ -17,6 +17,7 @@
 
 #define BNO086_CS 37
 #define BNO086_RESET 40
+#define BNO086_INT 38
 
 #define BME688_CS 17
 

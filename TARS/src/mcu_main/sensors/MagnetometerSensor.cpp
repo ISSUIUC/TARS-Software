@@ -16,7 +16,9 @@ ErrorCode MagnetometerSensor::init() {
 }
 
 void MagnetometerSensor::update() {
+    Serial.println("reading...");
     sensor.read();
+    Serial.println("read");
 
     time_stamp = chVTGetSystemTime();
     dataLogger.pushMagnetometerFifo((MagnetometerData) { {sensor.x_gauss, sensor.y_gauss, sensor.z_gauss}, time_stamp });

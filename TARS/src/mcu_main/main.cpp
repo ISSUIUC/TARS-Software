@@ -352,8 +352,9 @@ void setup() {
     handleError(gps.init());
     handleError(highG.init());
     handleError(lowG.init());
-    magnetometer.init();
+    handleError(magnetometer.init());
     handleError(highG.init());
+    handleError(orientation.init());
 
     handleError(sd_logger.init());
     handleError(tlm.init());

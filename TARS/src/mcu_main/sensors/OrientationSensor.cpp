@@ -26,7 +26,9 @@ void OrientationSensor::setReports(sh2_SensorId_t reportType, long report_interv
 }
 
 #ifdef ENABLE_ORIENTATION
-OrientationSensor::OrientationSensor() : _imu(Adafruit_BNO08x(BNO086_RESET)) { }
+OrientationSensor::OrientationSensor() : _imu(Adafruit_BNO08x(BNO086_RESET)) {
+
+}
 #else
 OrientationSensor::OrientationSensor() { }
 #endif
@@ -114,6 +116,15 @@ Acceleration OrientationSensor::getAccelerations() { return _accelerations; }
 
 euler_t OrientationSensor::getEuler() { return _orientationEuler; }
 
-void OrientationSensor::init() {
+ErrorCode OrientationSensor::init() {
+    if (!_imu.begin_SPI(BNO086_CS, BNO086_INT)) {
+        return ErrorCode::CANNOT_CONNECT_BNO;
+    }
     setReports(reportType, reportIntervalUs);
+    Serial.println("Setting desired reports");
+    if (!_imu.enableReport(reportType, reportIntervalUs)) {
+        Serial.println("Could not enable stabilized remote vector");
+        return ErrorCode::CANNOT_INIT_BNO;
+    }
+    return ErrorCode::NO_ERROR;
 }
