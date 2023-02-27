@@ -342,12 +342,13 @@ void setup() {
                 currentSensor = serialData;
             }
         }
-        delay(25);
+        delay(10);
 
         switch (currentSensor) {
             
             case 'm':
                 // Serial.println("magnetometer");
+                
                 mag.read();
                 // Serial.print("x: ");
                 Serial.print(mag.x_gauss);
@@ -358,23 +359,25 @@ void setup() {
                 break;
 
             case 'l':
-                Serial.println("lowg sensor");
-                Serial.print("az: ");
-                Serial.println(lowG.readFloatAccelZ());
+                Serial.print(lowG.readFloatGyroX());
+                Serial.print(" ");
+                Serial.print(lowG.readFloatGyroY());
+                Serial.print(" ");
+                Serial.println(lowG.readFloatGyroZ());
                 break;
 
             case 'g':
-                Serial.println("Gas sensor (useless): ");
-                Serial.println(bme.readTemperature());
+                Serial.print(bme.readTemperature());
+                Serial.print(" ");
+                Serial.println(bme.readHumidity());
                 break;
 
             case 'b' : {
-                Serial.println("Barometer: ");
                 barometer.read(12);
                 float temp = barometer.getTemperature() * 0.01;
                 float pressure = barometer.getPressure()*0.01;
-                Serial.println(pressure);
-                Serial.print("Temp: ");
+                Serial.print(pressure);
+                Serial.print(" ");
                 Serial.println(temp);
                 // delay(50);
                 break;
@@ -382,11 +385,15 @@ void setup() {
                 
 
             case 'p' : {
-                Serial.println("Case 1");
+                // Serial.println("Case 1");
                  auto data = highG.getAccelData();
-                 Serial.println("Case 2");
+                //  Serial.println("Case 2");
+                 Serial.print(data.xData);
+                 Serial.print(" ");
+                 Serial.print(data.yData);
+                 Serial.print(" ");
                  Serial.println(data.zData);
-                 Serial.println("Case 3");
+                //  Serial.println("Case 3");
                 //  delay(50);
                  break;
             }
