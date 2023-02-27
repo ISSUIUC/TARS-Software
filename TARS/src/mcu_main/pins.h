@@ -16,6 +16,7 @@
 #define LSM6DSLTR 36
 
 #define BNO086_CS 37
+#define BNO086_RESET 40
 
 #define BME688_CS 17
 

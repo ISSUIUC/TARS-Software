@@ -21,7 +21,7 @@ void HighGSensor::update() {
 
 Acceleration HighGSensor::getAccel() { return {ax, ay, az}; }
 
-void HighGSensor::init() {
+ErrorCode HighGSensor::init() {
     if (!KX.beginSPI(KX134_CS)) {
         return ErrorCode::CANNOT_CONNECT_KX134_CS;
     }

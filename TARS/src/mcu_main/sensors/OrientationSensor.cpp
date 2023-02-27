@@ -10,62 +10,62 @@ sh2_SensorId_t reportType = SH2_ARVR_STABILIZED_RV;
 long reportIntervalUs = 5000;
 #endif
 void OrientationSensor::setReports(sh2_SensorId_t reportType, long report_interval) {
-    Serial.println("Setting desired reports");
-    if (!_imu.enableReport(reportType, report_interval)) {
-        Serial.println("Could not enable stabilized remote vector");
-    }
+//    Serial.println("Setting desired reports");
+//    if (!_imu.enableReport(reportType, report_interval)) {
+//        Serial.println("Could not enable stabilized remote vector");
+//    }
 }
 
 OrientationSensor orientation;
 
 OrientationSensor::OrientationSensor() {
-    _imu = Adafruit_BNO08x(BNO086_RESET);
-    setReports(reportType, reportIntervalUs);
+//    _imu = Adafruit_BNO08x(BNO086_RESET);
+//    setReports(reportType, reportIntervalUs);
 }
 
 OrientationSensor::OrientationSensor(Adafruit_BNO08x bno) {
-    _imu = bno;
-    setReports(reportType, reportIntervalUs);
+//    _imu = bno;
+//    setReports(reportType, reportIntervalUs);
 }
 
 void OrientationSensor::setIMU(Adafruit_BNO08x bno) {
-    _imu = bno;
-    setReports(reportType, reportIntervalUs);
+//    _imu = bno;
+//    setReports(reportType, reportIntervalUs);
 }
 
 void OrientationSensor::update() {
-    chSysLock();
-    chMtxLock(&mutex);
-    sh2_SensorValue_t event;
-    if (_imu.getSensorEvent(&event)) {
-        switch (event.sensorId) {
-            case SH2_ARVR_STABILIZED_RV:
-                quaternionToEulerRV(&event.un.arvrStabilizedRV, true);
-            case SH2_GYRO_INTEGRATED_RV:
-                // faster (more noise?)
-                quaternionToEulerGI(&event.un.gyroIntegratedRV, true);
-                break;
-        }
-
-        _accelerations.ax = event.un.accelerometer.x;
-        _accelerations.ay = event.un.accelerometer.y;
-        _accelerations.az = event.un.accelerometer.z;
-
-        _gyro.gx = event.un.gyroscope.x;
-        _gyro.gy = event.un.gyroscope.y;
-        _gyro.gz = event.un.gyroscope.z;
-
-        _magnetometer.mx = event.un.magneticField.x;
-        _magnetometer.my = event.un.magneticField.y;
-        _magnetometer.mz = event.un.magneticField.z;
-
-        _temp = event.un.temperature.value;
-        _pressure = event.un.pressure.value;
-    }
-    time_stamp = chVTGetSystemTime();
-    dataLogger.pushOrientationFifo((OrientationData){_orientationEuler.yaw, _orientationEuler.pitch, _orientationEuler.roll, time_stamp});
-    chMtxUnlock(&mutex);
-    chSysUnlock();
+//    chSysLock();
+//    chMtxLock(&mutex);
+//    sh2_SensorValue_t event;
+//    if (_imu.getSensorEvent(&event)) {
+//        switch (event.sensorId) {
+//            case SH2_ARVR_STABILIZED_RV:
+//                quaternionToEulerRV(&event.un.arvrStabilizedRV, true);
+//            case SH2_GYRO_INTEGRATED_RV:
+//                // faster (more noise?)
+//                quaternionToEulerGI(&event.un.gyroIntegratedRV, true);
+//                break;
+//        }
+//
+//        _accelerations.ax = event.un.accelerometer.x;
+//        _accelerations.ay = event.un.accelerometer.y;
+//        _accelerations.az = event.un.accelerometer.z;
+//
+//        _gyro.gx = event.un.gyroscope.x;
+//        _gyro.gy = event.un.gyroscope.y;
+//        _gyro.gz = event.un.gyroscope.z;
+//
+//        _magnetometer.mx = event.un.magneticField.x;
+//        _magnetometer.my = event.un.magneticField.y;
+//        _magnetometer.mz = event.un.magneticField.z;
+//
+//        _temp = event.un.temperature.value;
+//        _pressure = event.un.pressure.value;
+//    }
+//    time_stamp = chVTGetSystemTime();
+//    dataLogger.pushOrientationFifo((OrientationData){_orientationEuler.yaw, _orientationEuler.pitch, _orientationEuler.roll, time_stamp});
+//    chMtxUnlock(&mutex);
+//    chSysUnlock();
 }
 
 void OrientationSensor::quaternionToEuler(float qr, float qi, float qj, float qk,

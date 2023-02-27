@@ -2,7 +2,7 @@
 
 #include "mcu_main/pins.h"
 
-GasSensor gasSensor;
+GasSensor gas;
 
 GasSensor::GasSensor() : bme(BME688_CS) { }
 
