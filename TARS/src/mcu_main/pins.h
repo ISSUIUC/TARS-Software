@@ -23,6 +23,7 @@
 
 #define LIS3MDL_CS 10
 
+
 #define RFM96_CS 32
 #define RFM96_INT 33
 #define RFM96_RST 0

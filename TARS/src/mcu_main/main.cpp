@@ -42,6 +42,8 @@
 #include "mcu_main/telemetry.h"
 #include "mcu_main/error.h"
 #include "mcu_main/debug.h"
+#include "mcu_main/buzzer/buzzer_controller.h"
+#include "mcu_main/buzzer/boop.h"
 
 
 /******************************************************************************/
@@ -358,6 +360,12 @@ void setup() {
 
     handleError(sd_logger.init());
     handleError(tlm.init());
+
+    BuzzerController controller(15, melody);
+    controller.playSequence(0);
+    while (true) {
+        controller.tick();
+    }
 
     Serial.println("chibios begin");
     chBegin(chSetup);
