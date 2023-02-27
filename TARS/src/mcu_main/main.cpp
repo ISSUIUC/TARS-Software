@@ -326,62 +326,77 @@ void setup() {
     highG.initialize(DEFAULT_SETTINGS);
     highG.setRange(3);
 
-    for (int i = 0; i < 100; i++) {
-        auto data = highG.getAccelData();
-        Serial.println(data.zData);
-        delay(50);
-    }
+    // for (int i = 0; i < 100; i++) {
+    //     auto data = highG.getAccelData();
+    //     Serial.println(data.zData);
+    //     delay(50);
+    // }
         
 
 
-    // while (1) {
-    //     if (Serial.available()) {
-    //         char serialData = Serial.read();
-    //         if (serialData != 10) {
-    //             // ignore new line data (10)
-    //             currentSensor = serialData;
-    //         }
-    //     }
+    while (1) {
+        if (Serial.available()) {
+            char serialData = Serial.read();
+            if (serialData != 10) {
+                // ignore new line data (10)
+                currentSensor = serialData;
+            }
+        }
+        delay(25);
 
-    //     switch (currentSensor) {
-    //         case 'm':
-    //             Serial.println("magnetometer");
-    //             mag.read();
-    //             Serial.print("x: ");
-    //             Serial.println(mag.x);
-    //             break;
+        switch (currentSensor) {
+            
+            case 'm':
+                // Serial.println("magnetometer");
+                mag.read();
+                // Serial.print("x: ");
+                Serial.print(mag.x_gauss);
+                Serial.print(" ");
+                Serial.print(mag.y_gauss);
+                Serial.print(" ");
+                Serial.println(mag.z_gauss);
+                break;
 
-    //         case 'l':
-    //             Serial.println("lowg sensor");
-    //             Serial.print("az: ");
-    //             Serial.println(lowG.readFloatAccelZ());
-    //             break;
+            case 'l':
+                Serial.println("lowg sensor");
+                Serial.print("az: ");
+                Serial.println(lowG.readFloatAccelZ());
+                break;
 
-    //         case 'g':
-    //             Serial.println("Gas sensor (useless): ");
-    //             Serial.println(bme.readTemperature());
-    //             break;
+            case 'g':
+                Serial.println("Gas sensor (useless): ");
+                Serial.println(bme.readTemperature());
+                break;
 
-    //         case 'b':
-    //             Serial.println("Barometer: ");
-    //             barometer.read(12);
-    //             float temp = barometer.getTemperature() * 0.01;
-    //             float pressure = barometer.getPressure()*0.01;
-    //             Serial.println(pressure);
-    //             break;
+            case 'b' : {
+                Serial.println("Barometer: ");
+                barometer.read(12);
+                float temp = barometer.getTemperature() * 0.01;
+                float pressure = barometer.getPressure()*0.01;
+                Serial.println(pressure);
+                Serial.print("Temp: ");
+                Serial.println(temp);
+                // delay(50);
+                break;
+            }
+                
 
-    //         case 'p':
-    //              Serial.println("Case 1");
-    //              auto data = highG.getAccelData();
-    //              Serial.println("Case 2");
-    //              Serial.println(data.zData);
-    //              Serial.println("Case 3");
-    //              break;
+            case 'p' : {
+                Serial.println("Case 1");
+                 auto data = highG.getAccelData();
+                 Serial.println("Case 2");
+                 Serial.println(data.zData);
+                 Serial.println("Case 3");
+                //  delay(50);
+                 break;
+            }
+                 
 
-    //         default:
-    //             Serial.println("Default");
-    //     }
-    // }
+            default:
+                Serial.println("Default");
+                // delay(50);
+        }
+    }
 
     // while (1) {
     //     barometer.read(12);
