@@ -94,50 +94,50 @@ static THD_FUNCTION(rocket_FSM_THD, arg) {
     }
 }
 
-/******************************************************************************/
-/* LOW G IMU THREAD                                                           */
+///******************************************************************************/
+///* LOW G IMU THREAD                                                           */
+//
+//static THD_FUNCTION(lowgIMU_THD, arg) {
+//    while (true) {
+//#ifdef THREAD_DEBUG
+//        Serial.println("### Low G IMU thread entrance");
+//#endif
+//
+//        lowG.update();
+//
+//        chThdSleepMilliseconds(6);
+//    }
+//}
 
-static THD_FUNCTION(lowgIMU_THD, arg) {
-    while (true) {
-#ifdef THREAD_DEBUG
-        Serial.println("### Low G IMU thread entrance");
-#endif
-
-        lowG.update();
-
-        chThdSleepMilliseconds(6);
-    }
-}
-
-/******************************************************************************/
-/* ORIENTATION THREAD                                                           */
-
-static THD_FUNCTION(orientation_THD, arg) {
-    while (true) {
-#ifdef THREAD_DEBUG
-        Serial.println("### ORIENTATION thread entrance");
-#endif
-
-        orientation.update();
-
-        chThdSleepMilliseconds(6);
-    }
-}
+///******************************************************************************/
+///* ORIENTATION THREAD                                                           */
+//
+//static THD_FUNCTION(orientation_THD, arg) {
+//    while (true) {
+//#ifdef THREAD_DEBUG
+//        Serial.println("### ORIENTATION thread entrance");
+//#endif
+//
+//        orientation.update();
+//
+//        chThdSleepMilliseconds(6);
+//    }
+//}
 
 /******************************************************************************/
 /* GAS SENSOR THREAD                                                           */
 
-static THD_FUNCTION(gas_THD, arg) {
-    while (true) {
-#ifdef THREAD_DEBUG
-        Serial.println("### Gas thread entrance");
-#endif
-
-        gas.refresh();
-
-        chThdSleepMilliseconds(6);
-    }
-}
+//static THD_FUNCTION(gas_THD, arg) {
+//    while (true) {
+//#ifdef THREAD_DEBUG
+//        Serial.println("### Gas thread entrance");
+//#endif
+//
+//        gas.refresh();
+//
+//        chThdSleepMilliseconds(6);
+//    }
+//}
 
 ///******************************************************************************/
 ///* MAGNETOMETER THREAD                                                           */
@@ -193,6 +193,9 @@ static THD_FUNCTION(sensor_fast_THD, arg) {
 #endif
         barometer.refresh();
         magnetometer.update();
+        gas.refresh();
+        orientation.update();
+        lowG.update();
 
         chThdSleepMilliseconds(6);
     }
@@ -294,13 +297,13 @@ static THD_FUNCTION(buzzer_THD, arg) {
 
 #define THREAD_WA 4096
 
-static THD_WORKING_AREA(barometer_WA, THREAD_WA);
+//static THD_WORKING_AREA(barometer_WA, THREAD_WA);
 static THD_WORKING_AREA(gps_WA, THREAD_WA);
 static THD_WORKING_AREA(rocket_FSM_WA, THREAD_WA);
-static THD_WORKING_AREA(lowgIMU_WA, THREAD_WA);
-static THD_WORKING_AREA(orientation_WA, THREAD_WA);
-static THD_WORKING_AREA(gas_WA, THREAD_WA);
-static THD_WORKING_AREA(magnetometer_WA, THREAD_WA);
+//static THD_WORKING_AREA(lowgIMU_WA, THREAD_WA);
+//static THD_WORKING_AREA(orientation_WA, THREAD_WA);
+//static THD_WORKING_AREA(gas_WA, THREAD_WA);
+//static THD_WORKING_AREA(magnetometer_WA, THREAD_WA);
 static THD_WORKING_AREA(highgIMU_WA, THREAD_WA);
 static THD_WORKING_AREA(servo_WA, THREAD_WA);
 static THD_WORKING_AREA(dataLogger_WA, THREAD_WA);
@@ -309,6 +312,7 @@ static THD_WORKING_AREA(telemetry_sending_WA, THREAD_WA);
 static THD_WORKING_AREA(telemetry_buffering_WA, THREAD_WA);
 static THD_WORKING_AREA(kalman_WA, THREAD_WA);
 static THD_WORKING_AREA(buzzer_WA, THREAD_WA);
+static THD_WORKING_AREA(sensor_fast_WA, THREAD_WA);
 
 #define START_THREAD(NAME) chThdCreateStatic(NAME##_WA, sizeof(NAME##_WA), NORMALPRIO + 1, NAME##_THD, nullptr)
 /**
@@ -319,11 +323,12 @@ void chSetup() {
     START_THREAD(telemetry_buffering);
     START_THREAD(rocket_FSM);
     START_THREAD(gps);
-    START_THREAD(lowgIMU);
-    START_THREAD(gas);
-    START_THREAD(magnetometer);
-    START_THREAD(orientation);
-    START_THREAD(barometer);
+//    START_THREAD(lowgIMU);
+//    START_THREAD(gas);
+//    START_THREAD(magnetometer);
+//    START_THREAD(orientation);
+//    START_THREAD(barometer);
+    START_THREAD(sensor_fast);
     START_THREAD(highgIMU);
     START_THREAD(servo);
     START_THREAD(dataLogger);
