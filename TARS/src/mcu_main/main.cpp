@@ -314,9 +314,14 @@ void setup() {
     Serial.println("Starting SPI...");
 
     SPI.begin();
-    SPI.setMOSI(11);
-    SPI.setMISO(12);
-    SPI.setSCK(13);
+    SPI.setMOSI(SPI_MOSI);
+    SPI.setMISO(SPI_MISO);
+    SPI.setSCK(SPI_SCK);
+
+    SPI1.begin();
+    SPI1.setMOSI(B2B_SPI_MOSI);
+    SPI1.setMISO(B2B_SPI_MISO);
+    SPI1.setSCK(B2B_SPI_SCK);
 
     pinMode(LED_BLUE, OUTPUT);
     pinMode(LED_RED, OUTPUT);

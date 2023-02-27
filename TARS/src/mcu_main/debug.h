@@ -10,4 +10,4 @@
 #define ENABLE_BAROMETER
 
 #define ENABLE_SD
-#define ENABLE_TELEMETRY
+//#define ENABLE_TELEMETRY

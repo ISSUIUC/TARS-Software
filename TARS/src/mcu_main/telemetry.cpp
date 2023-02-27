@@ -15,6 +15,8 @@
 
 #include "mcu_main/telemetry.h"
 
+#include "RHHardwareSPI1.h"
+
 #include <limits>
 
 #include "mcu_main/debug.h"
@@ -43,7 +45,7 @@ ErrorCode Telemetry::init() {
 #ifdef ENABLE_TELEMETRY
     pinMode(RFM96_RST, OUTPUT);
     digitalWrite(RFM96_RST, HIGH);
-    delay(100);
+    delay(10);
 
     // manual reset
 
@@ -52,7 +54,7 @@ ErrorCode Telemetry::init() {
     digitalWrite(RFM96_RST, HIGH);
     delay(10);
 
-    while (!rf95.init()) {
+    if (!rf95.init()) {
         return ErrorCode::RADIO_INIT_FAILED;
     }
     Serial.println("[DEBUG]: Radio Initialized");
@@ -69,13 +71,15 @@ ErrorCode Telemetry::init() {
      * If you are using RFM95/96/97/98 modules which uses the PA_BOOST
      * transmitter pin, then you can set transmitter powers from 5 to 23 dBm:
      */
-    rf95.setTxPower(23, false);
+    rf95.setTxPower(6, false);
+
+    sei();
 #endif
     return ErrorCode::NO_ERROR;
 }
 
 #ifdef ENABLE_TELEMETRY
-Telemetry::Telemetry() : rf95(RFM96_CS, RFM96_INT) {}
+Telemetry::Telemetry() : rf95(RFM96_CS, RFM96_INT, hardware_spi1) { }
 #else
 Telemetry::Telemetry() {}
 #endif
@@ -124,6 +128,8 @@ void Telemetry::handleCommand(const telemetry_command &cmd) {
     }
 }
 
+#define TLM_DEBUG
+
 /**
  * @brief This function transmits data from the struct provided as
  * the parameter (data collected from sensor suite) to the
@@ -138,6 +144,13 @@ void Telemetry::handleCommand(const telemetry_command &cmd) {
  */
 void Telemetry::transmit() {
 #ifdef ENABLE_TELEMETRY
+#ifdef TLM_DEBUG
+    const uint8_t data[4] = {0, 1, 2, 3};
+    rf95.send(data, 4);
+    Serial.println("Sending packet...");
+    rf95.waitPacketSent();
+    Serial.println("Sent packet");
+#else
     static bool blue_state = false;
     digitalWrite(LED_BLUE, blue_state);
     blue_state = !blue_state;
@@ -164,6 +177,7 @@ void Telemetry::transmit() {
 
         handleCommand(received);
     }
+#endif
 #endif
 }
 
@@ -291,6 +305,7 @@ TelemetryPacket Telemetry::makePacket(const sensorDataStruct_t &data_struct) {
 
 void Telemetry::bufferData() {
 #ifdef ENABLE_TELEMETRY
+#ifndef TLM_DEBUG
     sensorDataStruct_t sensor_data = dataLogger.read();
     // Serial.println(dataLogger.count);
     TelemetryDataLite data{};
@@ -312,6 +327,7 @@ void Telemetry::bufferData() {
 
 #ifdef SERIAL_PLOTTING
     serialPrint(sensor_data);
+#endif
 #endif
 #endif
 }

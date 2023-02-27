@@ -22,10 +22,17 @@
 
 #define LIS3MDL_CS 10
 
-
 #define RFM96_CS 32
 #define RFM96_INT 33
 #define RFM96_RST 0
+
+#define SPI_MISO 12
+#define SPI_MOSI 11
+#define SPI_SCK 13
+
+#define B2B_SPI_MISO 1
+#define B2B_SPI_MOSI 26
+#define B2B_SPI_SCK 27
 
 #define MAXM10S_SCL 19
 #define MAXM10S_SDA 18
