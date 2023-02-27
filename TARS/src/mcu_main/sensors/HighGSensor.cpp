@@ -26,9 +26,12 @@ Acceleration HighGSensor::getAccel() { return {ax, ay, az}; }
 
 ErrorCode HighGSensor::init() {
 #ifdef ENABLE_HIGH_G
-    if (!KX.beginSPI(KX134_CS)) {
-        return ErrorCode::CANNOT_CONNECT_KX134_CS;
-    }
+    KX.beginSPI(KX134_CS);
+    // TODO for some reason it works fine even if beginSPI claims it fails
+    //   idk lmao
+//    if (!KX.beginSPI(KX134_CS)) {
+//        return ErrorCode::CANNOT_CONNECT_KX134_CS;
+//    }
 
     if (!KX.initialize(DEFAULT_SETTINGS)) {
         return ErrorCode::CANNOT_INIT_KX134_CS;

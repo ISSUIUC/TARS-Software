@@ -42,6 +42,10 @@ void handleError(ErrorCode code) {
             while (true) {
                 Serial.println("[ERROR]: Default setFrequency Failed");
             }
+        default:
+            while (true) {
+                Serial.println("Unknown error");
+            }
     }
 
 }

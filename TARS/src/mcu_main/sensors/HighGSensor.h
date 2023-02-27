@@ -22,5 +22,5 @@ struct HighGSensor {
    private:
     float ax = 0.0, ay = 0.0, az = 0.0;
     systime_t timestamp = 0;
-    QwiicKX132 KX{};
+    QwiicKX134 KX;
 };

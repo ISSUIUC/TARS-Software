@@ -343,12 +343,12 @@ void setup() {
     Wire.begin();
 
     handleError(barometer.init());
-    handleError(highG.init());
     handleError(gas.init());
     handleError(gps.init());
     handleError(highG.init());
     handleError(lowG.init());
     magnetometer.init();
+    handleError(highG.init());
 
     handleError(sd_logger.init());
     handleError(tlm.init());

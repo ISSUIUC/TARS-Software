@@ -40,6 +40,7 @@ T inv_convert_range(float val, float range) {
 }
 
 ErrorCode Telemetry::init() {
+#ifdef ENABLE_TELEMETRY
     pinMode(50, OUTPUT);
     digitalWrite(50, HIGH);
     delay(100);
@@ -69,10 +70,15 @@ ErrorCode Telemetry::init() {
      * transmitter pin, then you can set transmitter powers from 5 to 23 dBm:
      */
     rf95.setTxPower(23, false);
+#endif
     return ErrorCode::NO_ERROR;
 }
 
+#ifdef ENABLE_TELEMETRY
 Telemetry::Telemetry() : rf95(50, 50) {}
+#else
+Telemetry::Telemetry() {}
+#endif
 
 /**
  * @brief  This function handles commands sent from the ground station
@@ -131,6 +137,7 @@ void Telemetry::handleCommand(const telemetry_command &cmd) {
  * @return void
  */
 void Telemetry::transmit() {
+#ifdef ENABLE_TELEMETRY
     static bool blue_state = false;
     digitalWrite(LED_BLUE, blue_state);
     blue_state = !blue_state;
@@ -157,6 +164,7 @@ void Telemetry::transmit() {
 
         handleCommand(received);
     }
+#endif
 }
 
 void Telemetry::serialPrint(const sensorDataStruct_t &sensor_data) {
@@ -282,6 +290,7 @@ TelemetryPacket Telemetry::makePacket(const sensorDataStruct_t &data_struct) {
 }
 
 void Telemetry::bufferData() {
+#ifdef ENABLE_TELEMETRY
     sensorDataStruct_t sensor_data = dataLogger.read();
     // Serial.println(dataLogger.count);
     TelemetryDataLite data{};
@@ -303,5 +312,6 @@ void Telemetry::bufferData() {
 
 #ifdef SERIAL_PLOTTING
     serialPrint(sensor_data);
+#endif
 #endif
 }
