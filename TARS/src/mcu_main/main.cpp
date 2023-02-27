@@ -42,8 +42,7 @@
 #include "mcu_main/telemetry.h"
 #include "mcu_main/error.h"
 #include "mcu_main/debug.h"
-#include "mcu_main/buzzer/buzzer_controller.h"
-#include "mcu_main/buzzer/boop.h"
+#include "mcu_main/buzzer/buzzer.h"
 
 
 /******************************************************************************/
@@ -140,35 +139,35 @@ static THD_FUNCTION(gas_THD, arg) {
     }
 }
 
-/******************************************************************************/
-/* MAGNETOMETER THREAD                                                           */
+///******************************************************************************/
+///* MAGNETOMETER THREAD                                                           */
+//
+//static THD_FUNCTION(magnetometer_THD, arg) {
+//    while (true) {
+//#ifdef THREAD_DEBUG
+//        Serial.println("### Magnetometer thread entrance");
+//#endif
+//
+//        magnetometer.update();
+//
+//        chThdSleepMilliseconds(6);
+//    }
+//}
 
-static THD_FUNCTION(magnetometer_THD, arg) {
-    while (true) {
-#ifdef THREAD_DEBUG
-        Serial.println("### Magnetometer thread entrance");
-#endif
-
-        magnetometer.update();
-
-        chThdSleepMilliseconds(6);
-    }
-}
-
-/******************************************************************************/
-/* BAROMETER THREAD                                                           */
-
-static THD_FUNCTION(barometer_THD, arg) {
-    while (true) {
-#ifdef THREAD_DEBUG
-        Serial.println("### Barometer thread entrance");
-#endif
-
-        barometer.refresh();
-
-        chThdSleepMilliseconds(6);
-    }
-}
+///******************************************************************************/
+///* BAROMETER THREAD                                                           */
+//
+//static THD_FUNCTION(barometer_THD, arg) {
+//    while (true) {
+//#ifdef THREAD_DEBUG
+//        Serial.println("### Barometer thread entrance");
+//#endif
+//
+//        barometer.refresh();
+//
+//        chThdSleepMilliseconds(6);
+//    }
+//}
 
 /******************************************************************************/
 /* HIGH G IMU THREAD                                                          */
@@ -181,6 +180,21 @@ static THD_FUNCTION(highgIMU_THD, arg) {
         highG.update();
 
         chThdSleepMilliseconds(20);  // highg reads at 50 hz
+    }
+}
+
+/******************************************************************************/
+/* SENSOR FAST THREAD                                                          */
+
+static THD_FUNCTION(sensor_fast_THD, arg) {
+    while (true) {
+#ifdef THREAD_DEBUG
+        Serial.println("### Sensor fast thread entrance");
+#endif
+        barometer.refresh();
+        magnetometer.update();
+
+        chThdSleepMilliseconds(6);
     }
 }
 
@@ -263,20 +277,38 @@ static THD_FUNCTION(dataLogger_THD, arg) {
     }
 }
 
-static THD_WORKING_AREA(barometer_WA, 8192);
-static THD_WORKING_AREA(gps_WA, 8192);
-static THD_WORKING_AREA(rocket_FSM_WA, 8192);
-static THD_WORKING_AREA(lowgIMU_WA, 8192);
-static THD_WORKING_AREA(orientation_WA, 8192);
-static THD_WORKING_AREA(gas_WA, 8192);
-static THD_WORKING_AREA(magnetometer_WA, 8192);
-static THD_WORKING_AREA(highgIMU_WA, 8192);
-static THD_WORKING_AREA(servo_WA, 8192);
-static THD_WORKING_AREA(dataLogger_WA, 8192);
-static THD_WORKING_AREA(voltage_WA, 8192);
-static THD_WORKING_AREA(telemetry_sending_WA, 8192);
-static THD_WORKING_AREA(telemetry_buffering_WA, 8192);
-static THD_WORKING_AREA(kalman_WA, 8192);
+/******************************************************************************/
+/* BUZZER THREAD                                                   */
+
+static THD_FUNCTION(buzzer_THD, arg) {
+    while (true) {
+#ifdef THREAD_DEBUG
+        Serial.println("Buzzer thread entrance");
+#endif
+
+        buzzer1.tick();
+
+        chThdSleepMilliseconds(6);
+    }
+}
+
+#define THREAD_WA 4096
+
+static THD_WORKING_AREA(barometer_WA, THREAD_WA);
+static THD_WORKING_AREA(gps_WA, THREAD_WA);
+static THD_WORKING_AREA(rocket_FSM_WA, THREAD_WA);
+static THD_WORKING_AREA(lowgIMU_WA, THREAD_WA);
+static THD_WORKING_AREA(orientation_WA, THREAD_WA);
+static THD_WORKING_AREA(gas_WA, THREAD_WA);
+static THD_WORKING_AREA(magnetometer_WA, THREAD_WA);
+static THD_WORKING_AREA(highgIMU_WA, THREAD_WA);
+static THD_WORKING_AREA(servo_WA, THREAD_WA);
+static THD_WORKING_AREA(dataLogger_WA, THREAD_WA);
+static THD_WORKING_AREA(voltage_WA, THREAD_WA);
+static THD_WORKING_AREA(telemetry_sending_WA, THREAD_WA);
+static THD_WORKING_AREA(telemetry_buffering_WA, THREAD_WA);
+static THD_WORKING_AREA(kalman_WA, THREAD_WA);
+static THD_WORKING_AREA(buzzer_WA, THREAD_WA);
 
 #define START_THREAD(NAME) chThdCreateStatic(NAME##_WA, sizeof(NAME##_WA), NORMALPRIO + 1, NAME##_THD, nullptr)
 /**
@@ -297,6 +329,7 @@ void chSetup() {
     START_THREAD(dataLogger);
     START_THREAD(voltage);
     START_THREAD(kalman);
+    START_THREAD(buzzer);
 
     while (true)
         ;
@@ -361,11 +394,7 @@ void setup() {
     handleError(sd_logger.init());
     handleError(tlm.init());
 
-    BuzzerController controller(15, melody);
-    controller.playSequence(0);
-    while (true) {
-        controller.tick();
-    }
+    buzzer1.playSequence(0);
 
     Serial.println("chibios begin");
     chBegin(chSetup);
