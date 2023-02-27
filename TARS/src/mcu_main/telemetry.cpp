@@ -41,15 +41,15 @@ T inv_convert_range(float val, float range) {
 
 ErrorCode Telemetry::init() {
 #ifdef ENABLE_TELEMETRY
-    pinMode(50, OUTPUT);
-    digitalWrite(50, HIGH);
+    pinMode(RFM96_RST, OUTPUT);
+    digitalWrite(RFM96_RST, HIGH);
     delay(100);
 
     // manual reset
 
-    digitalWrite(50, LOW);
+    digitalWrite(RFM96_RST, LOW);
     delay(10);
-    digitalWrite(50, HIGH);
+    digitalWrite(RFM96_RST, HIGH);
     delay(10);
 
     while (!rf95.init()) {
@@ -75,7 +75,7 @@ ErrorCode Telemetry::init() {
 }
 
 #ifdef ENABLE_TELEMETRY
-Telemetry::Telemetry() : rf95(50, 50) {}
+Telemetry::Telemetry() : rf95(RFM96_CS, RFM96_INT) {}
 #else
 Telemetry::Telemetry() {}
 #endif
