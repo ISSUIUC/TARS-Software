@@ -41,9 +41,8 @@
 #include "mcu_main/sensors/sensors.h"
 #include "mcu_main/telemetry.h"
 #include "mcu_main/error.h"
+#include "mcu_main/debug.h"
 
-#define THREAD_DEBUG
-//#define SERVO_DEBUG
 
 /******************************************************************************/
 /* TELEMETRY THREAD                                         */

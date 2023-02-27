@@ -2,11 +2,13 @@
 
 #include <Adafruit_BME680.h>
 
+#include "mcu_main/error.h"
+
 class GasSensor {
 public:
     GasSensor();
 
-    void init();
+    ErrorCode __attribute__((warn_unused_result)) init();
     void refresh();
 
     float readTemperature();

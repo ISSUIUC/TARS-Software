@@ -2,10 +2,12 @@
 
 #include "mcu_main/dataLog.h"
 #include "mcu_main/pins.h"
+#include "mcu_main/debug.h"
 
 HighGSensor highG;
 
 void HighGSensor::update() {
+#ifdef ENABLE_HIGH_G
     chSysLock();
     chMtxLock(&mutex);
     auto data = KX.getAccelData();
@@ -17,11 +19,13 @@ void HighGSensor::update() {
 
     chMtxUnlock(&mutex);
     chSysUnlock();
+#endif
 }
 
 Acceleration HighGSensor::getAccel() { return {ax, ay, az}; }
 
 ErrorCode HighGSensor::init() {
+#ifdef ENABLE_HIGH_G
     if (!KX.beginSPI(KX134_CS)) {
         return ErrorCode::CANNOT_CONNECT_KX134_CS;
     }
@@ -31,5 +35,6 @@ ErrorCode HighGSensor::init() {
     }
 
     KX.setRange(3);  // set range to 3 = 64 g range
+#endif
     return ErrorCode::NO_ERROR;
 }

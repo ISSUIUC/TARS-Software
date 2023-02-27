@@ -13,12 +13,11 @@
  * Peter Giannetos
  */
 
-#define SERIAL_PLOTTING
-
 #include "mcu_main/telemetry.h"
 
 #include <limits>
 
+#include "mcu_main/debug.h"
 #include "mcu_main/dataLog.h"
 
 Telemetry tlm;
