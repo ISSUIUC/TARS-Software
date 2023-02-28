@@ -162,6 +162,9 @@ struct OrientationData {
 
 struct GasData {
     float temp = 0.0;
+    float humidity = 0.0;
+    uint32_t pressure = 0;
+    uint32_t resistance = 0;
     systime_t timestamp = 0;
 };
 

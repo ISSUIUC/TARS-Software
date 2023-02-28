@@ -119,7 +119,7 @@ void BuzzerController::tick() {
     } else if (duration_code < 0) {
         note_duration = (60000.0f * 2 / 140) / -(float) duration_code * 1.5f;
     }
-    Serial.println(idx);
+//    Serial.println(idx);
     tone(pin, note, note_duration*0.9);
     chThdSleep((int) note_duration*100);
     noTone(pin);

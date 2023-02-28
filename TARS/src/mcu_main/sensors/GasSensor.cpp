@@ -18,7 +18,16 @@ float GasSensor::readTemperature() {
 }
 
 void GasSensor::refresh() {
-    temperature = bme.readTemperature();
-    time_stamp = chVTGetSystemTime();
-    dataLogger.pushGasFifo((GasData) { temperature, time_stamp });
+    int remaining = bme.remainingReadingMillis();
+    if (remaining == 0) {
+        bme.performReading();
+        temperature = bme.temperature;
+        humidity = bme.humidity;
+        pressure = bme.pressure;
+        resistance = bme.gas_resistance;
+        time_stamp = chVTGetSystemTime();
+        dataLogger.pushGasFifo((GasData) {temperature, humidity, pressure, resistance, time_stamp});
+    } else if (remaining == -1) {
+        bme.beginReading();
+    }
 }
