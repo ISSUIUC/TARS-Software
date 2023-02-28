@@ -3,7 +3,9 @@
 #include "ChRt.h"
 
 struct Acceleration {
-    float ax, ay, az;
+    float ax;
+    float ay;
+    float az;
 };
 
 struct Gyroscope {
@@ -149,9 +151,10 @@ struct KalmanData {
 };
 
 struct OrientationData {
-    float yaw = 0.0;
-    float pitch = 0.0;
-    float roll = 0.0;
+    Acceleration accel{};
+    Gyroscope gyro{};
+    Magnetometer magnet{};
+    euler_t angle{};
     systime_t timeStamp_orientation = 0;
 };
 

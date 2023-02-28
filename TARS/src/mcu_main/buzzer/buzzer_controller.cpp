@@ -123,7 +123,7 @@ void BuzzerController::tick() {
     tone(pin, note, note_duration*0.9);
     chThdSleep((int) note_duration*100);
     noTone(pin);
-    idx++;
+    idx += 2;
 
 }
 
