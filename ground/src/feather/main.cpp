@@ -94,7 +94,7 @@ struct TelemetryPacket {
     int8_t datapoint_count;   //[0,4]
     uint8_t voltage_battery;  //[0, 16]
     uint8_t FSM_State;        //[0,256]
-    uint8_t barometer_temp;  //[0, 128]
+    int16_t barometer_temp;  //[-128, 128]
 };
 
 struct FullTelemetryData {
@@ -126,7 +126,7 @@ struct FullTelemetryData {
     int8_t rssi;              //[-128, 128]
     float voltage_battery;  //[0, 16]
     uint8_t FSM_State;        //[0,256]
-    float barometer_temp;  //[0, 128]
+    float barometer_temp;  //[-128, 128]
     float freq;
     int64_t print_time;
 };
@@ -183,7 +183,7 @@ void EnqueuePacket(const TelemetryPacket& packet, float frequency) {
         FullTelemetryData item;
         TelemetryDataLite data = packet.datapoints[i];
         item.barometer_pressure = convert_range(data.barometer_pressure, 4096);
-        item.barometer_temp = convert_range(packet.barometer_temp, 128);
+        item.barometer_temp = convert_range(packet.barometer_temp, 256);
         item.highG_ax = convert_range(data.highG_ax, 256);
         item.highG_ay = convert_range(data.highG_ay, 256);
         item.highG_az = convert_range(data.highG_az, 256);
