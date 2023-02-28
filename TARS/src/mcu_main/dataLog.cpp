@@ -125,5 +125,7 @@ sensorDataStruct_t DataLogQueue::next() {
     data.has_flap_data = flapQueue.pop(data.flap_data);
     data.has_voltage_data = voltageQueue.pop(data.voltage_data);
     data.has_orientation_data = orientationQueue.pop(data.orientation_data);
+    data.has_gas_data = gasQueue.pop(data.gas_data);
+    data.has_magnetometer_data = magnetometerQueue.pop(data.magnetometer_data);
     return data;
 }
