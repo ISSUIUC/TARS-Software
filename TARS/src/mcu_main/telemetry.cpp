@@ -289,6 +289,14 @@ TelemetryPacket Telemetry::makePacket(const sensorDataStruct_t &data_struct) {
     packet.gnc_state_x = data_struct.kalman_data.kalman_pos_x;
     packet.gns_state_apo = data_struct.kalman_data.kalman_apo;
 
+    packet.mag_x = inv_convert_range<int16_t>(data_struct.magnetometer_data.magnetometer.mx, 8);
+    packet.mag_y = inv_convert_range<int16_t>(data_struct.magnetometer_data.magnetometer.my, 8);
+    packet.mag_z = inv_convert_range<int16_t>(data_struct.magnetometer_data.magnetometer.mz, 8);
+
+    packet.gyro_x = inv_convert_range<int16_t>(data_struct.lowG_data.gx, 8192);
+    packet.gyro_y = inv_convert_range<int16_t>(data_struct.lowG_data.gy, 8192);
+    packet.gyro_z = inv_convert_range<int16_t>(data_struct.lowG_data.gz, 8192);
+
     packet.response_ID = last_command_id;
     packet.rssi = rf95.lastRssi();
     packet.voltage_battery = inv_convert_range<uint8_t>(data_struct.voltage_data.v_battery, 16);
@@ -307,7 +315,6 @@ void Telemetry::bufferData() {
 #ifdef ENABLE_TELEMETRY
 #ifndef TLM_DEBUG
     sensorDataStruct_t sensor_data = dataLogger.read();
-    // Serial.println(dataLogger.count);
     TelemetryDataLite data{};
     data.timestamp = TIME_I2MS(chVTGetSystemTime());
     data.barometer_pressure = inv_convert_range<uint16_t>(sensor_data.barometer_data.pressure, 4096);
@@ -316,13 +323,11 @@ void Telemetry::bufferData() {
     data.highG_ay = inv_convert_range<int16_t>(sensor_data.highG_data.hg_ay, 256);
     data.highG_az = inv_convert_range<int16_t>(sensor_data.highG_data.hg_az, 256);
 
-    data.gyro_x = inv_convert_range<int16_t>(sensor_data.lowG_data.gx, 8192);
-    data.gyro_y = inv_convert_range<int16_t>(sensor_data.lowG_data.gy, 8192);
-    data.gyro_z = inv_convert_range<int16_t>(sensor_data.lowG_data.gz, 8192);
+    data.bno_pitch = inv_convert_range<int16_t>(sensor_data.orientation_data.pitch, 8);
+    data.bno_yaw = inv_convert_range<int16_t>(sensor_data.orientation_data.yaw, 8);
+    data.bno_roll = inv_convert_range<int16_t>(sensor_data.orientation_data.roll, 8);
 
-    data.flap_extension = (uint8_t)sensor_data.flap_data.extension;
-    data.barometer_temp = inv_convert_range<uint8_t>(sensor_data.barometer_data.temperature, 128);
-
+    data.flap_extension = sensor_data.flap_data.extension;
     buffered_data.push(data);
 
 #ifdef SERIAL_PLOTTING
