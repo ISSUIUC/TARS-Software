@@ -257,9 +257,13 @@ void KalmanFilter::update() {
     K = (P_priori * H.transpose()) * temp;
 
     // Sensor Measurements
-    chMtxLock(mutex_highG_);
-    y_k(1, 0) = ((*gz_H) * 9.81) - 9.81 - 0.51;
-    chMtxUnlock(mutex_highG_);
+    // chMtxLock(mutex_highG_);
+    // y_k(1, 0) = ((*gz_H) * 9.81) - 9.81 - 0.51;
+    // chMtxUnlock(mutex_highG_);
+
+    chMtxLock(mutex_lowG_);
+    y_k(1, 0) = (*gz_L * 9.81) - 9.81 - 0.51;
+    chMtxUnlock(mutex_lowG_);
 
     chMtxLock(dataMutex_barometer_);
     y_k(0, 0) = *b_alt;

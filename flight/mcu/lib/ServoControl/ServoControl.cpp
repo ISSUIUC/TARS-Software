@@ -26,12 +26,12 @@ ServoControl::ServoControl(PWMServo* servo) { servo_ = servo; }
  */
 void ServoControl::roundOffAngle(float& value) {
     // Min Extension Angle Value
-    if (value > 130) {
-        value = 130;
+    if (value > 90) {
+        value = 90;
     }
     // Max Extension Angle Value
-    if (value < 12) {
-        value = 12;
+    if (value < 0) {
+        value = 0;
     }
 
     value = std::round(value);

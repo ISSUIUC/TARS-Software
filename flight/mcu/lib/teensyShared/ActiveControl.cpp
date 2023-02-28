@@ -26,11 +26,23 @@ Controller::Controller(struct pointers* pointer_struct, PWMServo* controller_ser
      * experimentally determined to be the position in which
      * the flaps are perfectly flush with the airframe.
      */
-    controller_servo_->write(120);
+    controller_servo_->write(90);
     chThdSleepMilliseconds(1000);
-    controller_servo_->write(12);
+    controller_servo_->write(0);
     chThdSleepMilliseconds(1000);
-
+    // chThdSleepMilliseconds(10000);
+    // for (int i = 0; i < 100; i += 10) {
+    //     Serial.println(i);
+    //     controller_servo_->write(i);
+    //     chThdSleepMilliseconds(1000);
+    // }
+        // while(true) {
+        //     controller_servo_->write(0);
+        // }
+        
+        // chThdSleepMilliseconds(10000);
+    // }
+    // controller_servo_->write(0);
     setLaunchPadElevation();
 }
 
