@@ -311,6 +311,7 @@ TelemetryPacket Telemetry::makePacket(const sensorDataStruct_t &data_struct) {
     packet.rssi = rf95.lastRssi();
     packet.voltage_battery = inv_convert_range<uint8_t>(data_struct.voltage_data.v_battery, 16);
     packet.FSM_State = (uint8_t)data_struct.rocketState_data.rocketStates[0];
+    packet.barometer_temp = inv_convert_range<int16_t>(data_struct.barometer_data.temperature, 256);
 
     TelemetryDataLite data{};
     packet.datapoint_count = 0;

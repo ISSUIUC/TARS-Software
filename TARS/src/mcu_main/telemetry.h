@@ -53,7 +53,7 @@ struct TelemetryPacket {
     int8_t datapoint_count;   //[0,4]
     uint8_t voltage_battery;  //[0, 16]
     uint8_t FSM_State;        //[0,256]
-    uint8_t barometer_temp;  //[0, 128]
+    int16_t barometer_temp;  //[-128, 128]
 };
 
 

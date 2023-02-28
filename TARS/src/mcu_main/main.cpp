@@ -349,8 +349,10 @@ void chSetup() {
 
 void setup() {
     Serial.begin(9600);
+#ifdef WAIT_SERIAL
     // Stall until serial monitor opened
     while (!Serial);
+#endif
     Serial.println("Starting SPI...");
 
     SPI.begin();
