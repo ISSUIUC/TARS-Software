@@ -399,7 +399,7 @@ void setup() {
     handleError(sd_logger.init());
     handleError(tlm.init());
 
-    buzzer1.playSequence(0);
+//    buzzer1.playSequence(0);
 
     Serial.println("chibios begin");
     chBegin(chSetup);

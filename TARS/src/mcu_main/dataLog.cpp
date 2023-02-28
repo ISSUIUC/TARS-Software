@@ -40,6 +40,8 @@ sensorDataStruct_t DataLogBuffer::read() {
     flapFifo.read(data.flap_data);
     voltageFifo.read(data.voltage_data);
     orientationFifo.read(data.orientation_data);
+    magnetometerFifo.read(data.magnetometer_data);
+    gasFifo.read(data.gas_data);
     return data;
 }
 

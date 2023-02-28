@@ -272,10 +272,20 @@ void Telemetry::serialPrint(const sensorDataStruct_t &sensor_data) {
     Serial.print(R"("pressure":)");
     Serial.print(sensor_data.barometer_data.pressure, 5);
     Serial.print(",");
+    Serial.print(R"("mx":)");
+    Serial.print(sensor_data.magnetometer_data.magnetometer.mx, 5);
+    Serial.print(",");
+    Serial.print(R"("my":)");
+    Serial.print(sensor_data.magnetometer_data.magnetometer.my, 5);
+    Serial.print(",");
+    Serial.print(R"("mz":)");
+    Serial.print(sensor_data.magnetometer_data.magnetometer.mz, 5);
+    Serial.print(",");
     Serial.print(R"("STE_APO":)");
     Serial.print(sensor_data.kalman_data.kalman_apo, 5);
     Serial.print("");
-    Serial.println("}}");
+
+    Serial.println("}}\n");
 }
 
 TelemetryPacket Telemetry::makePacket(const sensorDataStruct_t &data_struct) {
