@@ -183,12 +183,19 @@ void EnqueuePacket(const TelemetryPacket& packet, float frequency) {
         FullTelemetryData item;
         TelemetryDataLite data = packet.datapoints[i];
         item.barometer_pressure = convert_range(data.barometer_pressure, 4096);
+        item.barometer_temp = convert_range(packet.barometer_temp, 128);
         item.highG_ax = convert_range(data.highG_ax, 256);
-        item.highG_ay = convert_range(data.highG_ax, 256);
-        item.highG_az = convert_range(data.highG_ax, 256);
+        item.highG_ay = convert_range(data.highG_ay, 256);
+        item.highG_az = convert_range(data.highG_az, 256);
+        item.gyro_x = convert_range(packet.gyro_x, 8192);
+        item.gyro_y = convert_range(packet.gyro_y, 8192);
+        item.gyro_z = convert_range(packet.gyro_z, 8192);
         item.bno_roll = convert_range(data.bno_roll, 8);
         item.bno_pitch = convert_range(data.bno_pitch, 8);
         item.bno_yaw = convert_range(data.bno_yaw, 8);
+        item.mag_x = convert_range(packet.mag_x, 8);
+        item.mag_y = convert_range(packet.mag_y, 8);
+        item.mag_z = convert_range(packet.mag_z, 8);
         item.flap_extension = data.flap_extension;
         item.gps_alt = packet.gps_alt;
         item.gps_lat = packet.gps_lat;
@@ -201,7 +208,7 @@ void EnqueuePacket(const TelemetryPacket& packet, float frequency) {
         item.gnc_state_apo = packet.gnc_state_apo;
         item.response_ID = packet.response_ID;
         item.rssi = packet.rssi;
-        item.voltage_battery = packet.voltage_battery;
+        item.voltage_battery = convert_range(packet.voltage_battery, 16);
         item.print_time = start_printing - start_timestamp + data.timestamp;
         print_queue.emplace(item);
     }
