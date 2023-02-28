@@ -173,12 +173,13 @@ static THD_FUNCTION(gps_THD, arg) {
 /* KALMAN FILTER THREAD                                                       */
 
 static THD_FUNCTION(kalman_THD, arg) {
-    kalmanFilter.Initialize();
+    kalmanFilter.Initialize(0,0,0,0,0,0,1);
 
     systime_t last = chVTGetSystemTime();
 
     while (true) {
         kalmanFilter.kfTickFunction(TIME_I2MS(chVTGetSystemTime() - last), 13.0);
+
         last = chVTGetSystemTime();
 
         chThdSleepMilliseconds(50);

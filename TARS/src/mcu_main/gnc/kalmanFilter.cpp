@@ -66,7 +66,7 @@ void KalmanFilter::SetF(float dt) {
  * @param sd Spectral density of the noise
  */
 void KalmanFilter::kfTickFunction(float dt, float sd) {
-    if (getActiveFSM().getFSMState() > FSM_State::STATE_IDLE) {
+    if (getActiveFSM().getFSMState() >= FSM_State::STATE_IDLE) {
         SetF(float(dt) / 1000);
         SetQ(float(dt) / 1000, sd);
         priori();
@@ -229,7 +229,9 @@ void KalmanFilter::Initialize() {
 
 void KalmanFilter::Initialize(float pos_x, float vel_x,
                               float pos_y, float vel_y,
-                              float pos_z, float vel_z) {
+                              float pos_z, float vel_z, float rot_Q_fac) {
+    rqf = rot_Q_fac;
+
     // set x_k
     x_k(0, 0) = pos_x;
     x_k(1, 0) = vel_x;
@@ -394,7 +396,7 @@ Eigen::Matrix<float, 3, 1> KalmanFilter::BodyToGlobal(euler_t angles, Eigen::Mat
 
 void KalmanFilter::priori_r() {
     x_priori_r = (F_mat * x_k_r);
-    P_priori_r = (F_mat * P_k_r * F_mat.transpose()) + Q;
+    P_priori_r = (F_mat * P_k_r * F_mat.transpose()) + rqf*Q;
 }
 
 void KalmanFilter::update_r() {

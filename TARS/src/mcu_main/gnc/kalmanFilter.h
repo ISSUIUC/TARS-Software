@@ -39,7 +39,7 @@ class KalmanFilter {
     MUTEX_DECL(mutex);
 
     void Initialize();
-    void Initialize(float pos_x, float vel_x, float pos_y, float vel_y, float pos_z, float vel_z);
+    void Initialize(float pos_x, float vel_x, float pos_y, float vel_y, float pos_z, float vel_z, float rot_Q_fac);
     void priori();
     void update();
     void priori_r();
@@ -57,6 +57,7 @@ class KalmanFilter {
 
    private:
     float s_dt = 0.050;
+    float rqf = 1;
 
     // float kalman_x = 0;
     // float kalman_vx = 0;
