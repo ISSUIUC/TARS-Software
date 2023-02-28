@@ -67,12 +67,11 @@ struct TelemetryDataLite {
     int16_t highG_ax;             //[128, -128]
     int16_t highG_ay;             //[128, -128]
     int16_t highG_az;             //[128, -128]
-    int16_t gyro_x;               //[-4096, 4096]
-    int16_t gyro_y;               //[-4096, 4096]
-    int16_t gyro_z;               //[-4096, 4096]
+    int16_t bno_roll;             //[-4,4]
+    int16_t bno_pitch;            //[-4,4]
+    int16_t bno_yaw;              //[-4,4]
 
-    uint8_t flap_extension;  //[0, 256]
-    uint8_t barometer_temp;  //[0, 128]
+    float flap_extension; 
 };
 
 struct TelemetryPacket {
@@ -84,15 +83,32 @@ struct TelemetryPacket {
     float gnc_state_vx;
     float gnc_state_ax;
     float gns_state_apo;
+    int16_t mag_x;                //[-4, 4]
+    int16_t mag_y;                //[-4, 4]
+    int16_t mag_z;                //[-4, 4]
+    int16_t gyro_x;               //[-4096, 4096]
+    int16_t gyro_y;               //[-4096, 4096]
+    int16_t gyro_z;               //[-4096, 4096]
     int16_t response_ID;      //[0, 2^16]
     int8_t rssi;              //[-128, 128]
     int8_t datapoint_count;   //[0,4]
     uint8_t voltage_battery;  //[0, 16]
     uint8_t FSM_State;        //[0,256]
+    uint8_t barometer_temp;  //[0, 128]
 };
 
 struct FullTelemetryData {
-    TelemetryDataLite data;
+    systime_t timestamp;  //[0, 2^32]
+
+    float barometer_pressure;  //[0, 4096]
+    float highG_ax;             //[128, -128]
+    float highG_ay;             //[128, -128]
+    float highG_az;             //[128, -128]
+    float bno_yaw;              //[-4,4]
+    float bno_pitch;            //[-4,4]
+    float bno_roll;             //[-4,4]
+
+    float flap_extension;  //[0, 256]
     float gps_lat;
     float gps_long;
     float gps_alt;
@@ -100,54 +116,19 @@ struct FullTelemetryData {
     float gnc_state_vx;
     float gnc_state_ax;
     float gns_state_apo;
+    float mag_x;                //[-4, 4]
+    float mag_y;                //[-4, 4]
+    float mag_z;                //[-4, 4]
+    float gyro_x;               //[-4096, 4096]
+    float gyro_y;               //[-4096, 4096]
+    float gyro_z;               //[-4096, 4096]
     int16_t response_ID;      //[0, 2^16]
     int8_t rssi;              //[-128, 128]
-    int8_t datapoint_count;   //[0,4]
-    uint8_t voltage_battery;  //[0, 16]
+    float voltage_battery;  //[0, 16]
     uint8_t FSM_State;        //[0,256]
+    float barometer_temp;  //[0, 128]
     float freq;
     int64_t print_time;
-};
-
-struct telemetry_data {
-    float gps_lat;
-    float gps_long;
-    float gps_alt;
-    float barometer_alt;
-    float barometer_pressure;
-    float barometer_temperature;
-    // KX134 (highg) IMU DATA
-    float KX_IMU_ax;  // acceleration (in G's)
-    float KX_IMU_ay;
-    float KX_IMU_az;
-    // H3LIS331DL (highg) IMU DATA
-    float H3L_IMU_ax;
-    float H3L_IMU_ay;
-    float H3L_IMU_az;
-    // LSM9DS1 (lowg) IMU DATA
-    float LSM_IMU_ax;  // acceleration (in G's)
-    float LSM_IMU_ay;
-    float LSM_IMU_az;
-    float LSM_IMU_gx;  // Gyro data (in degrees/sec)
-    float LSM_IMU_gy;
-    float LSM_IMU_gz;
-    float LSM_IMU_mx;
-    float LSM_IMU_my;
-    float LSM_IMU_mz;
-
-    float flap_extension;
-    float voltage_battry;
-
-    float state_x;
-    float state_vx;
-    float state_ax;
-    float state_apo;
-
-    int FSM_state;
-    char sign[8] = "KC1QJA";
-    int rssi;
-    float battery_voltage;
-    int response_ID;
 };
 
 enum class CommandType { SET_FREQ, SET_CALLSIGN, ABORT, TEST_FLAP, EMPTY };
@@ -200,6 +181,15 @@ void EnqueuePacket(const TelemetryPacket& packet, float frequency) {
 
     for (int i = 0; i < packet.datapoint_count && i < 4; i++) {
         FullTelemetryData item;
+        TelemetryDataLite data = packet.datapoints[i];
+        item.barometer_pressure = convert_range(data.barometer_pressure, 4096);
+        item.highG_ax = convert_range(data.highG_ax, 256);
+        item.highG_ay = convert_range(data.highG_ax, 256);
+        item.highG_az = convert_range(data.highG_ax, 256);
+        item.bno_roll = convert_range(data.bno_roll, 8);
+        item.bno_pitch = convert_range(data.bno_pitch, 8);
+        item.bno_yaw = convert_range(data.bno_yaw, 8);
+        item.flap_extension = data.flap_extension;
         item.gps_alt = packet.gps_alt;
         item.gps_lat = packet.gps_lat;
         item.gps_long = packet.gps_long;
@@ -212,22 +202,33 @@ void EnqueuePacket(const TelemetryPacket& packet, float frequency) {
         item.response_ID = packet.response_ID;
         item.rssi = packet.rssi;
         item.voltage_battery = packet.voltage_battery;
-        item.data = packet.datapoints[i];
-        item.print_time = start_printing - start_timestamp + item.data.timestamp;
+        item.print_time = start_printing - start_timestamp + data.timestamp;
         print_queue.emplace(item);
-        // // space packets out
-        // int64_t time_diff = packet.datapoints[i].timestamp - start_timestamp;
-        // if (time_diff > 0) {
-        //     int64_t elapsed = millis() - start_printing;
-
-        //     if (elapsed < time_diff) {
-        //         // failsafe if sleep time is too long
-        //         delay(std::min(time_diff - elapsed, 200ll));
-        //     }
-        // }
-
-        // TelemetryDataLite data = packet.datapoints[i];
     }
+}
+
+void printJSONField(const char * name, float val){
+    Serial.print('\"');
+    Serial.print(name);
+    Serial.print("\":");
+    printFloat(val);
+    Serial.print(',');
+}
+
+void printJSONField(const char * name, int val){
+    Serial.print('\"');
+    Serial.print(name);
+    Serial.print("\":");
+    Serial.print(val);
+    Serial.print(',');
+}
+
+void printJSONField(const char * name, const char * val){
+    Serial.print('\"');
+    Serial.print(name);
+    Serial.print("\":\"");
+    Serial.print(val);
+    Serial.print("\",");
 }
 
 void PrintDequeue() {
@@ -237,228 +238,33 @@ void PrintDequeue() {
     if (packet.print_time > millis()) return;
     print_queue.pop();
 
-    TelemetryDataLite data = packet.data;
-
-    float baro_altitude = -log(convert_range(data.barometer_pressure, 4096) * 0.000987) *
-                          (convert_range(data.barometer_temp, 128) + 273.15) * 29.254;
     Serial.print(R"({"type": "data", "value": {)");
-    Serial.print(R"("response_ID":)");
-    Serial.print(packet.response_ID);
-    Serial.print(',');
-    Serial.print(R"("gps_lat":)");
-    printFloat(packet.gps_lat);
-    Serial.print(',');
-    Serial.print(R"("gps_long":)");
-    printFloat(packet.gps_long);
-    Serial.print(',');
-    Serial.print(R"("gps_alt":)");
-    printFloat(packet.gps_alt);
-    Serial.print(',');
-    Serial.print(R"("barometer_alt":)");
-    printFloat(baro_altitude);
-    Serial.print(',');
-    Serial.print(R"("KX_IMU_ax":)");
-    printFloat(convert_range(data.highG_ax, 256));
-    Serial.print(',');
-    Serial.print(R"("KX_IMU_ay":)");
-    printFloat(convert_range(data.highG_ay, 256));
-    Serial.print(',');
-    Serial.print(R"("KX_IMU_az":)");
-    printFloat(convert_range(data.highG_az, 256));
-    Serial.print(',');
-    // Serial.print(R"("H3L_IMU_ax":)"); Serial.print(data.H3L_IMU_ax);
-    // Serial.print(','); Serial.print(R"("H3L_IMU_ay":)");
-    // Serial.print(data.H3L_IMU_ay); Serial.print(',');
-    // Serial.print(R"("H3L_IMU_az":)"); Serial.print(data.H3L_IMU_az);
-    // Serial.print(',');
-    Serial.print(R"("LSM_IMU_ax":)");
-    printFloat(0);
-    Serial.print(',');
-    Serial.print(R"("LSM_IMU_ay":)");
-    printFloat(0);
-    Serial.print(',');
-    Serial.print(R"("LSM_IMU_az":)");
-    printFloat(0);
-    Serial.print(',');
-    Serial.print(R"("LSM_IMU_gx":)");
-    printFloat(convert_range(data.gyro_x, 8192));
-    Serial.print(',');
-    Serial.print(R"("LSM_IMU_gy":)");
-    printFloat(convert_range(data.gyro_y, 8192));
-    Serial.print(',');
-    Serial.print(R"("LSM_IMU_gz":)");
-    printFloat(convert_range(data.gyro_z, 8192));
-    Serial.print(',');
-    Serial.print(R"("LSM_IMU_mx":)");
-    printFloat(0);
-    Serial.print(',');
-    Serial.print(R"("LSM_IMU_my":)");
-    printFloat(0);
-    Serial.print(',');
-    Serial.print(R"("LSM_IMU_mz":)");
-    printFloat(0);
-    Serial.print(',');
-    Serial.print(R"("FSM_state":)");
-    Serial.print(packet.FSM_State);
-    Serial.print(',');
-    Serial.print(R"("sign":")");
-    Serial.print("NOSIGN");
-    Serial.print("\",");
-    Serial.print(R"("RSSI":)");
-    Serial.print(rf95.lastRssi());
-    Serial.print(',');
-    Serial.print(R"("Voltage":)");
-    printFloat(convert_range(packet.voltage_battery, 16));
-    Serial.print(',');
-    Serial.print(R"("frequency":)");
-    Serial.print(packet.freq);
-    Serial.print(',');
-    Serial.print(R"("flap_extension":)");
-    printFloat(data.flap_extension);
-    Serial.print(",");
-    Serial.print(R"("STE_ALT":)");
-    printFloat(packet.gnc_state_x);
-    Serial.print(",");
-    Serial.print(R"("STE_VEL":)");
-    printFloat(packet.gnc_state_vx);
-    Serial.print(",");
-    Serial.print(R"("STE_ACC":)");
-    printFloat(packet.gnc_state_ax);
-    Serial.print(",");
-    Serial.print(R"("TEMP":)");
-    printFloat(convert_range(data.barometer_temp, 128));
-    Serial.print(",");
-    Serial.print(R"("pressure":)");
-    printFloat(convert_range(data.barometer_pressure, 4096));
-    Serial.print(",");
-    Serial.print(R"("STE_APO":)");
-    printFloat(packet.gns_state_apo);
-    Serial.print("");
-
+    printJSONField("response_ID", packet.response_ID);
+    printJSONField("gps_lat", packet.gps_lat);
+    printJSONField("gps_long", packet.gps_long);
+    printJSONField("gps_alt", packet.gps_alt);
+    printJSONField("KX_IMU_ax", packet.highG_ax);
+    printJSONField("KX_IMU_ay", packet.highG_ay);
+    printJSONField("KX_IMU_az", packet.highG_az);
+    printJSONField("IMU_gx", packet.gyro_x);
+    printJSONField("IMU_gy", packet.gyro_y);
+    printJSONField("IMU_gz", packet.gyro_z);
+    printJSONField("IMU_mx", packet.mag_x);
+    printJSONField("IMU_my", packet.mag_y);
+    printJSONField("IMU_mz", packet.mag_z);
+    printJSONField("FSM_state", packet.FSM_State);
+    printJSONField("sign", "NOSIGN");
+    printJSONField("RSSI", rf95.lastRssi());
+    printJSONField("Voltage", packet.voltage_battery);
+    printJSONField("frequency", packet.freq);
+    printJSONField("flap_extension", packet.flap_extension);
+    printJSONField("STE_ALT", packet.gnc_state_x);
+    printJSONField("STE_VEL", packet.gnc_state_vx);
+    printJSONField("STE_ACC", packet.gnc_state_ax);
+    printJSONField("STE_APO", packet.gns_state_apo);
+    printJSONField("TEMP", packet.barometer_temp);
+    printJSONField("pressure", packet.barometer_pressure);
     Serial.println("}}");
-}
-
-void SerialPrintTelemetryData(const TelemetryPacket& packet, float frequency) {
-    if (packet.datapoint_count == 0) return;
-
-    int64_t start_timestamp = packet.datapoints[0].timestamp;
-    int64_t start_printing = millis();
-
-    for (int i = 0; i < packet.datapoint_count && i < 4; i++) {
-        // space packets out
-        int64_t time_diff = packet.datapoints[i].timestamp - start_timestamp;
-        if (time_diff > 0) {
-            int64_t elapsed = millis() - start_printing;
-
-            if (elapsed < time_diff) {
-                // failsafe if sleep time is too long
-                delay(std::min(time_diff - elapsed, 200ll));
-            }
-        }
-
-        TelemetryDataLite data = packet.datapoints[i];
-
-        float baro_altitude = -log(convert_range(data.barometer_pressure, 4096) * 0.000987) *
-                              (convert_range(data.barometer_temp, 128) + 273.15) * 29.254;
-        Serial.print(R"({"type": "data", "value": {)");
-        Serial.print(R"("response_ID":)");
-        Serial.print(packet.response_ID);
-        Serial.print(',');
-        Serial.print(R"("gps_lat":)");
-        printFloat(packet.gps_lat);
-        Serial.print(',');
-        Serial.print(R"("gps_long":)");
-        printFloat(packet.gps_long);
-        Serial.print(',');
-        Serial.print(R"("gps_alt":)");
-        printFloat(packet.gps_alt);
-        Serial.print(',');
-        Serial.print(R"("barometer_alt":)");
-        printFloat(baro_altitude);
-        Serial.print(',');
-        Serial.print(R"("KX_IMU_ax":)");
-        printFloat(convert_range(data.highG_ax, 256));
-        Serial.print(',');
-        Serial.print(R"("KX_IMU_ay":)");
-        printFloat(convert_range(data.highG_ay, 256));
-        Serial.print(',');
-        Serial.print(R"("KX_IMU_az":)");
-        printFloat(convert_range(data.highG_az, 256));
-        Serial.print(',');
-        // Serial.print(R"("H3L_IMU_ax":)"); Serial.print(data.H3L_IMU_ax);
-        // Serial.print(','); Serial.print(R"("H3L_IMU_ay":)");
-        // Serial.print(data.H3L_IMU_ay); Serial.print(',');
-        // Serial.print(R"("H3L_IMU_az":)"); Serial.print(data.H3L_IMU_az);
-        // Serial.print(',');
-        Serial.print(R"("LSM_IMU_ax":)");
-        printFloat(0);
-        Serial.print(',');
-        Serial.print(R"("LSM_IMU_ay":)");
-        printFloat(0);
-        Serial.print(',');
-        Serial.print(R"("LSM_IMU_az":)");
-        printFloat(0);
-        Serial.print(',');
-        Serial.print(R"("LSM_IMU_gx":)");
-        printFloat(convert_range(data.gyro_x, 8192));
-        Serial.print(',');
-        Serial.print(R"("LSM_IMU_gy":)");
-        printFloat(convert_range(data.gyro_y, 8192));
-        Serial.print(',');
-        Serial.print(R"("LSM_IMU_gz":)");
-        printFloat(convert_range(data.gyro_z, 8192));
-        Serial.print(',');
-        Serial.print(R"("LSM_IMU_mx":)");
-        printFloat(0);
-        Serial.print(',');
-        Serial.print(R"("LSM_IMU_my":)");
-        printFloat(0);
-        Serial.print(',');
-        Serial.print(R"("LSM_IMU_mz":)");
-        printFloat(0);
-        Serial.print(',');
-        Serial.print(R"("FSM_state":)");
-        Serial.print(packet.FSM_State);
-        Serial.print(',');
-        Serial.print(R"("sign":")");
-        Serial.print("NOSIGN");
-        Serial.print("\",");
-        Serial.print(R"("RSSI":)");
-        Serial.print(rf95.lastRssi());
-        Serial.print(',');
-        Serial.print(R"("Voltage":)");
-        printFloat(convert_range(packet.voltage_battery, 16));
-        Serial.print(',');
-        Serial.print(R"("frequency":)");
-        Serial.print(frequency);
-        Serial.print(',');
-        Serial.print(R"("flap_extension":)");
-        printFloat(data.flap_extension);
-        Serial.print(",");
-        Serial.print(R"("STE_ALT":)");
-        printFloat(packet.gnc_state_x);
-        Serial.print(",");
-        Serial.print(R"("STE_VEL":)");
-        printFloat(packet.gnc_state_vx);
-        Serial.print(",");
-        Serial.print(R"("STE_ACC":)");
-        printFloat(packet.gnc_state_ax);
-        Serial.print(",");
-        Serial.print(R"("TEMP":)");
-        printFloat(convert_range(data.barometer_temp, 128));
-        Serial.print(",");
-        Serial.print(R"("pressure":)");
-        printFloat(convert_range(data.barometer_pressure, 4096));
-        Serial.print(",");
-        Serial.print(R"("STE_APO":)");
-        printFloat(packet.gns_state_apo);
-        Serial.print("");
-
-        Serial.println("}}");
-    }
-    // add null ternimator to sign
-    // char sign[9]{};
-    // memcpy(sign, data.sign, 8);
 }
 
 void SerialError() { Serial.println(json_command_parse_error); }
@@ -564,10 +370,9 @@ void loop() {
         TelemetryPacket packet;
         uint8_t len = sizeof(buf);
 
-        if (rf95.recv(buf, &len)) {
+        if (rf95.recv(buf, &len) && len == sizeof(packet)) {
             memcpy(&packet, buf, sizeof(packet));
             EnqueuePacket(packet, current_freq);
-            // SerialPrintTelemetryData(packet, current_freq);
 
             if (!cmd_queue.empty()) {
                 auto& cmd = cmd_queue.front();
