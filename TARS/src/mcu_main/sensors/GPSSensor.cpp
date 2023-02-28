@@ -33,6 +33,7 @@ void GPSSensor::update() {
     chMtxLock(&mutex);
     bool succeed = GNSS.getPVT(20);
     if (!succeed) {
+        chMtxUnlock(&mutex);
         return;
     }
 
