@@ -82,7 +82,7 @@ struct TelemetryPacket {
     float gnc_state_x;
     float gnc_state_vx;
     float gnc_state_ax;
-    float gns_state_apo;
+    float gnc_state_apo;
     int16_t mag_x;                //[-4, 4]
     int16_t mag_y;                //[-4, 4]
     int16_t mag_z;                //[-4, 4]
@@ -115,7 +115,7 @@ struct FullTelemetryData {
     float gnc_state_x;
     float gnc_state_vx;
     float gnc_state_ax;
-    float gns_state_apo;
+    float gnc_state_apo;
     float mag_x;                //[-4, 4]
     float mag_y;                //[-4, 4]
     float mag_z;                //[-4, 4]
@@ -198,7 +198,7 @@ void EnqueuePacket(const TelemetryPacket& packet, float frequency) {
         item.gnc_state_ax = packet.gnc_state_ax;
         item.gnc_state_vx = packet.gnc_state_vx;
         item.gnc_state_x = packet.gnc_state_x;
-        item.gns_state_apo = packet.gns_state_apo;
+        item.gnc_state_apo = packet.gnc_state_apo;
         item.response_ID = packet.response_ID;
         item.rssi = packet.rssi;
         item.voltage_battery = packet.voltage_battery;
@@ -207,37 +207,32 @@ void EnqueuePacket(const TelemetryPacket& packet, float frequency) {
     }
 }
 
-void printJSONField(const char * name, float val){
+void printJSONField(const char * name, float val, bool comma=true){
     Serial.print('\"');
     Serial.print(name);
     Serial.print("\":");
     printFloat(val);
-    Serial.print(',');
+    if(comma) Serial.print(',');
 }
 
-void printJSONField(const char * name, int val){
+void printJSONField(const char * name, int val, bool comma=true){
     Serial.print('\"');
     Serial.print(name);
     Serial.print("\":");
     Serial.print(val);
-    Serial.print(',');
+    if(comma) Serial.print(',');
 }
 
-void printJSONField(const char * name, const char * val){
+void printJSONField(const char * name, const char * val, bool comma=true){
     Serial.print('\"');
     Serial.print(name);
     Serial.print("\":\"");
     Serial.print(val);
-    Serial.print("\",");
+    Serial.print('"');
+    if(comma) Serial.print(',');
 }
 
-void PrintDequeue() {
-    if (print_queue.empty()) return;
-
-    auto packet = print_queue.front();
-    if (packet.print_time > millis()) return;
-    print_queue.pop();
-
+void printPacketJson(FullTelemetryData const& packet){
     Serial.print(R"({"type": "data", "value": {)");
     printJSONField("response_ID", packet.response_ID);
     printJSONField("gps_lat", packet.gps_lat);
@@ -261,10 +256,22 @@ void PrintDequeue() {
     printJSONField("STE_ALT", packet.gnc_state_x);
     printJSONField("STE_VEL", packet.gnc_state_vx);
     printJSONField("STE_ACC", packet.gnc_state_ax);
-    printJSONField("STE_APO", packet.gns_state_apo);
+    printJSONField("STE_APO", packet.gnc_state_apo);
+    printJSONField("BNO_YAW", packet.bno_yaw);
+    printJSONField("BNO_PITCH", packet.bno_pitch);
+    printJSONField("BNO_ROLL", packet.bno_roll);
     printJSONField("TEMP", packet.barometer_temp);
-    printJSONField("pressure", packet.barometer_pressure);
+    printJSONField("pressure", packet.barometer_pressure, false);
     Serial.println("}}");
+}
+
+void PrintDequeue() {
+    if (print_queue.empty()) return;
+
+    auto packet = print_queue.front();
+    if (packet.print_time > millis()) return;
+    print_queue.pop();
+    printPacketJson(packet);
 }
 
 void SerialError() { Serial.println(json_command_parse_error); }
@@ -363,6 +370,40 @@ void setup() {
 
 void loop() {
     PrintDequeue();
+    // static float f = 0;
+    // static float f2 = 0;
+    // f+=0.1;
+    // f2 += 0.01;
+    // if(f > 3.14) f -= 6.28;
+    // delay(30);
+    // FullTelemetryData d{};
+    // d.barometer_pressure = 1000;
+    // d.barometer_temp = 20;
+    // d.bno_pitch = cos(f2);
+    // d.bno_roll = sin(f2);
+    // d.bno_yaw = 0;
+    // d.flap_extension = f / 10;
+    // d.freq = 434;
+    // d.FSM_State = 3;
+    // d.gnc_state_ax = f * 100;
+    // d.gnc_state_vx = f * 10;
+    // d.gnc_state_x = f * 1000;
+    // d.gnc_state_apo = 100;
+    // d.gps_alt = 1000+100*f;
+    // d.gps_lat = 40;
+    // d.gps_long = 80 + f;
+    // d.gyro_x = sin(f2);
+    // d.gyro_y = f+30;
+    // d.gyro_z = f+40;
+    // d.highG_ax = 10+f;
+    // d.highG_ay = f/10;
+    // d.highG_az = f/10;
+    // d.mag_x = f;
+    // d.mag_y = f+1;
+    // d.mag_z = f+2;
+    // d.voltage_battery = f + 4;
+    // printPacketJson(d);
+
     if (rf95.available()) {
         // Should be a message for us now
         uint8_t buf[RH_RF95_MAX_MESSAGE_LEN];
