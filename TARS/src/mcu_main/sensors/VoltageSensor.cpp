@@ -3,12 +3,12 @@
 #include "ChRt.h"
 #include "mcu_main/dataLog.h"
 
-VoltageSensor voltage{Serial1};
+VoltageSensor voltage;
 
 VoltageData VoltageSensor::read() {
     chMtxLock(&mutex);
 
-    v_battery = read_voltage('B');
+    v_battery = analogRead(16) / 1024.f * 3.3f * 3.f;
     timestamp = chVTGetSystemTime();
 
     auto data = (VoltageData){v_battery, timestamp};

@@ -349,8 +349,10 @@ void chSetup() {
 
 void setup() {
     Serial.begin(9600);
+#ifdef WAIT_SERIAL
     // Stall until serial monitor opened
     while (!Serial);
+#endif
     Serial.println("Starting SPI...");
 
     SPI.begin();
@@ -399,7 +401,7 @@ void setup() {
     handleError(sd_logger.init());
     handleError(tlm.init());
 
-    buzzer1.playSequence(0);
+//    buzzer1.playSequence(0);
 
     Serial.println("chibios begin");
     chBegin(chSetup);

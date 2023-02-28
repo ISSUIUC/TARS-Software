@@ -272,10 +272,20 @@ void Telemetry::serialPrint(const sensorDataStruct_t &sensor_data) {
     Serial.print(R"("pressure":)");
     Serial.print(sensor_data.barometer_data.pressure, 5);
     Serial.print(",");
+    Serial.print(R"("mx":)");
+    Serial.print(sensor_data.magnetometer_data.magnetometer.mx, 5);
+    Serial.print(",");
+    Serial.print(R"("my":)");
+    Serial.print(sensor_data.magnetometer_data.magnetometer.my, 5);
+    Serial.print(",");
+    Serial.print(R"("mz":)");
+    Serial.print(sensor_data.magnetometer_data.magnetometer.mz, 5);
+    Serial.print(",");
     Serial.print(R"("STE_APO":)");
     Serial.print(sensor_data.kalman_data.kalman_apo, 5);
     Serial.print("");
-    Serial.println("}}");
+
+    Serial.println("}}\n");
 }
 
 TelemetryPacket Telemetry::makePacket(const sensorDataStruct_t &data_struct) {
@@ -301,6 +311,7 @@ TelemetryPacket Telemetry::makePacket(const sensorDataStruct_t &data_struct) {
     packet.rssi = rf95.lastRssi();
     packet.voltage_battery = inv_convert_range<uint8_t>(data_struct.voltage_data.v_battery, 16);
     packet.FSM_State = (uint8_t)data_struct.rocketState_data.rocketStates[0];
+    packet.barometer_temp = inv_convert_range<int16_t>(data_struct.barometer_data.temperature, 256);
 
     TelemetryDataLite data{};
     packet.datapoint_count = 0;
