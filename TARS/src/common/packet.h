@@ -64,11 +64,6 @@ struct rocketStateData {
 
 struct VoltageData {
     float v_battery;
-    float v_servo1;
-    float v_servo2;
-    float v_3_3;
-    float v_5;
-    float v_9;
     systime_t timestamp;
 };
 

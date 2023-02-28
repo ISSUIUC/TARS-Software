@@ -15,25 +15,6 @@ class VoltageSensor {
 
     VoltageData read();
 
-    float getVoltage(char src) const {
-        switch (src) {
-            case 'B':
-                return v_battery;
-            case '1':
-                return v_servo1;
-            case '2':
-                return v_servo2;
-            case '3':
-                return v_3_3;
-            case '5':
-                return v_5;
-            case '9':
-                return v_9;
-            default:
-                return -1.0;
-        }
-    }
-
    private:
     /**
      * @param voltage_src

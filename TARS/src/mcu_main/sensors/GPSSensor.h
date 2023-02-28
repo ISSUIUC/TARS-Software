@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ChRt.h"
-#include "SparkFun_u-blox_GNSS_Arduino_Library.h"
+#include "SparkFun_u-blox_GNSS_v3.h"
 #include "mcu_main/error.h"
 
 struct GPSSensor {
