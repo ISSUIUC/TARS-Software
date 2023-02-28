@@ -323,9 +323,9 @@ void Telemetry::bufferData() {
     data.highG_ay = inv_convert_range<int16_t>(sensor_data.highG_data.hg_ay, 256);
     data.highG_az = inv_convert_range<int16_t>(sensor_data.highG_data.hg_az, 256);
 
-    data.bno_pitch = inv_convert_range<int16_t>(sensor_data.orientation_data.pitch, 8);
-    data.bno_yaw = inv_convert_range<int16_t>(sensor_data.orientation_data.yaw, 8);
-    data.bno_roll = inv_convert_range<int16_t>(sensor_data.orientation_data.roll, 8);
+    data.bno_pitch = inv_convert_range<int16_t>(sensor_data.orientation_data.angle.pitch, 8);
+    data.bno_yaw = inv_convert_range<int16_t>(sensor_data.orientation_data.angle.yaw, 8);
+    data.bno_roll = inv_convert_range<int16_t>(sensor_data.orientation_data.angle.roll, 8);
 
     data.flap_extension = sensor_data.flap_data.extension;
     buffered_data.push(data);
