@@ -16,7 +16,11 @@
 
 #include <cmath>
 
-ServoControl::ServoControl(PWMServo* servo) { servo_ = servo; }
+ServoControl::ServoControl(PWMServo* servo, int min, int max) {
+    servo_ = servo;
+    min_angle = min;
+    max_angle = max;
+}
 
 /**
  * @brief A function to keep the value sent to the servo between 0 and 130
@@ -26,12 +30,12 @@ ServoControl::ServoControl(PWMServo* servo) { servo_ = servo; }
  */
 void ServoControl::roundOffAngle(float& value) {
     // Min Extension Angle Value
-    if (value > 130) {
-        value = 130;
+    if (value > max_angle) {
+        value = max_angle;
     }
     // Max Extension Angle Value
-    if (value < 12) {
-        value = 12;
+    if (value < min_angle) {
+        value = min_angle;
     }
 
     value = std::round(value);

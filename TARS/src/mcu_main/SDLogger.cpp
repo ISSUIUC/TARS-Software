@@ -70,7 +70,7 @@ ErrorCode SDLogger::init() {
     queue.attach(dataLogger);
 
     if (SD.begin(BUILTIN_SDCARD)) {
-        char file_extension[6] = ".dat";
+        char file_extension[8] = ".launch";
 
         char data_name[16] = "data";
         sdFileNamer(data_name, file_extension);

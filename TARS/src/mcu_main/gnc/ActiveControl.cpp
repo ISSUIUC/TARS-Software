@@ -13,7 +13,7 @@
 
 Controller activeController;
 
-Controller::Controller() : activeControlServos(&controller_servo_) {}
+Controller::Controller() : activeControlServos(&controller_servo_, 10, 90) {}
 
 void Controller::ctrlTickFunction() {
     chMtxLock(&kalmanFilter.mutex);
@@ -111,7 +111,7 @@ void Controller::init() {
      */
     controller_servo_.write(90);
     chThdSleepMilliseconds(1000);
-    controller_servo_.write(0);
+    controller_servo_.write(10);
     chThdSleepMilliseconds(1000);
 
     setLaunchPadElevation();
