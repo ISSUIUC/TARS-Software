@@ -110,16 +110,17 @@ void Controller::init() {
      * the flaps are perfectly flush with the airframe.
      */
 
-    // for (int i = 0; i < 19; i++) {
-    //     controller_servo_.write(i * 10);
-    //     Serial.println(i);
-    //     chThdSleepMilliseconds(5000);
-    // }
+    for (int i = 0; i < 19; i++) {
+        controller_servo_.write(i * 10);
+        Serial.println(i);
+        chThdSleepMilliseconds(2000);
+        controller_servo_.
+    }
     
-    controller_servo_.write(90);
-    chThdSleepMilliseconds(1000);
-    controller_servo_.write(10);
-    chThdSleepMilliseconds(1000);
+    // controller_servo_.write(90);
+    // chThdSleepMilliseconds(1000);
+    // controller_servo_.write(10);
+    // chThdSleepMilliseconds(1000);
 
 
     setLaunchPadElevation();

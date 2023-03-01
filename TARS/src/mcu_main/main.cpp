@@ -77,7 +77,7 @@ static THD_FUNCTION(telemetry_buffering_THD, arg) {
 bool telemetry_sending_start = false;
 
 static THD_FUNCTION(telemetry_sending_THD, arg) {
-    telemetry_buffering_start = true;
+    telemetry_sending_start = true;
 
     while (true) {
 #ifdef THREAD_DEBUG
