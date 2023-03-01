@@ -38,15 +38,15 @@ class RocketFSMBase {
             double first = access_value(items[i]);
             double second = access_value(items[i + 1]);
             systime_t delta_t = access_time(items[i + 1]) - access_time(items[i]);
-            derivatives[i] = (second - first) / (delta_t == 0 ? 0.02 : delta_t);
+            derivatives[i-start] = (second - first) / (delta_t == 0 ? 0.02 : delta_t);
         }
 
         double second_derivatives[len - 2];
         for (size_t i = start; i < start + len - 2; i++) {
-            double first = derivatives[i];
-            double second = derivatives[i + 1];
+            double first = derivatives[i - start];
+            double second = derivatives[i + 1 - start];
             systime_t delta_t = access_time(items[i + 1]) - access_time(items[i]);
-            derivatives[i] = (second - first) / (delta_t == 0 ? 0.02 : delta_t);
+            derivatives[i-start] = (second - first) / (delta_t == 0 ? 0.02 : delta_t);
         }
         chMtxUnlock(&buffer.lock);
 

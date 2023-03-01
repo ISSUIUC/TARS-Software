@@ -26,9 +26,9 @@ struct TelemetryDataLite {
     int16_t highG_ax;             //[128, -128]
     int16_t highG_ay;             //[128, -128]
     int16_t highG_az;             //[128, -128]
-    int16_t bno_yaw;              //[-4,4]
+    int16_t bno_roll;              //[-4,4]
     int16_t bno_pitch;            //[-4,4]
-    int16_t bno_roll;             //[-4,4]
+    int16_t bno_yaw;             //[-4,4]
 
     float flap_extension;  //[0, 256]
 };
