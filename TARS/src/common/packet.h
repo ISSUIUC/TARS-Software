@@ -6,6 +6,7 @@
  * @brief Labels for each FSM state
  */
 enum class FSM_State {
+    STATE_UNKNOWN,
     STATE_INIT,
     STATE_IDLE,
     STATE_LAUNCH_DETECT,
@@ -15,6 +16,7 @@ enum class FSM_State {
     STATE_COAST_GNC,
     STATE_APOGEE_DETECT,
     STATE_APOGEE,
+    STATE_SEPARATION,
     STATE_DROGUE_DETECT,
     STATE_DROGUE,
     STATE_MAIN_DETECT,
