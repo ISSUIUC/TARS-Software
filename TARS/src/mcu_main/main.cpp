@@ -41,14 +41,25 @@
 #include "mcu_main/sensors/sensors.h"
 #include "mcu_main/telemetry.h"
 #include "mcu_main/error.h"
-#include "mcu_main/debug.h"
 #include "mcu_main/buzzer/buzzer.h"
+#include "mcu_main/debug.h"
+
+
+#if defined(ENABLE_HIGH_G) || defined(ENABLE_ORIENTATION) || defined(ENABLE_BAROMETER) || defined(ENABLE_LOW_G) || defined(ENABLE_MAGNETOMETER) || defined(ENABLE_GAS)
+#define ENABLE_SENSOR_FAST
+#endif
+
 
 
 /******************************************************************************/
 /* TELEMETRY THREAD                                         */
 
+#ifdef ENABLE_TELEMETRY
+bool telemetry_buffering_start = false;
+
 static THD_FUNCTION(telemetry_buffering_THD, arg) {
+    telemetry_buffering_start = true;
+
     while (true) {
 #ifdef THREAD_DEBUG
         Serial.println("### telemetry buffering thread entrance");
@@ -57,11 +68,17 @@ static THD_FUNCTION(telemetry_buffering_THD, arg) {
         chThdSleepMilliseconds(80);
     }
 }
+#endif
 
 /******************************************************************************/
 /* TELEMETRY THREAD                                         */
 
+#ifdef ENABLE_TELEMETRY
+bool telemetry_sending_start = false;
+
 static THD_FUNCTION(telemetry_sending_THD, arg) {
+    telemetry_buffering_start = true;
+
     while (true) {
 #ifdef THREAD_DEBUG
         Serial.println("### telemetry sending thread entrance");
@@ -75,11 +92,16 @@ static THD_FUNCTION(telemetry_sending_THD, arg) {
         // transmit has a sleep in it
     }
 }
+#endif
 
 /******************************************************************************/
 /* ROCKET FINITE STATE MACHINE THREAD                                         */
 
+bool rocket_fsm_start = false;
+
 static THD_FUNCTION(rocket_FSM_THD, arg) {
+    rocket_fsm_start = true;
+
     while (true) {
 #ifdef THREAD_DEBUG
         Serial.println("### Rocket FSM thread entrance");
@@ -94,99 +116,15 @@ static THD_FUNCTION(rocket_FSM_THD, arg) {
     }
 }
 
-///******************************************************************************/
-///* LOW G IMU THREAD                                                           */
-//
-//static THD_FUNCTION(lowgIMU_THD, arg) {
-//    while (true) {
-//#ifdef THREAD_DEBUG
-//        Serial.println("### Low G IMU thread entrance");
-//#endif
-//
-//        lowG.update();
-//
-//        chThdSleepMilliseconds(6);
-//    }
-//}
-
-///******************************************************************************/
-///* ORIENTATION THREAD                                                           */
-//
-//static THD_FUNCTION(orientation_THD, arg) {
-//    while (true) {
-//#ifdef THREAD_DEBUG
-//        Serial.println("### ORIENTATION thread entrance");
-//#endif
-//
-//        orientation.update();
-//
-//        chThdSleepMilliseconds(6);
-//    }
-//}
-
-/******************************************************************************/
-/* GAS SENSOR THREAD                                                           */
-
-//static THD_FUNCTION(gas_THD, arg) {
-//    while (true) {
-//#ifdef THREAD_DEBUG
-//        Serial.println("### Gas thread entrance");
-//#endif
-//
-//        gas.refresh();
-//
-//        chThdSleepMilliseconds(6);
-//    }
-//}
-
-///******************************************************************************/
-///* MAGNETOMETER THREAD                                                           */
-//
-//static THD_FUNCTION(magnetometer_THD, arg) {
-//    while (true) {
-//#ifdef THREAD_DEBUG
-//        Serial.println("### Magnetometer thread entrance");
-//#endif
-//
-//        magnetometer.update();
-//
-//        chThdSleepMilliseconds(6);
-//    }
-//}
-
-///******************************************************************************/
-///* BAROMETER THREAD                                                           */
-//
-//static THD_FUNCTION(barometer_THD, arg) {
-//    while (true) {
-//#ifdef THREAD_DEBUG
-//        Serial.println("### Barometer thread entrance");
-//#endif
-//
-//        barometer.refresh();
-//
-//        chThdSleepMilliseconds(6);
-//    }
-//}
-
-/******************************************************************************/
-/* HIGH G IMU THREAD                                                          */
-
-static THD_FUNCTION(highgIMU_THD, arg) {
-    while (true) {
-#ifdef THREAD_DEBUG
-        Serial.println("### High G IMU thread entrance");
-#endif
-        highG.update();
-
-        chThdSleepMilliseconds(20);  // highg reads at 50 hz
-    }
-}
-
 /******************************************************************************/
 /* SENSOR FAST THREAD                                                          */
 
+#ifdef ENABLE_SENSOR_FAST
+bool sensor_fast_start = false;
+
 static THD_FUNCTION(sensor_fast_THD, arg) {
+    sensor_fast_start = true;
+
     while (true) {
 #ifdef THREAD_DEBUG
         Serial.println("### Sensor fast thread entrance");
@@ -196,33 +134,42 @@ static THD_FUNCTION(sensor_fast_THD, arg) {
         gas.refresh();
         orientation.update();
         lowG.update();
+        voltage.read();
+        highG.update();
 
         chThdSleepMilliseconds(6);
     }
 }
+#endif
 
 /******************************************************************************/
 /* GPS THREAD                                                                 */
 
+#ifdef ENABLE_GPS
+bool gps_start = false;
+
 static THD_FUNCTION(gps_THD, arg) {
+    gps_start = true;
+
     while (true) {
 #ifdef THREAD_DEBUG
         Serial.println("### GPS thread entrance");
 #endif
         gps.update();
 
-#ifdef THREAD_DEBUG
-        Serial.println("### GPS thread exit");
-#endif
-
         chThdSleepMilliseconds(190);  // Read the gps @ ~5 Hz
     }
 }
+#endif
 
 /******************************************************************************/
 /* KALMAN FILTER THREAD                                                       */
 
+bool kalman_start = false;
+
 static THD_FUNCTION(kalman_THD, arg) {
+    kalman_start = true;
+
     kalmanFilter.Initialize();
 
     systime_t last = chVTGetSystemTime();
@@ -238,7 +185,11 @@ static THD_FUNCTION(kalman_THD, arg) {
 /******************************************************************************/
 /* SERVO CONTROL THREAD                                                       */
 
+bool servo_start = false;
+
 static THD_FUNCTION(servo_THD, arg) {
+    servo_start = true;
+
     activeController.init();
 
     while (true) {
@@ -252,23 +203,14 @@ static THD_FUNCTION(servo_THD, arg) {
 }
 
 /******************************************************************************/
-/* MPU COMMUNICATION THREAD                                                   */
-
-static THD_FUNCTION(voltage_THD, arg) {
-    while (true) {
-#ifdef THREAD_DEBUG
-        Serial.println("### voltage thread entrance");
-#endif
-        voltage.read();
-
-        chThdSleepMilliseconds(6);  // Set equal sleep time as the other threads, can change
-    }
-}
-
-/******************************************************************************/
 /* DATA LOGGER THREAD                                                   */
 
+#ifdef ENABLE_SD
+bool sd_start = false;
+
 static THD_FUNCTION(dataLogger_THD, arg) {
+    sd_start = true;
+
     while (true) {
 #ifdef THREAD_DEBUG
         Serial.println("Data Logging thread entrance");
@@ -279,11 +221,17 @@ static THD_FUNCTION(dataLogger_THD, arg) {
         chThdSleepMilliseconds(6);
     }
 }
+#endif
 
 /******************************************************************************/
 /* BUZZER THREAD                                                   */
 
+#ifdef ENABLE_BUZZER
+bool buzzer_start = false;
+
 static THD_FUNCTION(buzzer_THD, arg) {
+    buzzer_start = true;
+
     while (true) {
 #ifdef THREAD_DEBUG
         Serial.println("Buzzer thread entrance");
@@ -294,52 +242,91 @@ static THD_FUNCTION(buzzer_THD, arg) {
         chThdSleepMilliseconds(6);
     }
 }
+#endif
 
 #define THREAD_WA 4096
 
-//static THD_WORKING_AREA(barometer_WA, THREAD_WA);
+#ifdef ENABLE_GPS
 static THD_WORKING_AREA(gps_WA, THREAD_WA);
+#endif
 static THD_WORKING_AREA(rocket_FSM_WA, THREAD_WA);
-//static THD_WORKING_AREA(lowgIMU_WA, THREAD_WA);
-//static THD_WORKING_AREA(orientation_WA, THREAD_WA);
-//static THD_WORKING_AREA(gas_WA, THREAD_WA);
-//static THD_WORKING_AREA(magnetometer_WA, THREAD_WA);
-static THD_WORKING_AREA(highgIMU_WA, THREAD_WA);
 static THD_WORKING_AREA(servo_WA, THREAD_WA);
+#ifdef ENABLE_SD
 static THD_WORKING_AREA(dataLogger_WA, THREAD_WA);
-static THD_WORKING_AREA(voltage_WA, THREAD_WA);
+#endif
+#ifdef ENABLE_TELEMETRY
 static THD_WORKING_AREA(telemetry_sending_WA, THREAD_WA);
 static THD_WORKING_AREA(telemetry_buffering_WA, THREAD_WA);
+#endif
 static THD_WORKING_AREA(kalman_WA, THREAD_WA);
+#ifdef ENABLE_BUZZER
 static THD_WORKING_AREA(buzzer_WA, THREAD_WA);
+#endif
+#ifdef ENABLE_SENSOR_FAST
 static THD_WORKING_AREA(sensor_fast_WA, THREAD_WA);
+#endif
+
+#undef THREAD_WA
 
 #define START_THREAD(NAME) chThdCreateStatic(NAME##_WA, sizeof(NAME##_WA), NORMALPRIO + 1, NAME##_THD, nullptr)
+#define CHECK_THREAD(NAME, SHORT) do { Serial.print(" " SHORT ": "); Serial.print(NAME##_start ? "\u2713" : "\u2717"); all_passed &= NAME##_start; } while (0)
+
 /**
  * @brief Starts all of the threads.
  */
 void chSetup() {
+#ifdef ENABLE_TELEMETRY
     START_THREAD(telemetry_sending);
     START_THREAD(telemetry_buffering);
+#endif
     START_THREAD(rocket_FSM);
+#ifdef ENABLE_GPS
     START_THREAD(gps);
-//    START_THREAD(lowgIMU);
-//    START_THREAD(gas);
-//    START_THREAD(magnetometer);
-//    START_THREAD(orientation);
-//    START_THREAD(barometer);
+#endif
+#ifdef ENABLE_SENSOR_FAST
     START_THREAD(sensor_fast);
-    START_THREAD(highgIMU);
+#endif
     START_THREAD(servo);
+#ifdef ENABLE_SD
     START_THREAD(dataLogger);
-    START_THREAD(voltage);
+#endif
     START_THREAD(kalman);
+#ifdef ENABLE_BUZZER
     START_THREAD(buzzer);
+#endif
+
+    bool all_passed;
+    do {
+        all_passed = true;
+
+        Serial.print("Thread Starts:");
+#ifdef ENABLE_TELEMETRY
+        CHECK_THREAD(telemetry_sending, "TLMS");
+        CHECK_THREAD(telemetry_buffering, "TLMB");
+#endif
+        CHECK_THREAD(rocket_fsm, "FSM");
+#ifdef ENABLE_GPS
+        CHECK_THREAD(gps, "GPS");
+#endif
+#ifdef ENABLE_SENSOR_FAST
+        CHECK_THREAD(sensor_fast, "SF");
+#endif
+        CHECK_THREAD(servo, "SRV");
+#ifdef ENABLE_SD
+        CHECK_THREAD(sd, "SD");
+#endif
+        CHECK_THREAD(kalman, "KLMN");
+#ifdef ENABLE_BUZZER
+        CHECK_THREAD(buzzer, "BUZZ");
+#endif
+        Serial.println("");
+    } while (!all_passed);
 
     while (true)
         ;
 }
 
+#undef CHECK_THREAD
 #undef START_THREAD
 
 /**
@@ -389,17 +376,34 @@ void setup() {
     Wire.setSCL(MAXM10S_SDA);
     Wire.begin();
 
+#ifdef ENABLE_BAROMETER
     handleError(barometer.init());
+#endif
+#ifdef ENABLE_GAS
     handleError(gas.init());
+#endif
+#ifdef ENABLE_GPS
     handleError(gps.init());
+#endif
+#ifdef ENABLE_HIGH_G
     handleError(highG.init());
+#endif
+#ifdef ENABLE_LOW_G
     handleError(lowG.init());
+#endif
+#ifdef ENABLE_MAGNETOMETER
     handleError(magnetometer.init());
-    handleError(highG.init());
+#endif
+#ifdef ENABLE_ORIENTATION
     handleError(orientation.init());
+#endif
 
+#ifdef ENABLE_SD
     handleError(sd_logger.init());
+#endif
+#ifdef ENABLE_TELEMETRY
     handleError(tlm.init());
+#endif
 
 //    buzzer1.playSequence(0);
 
@@ -412,3 +416,5 @@ void setup() {
 void loop() {
     // not used
 }
+
+#undef ENABLE_SENSOR_FAST

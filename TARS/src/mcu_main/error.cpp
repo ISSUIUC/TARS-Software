@@ -10,7 +10,7 @@
  * RED, BLUE, ORANGE => RADIO
  * BLUE => MAGNETOMETER
  * BLUE, ORANGE => BNO,
- * NONE => Something is fucked
+ * NONE (and RED is flashing) => Something is fucked, call whoever wrote this code
  *
  * RED, 10 Hz => Connection Error
  * RED, 2 Hz => Initialization Error

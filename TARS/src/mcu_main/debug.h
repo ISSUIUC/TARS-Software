@@ -8,6 +8,9 @@
 #define ENABLE_HIGH_G
 #define ENABLE_LOW_G
 #define ENABLE_GPS
+#define ENABLE_GAS
 #define ENABLE_BAROMETER
+#define ENABLE_MAGNETOMETER
 #define ENABLE_SD
 #define ENABLE_TELEMETRY
+#define ENABLE_BUZZER
