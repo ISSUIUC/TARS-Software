@@ -105,6 +105,7 @@ void BuzzerController::playSequence(size_t sequence) {
 
 void BuzzerController::init() {
     float T = 500.0;
+    // Storing notes for startup
     const int spongebob[] = {
         NOTE_C5,
         NOTE_D5,
@@ -115,6 +116,8 @@ void BuzzerController::init() {
         NOTE_G4,
         NOTE_C5
     };
+    
+    // Storing delays as fraction of T where T represents a quarter note
     const float spongebob_delays[] = {
         T/3,
         T/3,
