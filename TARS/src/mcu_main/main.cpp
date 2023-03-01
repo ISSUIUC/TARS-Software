@@ -410,7 +410,7 @@ void setup() {
     handleError(tlm.init());
 #endif
 
-//    buzzer1.playSequence(0);
+   buzzer1.init();
 
     Serial.println("chibios begin");
     chBegin(chSetup);

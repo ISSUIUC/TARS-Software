@@ -103,6 +103,37 @@ void BuzzerController::playSequence(size_t sequence) {
     playing = true;
 }
 
+void BuzzerController::init() {
+    float T = 500.0;
+    const int spongebob[] = {
+        NOTE_C5,
+        NOTE_D5,
+        NOTE_E5,
+        NOTE_D5,
+        NOTE_E5,
+        NOTE_C5,
+        NOTE_G4,
+        NOTE_C5
+    };
+    const float spongebob_delays[] = {
+        T/3,
+        T/3,
+        T/3,
+        0.75*T,
+        0.25*T,
+        0.75*T,
+        0.25*T,
+        T
+    };
+
+    for (int i = 0; i < 8; i++) {
+        tone(15, note_frequencies[spongebob[i]]);
+        delay(spongebob_delays[i]);
+        noTone(15);
+    }
+}
+
+
 void BuzzerController::tick() {
     if (!playing) return;
 

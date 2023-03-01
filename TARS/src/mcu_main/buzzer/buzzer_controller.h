@@ -7,6 +7,7 @@ public:
     explicit BuzzerController(int pin, int8_t const* sequences);
 
     void playSequence(size_t sequence);
+    void init();
 
     void tick();
 
