@@ -297,6 +297,7 @@ void chSetup() {
 
     bool all_passed;
     do {
+        digitalWrite(LED_GREEN, HIGH);
         all_passed = true;
 
         Serial.print("Thread Starts:");
@@ -320,6 +321,10 @@ void chSetup() {
         CHECK_THREAD(buzzer, "BUZZ");
 #endif
         Serial.println("");
+
+        chThdSleepMilliseconds(200);
+        digitalWrite(LED_GREEN, LOW);
+        chThdSleepMilliseconds(200);
     } while (!all_passed);
 
     while (true)
