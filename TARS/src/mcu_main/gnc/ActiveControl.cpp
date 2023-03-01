@@ -109,7 +109,7 @@ void Controller::init() {
      * experimentally determined to be the position in which
      * the flaps are perfectly flush with the airframe.
      */
-    controller_servo_.write(180);
+    controller_servo_.write(90);
     chThdSleepMilliseconds(1000);
     controller_servo_.write(15);
     chThdSleepMilliseconds(1000);
