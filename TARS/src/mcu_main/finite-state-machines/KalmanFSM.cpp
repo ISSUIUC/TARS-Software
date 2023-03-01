@@ -36,18 +36,18 @@
 #include "mcu_main/gnc/kalmanFilter.h"
 #include "mcu_main/sensors/sensors.h"
 
-double getAltitudeAverage(size_t start, size_t len) {
+double KalmanFSM::getAltitudeAverage(size_t start, size_t len) {
     return KalmanFSM::getAverage(
         dataLogger.kalmanFifo, +[](KalmanData& k) { return (double)k.kalman_pos_x; }, start, len);
 }
 
-double getSecondDerivativeAltitudeAverage(size_t start, size_t len) {
+double KalmanFSM::getSecondDerivativeAltitudeAverage(size_t start, size_t len) {
     return KalmanFSM::getSecondDerivativeAverage(
         dataLogger.kalmanFifo, +[](KalmanData& k) { return (double)k.kalman_pos_x; },
         +[](KalmanData& k) { return k.timeStamp_state; }, start, len);
 }
 
-double getAccelerationAverage(size_t start, size_t len) {
+double KalmanFSM::getAccelerationAverage(size_t start, size_t len) {
     return KalmanFSM::getAverage(
         dataLogger.kalmanFifo, +[](KalmanData& k) { return (double)k.kalman_acc_x; }, start, len);
 }

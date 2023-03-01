@@ -5,8 +5,8 @@
  */
 
 #pragma once
-
-// Transition from boost to coast if low accleration detected for 300 ms
+#include <cmath>
+// Transition from boost to coast if low acceleration detected for 300 ms
 static const float coast_time_thresh = 300;
 
 // transition from coast to apogee if low velocity detected for 100ms
@@ -47,7 +47,7 @@ static const float main_acceleration_change_threshold_imu = 1.53;
 
 static const float main_acceleration_change_threshold_altimeter = 25.02;
 
-// how long before we force droge deploy
+// how long before we force drogue deploy
 static const float drogue_deploy_time_since_apogee_threshold = 10000;
 
 // how long before we force main deploy
@@ -58,3 +58,63 @@ static const float landing_altimeter_threshold = .5;
 
 // how long we wait to let the buffers cycle
 static const float refresh_timer = 500;
+
+// start angle
+static const float ang_start = 0;
+
+// launch site error
+static const float alt_error = 20;
+
+// idle acceleration error
+static const float acc_error = 0.75;
+
+// idle angle error
+static const float ang_error = 45/180.0 * M_PI;
+
+// idle velocity error
+static const float vel_error = 5;
+
+//boost acceleration tolerance
+static const float boost_to_coast_acceleration = 1;
+
+//lower bound for allowable acceleration for boost
+
+static const float drogue_to_main_acceleration = -4;
+//lower bound for allowable accerleation for boost
+static const float boost_acc_thresh = 1;
+
+//bounds for allowable angle for boost (radians)
+static const float boost_ang_thresh = 85/180.0 * M_PI;
+
+// coast gnc angle threshold
+static const float coast_gnc_thresh = 30/180.0 * M_PI;
+
+// main angle bottom threshold
+static const float main_ang_thresh_bottom = 95/180.0 * M_PI;
+
+// main angle bottom threshold
+static const float main_ang_thresh_top = -95/180.0 * M_PI;
+
+// drogue angle bottom threshold
+static const float drogue_ang_thresh_bottom = 95/180.0 * M_PI;
+
+// drogue angle bottom threshold
+static const float drogue_ang_thresh_top = -95/180.0 * M_PI;
+
+// drogue acceleration bottom threshold
+static const float drogue_acc_bottom = -4;
+
+// drogue acceleration bottom threshold
+static const float drogue_acc_top = 1;
+
+// main acceleration top threshold
+static const float main_acc_top = -4;
+
+//acceleration to go from apogee to separation
+static const float apogee_to_separation_acceleration = 4;
+
+//acceleration to go from separation to drogue
+static const float separation_to_drogue_acceleration = -0.5;
+
+//lower bound for allowable acceleration for separation
+static const float separation_acc_thresh = 4;
