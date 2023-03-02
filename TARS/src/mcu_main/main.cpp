@@ -328,6 +328,7 @@ void chSetup() {
     } while (!all_passed);
     // buzzer1.init_sponge();
     buzzer1.init_mario();
+    buzzer1.playSequence(0);
     while (true)
         ;
 }
