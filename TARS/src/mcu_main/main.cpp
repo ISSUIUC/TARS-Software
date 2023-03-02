@@ -326,8 +326,8 @@ void chSetup() {
         digitalWrite(LED_GREEN, LOW);
         chThdSleepMilliseconds(200);
     } while (!all_passed);
-    // buzzer1.init_sponge();
-    buzzer1.init_mario();
+    buzzer1.init_sponge();
+    // buzzer1.init_mario();
     while (true)
         ;
 }

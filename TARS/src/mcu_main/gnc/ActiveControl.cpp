@@ -18,7 +18,7 @@ Controller activeController;
  * 
  * Initializes a PWMServo object and sets the angle limits for the ServoControl object
 */
-Controller::Controller() : activeControlServos(&controller_servo_, 30, 110) {}
+Controller::Controller() : activeControlServos(&controller_servo_, 35, 105) {}
 
 void Controller::ctrlTickFunction() {
     chMtxLock(&kalmanFilter.mutex);
