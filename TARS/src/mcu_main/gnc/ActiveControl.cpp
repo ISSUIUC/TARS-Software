@@ -115,9 +115,9 @@ void Controller::init() {
      * the flaps are perfectly flush with the airframe.
      */
     
-    controller_servo_.write(110);
+    controller_servo_.write(activeControlServos.max_angle);
     chThdSleepMilliseconds(1000);
-    controller_servo_.write(30);
+    controller_servo_.write(activeControlServos.max_angle);
     chThdSleepMilliseconds(1000);
 
 
