@@ -13,7 +13,12 @@
 
 Controller activeController;
 
-Controller::Controller() : activeControlServos(&controller_servo_, 10, 90) {}
+/**
+ * @brief Initializes the Servos for either drag or roll control
+ * 
+ * Initializes a PWMServo object and sets the angle limits for the ServoControl object
+*/
+Controller::Controller() : activeControlServos(&controller_servo_, 30, 110) {}
 
 void Controller::ctrlTickFunction() {
     chMtxLock(&kalmanFilter.mutex);
@@ -105,21 +110,14 @@ void Controller::init() {
 
     /*
      * Startup sequence
-     * 15 degrees written to servo since this was
+     * 30 degrees written to servo since this was
      * experimentally determined to be the position in which
      * the flaps are perfectly flush with the airframe.
      */
-
-    // for (int i = 0; i < 19; i++) {
-    //     controller_servo_.write(i * 10);
-    //     Serial.println(i);
-    //     chThdSleepMilliseconds(2000);
-    //     // controller_servo_.
-    // }
     
-    controller_servo_.write(90);
+    controller_servo_.write(110);
     chThdSleepMilliseconds(1000);
-    controller_servo_.write(0);
+    controller_servo_.write(30);
     chThdSleepMilliseconds(1000);
 
 
