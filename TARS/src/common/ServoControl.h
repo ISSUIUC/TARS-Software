@@ -9,9 +9,10 @@ class ServoControl {
     ServoControl(PWMServo* servo, int min, int max);
     void servoActuation(float length);
 
+    int min_angle;
+    int max_angle;
+
    private:
     PWMServo* servo_;
     void roundOffAngle(float& value);
-    int min_angle;
-    int max_angle;
 };
