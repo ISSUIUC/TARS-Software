@@ -3,6 +3,7 @@
 #include "mcu_main/finite-state-machines/thresholds.h"
 #include "mcu_main/sensors/sensors.h"
 #include "mcu_main/dataLog.h"
+#include "mcu_main/debug.h"
 
 double ModularFSM::getAltitudeAverage(size_t start, size_t len) {
     return ModularFSM::getAverage(
@@ -271,28 +272,31 @@ bool ModularFSM::landedStateCheck(){
 }
 
 void ModularFSM::tickFSM(){
-    Serial.print("Current State: ");
-    Serial.println((int) rocket_state_);
-    Serial.print("Last State: ");
-    Serial.println((int) last_state_);
-    //lock mutexes
     chMtxLock(&orientation.mutex);
     chMtxLock(&highG.mutex);
     chMtxLock(&barometer.mutex);
+    #ifdef FSM_DEBUG
+        Serial.print("Current State: ");
+        Serial.println((int) rocket_state_);
+        Serial.print("Last State: ");
+        Serial.println((int) last_state_);
+        //lock mutexes
+        
 
-    Serial.print("altitude: ");
-    Serial.println(barometer.getAltitude());
-    Serial.print("acceleration: ");
-    Serial.println(highG.getAccel().az);
-    Serial.print("pitch: ");
-    Serial.println(orientation.getEuler().pitch);
-    Serial.print("yaw: ");
-    Serial.println(orientation.getEuler().yaw);
-    Serial.print("velocity: ");
-    Serial.println(getAltitudeAverage(0, 3) - getAltitudeAverage(3, 3));
+        Serial.print("altitude: ");
+        Serial.println(barometer.getAltitude());
+        Serial.print("acceleration: ");
+        Serial.println(highG.getAccel().az);
+        Serial.print("pitch: ");
+        Serial.println(orientation.getEuler().pitch);
+        Serial.print("yaw: ");
+        Serial.println(orientation.getEuler().yaw);
+        Serial.print("velocity: ");
+        Serial.println(getAltitudeAverage(0, 3) - getAltitudeAverage(3, 3));
 
-    Serial.print("launch site altitude: ");
-    Serial.println(launch_site_altitude_);
+        Serial.print("launch site altitude: ");
+        Serial.println(launch_site_altitude_);
+    #endif FSM_DEBUG
 
     switch(rocket_state_){
         //include a case for init?
