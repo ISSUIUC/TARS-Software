@@ -119,7 +119,7 @@ void Controller::init() {
     
     controller_servo_.write(90);
     chThdSleepMilliseconds(1000);
-    controller_servo_.write(10);
+    controller_servo_.write(0);
     chThdSleepMilliseconds(1000);
 
 

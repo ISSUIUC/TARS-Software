@@ -91,8 +91,8 @@ void OrientationSensor::quaternionToEuler(float qr, float qi, float qj, float qk
     float sqj = sq(qj);
     float sqk = sq(qk);
 
-    _orientationEuler.yaw = atan2(2.0 * (qi * qj + qk * qr), (sqi - sqj - sqk + sqr));
-    _orientationEuler.roll = asin(-2.0 * (qi * qk - qj * qr) / (sqi + sqj + sqk + sqr));
+    _orientationEuler.roll = atan2(2.0 * (qi * qj + qk * qr), (sqi - sqj - sqk + sqr));
+    _orientationEuler.yaw = asin(-2.0 * (qi * qk - qj * qr) / (sqi + sqj + sqk + sqr));
     _orientationEuler.pitch = -1 * atan2(2.0 * (qj * qk + qi * qr), (-sqi - sqj + sqk + sqr));
 }
 
