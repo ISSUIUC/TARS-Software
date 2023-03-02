@@ -326,7 +326,7 @@ void chSetup() {
         digitalWrite(LED_GREEN, LOW);
         chThdSleepMilliseconds(200);
     } while (!all_passed);
-
+    buzzer1.init();
     while (true)
         ;
 }
@@ -410,10 +410,11 @@ void setup() {
     handleError(tlm.init());
 #endif
 
-   buzzer1.init();
+   
 
     Serial.println("chibios begin");
     chBegin(chSetup);
+
     while (true)
         ;
 }
