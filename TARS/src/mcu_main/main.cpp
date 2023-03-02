@@ -378,7 +378,7 @@ void setup() {
     digitalWrite(LIS3MDL_CS, HIGH);
 
     Wire.setSCL(MAXM10S_SCL);
-    Wire.setSCL(MAXM10S_SDA);
+    Wire.setSDA(MAXM10S_SDA);
     Wire.begin();
 
 #ifdef ENABLE_BAROMETER
