@@ -326,7 +326,7 @@ void chSetup() {
         digitalWrite(LED_GREEN, LOW);
         chThdSleepMilliseconds(200);
     } while (!all_passed);
-    buzzer1.init();
+    // buzzer1.init();
     while (true)
         ;
 }

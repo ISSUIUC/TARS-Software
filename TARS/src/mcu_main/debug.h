@@ -2,7 +2,7 @@
 
 //#define THREAD_DEBUG
 // #define SERIAL_PLOTTING
-#define WAIT_SERIAL
+// #define WAIT_SERIAL
 // #define FSM_DEBUG
 
 #define ENABLE_ORIENTATION

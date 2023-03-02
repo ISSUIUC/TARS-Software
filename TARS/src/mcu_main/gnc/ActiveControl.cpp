@@ -10,6 +10,7 @@
 
 #include "mcu_main/finite-state-machines/rocketFSM.h"
 #include "mcu_main/gnc/kalmanFilter.h"
+#include "mcu_main/buzzer/buzzer.h"
 
 Controller activeController;
 
@@ -105,6 +106,14 @@ void Controller::setLaunchPadElevation() {
     apogee_des_msl = apogee_des_agl + launch_pad_alt;
 }
 
+void buzz_count(int n) {
+    for (int i = 0; i < n; i++) {
+        tone(15, 200);
+        delay(100);
+        noTone(15);
+        delay(50);
+    }
+}
 void Controller::init() {
     controller_servo_.attach(AC_SERVO_PIN, 770, 2250);
 
@@ -115,47 +124,60 @@ void Controller::init() {
      * the flaps are perfectly flush with the airframe.
      */
     
-    char curr_val = '0';
-    int angle = 30;
+    int angle;
     while (1) {
-        if (Serial.available()) {
-            char serial_data = Serial.read();
-            if (serial_data != 10) {
-                curr_val = serial_data;
+        for (int i = 3; i <= 11; i++) {
+            buzz_count(i);
+            if (i == 3) {
+                angle = 35;
+            } else {
+                angle = i * 10;
             }
+            controller_servo_.write(i * 10);
+            delay(10000);
         }
-        delay(1000);
-        switch(curr_val) {
-            case '1':
-                angle = 30;
-                break;
-            case '2':
-                angle = 40;
-                break;
-            case '3':
-                angle = 50;
-                break;
-            case '4':
-                angle = 60;
-                break;
-            case '5':
-                angle = 70;
-                break;
-            case '6':
-                angle = 80;
-                break;
-            case '7':
-                angle= 90;
-                break;
-            case '8':
-                angle = 100;
-                break;
-            case '9':
-                angle = 110;
-                break;
-        }
-        controller_servo_.write(angle);
     }
+    // char curr_val = '0';
+    // int angle = 30;
+    // while (1) {
+    //     if (Serial.available()) {
+    //         char serial_data = Serial.read();
+    //         if (serial_data != 10) {
+    //             curr_val = serial_data;
+    //         }
+    //     }
+    //     delay(1000);
+    //     switch(curr_val) {
+    //         case '1':
+    //             angle = 30;
+    //             break;
+    //         case '2':
+    //             angle = 40;
+    //             break;
+    //         case '3':
+    //             angle = 50;
+    //             break;
+    //         case '4':
+    //             angle = 60;
+    //             break;
+    //         case '5':
+    //             angle = 70;
+    //             break;
+    //         case '6':
+    //             angle = 80;
+    //             break;
+    //         case '7':
+    //             angle= 90;
+    //             break;
+    //         case '8':
+    //             angle = 100;
+    //             break;
+    //         case '9':
+    //             angle = 110;
+    //             break;
+    //     }
+    //     controller_servo_.write(angle);
+    // }
 
 
     setLaunchPadElevation();
