@@ -181,111 +181,161 @@ void Telemetry::transmit() {
 #endif
 }
 
-void Telemetry::serialPrint(const sensorDataStruct_t &sensor_data) {
-    Serial.print(R"({"type": "data", "value": {)");
-    Serial.print(R"("response_ID":)");
-    Serial.print(000);
-    Serial.print(',');
-    Serial.print(R"("gps_lat":)");
-    Serial.print(0);
-    Serial.print(",");
-    Serial.print(R"("gps_long":)");
-    Serial.print(0);
-    Serial.print(",");
-    Serial.print(R"("gps_alt":)");
-    Serial.print(0);
-    Serial.print(",");
-    Serial.print(R"("barometer_alt":)");
-    Serial.print(sensor_data.barometer_data.altitude, 5);
-    Serial.print(',');
-    Serial.print(R"("KX_IMU_ax":)");
-    Serial.print(sensor_data.highG_data.hg_ax, 5);
-    Serial.print(',');
-    Serial.print(R"("KX_IMU_ay":)");
-    Serial.print(sensor_data.highG_data.hg_ay, 5);
-    Serial.print(',');
-    Serial.print(R"("KX_IMU_az":)");
-    Serial.print(sensor_data.highG_data.hg_az, 5);
-    Serial.print(',');
-    // Serial.print(R"("H3L_IMU_ax":)"); Serial.print(data.H3L_IMU_ax);
-    // Serial.print(','); Serial.print(R"("H3L_IMU_ay":)");
-    // Serial.print(data.H3L_IMU_ay); Serial.print(',');
-    // Serial.print(R"("H3L_IMU_az":)"); Serial.print(data.H3L_IMU_az);
-    // Serial.print(',');
-    Serial.print(R"("LSM_IMU_ax":)");
-    Serial.print(sensor_data.lowG_data.ax, 5);
-    Serial.print(',');
-    Serial.print(R"("LSM_IMU_ay":)");
-    Serial.print(sensor_data.lowG_data.ay, 5);
-    Serial.print(',');
-    Serial.print(R"("LSM_IMU_az":)");
-    Serial.print(sensor_data.lowG_data.az, 5);
-    Serial.print(',');
-    Serial.print(R"("LSM_IMU_gx":)");
-    Serial.print(sensor_data.lowG_data.gx, 5);
-    Serial.print(',');
-    Serial.print(R"("LSM_IMU_gy":)");
-    Serial.print(sensor_data.lowG_data.gy, 5);
-    Serial.print(',');
-    Serial.print(R"("LSM_IMU_gz":)");
-    Serial.print(sensor_data.lowG_data.gz, 5);
-    Serial.print(',');
-//    Serial.print(R"("LSM_IMU_mx":)");
-//    Serial.print(sensor_data.lowG_data.mx, 5);
-//    Serial.print(',');
-//    Serial.print(R"("LSM_IMU_my":)");
-//    Serial.print(sensor_data.lowG_data.my, 5);
-//    Serial.print(',');
-//    Serial.print(R"("LSM_IMU_mz":)");
-//    Serial.print(sensor_data.lowG_data.mz, 5);
-//    Serial.print(',');
-    Serial.print(R"("FSM_state":)");
-    Serial.print(1);
-    Serial.print(',');
-    Serial.print(R"("sign":")");
-    Serial.print("SIGN");
-    Serial.print("\",");
-    Serial.print(R"("RSSI":)");
-    Serial.print(rf95.lastRssi());
-    Serial.print(',');
-    Serial.print(R"("Voltage":)");
-    Serial.print(sensor_data.voltage_data.v_battery, 5);
-    Serial.print(',');
-    Serial.print(R"("frequency":)");
-    Serial.print(RF95_FREQ);
-    Serial.print(',');
-    Serial.print(R"("flap_extension":)");
-    Serial.print(sensor_data.flap_data.extension, 5);
-    Serial.print(",");
-    Serial.print(R"("STE_ALT":)");
-    Serial.print(sensor_data.kalman_data.kalman_pos_x, 5);
-    Serial.print(",");
-    Serial.print(R"("STE_VEL":)");
-    Serial.print(sensor_data.kalman_data.kalman_vel_x, 5);
-    Serial.print(",");
-    Serial.print(R"("STE_ACC":)");
-    Serial.print(sensor_data.kalman_data.kalman_acc_x, 5);
-    Serial.print(",");
-    Serial.print(R"("TEMP":)");
-    Serial.print(sensor_data.barometer_data.temperature);
-    Serial.print(",");
-    Serial.print(R"("pressure":)");
-    Serial.print(sensor_data.barometer_data.pressure, 5);
-    Serial.print(",");
-    Serial.print(R"("mx":)");
-    Serial.print(sensor_data.magnetometer_data.magnetometer.mx, 5);
-    Serial.print(",");
-    Serial.print(R"("my":)");
-    Serial.print(sensor_data.magnetometer_data.magnetometer.my, 5);
-    Serial.print(",");
-    Serial.print(R"("mz":)");
-    Serial.print(sensor_data.magnetometer_data.magnetometer.mz, 5);
-    Serial.print(",");
-    Serial.print(R"("STE_APO":)");
-    Serial.print(sensor_data.kalman_data.kalman_apo, 5);
-    Serial.print("");
+void printFloat(float f, int precision = 5) {
+    if (isinf(f) || isnan(f)) {
+        Serial.print(-1);
+    } else {
+        Serial.print(f, precision);
+    }
+}
 
-    Serial.println("}}\n");
+void printJSONField(const char * name, float val, bool comma=true){
+    Serial.print('\"');
+    Serial.print(name);
+    Serial.print("\":");
+    printFloat(val);
+    if(comma) Serial.print(',');
+}
+
+void printJSONField(const char * name, int val, bool comma=true){
+    Serial.print('\"');
+    Serial.print(name);
+    Serial.print("\":");
+    Serial.print(val);
+    if(comma) Serial.print(',');
+}
+
+void printJSONField(const char * name, const char * val, bool comma=true){
+    Serial.print('\"');
+    Serial.print(name);
+    Serial.print("\":\"");
+    Serial.print(val);
+    Serial.print('"');
+    if(comma) Serial.print(',');
+}
+void Telemetry::serialPrint(const sensorDataStruct_t &sensor_data) {
+     Serial.print(R"({"type": "data", "value": {)");
+    printJSONField("response_ID", -1);
+    printJSONField("gps_lat", sensor_data.gps_data.latitude);
+    printJSONField("gps_long", sensor_data.gps_data.longitude);
+    printJSONField("gps_alt", sensor_data.gps_data.altitude);
+    printJSONField("KX_IMU_ax", sensor_data.highG_data.hg_ax);
+    printJSONField("KX_IMU_ay", sensor_data.highG_data.hg_ay);
+    printJSONField("KX_IMU_az", sensor_data.highG_data.hg_az);
+    printJSONField("IMU_gx", sensor_data.lowG_data.gx);
+    printJSONField("IMU_gy", sensor_data.lowG_data.gy);
+    printJSONField("IMU_gz", sensor_data.lowG_data.az);
+    printJSONField("IMU_mx", sensor_data.magnetometer_data.magnetometer.mx);
+    printJSONField("IMU_my", sensor_data.magnetometer_data.magnetometer.my);
+    printJSONField("IMU_mz", sensor_data.magnetometer_data.magnetometer.mz);
+    printJSONField("FSM_state", (int)sensor_data.rocketState_data.rocketStates[0]);
+    printJSONField("sign", "NOSIGN");
+    printJSONField("RSSI", rf95.lastRssi());
+    printJSONField("Voltage", sensor_data.voltage_data.v_battery);
+    printJSONField("frequency", -1);
+    printJSONField("flap_extension", sensor_data.flap_data.extension);
+    printJSONField("STE_ALT", sensor_data.kalman_data.kalman_pos_x);
+    printJSONField("STE_VEL", sensor_data.kalman_data.kalman_vel_x);
+    printJSONField("STE_ACC", sensor_data.kalman_data.kalman_acc_x);
+    printJSONField("STE_APO", sensor_data.kalman_data.kalman_apo);
+    printJSONField("BNO_YAW", sensor_data.orientation_data.angle.yaw);
+    printJSONField("BNO_PITCH", sensor_data.orientation_data.angle.pitch);
+    printJSONField("BNO_ROLL", sensor_data.orientation_data.angle.roll);
+    printJSONField("TEMP", sensor_data.barometer_data.temperature);
+    printJSONField("pressure", sensor_data.barometer_data.pressure, false);
+    Serial.println("}}");
+    // Serial.print(R"({"type": "data", "value": {)");
+    // Serial.print(R"("response_ID":)");
+    // Serial.print(000);
+    // Serial.print(',');
+    // Serial.print(R"("gps_lat":)");
+    // Serial.print(0);
+    // Serial.print(",");
+    // Serial.print(R"("gps_long":)");
+    // Serial.print(0);
+    // Serial.print(",");
+    // Serial.print(R"("gps_alt":)");
+    // Serial.print(0);
+    // Serial.print(",");
+    // Serial.print(R"("barometer_alt":)");
+    // Serial.print(sensor_data.barometer_data.altitude, 5);
+    // Serial.print(',');
+    // Serial.print(R"("KX_IMU_ax":)");
+    // Serial.print(sensor_data.highG_data.hg_ax, 5);
+    // Serial.print(',');
+    // Serial.print(R"("KX_IMU_ay":)");
+    // Serial.print(sensor_data.highG_data.hg_ay, 5);
+    // Serial.print(',');
+    // Serial.print(R"("KX_IMU_az":)");
+    // Serial.print(sensor_data.highG_data.hg_az, 5);
+    // Serial.print(',');
+
+    // Serial.print(R"("LSM_IMU_ax":)");
+    // Serial.print(sensor_data.lowG_data.ax, 5);
+    // Serial.print(',');
+    // Serial.print(R"("LSM_IMU_ay":)");
+    // Serial.print(sensor_data.lowG_data.ay, 5);
+    // Serial.print(',');
+    // Serial.print(R"("LSM_IMU_az":)");
+    // Serial.print(sensor_data.lowG_data.az, 5);
+    // Serial.print(',');
+    // Serial.print(R"("LSM_IMU_gx":)");
+    // Serial.print(sensor_data.lowG_data.gx, 5);
+    // Serial.print(',');
+    // Serial.print(R"("LSM_IMU_gy":)");
+    // Serial.print(sensor_data.lowG_data.gy, 5);
+    // Serial.print(',');
+    // Serial.print(R"("LSM_IMU_gz":)");
+    // Serial.print(sensor_data.lowG_data.gz, 5);
+    // Serial.print(',');
+
+    // Serial.print(R"("FSM_state":)");
+    // Serial.print(1);
+    // Serial.print(',');
+    // Serial.print(R"("sign":")");
+    // Serial.print("SIGN");
+    // Serial.print("\",");
+    // Serial.print(R"("RSSI":)");
+    // Serial.print(rf95.lastRssi());
+    // Serial.print(',');
+    // Serial.print(R"("Voltage":)");
+    // Serial.print(sensor_data.voltage_data.v_battery, 5);
+    // Serial.print(',');
+    // Serial.print(R"("frequency":)");
+    // Serial.print(RF95_FREQ);
+    // Serial.print(',');
+    // Serial.print(R"("flap_extension":)");
+    // Serial.print(sensor_data.flap_data.extension, 5);
+    // Serial.print(",");
+    // Serial.print(R"("STE_ALT":)");
+    // Serial.print(sensor_data.kalman_data.kalman_pos_x, 5);
+    // Serial.print(",");
+    // Serial.print(R"("STE_VEL":)");
+    // Serial.print(sensor_data.kalman_data.kalman_vel_x, 5);
+    // Serial.print(",");
+    // Serial.print(R"("STE_ACC":)");
+    // Serial.print(sensor_data.kalman_data.kalman_acc_x, 5);
+    // Serial.print(",");
+    // Serial.print(R"("TEMP":)");
+    // Serial.print(sensor_data.barometer_data.temperature);
+    // Serial.print(",");
+    // Serial.print(R"("pressure":)");
+    // Serial.print(sensor_data.barometer_data.pressure, 5);
+    // Serial.print(",");
+    // Serial.print(R"("mx":)");
+    // Serial.print(sensor_data.magnetometer_data.magnetometer.mx, 5);
+    // Serial.print(",");
+    // Serial.print(R"("my":)");
+    // Serial.print(sensor_data.magnetometer_data.magnetometer.my, 5);
+    // Serial.print(",");
+    // Serial.print(R"("mz":)");
+    // Serial.print(sensor_data.magnetometer_data.magnetometer.mz, 5);
+    // Serial.print(",");
+    // Serial.print(R"("STE_APO":)");
+    // Serial.print(sensor_data.kalman_data.kalman_apo, 5);
+    // Serial.print("");
+
+    // Serial.println("}}\n");
 }
 
 TelemetryPacket Telemetry::makePacket(const sensorDataStruct_t &data_struct) {
