@@ -115,10 +115,47 @@ void Controller::init() {
      * the flaps are perfectly flush with the airframe.
      */
     
-    controller_servo_.write(110);
-    chThdSleepMilliseconds(1000);
-    controller_servo_.write(30);
-    chThdSleepMilliseconds(1000);
+    char curr_val = '0';
+    int angle = 30;
+    while (1) {
+        if (Serial.available()) {
+            char serial_data = Serial.read();
+            if (serial_data != 10) {
+                curr_val = serial_data;
+            }
+        }
+        delay(1000);
+        switch(curr_val) {
+            case '1':
+                angle = 30;
+                break;
+            case '2':
+                angle = 40;
+                break;
+            case '3':
+                angle = 50;
+                break;
+            case '4':
+                angle = 60;
+                break;
+            case '5':
+                angle = 70;
+                break;
+            case '6':
+                angle = 80;
+                break;
+            case '7':
+                angle= 90;
+                break;
+            case '8':
+                angle = 100;
+                break;
+            case '9':
+                angle = 110;
+                break;
+        }
+        controller_servo_.write(angle);
+    }
 
 
     setLaunchPadElevation();

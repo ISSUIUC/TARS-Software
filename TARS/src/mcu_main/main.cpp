@@ -346,6 +346,7 @@ void setup() {
     while (!Serial);
 #endif
     Serial.println("Starting SPI...");
+    
 
     SPI.begin();
     SPI.setMOSI(SPI_MOSI);
