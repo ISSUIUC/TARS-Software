@@ -103,7 +103,7 @@ void BuzzerController::playSequence(size_t sequence) {
     playing = true;
 }
 
-void BuzzerController::init() {
+void BuzzerController::init_sponge() {
     float T = 500.0;
     // Storing notes for startup
     const int spongebob[] = {
@@ -132,6 +132,38 @@ void BuzzerController::init() {
     for (int i = 0; i < 8; i++) {
         tone(15, note_frequencies[spongebob[i]]);
         delay(spongebob_delays[i]);
+        noTone(15);
+    }
+}
+
+void BuzzerController::init_mario() {
+    float T = 500.0;
+    const int mario[] = {
+        NOTE_C5,
+        NOTE_C5,
+        REST,
+        NOTE_C5,
+        REST,
+        NOTE_GS4,
+        NOTE_C5,
+        NOTE_DS5,
+        NOTE_DS4
+    };
+
+    const float mario_delays[] = {
+        T/4,
+        T/4,
+        T/4,
+        T/4,
+        T/4,
+        T/4,
+        T/2,
+        T,
+        T
+    };
+    for (int i = 0; i < 8; i++) {
+        tone(15, note_frequencies[mario[i]]);
+        delay(mario_delays[i]);
         noTone(15);
     }
 }
