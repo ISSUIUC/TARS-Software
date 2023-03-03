@@ -178,9 +178,9 @@ static THD_FUNCTION(kalman_THD, arg) {
 #ifdef THREAD_DEBUG
         Serial.println("### Kalman thread entrance");
 #endif
-        Serial.println("entering tick");
+        // Serial.println("entering tick");
         kalmanFilter.kfTickFunction(TIME_I2MS(chVTGetSystemTime() - last), 13.0);
-        Serial.println("exiting tick");
+        // Serial.println("exiting tick");
         // Serial.println(TIME_I2MS(chVTGetSystemTime() - last));
         last = chVTGetSystemTime();
 
