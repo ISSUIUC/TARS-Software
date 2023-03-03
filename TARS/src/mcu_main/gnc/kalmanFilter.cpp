@@ -406,16 +406,14 @@ void KalmanFilter::priori() {
  */
 void KalmanFilter::update() {
     if (getActiveFSM().getFSMState() == FSM_State::STATE_LAUNCH_DETECT) {
-        float cur_reading;
         float sum = 0;
-        while (alt_buffer.read(cur_reading)) {
-            sum += cur_reading;
+        float data[10];
+        alt_buffer.readSlice(data, 0, 10);
+        for (float i : data) {
+            sum += i;
         }
-        sum = sum / 10.0;
-        setState((KalmanState){sum, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0});
-    }
-    
-    if (getActiveFSM().getFSMState() >= FSM_State::STATE_APOGEE) {
+        setState((KalmanState){sum / 10.0f, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0});
+    } else if (getActiveFSM().getFSMState() >= FSM_State::STATE_APOGEE) {
         H(1, 2) = 0;
     }
 

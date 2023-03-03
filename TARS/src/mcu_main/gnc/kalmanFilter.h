@@ -66,7 +66,7 @@ class KalmanFilter {
     Eigen::Matrix<float, 3, 1> init_accel = Eigen::Matrix<float, 3, 1>::Zero();
     Eigen::Matrix<float, 3, 1> world_accel;
 
-        FifoBuffer<float, 10> alt_buffer;
+    FifoBuffer<float, 10> alt_buffer;
 
     Eigen::Matrix<float, 9, 1> x_k = Eigen::Matrix<float, 9, 1>::Zero();
     Eigen::Matrix<float, 9, 9> F_mat = Eigen::Matrix<float, 9, 9>::Zero();

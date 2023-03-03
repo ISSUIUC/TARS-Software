@@ -8,7 +8,7 @@
 class MagnetometerSensor {
 public:
     void update();
-    ErrorCode init();
+    ErrorCode __attribute__((warn_unused_result)) init();
 
     Magnetometer getMagnetometer();
 

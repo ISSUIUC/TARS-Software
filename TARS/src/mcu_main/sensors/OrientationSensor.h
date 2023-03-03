@@ -36,7 +36,7 @@ class OrientationSensor {
     explicit OrientationSensor(Adafruit_BNO08x const& imu);
 
     void update();
-    ErrorCode init();
+    ErrorCode __attribute__((warn_unused_result)) init();
 
     void setIMU(Adafruit_BNO08x const& imu);
     Acceleration getAccelerations();
