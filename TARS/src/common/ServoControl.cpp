@@ -49,7 +49,7 @@ void ServoControl::servoActuation(float length) {
 
     // if (length < 0) length = 0;
     // if (length > 0.018) length = 0.018;
-    float angle = ((180 / 3.1415) * asin((length * 1000 + 2) / 20) + 30) / 0.69;
+    float angle = (((180 / 3.1415) * asin((length - D)) / A) - C) / B;
 
     // Maps the length to an angle based on calibration
     // float angle = -0.035 + 1.09 * pow(10, 3) * length +
