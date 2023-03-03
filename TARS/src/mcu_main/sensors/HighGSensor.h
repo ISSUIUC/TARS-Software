@@ -8,6 +8,16 @@
 #include "common/packet.h"
 
 #include "mcu_main/error.h"
+/**
+* 
+* @class HighGSensor
+* 
+* @brief This class initializes and controls the HighG sensor. One can obtain data using the functions provided in the class.
+* 
+* Currently the chip select is given to the default constructor using the
+* QuiicKX132. Using this class one can obtain the current acceleration. 
+* The range on the high-g sensor is better than the low-g sensor, with a range higher than could reasonably be obtained.
+*/
 
 struct HighGSensor {
    public:
