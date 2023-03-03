@@ -50,7 +50,7 @@ void KalmanFilter::SetQ(float dt, float sd) {
 void KalmanFilter::SetF(float dt) {
     for (int i = 0; i < 3; i++) {
         F_mat(3 * i, 3 * i + 1) = s_dt;
-        F_mat(3 * i, 3 * i + 1) = (s_dt * s_dt) / 2;
+        F_mat(3 * i, 3 * i + 2) = (s_dt * s_dt) / 2;
         F_mat(3 * i + 1, 3 * i + 2) = s_dt;
 
         F_mat(3 * i, 3 * i) = 1;
@@ -66,13 +66,59 @@ void KalmanFilter::SetF(float dt) {
  * @param sd Spectral density of the noise
  */
 void KalmanFilter::kfTickFunction(float dt, float sd) {
-    if (getActiveFSM().getFSMState() > FSM_State::STATE_IDLE) {
-        SetF(float(dt) / 1000);
-        SetQ(float(dt) / 1000, sd);
+    if (getActiveFSM().getFSMState() >= FSM_State::STATE_IDLE) {
+        // SetF(float(dt) / 1000);
+        // SetQ(float(dt) / 1000, sd);
         priori();
-        priori_r();
         update();
-        update_r();
+
+        chMtxLock(&mutex);
+        chMtxLock(&orientation.mutex);
+
+        // Serial.print("Kalman rotational: ");
+        // Serial.print(x_k_r(0,0) * 180 / M_PI);
+        // Serial.print(", ");
+        // Serial.print(x_k_r(1,0) * 180 / M_PI);
+        // Serial.print(", ");
+        // Serial.print(x_k_r(2,0) * 180 / M_PI);
+        // Serial.print(", ");
+        // Serial.print(x_k_r(3, 0) * 180 / M_PI);
+        // Serial.print(", ");
+        // Serial.print(x_k_r(4, 0) * 180 / M_PI);
+        // Serial.print(", ");
+        // Serial.print(x_k_r(5, 0) * 180 / M_PI);
+        // Serial.print(", ");
+        // Serial.print(x_k_r(6, 0) * 180 / M_PI);
+        // Serial.print(", ");
+        // Serial.print(x_k_r(7, 0) * 180 / M_PI);
+        // Serial.print(", ");
+        // Serial.print(x_k_r(8, 0) * 180 / M_PI);
+        // Serial.print(", ");
+        // Serial.print(kalman_state.state_est_r_pos_z * 180 / M_PI);
+        // Serial.print(", ");
+        // Serial.print("BNO: ");
+        // Serial.print(orientation.getEuler().roll * 180 / M_PI);
+        // Serial.print(", ");
+        // Serial.print(orientation.getEuler().pitch * 180 / M_PI);
+        // Serial.print(", ");
+        // Serial.println(orientation.getEuler().yaw * 180 / M_PI);
+
+        Serial.print("Kalman linear: ");
+        Serial.print(x_k(0, 0));
+        Serial.print(", ");
+        Serial.print(x_k(3, 0));
+        Serial.print(", ");
+        Serial.print(x_k(6, 0));
+        Serial.print(", ");
+        Serial.print("BNO: ");
+        Serial.print(orientation.getEuler().roll * 180 / M_PI);
+        Serial.print(", ");
+        Serial.print(orientation.getEuler().pitch * 180 / M_PI);
+        Serial.print(", ");
+        Serial.println(orientation.getEuler().yaw * 180 / M_PI);
+
+        chMtxUnlock(&orientation.mutex);
+        chMtxUnlock(&mutex);
     }
 }
 /**
@@ -102,37 +148,109 @@ void KalmanFilter::Initialize() {
         chMtxLock(&barometer.mutex);
         sum += barometer.getAltitude();
         chMtxUnlock(&barometer.mutex);
+
+        chMtxLock(&highG.mutex);
+        init_accel(0,0) += highG.getAccel().az - 9.81;
+        init_accel(1, 0) += -1 * highG.getAccel().ax;
+        init_accel(2, 0) += highG.getAccel().ay;
+        chMtxUnlock(&highG.mutex);
+
         chThdSleepMilliseconds(100);
     }
+
+    init_accel(0,0) /= 30;
+    init_accel(1,0) /= 30;
+    init_accel(2,0) /= 30;
+
+    chMtxLock(&orientation.mutex);
+    euler_t euler = orientation.getEuler();
+    chMtxUnlock(&orientation.mutex);
+    world_accel = BodyToGlobal((euler_t){euler.roll, euler.yaw, euler.pitch}, init_accel);
+
 
     // set x_k
     x_k(0, 0) = sum / 30;
     // x_k(0,0) = 1401;
-    x_k(1, 0) = 0;
-    x_k(2, 0) = 0;
+    x_k(3, 0) = 0;
+    x_k(6, 0) = 0;
 
     // set F
-    for (int i = 0; i < 3; i++) {
-        // set F
-        F_mat(3*i, 3*i+1) = s_dt;
-        F_mat(3*i, 3*i+1) = (s_dt * s_dt) / 2;
-        F_mat(3*i+1, 3*i+2) = s_dt;
+    // for (int i = 0; i < 3; i++) {
+    //     // set F
+    //     F_mat(3*i, 3*i+1) = s_dt;
+    //     F_mat(3*i, 3*i+2) = (s_dt * s_dt) / 2;
+    //     F_mat(3*i+1, 3*i+2) = s_dt;
 
-        F_mat(3*i, 3*i) = 1;
-        F_mat(3*i+1, 3*i+1) = 1;
-        F_mat(3*i+2, 3*i+2) = 1;
+    //     F_mat(3*i, 3*i) = 1;
+    //     F_mat(3*i+1, 3*i+1) = 1;
+    //     F_mat(3*i+2, 3*i+2) = 1;
 
-        // set Q
-        Q(3*i, 3*i) = pow(s_dt, 5) / 20;
-        Q(3*i, 3*i+1) = pow(s_dt, 4) / 8 * 80;
-        Q(3*i, 3*i+2) = pow(s_dt, 3) / 6;
-        Q(3*i+1, 3*i+1) = pow(s_dt, 3) / 8;
-        Q(3*i+1, 3*i+2) = pow(s_dt, 2) / 2;
-        Q(3*i+2, 3*i+2) = s_dt;
-        Q(3*i+1, 3*i) = Q(3*i, 3*i+1);
-        Q(3*i+2, 3*i) = Q(3*i, 3*i+2);
-        Q(3*i+2, 3*i+1) = Q(3*i+1, 3*i+2);
-    }
+    //     // set Q
+    //     Q(3*i, 3*i) = pow(s_dt, 5) / 20;
+    //     Q(3*i, 3*i+1) = pow(s_dt, 4) / 8;
+    //     Q(3*i, 3*i+2) = pow(s_dt, 3) / 6;
+    //     Q(3*i+1, 3*i+1) = pow(s_dt, 3) / 8;
+    //     Q(3*i+1, 3*i+2) = pow(s_dt, 2) / 2;
+    //     Q(3*i+2, 3*i+2) = s_dt;
+    //     Q(3*i+1, 3*i) = Q(3*i, 3*i+1);
+    //     Q(3*i+2, 3*i) = Q(3*i, 3*i+2);
+    //     Q(3*i+2, 3*i+1) = Q(3*i+1, 3*i+2);
+    // }
+
+    F_mat(0, 1) = s_dt;
+    F_mat(0, 2) = (s_dt * s_dt) / 2;
+    F_mat(1, 2) = s_dt;
+
+    F_mat(0, 0) = 1;
+    F_mat(1, 1) = 1;
+    F_mat(2, 2) = 1;
+
+    F_mat(3, 4) = s_dt;
+    F_mat(3, 5) = (s_dt * s_dt) / 2;
+    F_mat(4, 5) = s_dt;
+
+    F_mat(3, 3) = 1;
+    F_mat(4, 4) = 1;
+    F_mat(5, 5) = 1;
+
+    F_mat(6, 7) = s_dt;
+    F_mat(6, 8) = (s_dt * s_dt) / 2;
+    F_mat(7, 8) = s_dt;
+
+    F_mat(6, 6) = 1;
+    F_mat(7, 7) = 1;
+    F_mat(8, 8) = 1;
+
+    Q(0,0) = pow(s_dt, 5) / 20;
+    Q(0,1) = pow(s_dt, 4) / 8;
+    Q(0,2) = pow(s_dt, 3) / 6;
+    Q(1,1) = pow(s_dt, 3) / 8;
+    Q(1,2) = pow(s_dt, 2) / 2;
+    Q(2,2) = s_dt;
+    Q(1,0) = Q(0,1);
+    Q(2,0) = Q(0,2);
+    Q(2,1) = Q(1,2);
+
+    Q(3,3) = pow(s_dt, 5) / 20;
+    Q(3,4) = pow(s_dt, 4) / 8;
+    Q(3,5) = pow(s_dt, 3) / 6;
+    Q(4,4) = pow(s_dt, 3) / 8;
+    Q(4,5) = pow(s_dt, 2) / 2; 
+    Q(5,5) = s_dt;
+    Q(4,3) = Q(3,4);
+    Q(5,3) = Q(3,5);
+    Q(5,4) = Q(4,5);
+
+    Q(6,6) = pow(s_dt, 5) / 20;
+    Q(6,7) = pow(s_dt, 4) / 8;
+    Q(6,8) = pow(s_dt, 3) / 6;
+    Q(7,7) = pow(s_dt, 3) / 8;
+    Q(7,8) = pow(s_dt, 2) / 2;
+    Q(8,8) = s_dt;
+    Q(7,6) = Q(6,7);
+    Q(8,6) = Q(6,8);
+    Q(8,7) = Q(7,8);
+
 
     // F_mat(0, 1) = s_dt;
     // F_mat(0, 2) = (s_dt * s_dt) / 2;
@@ -147,26 +265,19 @@ void KalmanFilter::Initialize() {
     H(1, 2) = 1;
     H(2, 5) = 1;
     H(3, 8) = 1;
-
-    H_r(0, 0) = 1;
-    H_r(0, 1) = 1;
-    H_r(1, 2) = 1;
-    H_r(1, 3) = 1;
-    H_r(2, 4) = 1;
-    H_r(2, 5) = 1;
     
 
     // set P_k
-    P_k(0, 0) = 0;
-    P_k(0, 1) = 0;
-    P_k(0, 2) = 0;
-    P_k(1, 1) = 0;
-    P_k(2, 2) = 0;
-    P_k(1, 2) = 0;
-    P_k(2, 1) = P_k(1, 2);
-    P_k(1, 0) = P_k(0, 1);
-    P_k(2, 0) = P_k(0, 2);
-    P_k(1, 0) = P_k(0, 1);
+    // P_k(0, 0) = 0;
+    // P_k(0, 1) = 0;
+    // P_k(0, 2) = 0;
+    // P_k(1, 1) = 0;
+    // P_k(2, 2) = 0;
+    // P_k(1, 2) = 0;
+    // P_k(2, 1) = P_k(1, 2);
+    // P_k(1, 0) = P_k(0, 1);
+    // P_k(2, 0) = P_k(0, 2);
+    // P_k(1, 0) = P_k(0, 1);
 
     // float scale_fact = 75.19;
     // float scale_fact = 14.25;
@@ -182,31 +293,9 @@ void KalmanFilter::Initialize() {
     // R(0,0) = 2.;
     // R(1,1) = .01;
 
-    float x_sum = 0;
-    float y_sum = 0;
-    float z_sum = 0;
-
-    euler_t orientations;
-
-    for (int i = 0; i < 30; i++) {
-        chMtxLock(&orientation.mutex);
-        orientations = orientation.getEuler();
-        chMtxUnlock(&orientation.mutex);
-        x_sum += orientations.roll;
-        y_sum += orientations.pitch;
-        z_sum += orientations.yaw;
-    }
-
-    x_k(0, 0) = x_sum / 30;
-    x_k(3, 0) = y_sum / 30;
-    x_k(6, 0) = z_sum / 30;
-
-    R_r(0, 0) = 1.9;
-    R_r(1, 1) = 1.9;
-    R_r(2, 2) = 1.9;
-    R_r(3, 3) = 1.9;
-    R_r(4, 4) = 1.9;
-    R_r(5, 5) = 1.9;
+    // x_k(0, 0) = x_sum / 30;
+    // x_k(3, 0) = y_sum / 30;
+    // x_k(6, 0) = z_sum / 30;
     
 
     // set B
@@ -288,29 +377,7 @@ void KalmanFilter::update() {
             sum += cur_reading;
         }
         sum = sum / 10.0;
-
-        float x_r_reading;
-        float x_r_sum = 0;
-        while (x_r_buffer.read(x_r_reading)) {
-            x_r_sum += x_r_reading;
-        }
-        x_r_sum = x_r_sum / 10.0;
-
-        float y_r_reading;
-        float y_r_sum = 0;
-        while (y_r_buffer.read(y_r_reading)) {
-            y_r_sum += y_r_reading;
-        }
-        y_r_sum = y_r_sum / 10.0;
-
-        float z_r_reading;
-        float z_r_sum = 0;
-        while (z_r_buffer.read(z_r_reading)) {
-            z_r_sum += z_r_reading;
-        }
-        z_r_sum = z_r_sum / 10.0;
-        
-        setState((KalmanState){sum, 0, 0, 0, 0, 0, 0, 0, 0, x_r_sum, 0, 0, y_r_sum, 0, 0, z_r_sum, 0, 0});
+        setState((KalmanState){sum, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0});
     }
     
     if (getActiveFSM().getFSMState() >= FSM_State::STATE_APOGEE) {
@@ -327,23 +394,29 @@ void KalmanFilter::update() {
     Eigen::Matrix<float, 3, 1> accel = Eigen::Matrix<float, 3, 1>::Zero();
     chMtxLock(&highG.mutex);
     accel(0, 0) = highG.getAccel().az;
-    accel(1, 0) = highG.getAccel().ax;
+    Serial.println(highG.getAccel().az);
+    accel(1, 0) = -1 * highG.getAccel().ax;
     accel(2, 0) = highG.getAccel().ay;
     chMtxUnlock(&highG.mutex);
 
     chMtxLock(&orientation.mutex);
     euler_t angles = orientation.getEuler();
+    // euler_t angles = (euler_t){0, 0, 0};
     chMtxUnlock(&orientation.mutex);
 
-    x_r_buffer.push(angles.roll);
-    y_r_buffer.push(angles.pitch);
-    z_r_buffer.push(angles.yaw);
 
+    Eigen::Matrix<float, 3, 1> acc = BodyToGlobal((euler_t){angles.roll, angles.yaw, angles.pitch}, accel);
+    y_k(1, 0) = (acc(0) - world_accel(0)) * 9.81;
+    // Serial.println(y_k(1, 0));
+    y_k(2, 0) = (acc(1) - world_accel(1)) * 9.81;
+    y_k(3, 0) = (acc(2) - world_accel(2)) * 9.81;
 
-    Eigen::Matrix<float, 3, 1> acc = BodyToGlobal(angles, accel);
-    y_k(1, 0) = acc(0) - 9.81;
-    y_k(2, 0) = acc(1);
-    y_k(3, 0) = acc(2);
+    Serial.print("Accel: ");
+    Serial.print(y_k(1, 0));
+    Serial.print(", ");
+    Serial.print(y_k(2, 0));
+    Serial.print(", ");
+    Serial.println(y_k(3, 0));
 
     chMtxLock(&barometer.mutex);
     y_k(0, 0) = barometer.getAltitude();
@@ -390,54 +463,6 @@ Eigen::Matrix<float, 3, 1> KalmanFilter::BodyToGlobal(euler_t angles, Eigen::Mat
     pitch << cos(angles.pitch), 0., sin(angles.pitch), 0., 1., 0., -sin(angles.pitch), 0., cos(angles.pitch);
     yaw << cos(angles.yaw), -sin(angles.yaw), 0., sin(angles.yaw), cos(angles.yaw), 0., 0., 0., 1.;
     return yaw * pitch * roll * body_vect;
-}
-
-void KalmanFilter::priori_r() {
-    x_priori_r = (F_mat * x_k_r);
-    P_priori_r = (F_mat * P_k_r * F_mat.transpose()) + Q;
-}
-
-void KalmanFilter::update_r() {
-    Eigen::Matrix<float, 6, 6> temp = Eigen::Matrix<float, 6, 6>::Zero();
-    temp = (((H_r * P_priori_r * H_r.transpose()) + R_r)).inverse();
-    Eigen::Matrix<float, 9, 9> identity = Eigen::Matrix<float, 9, 9>::Identity();
-    K_r = (P_priori_r * H_r.transpose()) * temp;
-
-    // TODO These mutex locks are almost certainly not necessary
-    // Sensor Measurements
-    Eigen::Matrix<float, 3, 1> gyro = Eigen::Matrix<float, 3, 1>::Zero();
-    chMtxLock(&lowG.mutex);
-    gyro(0, 0) = lowG.getGyroscope().gz;
-    gyro(1, 0) = lowG.getGyroscope().gx;
-    gyro(2, 0) = lowG.getGyroscope().gy;
-    chMtxUnlock(&lowG.mutex);
-
-    euler_t angles;
-    angles.roll = x_k_r(0);
-    angles.pitch = x_k_r(1);
-    angles.yaw = x_k_r(2);
-    
-    Eigen::Matrix<float, 3, 1> euler = BodyToGlobal(angles, gyro);
-    y_k_r(0, 0) = euler(0);
-    y_k_r(2, 0) = euler(1);
-    y_k_r(4, 0) = euler(2);
-
-    // # Posteriori Update
-    x_k_r = x_priori_r + K_r * (y_k_r - (H_r * x_priori_r));
-    P_k_r = (identity - K_r * H_r) * P_priori_r;
-
-    chMtxLock(&mutex);
-    kalman_state.state_est_r_pos_x = x_k_r(0, 0);
-    kalman_state.state_est_r_vel_x = x_k_r(1, 0);
-    kalman_state.state_est_r_accel_x = x_k_r(2, 0);
-    kalman_state.state_est_r_pos_y = x_k_r(3, 0);
-    kalman_state.state_est_r_vel_y = x_k_r(4, 0);
-    kalman_state.state_est_r_accel_y = x_k_r(5, 0);
-    kalman_state.state_est_r_pos_z = x_k_r(6, 0);
-    kalman_state.state_est_r_vel_z = x_k_r(7, 0);
-    kalman_state.state_est_r_accel_z = x_k_r(8, 0);
-
-    chMtxUnlock(&mutex);
 }
 
 KalmanState KalmanFilter::getState() const { return kalman_state; }

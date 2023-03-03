@@ -1,7 +1,7 @@
 #pragma once
 
-//#define THREAD_DEBUG
-#define SERIAL_PLOTTING
+// #define THREAD_DEBUG
+// #define SERIAL_PLOTTING
 // #define WAIT_SERIAL
 // #define FSM_DEBUG
 

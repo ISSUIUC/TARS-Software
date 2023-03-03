@@ -175,10 +175,16 @@ static THD_FUNCTION(kalman_THD, arg) {
     systime_t last = chVTGetSystemTime();
 
     while (true) {
+#ifdef THREAD_DEBUG
+        Serial.println("### Kalman thread entrance");
+#endif
+        Serial.println("entering tick");
         kalmanFilter.kfTickFunction(TIME_I2MS(chVTGetSystemTime() - last), 13.0);
+        Serial.println("exiting tick");
         last = chVTGetSystemTime();
 
         chThdSleepMilliseconds(50);
+
     }
 }
 

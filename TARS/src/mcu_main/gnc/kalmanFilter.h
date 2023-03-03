@@ -42,8 +42,6 @@ class KalmanFilter {
     void Initialize(float pos_x, float vel_x, float pos_y, float vel_y, float pos_z, float vel_z);
     void priori();
     void update();
-    void priori_r();
-    void update_r();
 
     void SetQ(float dt, float sd);
     void SetF(float dt);
@@ -65,10 +63,10 @@ class KalmanFilter {
     float kalman_apo = 0;
     systime_t timestamp = 0;
 
-    FifoBuffer<float, 10> alt_buffer;
-    FifoBuffer<float, 10> x_r_buffer;
-    FifoBuffer<float, 10> y_r_buffer;
-    FifoBuffer<float, 10> z_r_buffer;
+    Eigen::Matrix<float, 3, 1> init_accel = Eigen::Matrix<float, 3, 1>::Zero();
+    Eigen::Matrix<float, 3, 1> world_accel;
+
+        FifoBuffer<float, 10> alt_buffer;
 
     Eigen::Matrix<float, 9, 1> x_k = Eigen::Matrix<float, 9, 1>::Zero();
     Eigen::Matrix<float, 9, 9> F_mat = Eigen::Matrix<float, 9, 9>::Zero();
@@ -80,15 +78,6 @@ class KalmanFilter {
     Eigen::Matrix<float, 9, 1> x_priori = Eigen::Matrix<float, 9, 1>::Zero();
     Eigen::Matrix<float, 9, 4> K = Eigen::Matrix<float, 9, 4>::Zero();
     Eigen::Matrix<float, 4, 1> y_k = Eigen::Matrix<float, 4, 1>::Zero();
-
-    Eigen::Matrix<float, 9, 1> x_k_r = Eigen::Matrix<float, 9, 1>::Zero();
-    Eigen::Matrix<float, 6, 9> H_r = Eigen::Matrix<float, 6, 9>::Zero();
-    Eigen::Matrix<float, 9, 9> P_k_r = Eigen::Matrix<float, 9, 9>::Zero();
-    Eigen::Matrix<float, 6, 6> R_r = Eigen::Matrix<float, 6, 6>::Zero();  // Diagonal
-    Eigen::Matrix<float, 9, 9> P_priori_r = Eigen::Matrix<float, 9, 9>::Zero();
-    Eigen::Matrix<float, 9, 1> x_priori_r = Eigen::Matrix<float, 9, 1>::Zero();
-    Eigen::Matrix<float, 9, 6> K_r = Eigen::Matrix<float, 9, 6>::Zero();
-    Eigen::Matrix<float, 6, 1> y_k_r = Eigen::Matrix<float, 6, 1>::Zero();
 
     Eigen::Matrix<float, 9, 4> B = Eigen::Matrix<float, 9, 4>::Zero();
 };
