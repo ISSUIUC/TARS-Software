@@ -24,17 +24,35 @@
  * updated based on the time taken per cycle of the Kalman Filter Thread.
  */
 void KalmanFilter::SetQ(float dt, float sd) {    
-    for (int i = 0; i < 3; i++) {
-        Q(3 * i, 3 * i) = pow(dt, 5) / 20;
-        Q(3 * i, 3 * i + 1) = pow(dt, 4) / 8 * 80;
-        Q(3 * i, 3 * i + 2) = pow(dt, 3) / 6;
-        Q(3 * i + 1, 3 * i + 1) = pow(dt, 3) / 8;
-        Q(3 * i + 1, 3 * i + 2) = pow(dt, 2) / 2;
-        Q(3 * i + 2, 3 * i + 2) = dt;
-        Q(3 * i + 1, 3 * i) = Q(3 * i, 3 * i + 1);
-        Q(3 * i + 2, 3 * i) = Q(3 * i, 3 * i + 2);
-        Q(3 * i + 2, 3 * i + 1) = Q(3 * i + 1, 3 * i + 2);
-    }
+    Q(0,0) = pow(s_dt, 5) / 20;
+    Q(0,1) = pow(s_dt, 4) / 8;
+    Q(0,2) = pow(s_dt, 3) / 6;
+    Q(1,1) = pow(s_dt, 3) / 8;
+    Q(1,2) = pow(s_dt, 2) / 2;
+    Q(2,2) = s_dt;
+    Q(1,0) = Q(0,1);
+    Q(2,0) = Q(0,2);
+    Q(2,1) = Q(1,2);
+
+    Q(3,3) = pow(s_dt, 5) / 20;
+    Q(3,4) = pow(s_dt, 4) / 8;
+    Q(3,5) = pow(s_dt, 3) / 6;
+    Q(4,4) = pow(s_dt, 3) / 8;
+    Q(4,5) = pow(s_dt, 2) / 2; 
+    Q(5,5) = s_dt;
+    Q(4,3) = Q(3,4);
+    Q(5,3) = Q(3,5);
+    Q(5,4) = Q(4,5);
+
+    Q(6,6) = pow(s_dt, 5) / 20;
+    Q(6,7) = pow(s_dt, 4) / 8;
+    Q(6,8) = pow(s_dt, 3) / 6;
+    Q(7,7) = pow(s_dt, 3) / 8;
+    Q(7,8) = pow(s_dt, 2) / 2;
+    Q(8,8) = s_dt;
+    Q(7,6) = Q(6,7);
+    Q(8,6) = Q(6,8);
+    Q(8,7) = Q(7,8);
 
     Q *= sd;
 }
@@ -48,15 +66,29 @@ void KalmanFilter::SetQ(float dt, float sd) {
  * by how the states change over time.
  */
 void KalmanFilter::SetF(float dt) {
-    for (int i = 0; i < 3; i++) {
-        F_mat(3 * i, 3 * i + 1) = s_dt;
-        F_mat(3 * i, 3 * i + 2) = (s_dt * s_dt) / 2;
-        F_mat(3 * i + 1, 3 * i + 2) = s_dt;
+    F_mat(0, 1) = s_dt;
+    F_mat(0, 2) = (s_dt * s_dt) / 2;
+    F_mat(1, 2) = s_dt;
 
-        F_mat(3 * i, 3 * i) = 1;
-        F_mat(3 * i + 1, 3 * i + 1) = 1;
-        F_mat(3 * i + 2, 3 * i + 2) = 1;
-    }
+    F_mat(0, 0) = 1;
+    F_mat(1, 1) = 1;
+    F_mat(2, 2) = 1;
+
+    F_mat(3, 4) = s_dt;
+    F_mat(3, 5) = (s_dt * s_dt) / 2;
+    F_mat(4, 5) = s_dt;
+
+    F_mat(3, 3) = 1;
+    F_mat(4, 4) = 1;
+    F_mat(5, 5) = 1;
+
+    F_mat(6, 7) = s_dt;
+    F_mat(6, 8) = (s_dt * s_dt) / 2;
+    F_mat(7, 8) = s_dt;
+
+    F_mat(6, 6) = 1;
+    F_mat(7, 7) = 1;
+    F_mat(8, 8) = 1;
 }
 
 /**
@@ -67,8 +99,8 @@ void KalmanFilter::SetF(float dt) {
  */
 void KalmanFilter::kfTickFunction(float dt, float sd) {
     if (getActiveFSM().getFSMState() >= FSM_State::STATE_IDLE) {
-        // SetF(float(dt) / 1000);
-        // SetQ(float(dt) / 1000, sd);
+        SetF(float(dt) / 1000);
+        SetQ(float(dt) / 1000, sd);
         priori();
         update();
 
@@ -106,6 +138,8 @@ void KalmanFilter::kfTickFunction(float dt, float sd) {
         Serial.print("Kalman linear: ");
         Serial.print(x_k(0, 0));
         Serial.print(", ");
+        Serial.print(x_k(1, 0));
+        Serial.print(", ");
         Serial.print(x_k(3, 0));
         Serial.print(", ");
         Serial.print(x_k(6, 0));
@@ -115,7 +149,7 @@ void KalmanFilter::kfTickFunction(float dt, float sd) {
         Serial.print(", ");
         Serial.print(orientation.getEuler().pitch * 180 / M_PI);
         Serial.print(", ");
-        Serial.println(orientation.getEuler().yaw * 180 / M_PI);
+        Serial.println(-orientation.getEuler().yaw * 180 / M_PI);
 
         chMtxUnlock(&orientation.mutex);
         chMtxUnlock(&mutex);
@@ -150,9 +184,9 @@ void KalmanFilter::Initialize() {
         chMtxUnlock(&barometer.mutex);
 
         chMtxLock(&highG.mutex);
-        init_accel(0,0) += highG.getAccel().az - 9.81;
-        init_accel(1, 0) += -1 * highG.getAccel().ax;
-        init_accel(2, 0) += highG.getAccel().ay;
+        init_accel(0, 0) += highG.getAccel().az;
+        init_accel(1, 0) += highG.getAccel().ay;
+        init_accel(2, 0) += -highG.getAccel().ax;
         chMtxUnlock(&highG.mutex);
 
         chThdSleepMilliseconds(100);
@@ -165,7 +199,8 @@ void KalmanFilter::Initialize() {
     chMtxLock(&orientation.mutex);
     euler_t euler = orientation.getEuler();
     chMtxUnlock(&orientation.mutex);
-    world_accel = BodyToGlobal((euler_t){euler.roll, euler.yaw, euler.pitch}, init_accel);
+    euler.yaw = -euler.yaw;
+    world_accel = BodyToGlobal(euler, init_accel);
 
 
     // set x_k
@@ -288,8 +323,8 @@ void KalmanFilter::Initialize() {
     // set R
     R(0, 0) = 2.0;
     R(1, 1) = 1.9;
-    R(2, 2) = 1.9;
-    R(3, 3) = 1.9;
+    R(2, 2) = 10;
+    R(3, 3) = 10;
     // R(0,0) = 2.;
     // R(1,1) = .01;
 
@@ -393,23 +428,33 @@ void KalmanFilter::update() {
     // Sensor Measurements
     Eigen::Matrix<float, 3, 1> accel = Eigen::Matrix<float, 3, 1>::Zero();
     chMtxLock(&highG.mutex);
-    accel(0, 0) = highG.getAccel().az;
-    Serial.println(highG.getAccel().az);
-    accel(1, 0) = -1 * highG.getAccel().ax;
-    accel(2, 0) = highG.getAccel().ay;
+    accel(0, 0) = highG.getAccel().az - 0.045;
+    accel(1, 0) = highG.getAccel().ay - 0.065;
+    accel(2, 0) = -highG.getAccel().ax - 0.06;
     chMtxUnlock(&highG.mutex);
 
     chMtxLock(&orientation.mutex);
     euler_t angles = orientation.getEuler();
     // euler_t angles = (euler_t){0, 0, 0};
     chMtxUnlock(&orientation.mutex);
+    angles.yaw = -angles.yaw;
+    Serial.print("r_accel: ");
+    Serial.print(accel(0));
+    Serial.print(", ");
+    Serial.print(accel(1));
+    Serial.print(", ");
+    Serial.println(accel(2));
 
+    Eigen::Matrix<float, 3, 1> acc = BodyToGlobal(angles, accel);
+    // y_k(1, 0) = (acc(0) - world_accel(0)) * 9.81;
+    // // Serial.println(y_k(1, 0));
+    // y_k(2, 0) = (acc(1) - world_accel(1)) * 9.81;
+    // y_k(3, 0) = (acc(2) - world_accel(2)) * 9.81;
 
-    Eigen::Matrix<float, 3, 1> acc = BodyToGlobal((euler_t){angles.roll, angles.yaw, angles.pitch}, accel);
-    y_k(1, 0) = (acc(0) - world_accel(0)) * 9.81;
+    y_k(1, 0) = (acc(0)) * 9.81 - 9.81;
     // Serial.println(y_k(1, 0));
-    y_k(2, 0) = (acc(1) - world_accel(1)) * 9.81;
-    y_k(3, 0) = (acc(2) - world_accel(2)) * 9.81;
+    y_k(2, 0) = (acc(1)) * 9.81;
+    y_k(3, 0) = (acc(2)) * 9.81;
 
     Serial.print("Accel: ");
     Serial.print(y_k(1, 0));
@@ -459,10 +504,14 @@ void KalmanFilter::update() {
 
 Eigen::Matrix<float, 3, 1> KalmanFilter::BodyToGlobal(euler_t angles, Eigen::Matrix<float, 3, 1> body_vect) {
     Eigen::Matrix3f roll, pitch, yaw;
+    float temp = angles.yaw;
+    // angles.yaw = angles.roll;
+    // angles.roll = temp;
+
     roll << 1., 0., 0., 0., cos(angles.roll), -sin(angles.roll ), 0., sin(angles.roll), cos(angles.roll);
     pitch << cos(angles.pitch), 0., sin(angles.pitch), 0., 1., 0., -sin(angles.pitch), 0., cos(angles.pitch);
     yaw << cos(angles.yaw), -sin(angles.yaw), 0., sin(angles.yaw), cos(angles.yaw), 0., 0., 0., 1.;
-    return yaw * pitch * roll * body_vect;
+    return yaw * pitch * body_vect;
 }
 
 KalmanState KalmanFilter::getState() const { return kalman_state; }
