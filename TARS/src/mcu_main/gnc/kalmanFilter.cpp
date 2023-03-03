@@ -10,6 +10,8 @@
 
 #include "mcu_main/finite-state-machines/rocketFSM.h"
 
+#include <cmath>
+
 #define EIGEN_MATRIX_PLUGIN "MatrixAddons.h"
 
 /**
@@ -21,16 +23,19 @@
  * The Q matrix is the covariance matrix for the process noise and is
  * updated based on the time taken per cycle of the Kalman Filter Thread.
  */
-void KalmanFilter::SetQ(float dt, float sd) {
-    Q(0, 0) = pow(dt, 5) / 20;
-    Q(0, 1) = pow(dt, 4) / 8 * 80;
-    Q(0, 2) = pow(dt, 3) / 6;
-    Q(1, 1) = pow(dt, 3) / 8;
-    Q(1, 2) = pow(dt, 2) / 2;
-    Q(2, 2) = dt;
-    Q(1, 0) = Q(0, 1);
-    Q(2, 0) = Q(0, 2);
-    Q(2, 1) = Q(1, 2);
+void KalmanFilter::SetQ(float dt, float sd) {    
+    for (int i = 0; i < 3; i++) {
+        Q(3 * i, 3 * i) = pow(dt, 5) / 20;
+        Q(3 * i, 3 * i + 1) = pow(dt, 4) / 8 * 80;
+        Q(3 * i, 3 * i + 2) = pow(dt, 3) / 6;
+        Q(3 * i + 1, 3 * i + 1) = pow(dt, 3) / 8;
+        Q(3 * i + 1, 3 * i + 2) = pow(dt, 2) / 2;
+        Q(3 * i + 2, 3 * i + 2) = dt;
+        Q(3 * i + 1, 3 * i) = Q(3 * i, 3 * i + 1);
+        Q(3 * i + 2, 3 * i) = Q(3 * i, 3 * i + 2);
+        Q(3 * i + 2, 3 * i + 1) = Q(3 * i + 1, 3 * i + 2);
+    }
+
     Q *= sd;
 }
 
@@ -43,13 +48,15 @@ void KalmanFilter::SetQ(float dt, float sd) {
  * by how the states change over time.
  */
 void KalmanFilter::SetF(float dt) {
-    F_mat(0, 1) = dt;
-    F_mat(0, 2) = (s_dt * dt) / 2;
-    F_mat(1, 2) = dt;
+    for (int i = 0; i < 3; i++) {
+        F_mat(3 * i, 3 * i + 1) = s_dt;
+        F_mat(3 * i, 3 * i + 1) = (s_dt * s_dt) / 2;
+        F_mat(3 * i + 1, 3 * i + 2) = s_dt;
 
-    F_mat(0, 0) = 1;
-    F_mat(1, 1) = 1;
-    F_mat(2, 2) = 1;
+        F_mat(3 * i, 3 * i) = 1;
+        F_mat(3 * i + 1, 3 * i + 1) = 1;
+        F_mat(3 * i + 2, 3 * i + 2) = 1;
+    }
 }
 
 /**
@@ -63,7 +70,9 @@ void KalmanFilter::kfTickFunction(float dt, float sd) {
         SetF(float(dt) / 1000);
         SetQ(float(dt) / 1000, sd);
         priori();
+        priori_r();
         update();
+        update_r();
     }
 }
 /**
@@ -103,17 +112,49 @@ void KalmanFilter::Initialize() {
     x_k(2, 0) = 0;
 
     // set F
-    F_mat(0, 1) = s_dt;
-    F_mat(0, 2) = (s_dt * s_dt) / 2;
-    F_mat(1, 2) = s_dt;
+    for (int i = 0; i < 3; i++) {
+        // set F
+        F_mat(3*i, 3*i+1) = s_dt;
+        F_mat(3*i, 3*i+1) = (s_dt * s_dt) / 2;
+        F_mat(3*i+1, 3*i+2) = s_dt;
 
-    F_mat(0, 0) = 1;
-    F_mat(1, 1) = 1;
-    F_mat(2, 2) = 1;
+        F_mat(3*i, 3*i) = 1;
+        F_mat(3*i+1, 3*i+1) = 1;
+        F_mat(3*i+2, 3*i+2) = 1;
+
+        // set Q
+        Q(3*i, 3*i) = pow(s_dt, 5) / 20;
+        Q(3*i, 3*i+1) = pow(s_dt, 4) / 8 * 80;
+        Q(3*i, 3*i+2) = pow(s_dt, 3) / 6;
+        Q(3*i+1, 3*i+1) = pow(s_dt, 3) / 8;
+        Q(3*i+1, 3*i+2) = pow(s_dt, 2) / 2;
+        Q(3*i+2, 3*i+2) = s_dt;
+        Q(3*i+1, 3*i) = Q(3*i, 3*i+1);
+        Q(3*i+2, 3*i) = Q(3*i, 3*i+2);
+        Q(3*i+2, 3*i+1) = Q(3*i+1, 3*i+2);
+    }
+
+    // F_mat(0, 1) = s_dt;
+    // F_mat(0, 2) = (s_dt * s_dt) / 2;
+    // F_mat(1, 2) = s_dt;
+
+    // F_mat(0, 0) = 1;
+    // F_mat(1, 1) = 1;
+    // F_mat(2, 2) = 1;
 
     // set H
     H(0, 0) = 1;
     H(1, 2) = 1;
+    H(2, 5) = 1;
+    H(3, 8) = 1;
+
+    H_r(0, 0) = 1;
+    H_r(0, 1) = 1;
+    H_r(1, 2) = 1;
+    H_r(1, 3) = 1;
+    H_r(2, 4) = 1;
+    H_r(2, 5) = 1;
+    
 
     // set P_k
     P_k(0, 0) = 0;
@@ -127,17 +168,6 @@ void KalmanFilter::Initialize() {
     P_k(2, 0) = P_k(0, 2);
     P_k(1, 0) = P_k(0, 1);
 
-    // set Q
-    Q(0, 0) = pow(s_dt, 5) / 20;
-    Q(0, 1) = pow(s_dt, 4) / 8 * 80;
-    Q(0, 2) = pow(s_dt, 3) / 6;
-    Q(1, 1) = pow(s_dt, 3) / 8;
-    Q(1, 2) = pow(s_dt, 2) / 2;
-    Q(2, 2) = s_dt;
-    Q(1, 0) = Q(0, 1);
-    Q(2, 0) = Q(0, 2);
-    Q(2, 1) = Q(1, 2);
-
     // float scale_fact = 75.19;
     // float scale_fact = 14.25;
     float scale_fact = 13.0;
@@ -146,9 +176,38 @@ void KalmanFilter::Initialize() {
 
     // set R
     R(0, 0) = 2.0;
-    R(1, 1) = 0.1;
+    R(1, 1) = 1.9;
+    R(2, 2) = 1.9;
+    R(3, 3) = 1.9;
     // R(0,0) = 2.;
     // R(1,1) = .01;
+
+    float x_sum = 0;
+    float y_sum = 0;
+    float z_sum = 0;
+
+    euler_t orientations;
+
+    for (int i = 0; i < 30; i++) {
+        chMtxLock(&orientation.mutex);
+        orientations = orientation.getEuler();
+        chMtxUnlock(&orientation.mutex);
+        x_sum += orientations.roll;
+        y_sum += orientations.pitch;
+        z_sum += orientations.yaw;
+    }
+
+    x_k(0, 0) = x_sum / 30;
+    x_k(3, 0) = y_sum / 30;
+    x_k(6, 0) = z_sum / 30;
+
+    R_r(0, 0) = 1.9;
+    R_r(1, 1) = 1.9;
+    R_r(2, 2) = 1.9;
+    R_r(3, 3) = 1.9;
+    R_r(4, 4) = 1.9;
+    R_r(5, 5) = 1.9;
+    
 
     // set B
     B(2, 0) = -1;
@@ -157,14 +216,30 @@ void KalmanFilter::Initialize() {
 /**
  * @brief Initializes the Kalman Filter with an initial position and velocity estimate
  *
- * @param pos_f Initial position estimate
- * @param vel_f Initial velocity estimate
+ * @param pos_x Initial position estimate in the x direction
+ * @param vel_x Initial velocity estimate in the x direction
+ * @param accel_x Initial acceleration estimate in the x direction
+ * @param pos_y Initial position estimate in the y direction
+ * @param vel_y Initial velocity estimate in the y direction
+ * @param accel_y Initial acceleration estimate in the y direction
+ * @param pos_z Initial position estimate in the z direction
+ * @param vel_z Initial velocity estimate in the z direction
+ * @param accel_z Initial acceleration estimate in the z direction
  */
 
-void KalmanFilter::initialize(float pos_f, float vel_f) {
+void KalmanFilter::Initialize(float pos_x, float vel_x,
+                              float pos_y, float vel_y,
+                              float pos_z, float vel_z) {
     // set x_k
-    x_k(0, 0) = pos_f;
-    x_k(1, 0) = vel_f;
+    x_k(0, 0) = pos_x;
+    x_k(1, 0) = vel_x;
+
+    x_k(3, 0) = pos_y;
+    x_k(4, 0) = vel_y;
+
+    x_k(6, 0) = pos_z;
+    x_k(7, 0) = vel_z;
+
 
     // set F
     F_mat(0, 1) = s_dt;
@@ -206,23 +281,73 @@ void KalmanFilter::priori() {
  *
  */
 void KalmanFilter::update() {
+    if (getActiveFSM().getFSMState() == FSM_State::STATE_LAUNCH_DETECT) {
+        float cur_reading;
+        float sum = 0;
+        while (alt_buffer.read(cur_reading)) {
+            sum += cur_reading;
+        }
+        sum = sum / 10.0;
+
+        float x_r_reading;
+        float x_r_sum = 0;
+        while (x_r_buffer.read(x_r_reading)) {
+            x_r_sum += x_r_reading;
+        }
+        x_r_sum = x_r_sum / 10.0;
+
+        float y_r_reading;
+        float y_r_sum = 0;
+        while (y_r_buffer.read(y_r_reading)) {
+            y_r_sum += y_r_reading;
+        }
+        y_r_sum = y_r_sum / 10.0;
+
+        float z_r_reading;
+        float z_r_sum = 0;
+        while (z_r_buffer.read(z_r_reading)) {
+            z_r_sum += z_r_reading;
+        }
+        z_r_sum = z_r_sum / 10.0;
+        
+        setState((KalmanState){sum, 0, 0, 0, 0, 0, 0, 0, 0, x_r_sum, 0, 0, y_r_sum, 0, 0, z_r_sum, 0, 0});
+    }
+    
     if (getActiveFSM().getFSMState() >= FSM_State::STATE_APOGEE) {
         H(1, 2) = 0;
     }
 
-    Eigen::Matrix<float, 2, 2> temp = Eigen::Matrix<float, 2, 2>::Zero();
+    Eigen::Matrix<float, 4, 4> temp = Eigen::Matrix<float, 4, 4>::Zero();
     temp = (((H * P_priori * H.transpose()) + R)).inverse();
-    Eigen::Matrix<float, 3, 3> identity = Eigen::Matrix<float, 3, 3>::Identity();
+    Eigen::Matrix<float, 9, 9> identity = Eigen::Matrix<float, 9, 9>::Identity();
     K = (P_priori * H.transpose()) * temp;
 
     // TODO These mutex locks are almost certainly not necessary
     // Sensor Measurements
+    Eigen::Matrix<float, 3, 1> accel = Eigen::Matrix<float, 3, 1>::Zero();
     chMtxLock(&highG.mutex);
-    y_k(1, 0) = highG.getAccel().az * 9.81 - 0.981 - 0.51;
+    accel(0, 0) = highG.getAccel().az;
+    accel(1, 0) = highG.getAccel().ax;
+    accel(2, 0) = highG.getAccel().ay;
     chMtxUnlock(&highG.mutex);
+
+    chMtxLock(&orientation.mutex);
+    euler_t angles = orientation.getEuler();
+    chMtxUnlock(&orientation.mutex);
+
+    x_r_buffer.push(angles.roll);
+    y_r_buffer.push(angles.pitch);
+    z_r_buffer.push(angles.yaw);
+
+
+    Eigen::Matrix<float, 3, 1> acc = BodyToGlobal(angles, accel);
+    y_k(1, 0) = acc(0) - 9.81;
+    y_k(2, 0) = acc(1);
+    y_k(3, 0) = acc(2);
 
     chMtxLock(&barometer.mutex);
     y_k(0, 0) = barometer.getAltitude();
+    alt_buffer.push(barometer.getAltitude());
     chMtxUnlock(&barometer.mutex);
 
     // # Posteriori Update
@@ -230,15 +355,94 @@ void KalmanFilter::update() {
     P_k = (identity - K * H) * P_priori;
 
     chMtxLock(&mutex);
-    kalman_x = x_k(0, 0);
-    kalman_vx = x_k(1, 0);
-    kalman_ax = x_k(2, 0);
+    kalman_state.state_est_pos_x = x_k(0, 0);
+    kalman_state.state_est_vel_x = x_k(1, 0);
+    kalman_state.state_est_accel_x = x_k(2, 0);
+    kalman_state.state_est_pos_y = x_k(3, 0);
+    kalman_state.state_est_vel_y = x_k(4, 0);
+    kalman_state.state_est_accel_y = x_k(5, 0);
+    kalman_state.state_est_pos_z = x_k(6, 0);
+    kalman_state.state_est_vel_z = x_k(7, 0);
+    kalman_state.state_est_accel_z = x_k(8, 0);
+
     timestamp = chVTGetSystemTime();
     chMtxUnlock(&mutex);
-    dataLogger.pushKalmanFifo((KalmanData){kalman_x, kalman_vx, kalman_ax, kalman_apo, timestamp});
+
+    struct KalmanData kalman_data;
+    kalman_data.kalman_acc_x = kalman_state.state_est_accel_x;
+    kalman_data.kalman_acc_y = kalman_state.state_est_accel_y;
+    kalman_data.kalman_acc_z = kalman_state.state_est_accel_z;
+    kalman_data.kalman_vel_x = kalman_state.state_est_vel_x;
+    kalman_data.kalman_vel_y = kalman_state.state_est_vel_y;
+    kalman_data.kalman_vel_z = kalman_state.state_est_vel_z;
+    kalman_data.kalman_pos_x = kalman_state.state_est_pos_x;
+    kalman_data.kalman_pos_y = kalman_state.state_est_pos_y;
+    kalman_data.kalman_pos_z = kalman_state.state_est_pos_z;
+    kalman_data.kalman_apo = kalman_apo;
+    kalman_data.timeStamp_state = timestamp;
+
+    dataLogger.pushKalmanFifo(kalman_data);
 }
 
-KalmanState KalmanFilter::getState() const { return {kalman_x, kalman_vx, kalman_ax}; }
+Eigen::Matrix<float, 3, 1> KalmanFilter::BodyToGlobal(euler_t angles, Eigen::Matrix<float, 3, 1> body_vect) {
+    Eigen::Matrix3f roll, pitch, yaw;
+    roll << 1., 0., 0., 0., cos(angles.roll), -sin(angles.roll ), 0., sin(angles.roll), cos(angles.roll);
+    pitch << cos(angles.pitch), 0., sin(angles.pitch), 0., 1., 0., -sin(angles.pitch), 0., cos(angles.pitch);
+    yaw << cos(angles.yaw), -sin(angles.yaw), 0., sin(angles.yaw), cos(angles.yaw), 0., 0., 0., 1.;
+    return yaw * pitch * roll * body_vect;
+}
+
+void KalmanFilter::priori_r() {
+    x_priori_r = (F_mat * x_k_r);
+    P_priori_r = (F_mat * P_k_r * F_mat.transpose()) + Q;
+}
+
+void KalmanFilter::update_r() {
+    Eigen::Matrix<float, 6, 6> temp = Eigen::Matrix<float, 6, 6>::Zero();
+    temp = (((H_r * P_priori_r * H_r.transpose()) + R_r)).inverse();
+    Eigen::Matrix<float, 9, 9> identity = Eigen::Matrix<float, 9, 9>::Identity();
+    K_r = (P_priori_r * H_r.transpose()) * temp;
+
+    // TODO These mutex locks are almost certainly not necessary
+    // Sensor Measurements
+    Eigen::Matrix<float, 3, 1> gyro = Eigen::Matrix<float, 3, 1>::Zero();
+    chMtxLock(&lowG.mutex);
+    gyro(0, 0) = lowG.getGyroscope().gz;
+    gyro(1, 0) = lowG.getGyroscope().gx;
+    gyro(2, 0) = lowG.getGyroscope().gy;
+    chMtxUnlock(&lowG.mutex);
+
+    euler_t angles;
+    angles.roll = x_k_r(0);
+    angles.pitch = x_k_r(1);
+    angles.yaw = x_k_r(2);
+    
+    Eigen::Matrix<float, 3, 1> euler = BodyToGlobal(angles, gyro);
+    y_k_r(0, 0) = euler(0);
+    y_k_r(2, 0) = euler(1);
+    y_k_r(4, 0) = euler(2);
+
+    // # Posteriori Update
+    x_k_r = x_priori_r + K_r * (y_k_r - (H_r * x_priori_r));
+    P_k_r = (identity - K_r * H_r) * P_priori_r;
+
+    chMtxLock(&mutex);
+    kalman_state.state_est_r_pos_x = x_k_r(0, 0);
+    kalman_state.state_est_r_vel_x = x_k_r(1, 0);
+    kalman_state.state_est_r_accel_x = x_k_r(2, 0);
+    kalman_state.state_est_r_pos_y = x_k_r(3, 0);
+    kalman_state.state_est_r_vel_y = x_k_r(4, 0);
+    kalman_state.state_est_r_accel_y = x_k_r(5, 0);
+    kalman_state.state_est_r_pos_z = x_k_r(6, 0);
+    kalman_state.state_est_r_vel_z = x_k_r(7, 0);
+    kalman_state.state_est_r_accel_z = x_k_r(8, 0);
+
+    chMtxUnlock(&mutex);
+}
+
+KalmanState KalmanFilter::getState() const { return kalman_state; }
+
+void KalmanFilter::setState(KalmanState state) { kalman_state = state; }
 
 void KalmanFilter::updateApogee(float estimate) { kalman_apo = estimate; }
 

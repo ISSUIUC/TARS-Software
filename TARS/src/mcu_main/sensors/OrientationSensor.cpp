@@ -1,6 +1,7 @@
+#include "OrientationSensor.h"
+
 #include <cmath>
 
-#include "OrientationSensor.h"
 #include "mcu_main/debug.h"
 
 OrientationSensor orientation;
@@ -15,7 +16,6 @@ sh2_SensorId_t reportType = SH2_ARVR_STABILIZED_RV;
 long reportIntervalUs = 5000;
 #endif
 
-
 void OrientationSensor::setReports(sh2_SensorId_t reportType, long report_interval) {
 #ifdef ENABLE_ORIENTATION
     Serial.println("Setting desired reports");
@@ -26,13 +26,10 @@ void OrientationSensor::setReports(sh2_SensorId_t reportType, long report_interv
 }
 
 #ifdef ENABLE_ORIENTATION
-OrientationSensor::OrientationSensor() : _imu(Adafruit_BNO08x(BNO086_RESET)) {
-
-}
+OrientationSensor::OrientationSensor() : _imu(Adafruit_BNO08x(BNO086_RESET)) {}
 #else
-OrientationSensor::OrientationSensor() { }
+OrientationSensor::OrientationSensor() {}
 #endif
-
 
 OrientationSensor::OrientationSensor(Adafruit_BNO08x const& bno) {
 #ifdef ENABLE_ORIENTATION
@@ -79,7 +76,8 @@ void OrientationSensor::update() {
         _pressure = event.un.pressure.value;
     }
     time_stamp = chVTGetSystemTime();
-    dataLogger.pushOrientationFifo((OrientationData){_accelerations, _gyro, _magnetometer, _orientationEuler, time_stamp});
+    dataLogger.pushOrientationFifo(
+        (OrientationData){_accelerations, _gyro, _magnetometer, _orientationEuler, time_stamp});
     chMtxUnlock(&mutex);
     chSysUnlock();
 #endif
@@ -97,11 +95,13 @@ void OrientationSensor::quaternionToEuler(float qr, float qi, float qj, float qk
 }
 
 void OrientationSensor::quaternionToEulerRV(sh2_RotationVectorWAcc_t* rotational_vector, bool degrees) {
-    quaternionToEuler(rotational_vector->real, rotational_vector->i, rotational_vector->j, rotational_vector->k, degrees);
+    quaternionToEuler(rotational_vector->real, rotational_vector->i, rotational_vector->j, rotational_vector->k,
+                      degrees);
 }
 
 void OrientationSensor::quaternionToEulerGI(sh2_GyroIntegratedRV_t* rotational_vector, bool degrees) {
-    quaternionToEuler(rotational_vector->real, rotational_vector->i, rotational_vector->j, rotational_vector->k, degrees);
+    quaternionToEuler(rotational_vector->real, rotational_vector->i, rotational_vector->j, rotational_vector->k,
+                      degrees);
 }
 
 float OrientationSensor::getTemp() { return _temp; }

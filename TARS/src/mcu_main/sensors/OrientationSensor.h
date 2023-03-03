@@ -1,21 +1,20 @@
 #pragma once
 
-#include <ChRt.h>
 #include <Arduino.h>
+#include <ChRt.h>
 #include <Wire.h>
 
-#include "mcu_main/debug.h"
 #include "Adafruit_BNO08x.h"
-#include "mcu_main/pins.h"
-#include "mcu_main/dataLog.h"
-#include "mcu_main/error.h"
 #include "common/packet.h"
-
+#include "mcu_main/dataLog.h"
+#include "mcu_main/debug.h"
+#include "mcu_main/error.h"
+#include "mcu_main/pins.h"
 
 class OrientationSensor {
    public:
     MUTEX_DECL(mutex);
-    
+
     OrientationSensor();
     explicit OrientationSensor(Adafruit_BNO08x const& imu);
 

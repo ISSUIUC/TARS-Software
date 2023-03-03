@@ -15,4 +15,8 @@ class ServoControl {
    private:
     PWMServo* servo_;
     void roundOffAngle(float& value);
+    float A = 9.8;
+    float B = 2.05;
+    float C = -154;
+    float D = 4.1;
 };

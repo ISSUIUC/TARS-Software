@@ -82,9 +82,9 @@ struct LowGData {
     float gx;
     float gy;
     float gz;
-//    float mx;
-//    float my;
-//    float mz;
+    //    float mx;
+    //    float my;
+    //    float mz;
     systime_t timeStamp_lowG;
 };
 
@@ -226,5 +226,3 @@ struct sensorDataStruct_t {
                has_magnetometer_data || has_gas_data;
     }
 };
-
-

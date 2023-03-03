@@ -39,4 +39,3 @@
 
 #define MAXM10S_SCL 19
 #define MAXM10S_SDA 18
-
