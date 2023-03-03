@@ -79,9 +79,18 @@ struct TelemetryPacket {
     float gps_lat;
     float gps_long;
     float gps_alt;
+    float yaw;
+    float pitch;
+    float roll;
     float gnc_state_x;
     float gnc_state_vx;
     float gnc_state_ax;
+    float gnc_state_y;
+    float gnc_state_vy;
+    float gnc_state_ay;
+    float gnc_state_z;
+    float gnc_state_vz;
+    float gnc_state_az;
     float gnc_state_apo;
     int16_t mag_x;                //[-4, 4]
     int16_t mag_y;                //[-4, 4]
