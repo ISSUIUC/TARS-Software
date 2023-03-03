@@ -347,6 +347,12 @@ TelemetryPacket Telemetry::makePacket(const sensorDataStruct_t &data_struct) {
     packet.gnc_state_ax = data_struct.kalman_data.kalman_acc_x;
     packet.gnc_state_vx = data_struct.kalman_data.kalman_vel_x;
     packet.gnc_state_x = data_struct.kalman_data.kalman_pos_x;
+    packet.gnc_state_ay = data_struct.kalman_data.kalman_acc_y;
+    packet.gnc_state_vy = data_struct.kalman_data.kalman_vel_y;
+    packet.gnc_state_y = data_struct.kalman_data.kalman_pos_y;
+    packet.gnc_state_az = data_struct.kalman_data.kalman_acc_z;
+    packet.gnc_state_vz = data_struct.kalman_data.kalman_vel_z;
+    packet.gnc_state_z = data_struct.kalman_data.kalman_pos_z;
     packet.gns_state_apo = data_struct.kalman_data.kalman_apo;
 
     packet.mag_x = inv_convert_range<int16_t>(data_struct.magnetometer_data.magnetometer.mx, 8);
