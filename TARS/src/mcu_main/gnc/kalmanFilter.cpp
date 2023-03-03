@@ -135,21 +135,21 @@ void KalmanFilter::kfTickFunction(float dt, float sd) {
         // Serial.print(", ");
         // Serial.println(orientation.getEuler().yaw * 180 / M_PI);
 
-        Serial.print("Kalman linear: ");
-        Serial.print(x_k(0, 0));
-        Serial.print(", ");
-        Serial.print(x_k(1, 0));
-        Serial.print(", ");
-        Serial.print(x_k(3, 0));
-        Serial.print(", ");
-        Serial.print(x_k(6, 0));
-        Serial.print(", ");
-        Serial.print("BNO: ");
-        Serial.print(orientation.getEuler().roll * 180 / M_PI);
-        Serial.print(", ");
-        Serial.print(orientation.getEuler().pitch * 180 / M_PI);
-        Serial.print(", ");
-        Serial.println(-orientation.getEuler().yaw * 180 / M_PI);
+        // Serial.print("Kalman linear: ");
+        // Serial.print(x_k(0, 0));
+        // Serial.print(", ");
+        // Serial.print(x_k(1, 0));
+        // Serial.print(", ");
+        // Serial.print(x_k(3, 0));
+        // Serial.print(", ");
+        // Serial.print(x_k(6, 0));
+        // Serial.print(", ");
+        // Serial.print("BNO: ");
+        // Serial.print(orientation.getEuler().roll * 180 / M_PI);
+        // Serial.print(", ");
+        // Serial.print(orientation.getEuler().pitch * 180 / M_PI);
+        // Serial.print(", ");
+        // Serial.println(-orientation.getEuler().yaw * 180 / M_PI);
 
         chMtxUnlock(&orientation.mutex);
         chMtxUnlock(&mutex);
@@ -438,12 +438,6 @@ void KalmanFilter::update() {
     // euler_t angles = (euler_t){0, 0, 0};
     chMtxUnlock(&orientation.mutex);
     angles.yaw = -angles.yaw;
-    Serial.print("r_accel: ");
-    Serial.print(accel(0));
-    Serial.print(", ");
-    Serial.print(accel(1));
-    Serial.print(", ");
-    Serial.println(accel(2));
 
     Eigen::Matrix<float, 3, 1> acc = BodyToGlobal(angles, accel);
     // y_k(1, 0) = (acc(0) - world_accel(0)) * 9.81;
@@ -455,13 +449,6 @@ void KalmanFilter::update() {
     // Serial.println(y_k(1, 0));
     y_k(2, 0) = (acc(1)) * 9.81;
     y_k(3, 0) = (acc(2)) * 9.81;
-
-    Serial.print("Accel: ");
-    Serial.print(y_k(1, 0));
-    Serial.print(", ");
-    Serial.print(y_k(2, 0));
-    Serial.print(", ");
-    Serial.println(y_k(3, 0));
 
     chMtxLock(&barometer.mutex);
     y_k(0, 0) = barometer.getAltitude();
