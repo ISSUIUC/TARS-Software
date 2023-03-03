@@ -104,7 +104,7 @@ void BuzzerController::playSequence(size_t sequence) {
 }
 
 void BuzzerController::init_sponge() {
-    float T = 500.0;
+    float T = 400.0;
     // Storing notes for startup
     const int spongebob[] = {
         NOTE_C5,
