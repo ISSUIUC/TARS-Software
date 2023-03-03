@@ -18,7 +18,7 @@ class Controller {
 
     PWMServo controller_servo_;
     rk4 rk4_;
-    float kp = 0.00008;
+    float kp = 0.0002;
 
     float min_extension = 0.0;
     float max_extension = 12.5 / 1000.0;
