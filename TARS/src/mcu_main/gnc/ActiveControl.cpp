@@ -18,7 +18,7 @@ Controller activeController;
  * 
  * Initializes a PWMServo object and sets the angle limits for the ServoControl object
 */
-Controller::Controller() : activeControlServos(&controller_servo_, 35, 105) {}
+Controller::Controller() : activeControlServos(&controller_servo_, 37, 105) {}
 
 void Controller::ctrlTickFunction() {
     chMtxLock(&kalmanFilter.mutex);
@@ -69,7 +69,8 @@ void Controller::ctrlTickFunction() {
         activeControlServos.servoActuation(u);
         dataLogger.pushFlapsFifo((FlapData){u, chVTGetSystemTime()});
     } else {
-        activeControlServos.servoActuation(min_extension);
+        // activeControlServos.servoActuation(min_extension);
+        controller_servo_.write(activeControlServos.min_angle);
     }
 }
 
@@ -117,7 +118,7 @@ void Controller::init() {
     
     controller_servo_.write(activeControlServos.max_angle);
     chThdSleepMilliseconds(1000);
-    controller_servo_.write(activeControlServos.max_angle);
+    controller_servo_.write(activeControlServos.min_angle);
     chThdSleepMilliseconds(1000);
 
 
