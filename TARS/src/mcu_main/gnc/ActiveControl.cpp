@@ -69,8 +69,8 @@ void Controller::ctrlTickFunction() {
         activeControlServos.servoActuation(u);
         dataLogger.pushFlapsFifo((FlapData){u, chVTGetSystemTime()});
     } else {
-        // activeControlServos.servoActuation(min_extension);
-        controller_servo_.write(activeControlServos.min_angle);
+        activeControlServos.servoActuation(min_extension);
+        // controller_servo_.write(activeControlServos.min_angle);
     }
 }
 
