@@ -362,6 +362,7 @@ void setup() {
             ;
     }
 
+    pinMode(LED_BUILTIN, OUTPUT);
     Serial.println(json_init_success);
 
     // Defaults after init are 434.0MHz, modulation GFSK_Rb250Fd250, +13dbM
@@ -428,6 +429,9 @@ void loop() {
         uint8_t len = sizeof(buf);
 
         if (rf95.recv(buf, &len) && len == sizeof(packet)) {
+            digitalWrite(LED_BUILTIN, HIGH);
+            delay(50);
+            digitalWrite(LED_BUILTIN, LOW);
             memcpy(&packet, buf, sizeof(packet));
             EnqueuePacket(packet, current_freq);
 
