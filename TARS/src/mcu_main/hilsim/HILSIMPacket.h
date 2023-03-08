@@ -1,12 +1,14 @@
 #include <ChRt.h>
 #include <cstdint>
 
+
 /**
- * @struct HILSIMPacket.h
+ * @struct HILSIMPacket
  * @brief Structure to hold data received serially from a desktop computer
  * 
  * The simulated/past-launch data is streamed through serial row-by-row to TARS. TARS receives it in the HILSIM thread and populates
- * data that would otherwise be read from sensors via the received HILSIM packet. 
+ * data that would otherwise be read from sensors via the received HILSIM packet. Used for rapid testing and iteration of onboard 
+ * hardware, GNC, and telemetry systems.
 */
 struct HILSIMPacket {
     uint32_t timestamp{};
@@ -32,11 +34,10 @@ struct HILSIMPacket {
     float imu_low_gy{};
     float imu_low_gz{};
 
-    // GPS data
-    float gps_latitude{};
-    float gps_longitude{};
-    float gps_altitude{};
-    float gps_sats_in_view{};
-
-    // 
+    // Orientation data
+    float ornt_roll{};
+    float ornt_pitch{};
+    float ornt_yaw{};
 };
+
+HILSIMPacket hilsim_reader;

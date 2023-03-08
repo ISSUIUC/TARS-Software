@@ -43,13 +43,52 @@
 #include "mcu_main/error.h"
 #include "mcu_main/buzzer/buzzer.h"
 #include "mcu_main/debug.h"
+#include "mcu_main/hilsim/HILSIMPacket.h"
 
 
 #if defined(ENABLE_HIGH_G) || defined(ENABLE_ORIENTATION) || defined(ENABLE_BAROMETER) || defined(ENABLE_LOW_G) || defined(ENABLE_MAGNETOMETER) || defined(ENABLE_GAS)
 #define ENABLE_SENSOR_FAST
 #endif
 
+#ifdef ENABLE_HILSIM_MODE
+static THD_FUNCTION(hilsim_THD, arg) {
+    // Creating array for data to be read into and setting timeout thresholds for receiving from serial
+    char data_read[512];
+    Serial.setTimeout(10000);
 
+    Serial.println("[TARS] Hardware-in-Loop Test Commenced");
+    while (1) {
+        int bytes_read = Serial.readBytesUntil('\n', data_read, 511);
+        if (bytes_read > 0) {
+            if (data_read[bytes_read - 1] == '\r') data_read[bytes_read - 1] = 0;
+
+            sscanf(data_read, "%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", 
+            &hilsim_reader.imu_high_ax,
+            &hilsim_reader.imu_high_ay,
+            &hilsim_reader.imu_high_az,
+            &hilsim_reader.barometer_altitude,
+            &hilsim_reader.barometer_temperature,
+            &hilsim_reader.barometer_pressure,
+            &hilsim_reader.imu_low_ax,
+            &hilsim_reader.imu_low_ay,
+            &hilsim_reader.imu_low_az,
+            &hilsim_reader.imu_low_mx,
+            &hilsim_reader.imu_low_my,
+            &hilsim_reader.imu_low_mz,
+            &hilsim_reader.imu_low_gx,
+            &hilsim_reader.imu_low_gy,
+            &hilsim_reader.imu_low_gz,
+            &hilsim_reader.ornt_roll,
+            &hilsim_reader.ornt_pitch,
+            &hilsim_reader.ornt_yaw
+            );
+            data_read[bytes_read] = 0;
+        }
+
+        chThdSleepMilliseconds(1);
+    }
+}
+#endif
 
 /******************************************************************************/
 /* TELEMETRY THREAD                                         */
