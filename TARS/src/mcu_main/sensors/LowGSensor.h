@@ -2,9 +2,11 @@
 
 #include "ChRt.h"
 #include "SparkFunLSM6DS3.h"
+
 #include "mcu_main/sensors/HighGSensor.h"
 #include "common/packet.h"
 #include "mcu_main/error.h"
+#include "mcu_main/hilsim/HILSIMPacket.h"
 
 /**
 * 
@@ -24,14 +26,13 @@ class LowGSensor {
 
     ErrorCode __attribute__((warn_unused_result)) init();
     void update();
+    void update(HILSIMPacket hilsim_packet);
     Acceleration getAcceleration();
     Gyroscope getGyroscope();
-//    Magnetometer getMagnetometer();
 
    private:
     float ax = 0.0, ay = 0.0, az = 0.0;
     float gx = 0.0, gy = 0.0, gz = 0.0;
-//    float mx = 0.0, my = 0.0, mz = 0.0;
     systime_t timestamp = 0;
 
     LSM6DS3 LSM;

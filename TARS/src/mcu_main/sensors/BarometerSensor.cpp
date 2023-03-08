@@ -14,7 +14,7 @@ ErrorCode BarometerSensor::init() {
     return ErrorCode::NO_ERROR;
 }
 
-void BarometerSensor::refresh() {
+void BarometerSensor::update() {
 #ifdef ENABLE_BAROMETER
     chMtxLock(&mutex);
     MS.read(12);
@@ -24,6 +24,15 @@ void BarometerSensor::refresh() {
     dataLogger.pushBarometerFifo((BarometerData){temperature, pressure, altitude, chVTGetSystemTime()});
     chMtxUnlock(&mutex);
 #endif
+}
+
+void BarometerSensor::update(HILSIMPacket hilsim_packet) {
+    chMtxLock(&mutex);
+    pressure = hilsim_packet.barometer_pressure;
+    temperature = hilsim_packet.barometer_temperature;
+    altitude = hilsim_packet.barometer_altitude;
+
+    chMtxUnlock(&mutex);
 }
 
 float BarometerSensor::getPressure() const { return pressure; }

@@ -170,7 +170,7 @@ static THD_FUNCTION(sensor_fast_THD, arg) {
 #ifdef THREAD_DEBUG
         Serial.println("### Sensor fast thread entrance");
 #endif
-        barometer.refresh();
+        barometer.update();
         magnetometer.update();
         gas.refresh();
         orientation.update();

@@ -6,8 +6,9 @@
 #include "SparkFun_Qwiic_KX13X.h"
 
 #include "common/packet.h"
-
 #include "mcu_main/error.h"
+#include "mcu_main/hilsim/HILSIMPacket.h"
+
 /**
 * 
 * @class HighGSensor
@@ -27,6 +28,7 @@ struct HighGSensor {
 
     ErrorCode __attribute__((warn_unused_result)) init();
     void update();
+    void update(HILSIMPacket hilsim_packet);
     Acceleration getAccel();
 
    private:

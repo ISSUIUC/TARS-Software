@@ -5,6 +5,7 @@
 #include "mcu_main/pins.h"
 #include "mcu_main/error.h"
 #include "mcu_main/debug.h"
+#include "mcu_main/hilsim/HILSIMPacket.h"
 
 /**
 * 
@@ -22,7 +23,9 @@ struct BarometerSensor {
     MUTEX_DECL(mutex);
 
     ErrorCode __attribute__((warn_unused_result)) init();
-    void refresh();
+    void update();
+    void update(HILSIMPacket hilsim_packet);
+
     float getPressure() const;
     float getTemperature() const;
     float getAltitude() const;

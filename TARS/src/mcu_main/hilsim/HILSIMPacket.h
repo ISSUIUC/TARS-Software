@@ -1,3 +1,5 @@
+#pragma once
+
 #include <ChRt.h>
 #include <cstdint>
 
@@ -10,7 +12,7 @@
  * data that would otherwise be read from sensors via the received HILSIM packet. Used for rapid testing and iteration of onboard 
  * hardware, GNC, and telemetry systems.
 */
-struct HILSIMPacket {
+typedef struct HILSIMPacket {
     uint32_t timestamp{};
 
     // High-G IMU data
@@ -40,6 +42,4 @@ struct HILSIMPacket {
     float ornt_roll{};
     float ornt_pitch{};
     float ornt_yaw{};
-
-
-};
+} HILSIMPacket;

@@ -11,6 +11,7 @@
 #include "mcu_main/debug.h"
 #include "mcu_main/error.h"
 #include "mcu_main/pins.h"
+#include "mcu_main/hilsim/HILSIMPacket.h"
 
 /**
 * 
@@ -36,6 +37,8 @@ class OrientationSensor {
     explicit OrientationSensor(Adafruit_BNO08x const& imu);
 
     void update();
+    void update(HILSIMPacket hilsim_packet);
+    
     ErrorCode __attribute__((warn_unused_result)) init();
 
     void setIMU(Adafruit_BNO08x const& imu);

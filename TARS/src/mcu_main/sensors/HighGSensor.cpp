@@ -3,7 +3,7 @@
 #include "mcu_main/dataLog.h"
 #include "mcu_main/pins.h"
 #include "mcu_main/debug.h"
-#include "mcu_main/hilsim/HILSIMPacket.h"
+
 
 HighGSensor highG;
 
