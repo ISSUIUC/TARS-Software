@@ -46,6 +46,8 @@
 #include "mcu_main/hilsim/HILSIMPacket.h"
 
 
+HILSIMPacket hilsim_reader;
+
 #if defined(ENABLE_HIGH_G) || defined(ENABLE_ORIENTATION) || defined(ENABLE_BAROMETER) || defined(ENABLE_LOW_G) || defined(ENABLE_MAGNETOMETER) || defined(ENABLE_GAS)
 #define ENABLE_SENSOR_FAST
 #endif
@@ -63,24 +65,24 @@ static THD_FUNCTION(hilsim_THD, arg) {
             if (data_read[bytes_read - 1] == '\r') data_read[bytes_read - 1] = 0;
 
             sscanf(data_read, "%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", 
-            &hilsim_reader.imu_high_ax,
-            &hilsim_reader.imu_high_ay,
-            &hilsim_reader.imu_high_az,
-            &hilsim_reader.barometer_altitude,
-            &hilsim_reader.barometer_temperature,
-            &hilsim_reader.barometer_pressure,
-            &hilsim_reader.imu_low_ax,
-            &hilsim_reader.imu_low_ay,
-            &hilsim_reader.imu_low_az,
-            &hilsim_reader.imu_low_mx,
-            &hilsim_reader.imu_low_my,
-            &hilsim_reader.imu_low_mz,
-            &hilsim_reader.imu_low_gx,
-            &hilsim_reader.imu_low_gy,
-            &hilsim_reader.imu_low_gz,
-            &hilsim_reader.ornt_roll,
-            &hilsim_reader.ornt_pitch,
-            &hilsim_reader.ornt_yaw
+            hilsim_reader.imu_high_ax,
+            hilsim_reader.imu_high_ay,
+            hilsim_reader.imu_high_az,
+            hilsim_reader.barometer_altitude,
+            hilsim_reader.barometer_temperature,
+            hilsim_reader.barometer_pressure,
+            hilsim_reader.imu_low_ax,
+            hilsim_reader.imu_low_ay,
+            hilsim_reader.imu_low_az,
+            hilsim_reader.imu_low_gx,
+            hilsim_reader.imu_low_gy,
+            hilsim_reader.imu_low_gz,
+            hilsim_reader.mag_x,
+            hilsim_reader.mag_y,
+            hilsim_reader.mag_z,
+            hilsim_reader.ornt_roll,
+            hilsim_reader.ornt_pitch,
+            hilsim_reader.ornt_yaw
             );
             data_read[bytes_read] = 0;
         }
@@ -292,6 +294,9 @@ static THD_FUNCTION(buzzer_THD, arg) {
 
 #define THREAD_WA 4096
 
+#ifdef ENABLE_HILSIM_MODE
+static THD_WORKING_AREA(hilsim_WA, THREAD_WA);
+#endif
 #ifdef ENABLE_GPS
 static THD_WORKING_AREA(gps_WA, THREAD_WA);
 #endif
@@ -321,6 +326,9 @@ static THD_WORKING_AREA(sensor_fast_WA, THREAD_WA);
  * @brief Starts all of the threads.
  */
 void chSetup() {
+#ifdef ENABLE_HILSIM_MODE
+    START_THREAD(hilsim);
+#endif
 #ifdef ENABLE_TELEMETRY
     START_THREAD(telemetry_sending);
     START_THREAD(telemetry_buffering);

@@ -3,6 +3,7 @@
 #include "mcu_main/dataLog.h"
 #include "mcu_main/pins.h"
 #include "mcu_main/debug.h"
+#include "mcu_main/hilsim/HILSIMPacket.h"
 
 HighGSensor highG;
 
@@ -14,6 +15,7 @@ void HighGSensor::update() {
     ax = data.xData;
     ay = data.yData;
     az = data.zData;
+
     timestamp = chVTGetSystemTime();
     dataLogger.pushHighGFifo((HighGData){ax, ay, az, timestamp});
 

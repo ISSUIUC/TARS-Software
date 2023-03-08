@@ -4,30 +4,28 @@
 #include "mcu_main/dataLog.h"
 #include "mcu_main/pins.h"
 #include "mcu_main/debug.h"
+#include "mcu_main/hilsim/HILSIMPacket.h"
 
 LowGSensor lowG;
 
 void LowGSensor::update() {
 #ifdef ENABLE_LOW_G
-     chSysLock();
-     chMtxLock(&mutex);
+    chSysLock();
+    chMtxLock(&mutex);
 
-     ax = LSM.readFloatAccelX();
-     ay = LSM.readFloatAccelY();
-     az = LSM.readFloatAccelZ();
-     gx = LSM.readFloatGyroX();
-     gy = LSM.readFloatGyroY();
-     gz = LSM.readFloatGyroZ();
-//     mx = LSM.calcMag(LSM.mx);
-//     my = LSM.calcMag(LSM.my);
-//     mz = LSM.calcMag(LSM.mz);
+    ax = LSM.readFloatAccelX();
+    ay = LSM.readFloatAccelY();
+    az = LSM.readFloatAccelZ();
+    gx = LSM.readFloatGyroX();
+    gy = LSM.readFloatGyroY();
+    gz = LSM.readFloatGyroZ();
 
-     timestamp = chVTGetSystemTime();
+    timestamp = chVTGetSystemTime();
 
-     chMtxUnlock(&mutex);
-     chSysUnlock();
+    chMtxUnlock(&mutex);
+    chSysUnlock();
 
-     dataLogger.pushLowGFifo((LowGData){ax, ay, az, gx, gy, gz, timestamp});
+    dataLogger.pushLowGFifo((LowGData){ax, ay, az, gx, gy, gz, timestamp});
 #endif
 }
 

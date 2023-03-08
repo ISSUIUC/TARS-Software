@@ -27,17 +27,19 @@ struct HILSIMPacket {
     float imu_low_ax{};
     float imu_low_ay{};
     float imu_low_az{};
-    float imu_low_mx{};
-    float imu_low_my{};
-    float imu_low_mz{};
     float imu_low_gx{};
     float imu_low_gy{};
     float imu_low_gz{};
+
+    // Mag data
+    float mag_x{};
+    float mag_y{};
+    float mag_z{};
 
     // Orientation data
     float ornt_roll{};
     float ornt_pitch{};
     float ornt_yaw{};
-};
 
-HILSIMPacket hilsim_reader;
+
+};
