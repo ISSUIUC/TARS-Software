@@ -62,6 +62,7 @@ static THD_FUNCTION(hilsim_THD, arg) {
     while (1) {
         int bytes_read = Serial.readBytesUntil('\n', data_read, 511);
         if (bytes_read > 0) {
+            Serial.println("Got something");
             if (data_read[bytes_read - 1] == '\r') data_read[bytes_read - 1] = 0;
 
             sscanf(data_read, "%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", 
@@ -85,6 +86,8 @@ static THD_FUNCTION(hilsim_THD, arg) {
             hilsim_reader.ornt_yaw
             );
             data_read[bytes_read] = 0;
+        } else {
+            Serial.println("Got nothing");
         }
 
         chThdSleepMilliseconds(1);
