@@ -170,6 +170,18 @@ static THD_FUNCTION(sensor_fast_THD, arg) {
 #ifdef THREAD_DEBUG
         Serial.println("### Sensor fast thread entrance");
 #endif
+#ifdef ENABLE_HILSIM_MODE
+
+        barometer.update(hilsim_reader);
+        magnetometer.update(hilsim_reader);
+        gas.refresh();
+        orientation.update(hilsim_reader);
+        lowG.update(hilsim_reader);
+        voltage.read();
+        highG.update(hilsim_reader);
+
+
+#else
         barometer.update();
         magnetometer.update();
         gas.refresh();
@@ -177,6 +189,7 @@ static THD_FUNCTION(sensor_fast_THD, arg) {
         lowG.update();
         voltage.read();
         highG.update();
+#endif
 
         chThdSleepMilliseconds(6);
     }

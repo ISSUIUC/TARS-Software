@@ -83,6 +83,18 @@ void OrientationSensor::update() {
 #endif
 }
 
+void OrientationSensor::update(HILSIMPacket hilsim_packet) {
+#ifdef ENABLE_ORIENTATION
+    chSysLock();
+    chMtxLock(&mutex);
+    _orientationEuler = (euler_t) {hilsim_packet.ornt_roll, hilsim_packet.ornt_pitch, hilsim_packet.ornt_yaw};
+    dataLogger.pushOrientationFifo(
+        (OrientationData){_accelerations, _gyro, _magnetometer, _orientationEuler, chVTGetSystemTime()});
+    chMtxUnlock(&mutex);
+    chSysUnlock();
+#endif
+}
+
 void OrientationSensor::quaternionToEuler(float qr, float qi, float qj, float qk, bool degrees) {
     float sqr = sq(qr);
     float sqi = sq(qi);

@@ -22,7 +22,7 @@ void MagnetometerSensor::update() {
     dataLogger.pushMagnetometerFifo((MagnetometerData) { {sensor.x_gauss, sensor.y_gauss, sensor.z_gauss}, time_stamp });
 }
 
-void update(HILSIMPacket hilsim_packet) {
+void MagnetometerSensor::update(HILSIMPacket hilsim_packet) {
     // We have to rewrite this because we're being lazy while logging it
 }
 

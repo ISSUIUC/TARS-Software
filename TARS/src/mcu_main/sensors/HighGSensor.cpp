@@ -24,6 +24,21 @@ void HighGSensor::update() {
 #endif
 }
 
+void HighGSensor::update(HILSIMPacket hilsim_packet) {
+#ifdef ENABLE_HIGH_G
+    chSysLock();
+    chMtxLock(&mutex);
+    ax = hilsim_packet.imu_high_ax;
+    ay = hilsim_packet.imu_high_ay;
+    az = hilsim_packet.imu_high_az;
+
+    dataLogger.pushHighGFifo((HighGData){ax, ay, az, chVTGetSystemTime()});
+
+    chMtxUnlock(&mutex);
+    chSysUnlock();
+#endif
+}
+
 Acceleration HighGSensor::getAccel() { return {ax, ay, az}; }
 
 ErrorCode HighGSensor::init() {

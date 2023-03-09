@@ -29,6 +29,24 @@ void LowGSensor::update() {
 #endif
 }
 
+void LowGSensor::update(HILSIMPacket hilsim_packet) {
+#ifdef ENABLE_LOW_G
+    chSysLock();
+    chMtxLock(&mutex);
+    ax = hilsim_packet.imu_low_ax;
+    ay = hilsim_packet.imu_low_ay;
+    az = hilsim_packet.imu_low_az;
+    gx = hilsim_packet.imu_low_gx;
+    gy = hilsim_packet.imu_low_gy;
+    gz = hilsim_packet.imu_low_gz;
+
+    dataLogger.pushLowGFifo((LowGData){ax, ay, az, gx, gy, gz, chVTGetSystemTime()});
+
+    chMtxUnlock(&mutex);
+    chSysUnlock();
+#endif
+}
+
 Acceleration LowGSensor::getAcceleration() { return Acceleration{ax, ay, az}; }
 
 Gyroscope LowGSensor::getGyroscope() { return Gyroscope{gx, gy, gz}; }

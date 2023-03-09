@@ -31,7 +31,7 @@ void BarometerSensor::update(HILSIMPacket hilsim_packet) {
     pressure = hilsim_packet.barometer_pressure;
     temperature = hilsim_packet.barometer_temperature;
     altitude = hilsim_packet.barometer_altitude;
-
+    dataLogger.pushBarometerFifo((BarometerData){temperature, pressure, altitude, chVTGetSystemTime()});
     chMtxUnlock(&mutex);
 }
 
