@@ -16,14 +16,26 @@ ErrorCode MagnetometerSensor::init() {
 }
 
 void MagnetometerSensor::update() {
+    #ifdef ENABLE_MAGNETOMETER
     sensor.read();
 
     time_stamp = chVTGetSystemTime();
-    dataLogger.pushMagnetometerFifo((MagnetometerData) { {sensor.x_gauss, sensor.y_gauss, sensor.z_gauss}, time_stamp });
+    mx = sensor.x_gauss;
+    my = sensor.y_gauss;
+    mz = sensor.z_gauss;
+    dataLogger.pushMagnetometerFifo((MagnetometerData) { {mx, my, mz}, time_stamp });
+    #endif
 }
 
 void MagnetometerSensor::update(HILSIMPacket hilsim_packet) {
-    // We have to rewrite this because we're being lazy while logging it
+#ifdef ENABLE_MAGNETOMETER
+    time_stamp = chVTGetSystemTime();
+    mx = hilsim_packet.mag_x;
+    my = hilsim_packet.mag_y;
+    mz = hilsim_packet.mag_z;
+    dataLogger.pushMagnetometerFifo((MagnetometerData) { {mx, my, mz}, time_stamp });
+
+#endif 
 }
 
 Magnetometer MagnetometerSensor::getMagnetometer() {

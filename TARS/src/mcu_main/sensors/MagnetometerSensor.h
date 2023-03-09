@@ -16,6 +16,9 @@ public:
 
 private:
     Adafruit_LIS3MDL sensor;
+    float mx;
+    float my;
+    float mz;
 
     systime_t time_stamp = 0;
 };
