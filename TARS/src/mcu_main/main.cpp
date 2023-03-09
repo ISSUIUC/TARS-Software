@@ -60,8 +60,11 @@ static THD_FUNCTION(hilsim_THD, arg) {
 
     Serial.println("[TARS] Hardware-in-Loop Test Commenced");
     while (1) {
+
         int bytes_read = Serial.readBytesUntil('\n', data_read, 511);
         if (bytes_read > 0) {
+            Serial.println(bytes_read);
+
             Serial.println("Got something");
             if (data_read[bytes_read - 1] == '\r') data_read[bytes_read - 1] = 0;
 
@@ -85,6 +88,7 @@ static THD_FUNCTION(hilsim_THD, arg) {
             hilsim_reader.ornt_pitch,
             hilsim_reader.ornt_yaw
             );
+            Serial.println(hilsim_reader.imu_high_ax);
             data_read[bytes_read] = 0;
         } else {
             Serial.println("Got nothing");
