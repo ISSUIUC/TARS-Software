@@ -56,39 +56,41 @@ HILSIMPacket hilsim_reader;
 static THD_FUNCTION(hilsim_THD, arg) {
     // Creating array for data to be read into and setting timeout thresholds for receiving from serial
     char data_read[512];
-    Serial.setTimeout(10000);
+    Serial.setTimeout(10);
 
     Serial.println("[TARS] Hardware-in-Loop Test Commenced");
     while (1) {
-
+        char dummy;
+        int dummy2;
         int bytes_read = Serial.readBytesUntil('\n', data_read, 511);
         if (bytes_read > 0) {
             Serial.println(bytes_read);
 
             Serial.println("Got something");
             if (data_read[bytes_read - 1] == '\r') data_read[bytes_read - 1] = 0;
-
-            sscanf(data_read, "%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", 
-            hilsim_reader.imu_high_ax,
-            hilsim_reader.imu_high_ay,
-            hilsim_reader.imu_high_az,
-            hilsim_reader.barometer_altitude,
-            hilsim_reader.barometer_temperature,
-            hilsim_reader.barometer_pressure,
-            hilsim_reader.imu_low_ax,
-            hilsim_reader.imu_low_ay,
-            hilsim_reader.imu_low_az,
-            hilsim_reader.imu_low_gx,
-            hilsim_reader.imu_low_gy,
-            hilsim_reader.imu_low_gz,
-            hilsim_reader.mag_x,
-            hilsim_reader.mag_y,
-            hilsim_reader.mag_z,
-            hilsim_reader.ornt_roll,
-            hilsim_reader.ornt_pitch,
-            hilsim_reader.ornt_yaw
+            Serial.println(data_read);
+            sscanf(data_read, "%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", 
+            &dummy,
+            &dummy2,
+            &hilsim_reader.imu_high_ay,
+            &hilsim_reader.imu_high_az,
+            &hilsim_reader.barometer_altitude,
+            &hilsim_reader.barometer_temperature,
+            &hilsim_reader.barometer_pressure,
+            &hilsim_reader.imu_low_ax,
+            &hilsim_reader.imu_low_ay,
+            &hilsim_reader.imu_low_az,
+            &hilsim_reader.imu_low_gx,
+            &hilsim_reader.imu_low_gy,
+            &hilsim_reader.imu_low_gz,
+            &hilsim_reader.mag_x,
+            &hilsim_reader.mag_y,
+            &hilsim_reader.mag_z,
+            &hilsim_reader.ornt_roll,
+            &hilsim_reader.ornt_pitch,
+            &hilsim_reader.ornt_yaw
             );
-            Serial.println(hilsim_reader.imu_high_ax);
+            Serial.println(dummy2);
             data_read[bytes_read] = 0;
         } else {
             Serial.println("Got nothing");
