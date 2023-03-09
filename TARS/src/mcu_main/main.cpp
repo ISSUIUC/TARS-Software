@@ -45,7 +45,6 @@
 #include "mcu_main/debug.h"
 #include "mcu_main/hilsim/HILSIMPacket.h"
 
-
 HILSIMPacket hilsim_reader;
 
 #if defined(ENABLE_HIGH_G) || defined(ENABLE_ORIENTATION) || defined(ENABLE_BAROMETER) || defined(ENABLE_LOW_G) || defined(ENABLE_MAGNETOMETER) || defined(ENABLE_GAS)
@@ -54,43 +53,56 @@ HILSIMPacket hilsim_reader;
 
 #ifdef ENABLE_HILSIM_MODE
 static THD_FUNCTION(hilsim_THD, arg) {
-    // Creating array for data to be read into and setting timeout thresholds for receiving from serial
+    // Creating array for data to be read into
     char data_read[512];
+    int fields_to_read = 19;
     Serial.setTimeout(10);
-
     Serial.println("[TARS] Hardware-in-Loop Test Commenced");
+
     while (1) {
-        char dummy;
-        int dummy2;
         int bytes_read = Serial.readBytesUntil('\n', data_read, 511);
         if (bytes_read > 0) {
             Serial.println(bytes_read);
-
             Serial.println("Got something");
             if (data_read[bytes_read - 1] == '\r') data_read[bytes_read - 1] = 0;
-            Serial.println(data_read);
-            sscanf(data_read, "%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", 
-            &dummy,
-            &dummy2,
-            &hilsim_reader.imu_high_ay,
-            &hilsim_reader.imu_high_az,
-            &hilsim_reader.barometer_altitude,
-            &hilsim_reader.barometer_temperature,
-            &hilsim_reader.barometer_pressure,
-            &hilsim_reader.imu_low_ax,
-            &hilsim_reader.imu_low_ay,
-            &hilsim_reader.imu_low_az,
-            &hilsim_reader.imu_low_gx,
-            &hilsim_reader.imu_low_gy,
-            &hilsim_reader.imu_low_gz,
-            &hilsim_reader.mag_x,
-            &hilsim_reader.mag_y,
-            &hilsim_reader.mag_z,
-            &hilsim_reader.ornt_roll,
-            &hilsim_reader.ornt_pitch,
-            &hilsim_reader.ornt_yaw
-            );
-            Serial.println(dummy2);
+            
+            char* token;
+            float parsed_values[fields_to_read];
+            int i = 0;
+            token = strtok(data_read, ",");
+            while (token) {
+                parsed_values[i] = atof(token);
+                token = strtok(NULL, ",");
+                i++;
+            }
+            hilsim_reader.imu_high_ax = parsed_values[0];
+            hilsim_reader.imu_high_ay = parsed_values[1];
+            hilsim_reader.imu_high_az = parsed_values[2];
+            hilsim_reader.barometer_altitude = parsed_values[3];
+            hilsim_reader.barometer_temperature = parsed_values[4];
+            hilsim_reader.barometer_pressure = parsed_values[5];
+            hilsim_reader.imu_low_ax = parsed_values[6];
+            hilsim_reader.imu_low_ay = parsed_values[7];
+            hilsim_reader.imu_low_az = parsed_values[8];
+            hilsim_reader.imu_low_gx = parsed_values[9];
+            hilsim_reader.imu_low_gy = parsed_values[10];
+            hilsim_reader.imu_low_gz = parsed_values[11];
+            hilsim_reader.mag_x = parsed_values[12];
+            hilsim_reader.mag_y = parsed_values[13];
+            hilsim_reader.mag_z = parsed_values[14];
+            hilsim_reader.ornt_roll = parsed_values[15];
+            hilsim_reader.ornt_pitch = parsed_values[16];
+            hilsim_reader.ornt_yaw = parsed_values[17];
+
+            Serial.print("ax: ");
+            Serial.println(hilsim_reader.imu_high_ax);
+            Serial.print("ay: ");
+            Serial.println(hilsim_reader.imu_high_ay);
+            Serial.print("az: ");
+            Serial.println(hilsim_reader.imu_high_az);
+            Serial.print("Barom alt: ");
+            Serial.println(hilsim_reader.barometer_altitude);
+
             data_read[bytes_read] = 0;
         } else {
             Serial.println("Got nothing");

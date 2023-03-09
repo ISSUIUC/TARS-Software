@@ -43,3 +43,4 @@ typedef struct HILSIMPacket {
     float ornt_pitch{};
     float ornt_yaw{};
 } HILSIMPacket;
+
