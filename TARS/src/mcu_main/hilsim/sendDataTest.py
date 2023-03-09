@@ -1,26 +1,25 @@
 import serial
+import pandas
 
-ser = serial.Serial("/dev/tty.usbmodem132228101", 9600, timeout=10)
+import time
 
-csv = open("flight_computer.csv", "r")
-csv.readline()
+ser = serial.Serial("COM8", 9600, timeout=20)
 
-while True:
-    line = csv.readline()
+csv = pandas.read_csv('flight_computer.csv')
 
-    if not line:
-        break
+written = ["highg_ax", "highg_ay", "highg_az", "barometer_altitude", "temperature", "pressure", "ax", "ay", "az", "gx", "gy", "gz", "mx", "my", "mz", "mx", "my", "mz"]
 
-    line = 'a,' + line[:-1] + ',0,0,0' + '\n'
+# last = csv.iloc[0]["timestamp"]
+
+for _, row in csv.iterrows():
+    line = f"{','.join(str(item) for item in row[written])}\n"
 
     # print(line)
-
-    # ser.write(line.encode("utf8"))
-    ser.write(("a" + ",5"*18 + '\n').encode("utf-8"))
+    ser.write(line.encode("utf8"))
 
     data = ser.read_all()
     string = data.decode("utf8")
-    if string:
+    if string != "":
         print(string)
 
-        
+    time.sleep(1/1000)

@@ -59,10 +59,10 @@ static THD_FUNCTION(hilsim_THD, arg) {
     Serial.setTimeout(10);
 
     Serial.println("[TARS] Hardware-in-Loop Test Commenced");
-    while (1) {
+    while (true) {
         char dummy;
         int dummy2;
-        int bytes_read = Serial.readBytesUntil('\n', data_read, 511);
+        int bytes_read = Serial.readBytesUntil('\n', data_read, 511u);
         if (bytes_read > 0) {
             Serial.println(bytes_read);
 
