@@ -342,13 +342,10 @@ void KalmanFilter::Initialize() {
  *
  * @param pos_x Initial position estimate in the x direction
  * @param vel_x Initial velocity estimate in the x direction
- * @param accel_x Initial acceleration estimate in the x direction
  * @param pos_y Initial position estimate in the y direction
  * @param vel_y Initial velocity estimate in the y direction
- * @param accel_y Initial acceleration estimate in the y direction
  * @param pos_z Initial position estimate in the z direction
  * @param vel_z Initial velocity estimate in the z direction
- * @param accel_z Initial acceleration estimate in the z direction
  */
 
 void KalmanFilter::Initialize(float pos_x, float vel_x,
