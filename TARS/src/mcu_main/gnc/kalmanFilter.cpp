@@ -331,9 +331,8 @@ void KalmanFilter::Initialize() {
     // x_k(0, 0) = x_sum / 30;
     // x_k(3, 0) = y_sum / 30;
     // x_k(6, 0) = z_sum / 30;
-    
 
-    // set B
+    // set B (don't care about what's in B since we have no control input)
     B(2, 0) = -1;
 }
 
@@ -363,18 +362,29 @@ void KalmanFilter::Initialize(float pos_x, float vel_x,
 
 
     // set F
-    F_mat(0, 1) = s_dt;
+    for (int i = 0; i < 3; i++) {
+        F_mat(3*i, 3*i + 1) = s_dt;
+        F_mat(3*i, 3*i + 2) = (s_dt * s_dt) / 2;
+        F_mat(3*i + 1, 3*i + 2) = s_dt;
 
-    F_mat(0, 0) = 1;
-    F_mat(1, 1) = 1;
+        F_mat(3*i, 3*i) = 1;
+        F_mat(3*i + 1, 3*i + 1) = 1;
+        F_mat(3*i + 2, 3*i + 2) = 1;
+    }
 
     // set H
     H(0, 0) = 1;
+    H(1, 2) = 1;
+    H(2, 5) = 1;
+    H(3, 8) = 1;
 
     // set R
-    R(0, 0) = 12;
+    R(0, 0) = 2.0;
+    R(1, 1) = 1.9;
+    R(2, 2) = 10;
+    R(3, 3) = 10;
 
-    // set B
+    // set B (don't care about what's in B since we have no control input)
     B(2, 0) = -1;
 }
 

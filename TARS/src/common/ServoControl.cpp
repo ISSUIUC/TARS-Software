@@ -23,29 +23,28 @@ ServoControl::ServoControl(PWMServo* servo, int min, int max) {
 }
 
 /**
- * @brief A function to keep the value sent to the servo between 0 and 130
- * degrees.
+ * @brief A function to bound the desired servo angle between the limits
+ * defined by the constructor.
  *
  * @param value The angle value determined by the control algorithm.
+ * @return The bounded angle value as an integer.
  */
-void ServoControl::roundOffAngle(float& value) {
+int ServoControl::roundOffAngle(float value) {
     // Min Extension Angle Value
     if (value > max_angle) {
         value = max_angle;
-    }
-    // Max Extension Angle Value
-    if (value < min_angle) {
+    } else if (value < min_angle) {
         value = min_angle;
     }
 
-    value = std::round(value);
+    return std::round(value);
 }
 
 /**
  * @brief Takes the length of the flap extension and converts to angles for the
  * servo.
  *
- * @param length Desired flap extension
+ * @param length Desired flap extension in mm.
  */
 void ServoControl::servoActuation(float length) {
     // The angle is found through utilizing a fft and mapping extension/angle
@@ -60,9 +59,10 @@ void ServoControl::servoActuation(float length) {
     // float angle = -0.035 + 1.09 * pow(10, 3) * length +
     //               2.98 * pow(10, -4) * pow(length, 2) -
     //               1.24 * pow(10, -6) * pow(length, 3);
-    roundOffAngle(angle);
+    // roundOffAngle(angle);
+    int servo_angle = roundOffAngle(angle);
 
-    servo_->write(angle);
+    servo_->write(servo_angle);
 
     // 130 is max
 #ifdef SERVO_DEBUG

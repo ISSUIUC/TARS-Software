@@ -4,6 +4,11 @@
 
 #include <PWMServo.h>
 
+#define A 9.8
+#define B 2.05
+#define C -154
+#define D 4.1
+
 class ServoControl {
    public:
     ServoControl(PWMServo* servo, int min, int max);
@@ -14,9 +19,5 @@ class ServoControl {
 
    private:
     PWMServo* servo_;
-    void roundOffAngle(float& value);
-    float A = 9.8;
-    float B = 2.05;
-    float C = -154;
-    float D = 4.1;
+    int roundOffAngle(float value);
 };
