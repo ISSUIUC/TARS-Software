@@ -16,11 +16,12 @@
 
 #include <cmath>
 
-ServoControl::ServoControl(PWMServo* servo, int min, int max) {
-    servo_ = servo;
-    min_angle = min;
-    max_angle = max;
-}
+#define A 9.8
+#define B 2.05
+#define C -154
+#define D 4.1
+
+ServoControl::ServoControl(PWMServo* servo, int min, int max) : servo_(servo), min_angle(min), max_angle(max) {}
 
 /**
  * @brief A function to bound the desired servo angle between the limits

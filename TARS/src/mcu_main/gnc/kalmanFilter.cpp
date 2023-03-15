@@ -496,7 +496,7 @@ void KalmanFilter::update() {
 
 Eigen::Matrix<float, 3, 1> KalmanFilter::BodyToGlobal(euler_t angles, Eigen::Matrix<float, 3, 1> body_vect) {
     Eigen::Matrix3f roll, pitch, yaw;
-    float temp = angles.yaw;
+    // float temp = angles.yaw;
     // angles.yaw = angles.roll;
     // angles.roll = temp;
 
