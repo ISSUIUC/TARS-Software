@@ -9,6 +9,10 @@
 #include "mcu_main/sensors/sensors.h"
 #include "common/packet.h"
 
+#define NUM_STATES 9
+#define NUM_SENSOR_INPUTS 4
+#define BUFFER_BIGGNESS 10
+
 class KalmanFilter;
 extern KalmanFilter kalmanFilter;
 
@@ -56,9 +60,6 @@ class KalmanFilter {
    private:
     float s_dt = 0.050;
 
-    // float kalman_x = 0;
-    // float kalman_vx = 0;
-    // float kalman_ax = 0;
     KalmanState kalman_state;
     float kalman_apo = 0;
     systime_t timestamp = 0;
@@ -66,18 +67,18 @@ class KalmanFilter {
     Eigen::Matrix<float, 3, 1> init_accel = Eigen::Matrix<float, 3, 1>::Zero();
     Eigen::Matrix<float, 3, 1> world_accel;
 
-    FifoBuffer<float, 10> alt_buffer;
+    FifoBuffer<float, BUFFER_BIGGNESS> alt_buffer;
 
-    Eigen::Matrix<float, 9, 1> x_k = Eigen::Matrix<float, 9, 1>::Zero();
-    Eigen::Matrix<float, 9, 9> F_mat = Eigen::Matrix<float, 9, 9>::Zero();
-    Eigen::Matrix<float, 4, 9> H = Eigen::Matrix<float, 4, 9>::Zero();
-    Eigen::Matrix<float, 9, 9> P_k = Eigen::Matrix<float, 9, 9>::Zero();
-    Eigen::Matrix<float, 9, 9> Q = Eigen::Matrix<float, 9, 9>::Zero();
-    Eigen::Matrix<float, 4, 4> R = Eigen::Matrix<float, 4, 4>::Zero();  // Diagonal
-    Eigen::Matrix<float, 9, 9> P_priori = Eigen::Matrix<float, 9, 9>::Zero();
-    Eigen::Matrix<float, 9, 1> x_priori = Eigen::Matrix<float, 9, 1>::Zero();
-    Eigen::Matrix<float, 9, 4> K = Eigen::Matrix<float, 9, 4>::Zero();
-    Eigen::Matrix<float, 4, 1> y_k = Eigen::Matrix<float, 4, 1>::Zero();
+    Eigen::Matrix<float, NUM_STATES, 1> x_k = Eigen::Matrix<float, NUM_STATES, 1>::Zero();
+    Eigen::Matrix<float, NUM_STATES, NUM_STATES> F_mat = Eigen::Matrix<float, NUM_STATES, NUM_STATES>::Zero();
+    Eigen::Matrix<float, NUM_SENSOR_INPUTS, NUM_STATES> H = Eigen::Matrix<float, NUM_SENSOR_INPUTS, NUM_STATES>::Zero();
+    Eigen::Matrix<float, NUM_STATES, NUM_STATES> P_k = Eigen::Matrix<float, NUM_STATES, NUM_STATES>::Zero();
+    Eigen::Matrix<float, NUM_STATES, NUM_STATES> Q = Eigen::Matrix<float, NUM_STATES, NUM_STATES>::Zero();
+    Eigen::Matrix<float, NUM_SENSOR_INPUTS, NUM_SENSOR_INPUTS> R = Eigen::Matrix<float, NUM_SENSOR_INPUTS, NUM_SENSOR_INPUTS>::Zero();  // Diagonal
+    Eigen::Matrix<float, NUM_STATES, NUM_STATES> P_priori = Eigen::Matrix<float, NUM_STATES, NUM_STATES>::Zero();
+    Eigen::Matrix<float, NUM_STATES, 1> x_priori = Eigen::Matrix<float, NUM_STATES, 1>::Zero();
+    Eigen::Matrix<float, NUM_STATES, NUM_SENSOR_INPUTS> K = Eigen::Matrix<float, NUM_STATES, NUM_SENSOR_INPUTS>::Zero();
+    Eigen::Matrix<float, NUM_SENSOR_INPUTS, 1> y_k = Eigen::Matrix<float, NUM_SENSOR_INPUTS, 1>::Zero();
 
-    Eigen::Matrix<float, 9, 4> B = Eigen::Matrix<float, 9, 4>::Zero();
+    Eigen::Matrix<float, NUM_STATES, NUM_SENSOR_INPUTS> B = Eigen::Matrix<float, NUM_STATES, NUM_SENSOR_INPUTS>::Zero();
 };

@@ -6,11 +6,11 @@
 
 class ServoControl {
    public:
-    ServoControl(PWMServo* servo, int min, int max);
+    ServoControl(PWMServo* servo);
     void servoActuation(float length);
 
-    int min_angle;
-    int max_angle;
+    int min_angle = 37;
+    int max_angle = 105;
 
    private:
     PWMServo* servo_;
