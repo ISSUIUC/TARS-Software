@@ -1,3 +1,31 @@
+/**
+ * @file        KalmanFSM.cpp
+ * @authors     Anshuk Chigullapalli
+ * 		        Ayberk Yaraneri
+ * 		        Colin Kinsey
+ *              Gautam Dayal
+ *              Jusjeev Singh Bhurjee
+ *              Rithvik Bhogavilli
+ *              Nicholas Phillips
+ *
+ *              Jessica Myers
+ *              Aidan Costello
+ *              Aaditya Voruganti
+ *
+ *              Magilan Sendhil
+ *
+ * @brief      The implementation of the finite state machine class that governs state transitions.
+ *
+ * The KalmanFSM class encapsulates the finite state machine that dictates which
+ * state the rocket is in throughout the mission. The class implements the logic
+ * necessary to reliably transition between states along with hysteresis to
+ * avoid premature state transitions.
+ *
+ * This is a highly critical software module and should be tested throughly in
+ * simulation and on hardware targets.:
+ *
+ */
+
 #pragma once
 
 #include "mcu_main/finite-state-machines/RocketFSMBase.h"
@@ -6,6 +34,12 @@ class KalmanFSM : public RocketFSMBase {
    public:
     KalmanFSM() = default;
 
+    /**
+    * @brief KalmanFSM tick function
+    *
+    * Uses a combination of linear acceleration and timers to govern FSM state
+    * changes for each timestep of the rocket's flight.
+    */
     void tickFSM() override;
 
    private:
