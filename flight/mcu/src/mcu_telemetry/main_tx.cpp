@@ -94,17 +94,13 @@ void setup()
   //select ports to use for serial (usb are 19, 20?)
   //while(!Serial);
 
-  digitalWrite(RGB_BUILTIN, HIGH);   // white led on startup
-  delay(1000);
-  digitalWrite(RGB_BUILTIN, LOW);
-  delay(1000);
+  // digitalWrite(RGB_BUILTIN, HIGH);   // white led on startup
+  // delay(1000);
+  // digitalWrite(RGB_BUILTIN, LOW);
+  // delay(1000);
 
-  if (Serial){
-    neopixelWrite(RGB_BUILTIN, 0,0,255); // blue led if serial initialized
-    delay(1000);
-    neopixelWrite(RGB_BUILTIN, 0,0,0);
-    delay(1000);
-  }
+  // while (Serial);
+  
 
   Serial.println("Telemetry Test");
 
@@ -116,14 +112,14 @@ void setup()
 
   while (!rf95.init()) {
     Serial.println("Radio Initialization Failed");
-    neopixelWrite(RGB_BUILTIN, 255,0,0); //red led if radio failed
+   // neopixelWrite(RGB_BUILTIN, 255,0,0); //red led if radio failed
     delay(1000);
-    neopixelWrite(RGB_BUILTIN, 0,0,0);
+    // neopixelWrite(RGB_BUILTIN, 0,0,0);
     while (1);
   }
-  neopixelWrite(RGB_BUILTIN, 0,255,0); //green led if radio success
+  //neopixelWrite(RGB_BUILTIN, 0,255,0); //green led if radio success
   delay(1000);
-  neopixelWrite(RGB_BUILTIN, 0,0,0);
+  // neopixelWrite(RGB_BUILTIN, 0,0,0);
   Serial.println("Radio Initialized");
 
   // Defaults after init are 434.0MHz, modulation GFSK_Rb250Fd250, +13dbM
