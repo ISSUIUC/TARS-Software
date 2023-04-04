@@ -89,7 +89,19 @@ void setup()
   pinMode(RFM95_EN, OUTPUT);
   digitalWrite(RFM95_RST, HIGH);
   digitalWrite(RFM95_EN, HIGH);
+
+  digitalWrite(41, HIGH);
+  delay(1000);
+  digitalWrite(41, LOW);
+  delay(1000);
+
   Serial.begin(9600);
+
+  digitalWrite(42, HIGH);
+  delay(1000);
+  digitalWrite(42, LOW);
+  delay(1000);
+
   //Serial.begin(9600, SERIAL_8N1, 19, 20);
   //select ports to use for serial (usb are 19, 20?)
   //while(!Serial);
