@@ -13,7 +13,7 @@
 //Don't forget to change the ini file to build the correct main file
 #define RFM95_CS 10
 #define RFM95_RST 35
-#define RFM95_INT 14
+#define RFM95_INT 9
 #define RFM95_EN 1
 
 // Change to 434.0 or other frequency, must match RX's freq!
@@ -89,6 +89,9 @@ void setup()
   pinMode(RFM95_EN, OUTPUT);
   digitalWrite(RFM95_RST, HIGH);
   digitalWrite(RFM95_EN, HIGH);
+
+  pinMode(41, OUTPUT);
+  pinMode(42, OUTPUT);
 
   digitalWrite(41, HIGH);
   delay(1000);
