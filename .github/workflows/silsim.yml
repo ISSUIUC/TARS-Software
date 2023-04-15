@@ -24,6 +24,7 @@ jobs:
       #     make -C build ISS_SILSIM  
       #     ./build/ISS_SILSIM
       - name: Send hello world message
+        uses: 8398a7/action-slack@v3
         with:
           status: custom
           fields: workflow,job,commit,repo,ref,author,took
