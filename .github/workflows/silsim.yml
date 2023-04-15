@@ -36,5 +36,5 @@ jobs:
               }]
             }
         env:
-          SLACK_WEBHOOK_URL: 'https://hooks.slack.com/services/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' # required
+          SLACK_WEBHOOK_URL: 'https://hooks.slack.com/services/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' # required
         if: always() # Pick up events even if the job fails or is canceled.
