@@ -23,20 +23,17 @@ jobs:
       #     cd ..
       #     make -C build ISS_SILSIM  
       #     ./build/ISS_SILSIM
-      # https://hooks.slack.com/services/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
       - name: Send hello world message
         with:
-        status: custom
-        fields: workflow,job,commit,repo,ref,author,took
-        custom_payload: |
-          {
-            attachments: [{
-              color: '${{ job.status }}' === 'success' ? 'good' : '${{ job.status }}' === 'failure' ? 'danger' : 'warning',
-              text: `${process.env.AS_WORKFLOW}\n${process.env.AS_JOB} (${process.env.AS_COMMIT}) of ${process.env.AS_REPO}@${process.env.AS_REF} by ${process.env.AS_AUTHOR} ${{ job.status }} in ${process.env.AS_TOOK}`,
-            }]
-          }
-      env:
-        SLACK_WEBHOOK_URL: 'https://hooks.slack.com/services/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' # required
-      if: always() # Pick up events even if the job fails or is canceled.
-            
-      
+          status: custom
+          fields: workflow,job,commit,repo,ref,author,took
+          custom_payload: |
+            {
+              attachments: [{
+                color: '${{ job.status }}' === 'success' ? 'good' : '${{ job.status }}' === 'failure' ? 'danger' : 'warning',
+                text: `${process.env.AS_WORKFLOW}\n${process.env.AS_JOB} (${process.env.AS_COMMIT}) of ${process.env.AS_REPO}@${process.env.AS_REF} by ${process.env.AS_AUTHOR} ${{ job.status }} in ${process.env.AS_TOOK}`,
+              }]
+            }
+        env:
+          SLACK_WEBHOOK_URL: 'https://hooks.slack.com/services/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' # required
+        if: always() # Pick up events even if the job fails or is canceled.
