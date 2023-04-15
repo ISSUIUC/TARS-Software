@@ -23,18 +23,24 @@ jobs:
       #     cd ..
       #     make -C build ISS_SILSIM  
       #     ./build/ISS_SILSIM
-      - name: Send hello world message
-        uses: 8398a7/action-slack@v3
+      - name: Send custom JSON data to Slack workflow
+        id: slack
+        uses: slackapi/slack-github-action@v1.23.0
         with:
-          status: custom
-          fields: workflow,job,commit,repo,ref,author,took
-          custom_payload: |
+          # For posting a rich message using Block Kit
+          payload: |
             {
-              attachments: [{
-                color: '${{ job.status }}' === 'success' ? 'good' : '${{ job.status }}' === 'failure' ? 'danger' : 'warning',
-                text: `${process.env.AS_WORKFLOW}\n${process.env.AS_JOB} (${process.env.AS_COMMIT}) of ${process.env.AS_REPO}@${process.env.AS_REF} by ${process.env.AS_AUTHOR} ${{ job.status }} in ${process.env.AS_TOOK}`,
-              }]
+              "text": "GitHub Action build result: ${{ job.status }}",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "GitHub Action build result: ${{ job.status }}"
+                  }
+                }
+              ]
             }
         env:
-          SLACK_WEBHOOK_URL: 'https://hooks.slack.com/services/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' # required
-        if: always() # Pick up events even if the job fails or is canceled.
+          SLACK_WEBHOOK_URL: 'https://hooks.slack.com/services/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'
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
