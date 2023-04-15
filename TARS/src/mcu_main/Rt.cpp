@@ -51,7 +51,7 @@ public:
 ThreadManager thread_manager;
 
 uint32_t getTime() {
-    return clock();
+    return g_sim->get_time();
 }
 
 void threadYield() {
@@ -92,6 +92,9 @@ void run_sim(void* arg) {
         if (i % 100 == 0)
             std::cout << "Run " << i << std::endl;
 
+        if(i >= 3000){
+            // thread_manager.debug = true;
+        }
         bool res = g_sim->step();
         if(!res) break;
         threadYield();

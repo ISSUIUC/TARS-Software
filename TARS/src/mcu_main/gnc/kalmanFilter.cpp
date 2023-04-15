@@ -90,11 +90,11 @@ void KalmanFilter::kfTickFunction(float dt, float sd) {
         priori();
         update();
 
-        chMtxLock(&mutex);
-        chMtxLock(&orientation.mutex);
+        // chMtxLock(&mutex);
+        // chMtxLock(&orientation.mutex);
 
-        chMtxUnlock(&orientation.mutex);
-        chMtxUnlock(&mutex);
+        // chMtxUnlock(&orientation.mutex);
+        // chMtxUnlock(&mutex);
     }
 }
 /**
@@ -393,7 +393,9 @@ KalmanState KalmanFilter::getState() const { return kalman_state; }
  * 
  * @param state Wanted state vector
  */
-void KalmanFilter::setState(KalmanState state) { kalman_state = state; }
+void KalmanFilter::setState(KalmanState state) { 
+    kalman_state = state; 
+}
 
 /**
  * @brief Sets the apogee estimate

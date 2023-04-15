@@ -250,7 +250,6 @@ static THD_FUNCTION(kalman_THD, arg) {
     kalmanFilter.Initialize();
 
     systime_t last = chVTGetSystemTime();
-
     while (true) {
 #ifdef THREAD_DEBUG
         Serial.println("### Kalman thread entrance");
@@ -328,7 +327,7 @@ static THD_FUNCTION(buzzer_THD, arg) {
 }
 #endif
 
-#define THREAD_WA 4096
+#define THREAD_WA 8192
 
 #ifdef ENABLE_HILSIM_MODE
 static THD_WORKING_AREA(hilsim_WA, THREAD_WA);

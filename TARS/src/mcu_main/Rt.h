@@ -63,17 +63,28 @@ typedef uint32_t sysinterval_t;
 #define THD_FUNCTION(name, arg) const char* name##_name = #name; void name(void* arg)
 #define THD_WORKING_AREA(name, size) uint8_t name[size];
 #define NORMALPRIO 0
+#define CH_CFG_ST_FREQUENCY 10000
 
 #define chThdCreateStatic(wa_ptr, wa_size, prio, fn, arg) createThread(fn##_name, fn, wa_size, arg)
 #define chThdSleepMilliseconds(time) threadSleep(time)
 #define chThdYield() threadYield()
-#define chVTGetSystemTime() getTime()
+#define chVTGetSystemTime() TIME_MS2I(getTime() / 1000.0)
 #define chBegin(f) f()
+
+typedef uint64_t time_conv_t;
+typedef uint32_t time_msecs_t;
 
 #define MUTEX_DECL(name) Mutex name
 #define chMtxLock(mtx) (mtx)->lock()
 #define chMtxUnlock(mtx) (mtx)->unlock()
-#define TIME_I2MS(t) ((t) / CLOCKS_PER_SEC * 1000)
+#define TIME_I2MS(interval) (time_msecs_t)((((time_conv_t)(interval) * (time_conv_t)1000) +           \
+                  (time_conv_t)CH_CFG_ST_FREQUENCY - (time_conv_t)1) /      \
+                 (time_conv_t)CH_CFG_ST_FREQUENCY)
+
+
+#define TIME_MS2I(msecs) ((sysinterval_t)((((time_conv_t)(msecs) * \
+                     (time_conv_t)CH_CFG_ST_FREQUENCY) +           \
+                    (time_conv_t)999) / (time_conv_t)1000))
 
 #define chSysLock() (void) (0)
 #define chSysUnlock() (void) (0)
