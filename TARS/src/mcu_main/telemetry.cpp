@@ -19,6 +19,7 @@
 #include "mcu_main/debug.h"
 #include "mcu_main/dataLog.h"
 #include "mcu_main/Rt.h"
+#include <cstring>
 #include <cmath>
 
 #ifndef ENABLE_SILSIM_MODE

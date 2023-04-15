@@ -1,7 +1,11 @@
 #include "mcu_main/Rt.h"
 
 #ifdef ENABLE_SILSIM_MODE
+#ifdef _WIN32
 #include <windows.h>
+#else
+#include "mcu_main/unix_fiber.h"
+#endif
 #include <vector>
 #include <ctime>
 #include <iostream>
@@ -11,7 +15,7 @@
 
 void setup();
 
-
+static Simulation* g_sim;
 struct ThreadInfo {
 public:
     explicit ThreadInfo(const char* name, void* handle) : _name(name), fiber_handle(handle) { }
@@ -60,10 +64,11 @@ void createThread(const char* name, void fn(void*), size_t stack, void* arg) {
 }
 
 void threadSleep(int32_t time_ms) {
-    clock_t start = clock();
-    clock_t wait = time_ms * CLOCKS_PER_SEC / 1000;
+    
+    double start = g_sim->get_time();
+    double wait = time_ms / 1000.0;
     while (true) {
-        clock_t curr = clock();
+        double curr = g_sim->get_time();
         if (curr >= start + wait) {
             return;
         }
@@ -73,7 +78,7 @@ void threadSleep(int32_t time_ms) {
 }
 
 void SerialPatch::println(const char* s) {
-    std::cout << s << std::endl;
+    std::cout << s << '\n';
 }
 
 void SerialPatch::begin(int baudrate) {
@@ -83,13 +88,12 @@ void SerialPatch::begin(int baudrate) {
 SerialPatch Serial;
 
 void run_sim(void* arg) {
-    Simulation* sim = static_cast<Simulation*>(arg);
-
     for (int i = 0; i < 100000; i++) {
         if (i % 100 == 0)
             std::cout << "Run " << i << std::endl;
 
-        bool res = sim->step();
+        bool res = g_sim->step();
+        if(!res) break;
         threadYield();
     }
     std::cout << "done" << std::endl;
@@ -132,6 +136,8 @@ int main() {
     emulatedGPS = &gps1;
     sim.add_sensor(&mag1);
     emulatedMagnetometer = &mag1;
+
+    g_sim = &sim;
 
     std::cout << "to setup" << std::endl;
 
