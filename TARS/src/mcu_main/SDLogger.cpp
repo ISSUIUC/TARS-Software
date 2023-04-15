@@ -78,6 +78,10 @@ void SDLogger::init() {
         sd_file = SD.open(data_name, FILE_WRITE_BEGIN);
         // print header to file on sd card that lists each variable that is logged
         // sd_file.println("binary logging of sensor_data_t");
+
+        // Write the git hash of packet.h to the start of the file
+        sd_file.write((const uint8_t*)PACKET_H_GIT_HASH, sizeof(PACKET_H_GIT_HASH));
+
         sd_file.flush();
 
         Serial.println(sd_file.name());
