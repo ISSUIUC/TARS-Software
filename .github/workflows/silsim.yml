@@ -23,24 +23,15 @@ jobs:
       #     cd ..
       #     make -C build ISS_SILSIM  
       #     ./build/ISS_SILSIM
-      - name: Send custom JSON data to Slack workflow
+      - name: Post to a Slack channel
         id: slack
         uses: slackapi/slack-github-action@v1.23.0
         with:
-          # For posting a rich message using Block Kit
-          payload: |
-            {
-              "text": "GitHub Action build result: ${{ job.status }}",
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "GitHub Action build result: ${{ job.status }}"
-                  }
-                }
-              ]
-            }
+          # Slack channel id, channel name, or user id to post message.
+          # See also: https://api.slack.com/methods/chat.postMessage#channels
+          # You can pass in multiple channels to post to by providing a comma-delimited list of channel IDs.
+          channel-id: 'C052ZP64ARM'
+          # For posting a simple plain text message
+          slack-message: "GitHub build result: ${{ job.status }}\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}"
         env:
-          SLACK_WEBHOOK_URL: 'https://hooks.slack.com/services/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'
-          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+          SLACK_BOT_TOKEN: 'xoxb-5118805236916-5118826162228-zUoB4fY1TjoqiWcGMBKFLYv8'
