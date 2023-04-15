@@ -23,14 +23,14 @@ jobs:
       #     cd ..
       #     make -C build ISS_SILSIM  
       #     ./build/ISS_SILSIM
-      - name: Get user email
-        id: get_email
-        run: |
-          curl -X GET -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/user/emails | jq '.[0].email'
-          shell: bash
-      - name: Debug JSON response
-        if: ${{ always() }}
-        run: cat email.json
+      # - name: Get user email
+      #   id: get_email
+      #   run: |
+      #     curl -X GET -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/user/emails | jq '.[0].email'
+      #     shell: bash
+      # - name: Debug JSON response
+      #   if: ${{ always() }}
+      #   run: cat email.json
       - name: Send email notification
         if: ${{ always() }}
         uses: dawidd6/action-send-mail@v3.7.1
@@ -39,7 +39,7 @@ jobs:
           server_port: 465
           subject: SILSIM Check Status - ${{ job.status }}
           from: SILSIM BOT B)
-          to: ${{ steps.get_email.outputs.email }}
+          to: ${{github.event.pusher.email}}
           body: |
             The SILSIM check has completed with status ${{ job.status }}.
 
