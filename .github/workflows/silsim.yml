@@ -6,15 +6,16 @@ jobs:
     name: SILSIM Works
     runs-on: ubuntu-latest
     steps:
-      run: |
-      sudo apt install git
-      sudo apt-get -y install cmake
-      git clone https://github.com/ISSUIUC/ISS_SILSIM
-      cd ISS_SILSIM
-      git submodule update --init --recursive
-      mkdir build
-      cd build
-      cmake ..
-      cd ..
-      make -C build ISS_SILSIM
-      ./build/ISS_SILSIM
+      - name: Install dependencies and run SILSIM
+        run: |
+          sudo apt install git
+          sudo apt-get -y install cmake
+          git clone https://github.com/ISSUIUC/ISS_SILSIM
+          cd ISS_SILSIM
+          git submodule update --init --recursive
+          mkdir build
+          cd build
+          cmake ..
+          cd ..
+          make -C build ISS_SILSIM
+          ./build/ISS_SILSIM
