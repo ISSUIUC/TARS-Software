@@ -13,7 +13,7 @@ jobs:
       - name: Download SILSIM
         run: |    
           git clone https://github.com/ISSUIUC/ISS_SILSIM
-      - name: Install SILSIM
+      - name: Install and run SILSIM
         run: |  
           cd ISS_SILSIM
           git submodule update --init --recursive
@@ -21,19 +21,20 @@ jobs:
           cd build
           cmake ..
           cd ..
-          make -C build ISS_SILSIM
-      - name: Run SILSIM
-        run: |   
+          make -C build ISS_SILSIM  
           ./build/ISS_SILSIM
       - name: Send email notification
         if: ${{ always() }}
-        uses: dawidd6/action-send-mail@v2.2.0
+        uses: dawidd6/action-send-mail@v3.7.1
         with:
           server_address: smtp.gmail.com
-          server_port: 587
-          username: ${{ secrets.EMAIL_USERNAME }}
-          password: ${{ secrets.EMAIL_PASSWORD }}
+          server_port: 465
           subject: SILSIM Check Status - ${{ job.status }}
-          to: ${{ github.actor }}@example.com
+          to: ${{ steps.get_email.outputs.email }}
           body: |
             The SILSIM check has completed with status ${{ job.status }}.
+
+      - name: Get user email
+        id: get_email
+        run: |
+          curl -X GET -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/user/emails | jq '.[0].email'
