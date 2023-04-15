@@ -24,7 +24,7 @@ void BarometerSensor::update() {
 #ifdef ENABLE_SILSIM_MODE
     pressure = emulatedMS->get_data();
     temperature = emulatedThermometer->get_data();
-#elif
+#else
 #ifdef ENABLE_BAROMETER
     MS.read(12);
     pressure = static_cast<float>(MS.getPressure() * 0.01 + 26.03);

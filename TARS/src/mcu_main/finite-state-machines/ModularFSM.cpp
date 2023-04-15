@@ -299,7 +299,7 @@ void ModularFSM::tickFSM(){
 
         Serial.print("launch site altitude: ");
         Serial.println(launch_site_altitude_);
-    #endif FSM_DEBUG
+    #endif
 
     switch(rocket_state_){
         //include a case for init?

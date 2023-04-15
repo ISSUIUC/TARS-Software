@@ -23,7 +23,7 @@
 
 #ifdef ENABLE_SILSIM_MODE
 ServoControl::ServoControl() {}
-#elif
+#else
 ServoControl::ServoControl(PWMServo* servo) : servo_(servo) {}
 #endif
 

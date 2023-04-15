@@ -20,7 +20,7 @@ Controller activeController;
 */
 #ifdef ENABLE_SILSIM_MODE
 Controller::Controller() = default;
-#elif
+#else
 Controller::Controller() : activeControlServos(&controller_servo_) {}
 #endif
 

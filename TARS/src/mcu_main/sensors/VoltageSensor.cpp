@@ -10,7 +10,7 @@ VoltageData VoltageSensor::read() {
 
 #ifdef ENABLE_SILSIM_MODE
     v_battery = 9.0;
-#elif
+#else
     v_battery = analogRead(16) / 1024.f * 3.3f * 3.f;
 #endif
     timestamp = chVTGetSystemTime();

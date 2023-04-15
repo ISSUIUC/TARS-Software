@@ -24,7 +24,7 @@ void LowGSensor::update() {
     gx = emulatedGyro->get_data().x();
     gy = emulatedGyro->get_data().y();
     gz = emulatedGyro->get_data().z();
-#elif
+#else
     ax = LSM.readFloatAccelX();
     ay = LSM.readFloatAccelY();
     az = LSM.readFloatAccelZ();

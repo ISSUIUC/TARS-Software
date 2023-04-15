@@ -420,7 +420,7 @@ void chSetup() {
     buzzer1.init_sponge();
     // buzzer1.init_mario();
     while (true) {
-        threadYield();
+        chThdYield();
     }
 }
 

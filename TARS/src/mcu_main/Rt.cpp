@@ -1,11 +1,11 @@
 #include "mcu_main/Rt.h"
-#include "mcu_main/ISS_SILSIM/src/Sensors/Sensor.h"
 
 #ifdef ENABLE_SILSIM_MODE
 #include <windows.h>
 #include <vector>
 #include <ctime>
 #include <iostream>
+#include "mcu_main/ISS_SILSIM/src/Sensors/Sensor.h"
 #include "mcu_main/ISS_SILSIM/src/SILSIM.h"
 #include "mcu_main/emulation.h"
 

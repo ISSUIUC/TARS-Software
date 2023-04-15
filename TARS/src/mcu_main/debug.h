@@ -2,7 +2,9 @@
 
 // Enable or disable HILSIM mode
 //#define ENABLE_HILSIM_MODE
-#define ENABLE_SILSIM_MODE
+
+/* This shouldn't be enabled unless you're developing, since it's set automatically when building in SILSIM mode */
+// #define ENABLE_SILSIM_MODE
 
 // Enable or disable debugging tools here
 // #define THREAD_DEBUG

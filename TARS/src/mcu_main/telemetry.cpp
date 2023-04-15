@@ -237,7 +237,7 @@ void Telemetry::serialPrint(const sensorDataStruct_t &sensor_data) {
     printJSONField("sign", "NOSIGN");
 #ifdef ENABLE_SILSIM_MODE
     printJSONField("RSSI", 0);
-#elif
+#else
     printJSONField("RSSI", rf95.lastRssi());
 #endif
     printJSONField("Voltage", sensor_data.voltage_data.v_battery);
@@ -375,7 +375,7 @@ TelemetryPacket Telemetry::makePacket(const sensorDataStruct_t &data_struct) {
     packet.response_ID = last_command_id;
 #ifdef ENABLE_SILSIM_MODE
     packet.rssi = 0;
-#elif
+#else
     packet.rssi = rf95.lastRssi();
 #endif
     packet.voltage_battery = inv_convert_range<uint8_t>(data_struct.voltage_data.v_battery, 16);

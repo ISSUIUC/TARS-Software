@@ -24,7 +24,7 @@ void MagnetometerSensor::update() {
     mx = emulatedMagnetometer->get_data().x();
     my = emulatedMagnetometer->get_data().y();
     mz = emulatedMagnetometer->get_data().z();
-#elif
+#else
     sensor.read();
 
     mx = sensor.x_gauss;

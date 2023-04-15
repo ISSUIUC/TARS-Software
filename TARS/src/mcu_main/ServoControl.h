@@ -12,7 +12,7 @@ class ServoControl {
    public:
 #ifdef ENABLE_SILSIM_MODE
     ServoControl();
-#elif
+#else
     ServoControl(PWMServo* servo);
 #endif
     void servoActuation(float length);
@@ -21,9 +21,8 @@ class ServoControl {
     int max_angle = 105;
 
    private:
-#ifdef ENABLE_SILSIM_MODE
-#elif
-PWMServo* servo_;
+#ifndef ENABLE_SILSIM_MODE
+    PWMServo* servo_;
 #endif
     int roundOffAngle(float value);
 };

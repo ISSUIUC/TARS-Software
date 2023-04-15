@@ -20,7 +20,7 @@ void HighGSensor::update() {
     ax = data.x();
     ay = data.y();
     az = data.z();
-#elif
+#else
     auto data = KX.getAccelData();
     ax = data.xData;
     ay = data.yData;

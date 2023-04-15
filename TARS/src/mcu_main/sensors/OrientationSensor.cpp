@@ -8,7 +8,7 @@ OrientationSensor orientation;
 
 #ifdef ENABLE_SILSIM_MODE
 #include "mcu_main/emulation.h"
-#elif
+#else
 #ifdef FAST_MODE
 // Top frequency is reported to be 1000Hz (but freq is somewhat variable)
 sh2_SensorId_t reportType = SH2_GYRO_INTEGRATED_RV;
@@ -68,7 +68,7 @@ void OrientationSensor::update() {
     _magnetometer.mx = emulatedMagnetometer->get_data().x();
     _magnetometer.my = emulatedMagnetometer->get_data().y();
     _magnetometer.mz = emulatedMagnetometer->get_data().z();
-#elif
+#else
     sh2_SensorValue_t event;
     if (_imu.getSensorEvent(&event)) {
         switch (event.sensorId) {

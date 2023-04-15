@@ -42,7 +42,7 @@ void GPSSensor::update() {
     altitude = 0;
     fix_type = 3;
     SIV_count = 4;
-#elif
+#else
     bool succeed = GNSS.getPVT(20);
     if (!succeed) {
         chMtxUnlock(&mutex);
