@@ -15,6 +15,8 @@
 
 #pragma once
 
+#include "mcu_main/debug.h"
+
 #include "mcu_main/sensors/BarometerSensor.h"
 #include "mcu_main/sensors/GPSSensor.h"
 #include "mcu_main/sensors/HighGSensor.h"

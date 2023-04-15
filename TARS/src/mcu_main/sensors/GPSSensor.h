@@ -1,8 +1,10 @@
 #pragma once
 
-#include "ChRt.h"
-#include "SparkFun_u-blox_GNSS_v3.h"
+#include "mcu_main/Rt.h"
 #include "mcu_main/error.h"
+#ifndef ENABLE_SILSIM_MODE
+#include "SparkFun_u-blox_GNSS_v3.h"
+#endif
 
 
 /**
@@ -44,8 +46,9 @@ struct GPSSensor {
     uint32_t getSIVCount() const;
 
    private:
+#ifndef ENABLE_SILSIM_MODE
     SFE_UBLOX_GNSS GNSS;
-
+#endif
     
     systime_t timeStamp{};
     float latitude{};

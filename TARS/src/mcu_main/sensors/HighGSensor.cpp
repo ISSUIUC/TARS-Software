@@ -4,6 +4,10 @@
 #include "mcu_main/pins.h"
 #include "mcu_main/debug.h"
 
+#ifdef ENABLE_SILSIM_MODE
+#include "mcu_main/emulation.h"
+#endif
+
 
 HighGSensor highG;
 
@@ -11,10 +15,17 @@ void HighGSensor::update() {
 #ifdef ENABLE_HIGH_G
     chSysLock();
     chMtxLock(&mutex);
+#ifdef ENABLE_SILSIM_MODE
+    auto data = emulatedKX->get_data();
+    ax = data.x();
+    ay = data.y();
+    az = data.z();
+#elif
     auto data = KX.getAccelData();
     ax = data.xData;
     ay = data.yData;
     az = data.zData;
+#endif
 
     timestamp = chVTGetSystemTime();
     dataLogger.pushHighGFifo((HighGData){ax, ay, az, timestamp});
@@ -43,6 +54,7 @@ Acceleration HighGSensor::getAccel() { return {ax, ay, az}; }
 
 ErrorCode HighGSensor::init() {
 #ifdef ENABLE_HIGH_G
+#ifndef ENABLE_SILSIM_MODE
     KX.beginSPI(KX134_CS);
     // TODO for some reason it works fine even if beginSPI claims it fails
     //   idk lmao
@@ -55,6 +67,7 @@ ErrorCode HighGSensor::init() {
     }
 
     KX.setRange(3);  // set range to 3 = 64 g range
+#endif
 #endif
     return ErrorCode::NO_ERROR;
 }

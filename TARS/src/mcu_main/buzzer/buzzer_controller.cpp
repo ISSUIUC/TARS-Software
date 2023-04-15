@@ -1,6 +1,7 @@
 #include "buzzer_controller.h"
 
 #include "mcu_main/buzzer/notes.h"
+#include "mcu_main/Rt.h"
 
 uint16_t note_frequencies[] = {
     31,
@@ -128,12 +129,13 @@ void BuzzerController::init_sponge() {
         0.25*T,
         T
     };
-
+#ifndef ENABLE_SILSIM_MODE
     for (int i = 0; i < 8; i++) {
         tone(15, note_frequencies[spongebob[i]]);
         delay(spongebob_delays[i]);
         noTone(15);
     }
+#endif
 }
 
 void BuzzerController::init_mario() {
@@ -161,11 +163,13 @@ void BuzzerController::init_mario() {
         T,
         T
     };
+#ifndef ENABLE_SILSIM_MODE
     for (int i = 0; i < 8; i++) {
         tone(15, note_frequencies[mario[i]]);
         delay(mario_delays[i]);
         noTone(15);
     }
+#endif
 }
 
 
@@ -185,12 +189,15 @@ void BuzzerController::tick() {
     } else if (duration_code < 0) {
         note_duration = (60000.0f * 2 / 140) / -(float) duration_code * 1.5f;
     }
+
+#ifndef ENABLE_SILSIM_MODE
 //    Serial.println(idx);
     tone(pin, note, note_duration*0.9);
     chThdSleep((int) note_duration*100);
     noTone(pin);
-    idx += 2;
+#endif
 
+    idx += 2;
 }
 
 

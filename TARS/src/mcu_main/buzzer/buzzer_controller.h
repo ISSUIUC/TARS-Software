@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ChRt.h>
+#include "mcu_main/Rt.h"
 
 class BuzzerController {
 public:

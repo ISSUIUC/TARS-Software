@@ -1,8 +1,10 @@
 #pragma once
 
-#include "Arduino.h"
-#include "ChRt.h"
+#include "mcu_main/Rt.h"
 #include "common/packet.h"
+#ifndef ENABLE_SILSIM_MODE
+#include <Arduino.h>
+#endif
 
 /**
 * 
@@ -20,7 +22,9 @@ class VoltageSensor {
     MUTEX_DECL(mutex);
 
     explicit VoltageSensor() {
+#ifndef ENABLE_SILSIM_MODE
         pinMode(16, INPUT);
+#endif
     };
 
     VoltageData read();

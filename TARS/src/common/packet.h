@@ -1,6 +1,8 @@
 #pragma once
 
-#include "ChRt.h"
+#include <cstdint>
+
+typedef uint32_t systime_t;
 
 struct Acceleration {
     float ax;

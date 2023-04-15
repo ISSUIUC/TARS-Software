@@ -1,12 +1,14 @@
 #pragma once
 
-#include "ChRt.h"
-#include "SparkFunLSM6DS3.h"
+#include "mcu_main/Rt.h"
 
 #include "mcu_main/sensors/HighGSensor.h"
 #include "common/packet.h"
 #include "mcu_main/error.h"
 #include "mcu_main/hilsim/HILSIMPacket.h"
+#ifndef ENABLE_SILSIM_MODE
+#include "SparkFunLSM6DS3.h"
+#endif
 
 /**
 * 
@@ -35,5 +37,7 @@ class LowGSensor {
     float gx = 0.0, gy = 0.0, gz = 0.0;
     systime_t timestamp = 0;
 
+#ifndef ENABLE_SILSIM_MODE
     LSM6DS3 LSM;
+#endif
 };

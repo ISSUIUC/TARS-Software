@@ -25,11 +25,13 @@
  * Magilan Sendhil
  */
 
+#include "mcu_main/Rt.h"
+#ifndef ENABLE_SILSIM_MODE
 #include <Arduino.h>
-#include <ChRt.h>
 #include <PWMServo.h>
 #include <SPI.h>
 #include <Wire.h>
+#endif
 
 #include "mcu_main/Abort.h"
 #include "mcu_main/SDLogger.h"
@@ -417,8 +419,9 @@ void chSetup() {
     // buzzer1.init_sponge();
     buzzer1.init_sponge();
     // buzzer1.init_mario();
-    while (true)
-        ;
+    while (true) {
+        threadYield();
+    }
 }
 
 #undef CHECK_THREAD
@@ -437,6 +440,7 @@ void setup() {
 #endif
     Serial.println("Starting SPI...");
 
+#ifndef ENABLE_SILSIM_MODE
     SPI.begin();
     SPI.setMOSI(SPI_MOSI);
     SPI.setMISO(SPI_MISO);
@@ -470,6 +474,7 @@ void setup() {
     Wire.setSCL(MAXM10S_SCL);
     Wire.setSDA(MAXM10S_SDA);
     Wire.begin();
+#endif
 
 #ifdef ENABLE_BAROMETER
     handleError(barometer.init());
@@ -499,8 +504,6 @@ void setup() {
 #ifdef ENABLE_TELEMETRY
     handleError(tlm.init());
 #endif
-
-   
 
     Serial.println("chibios begin");
     chBegin(chSetup);

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "mcu_main/finite-state-machines/RocketFSMBase.h"
+#include "mcu_main/Rt.h"
 
 class KalmanFSM : public RocketFSMBase {
    public:

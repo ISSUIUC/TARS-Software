@@ -1,12 +1,14 @@
 #include "mcu_main/SDLogger.h"
 
-#include "FS.h"
 #include "mcu_main/pins.h"
 #include "mcu_main/debug.h"
 
 SDLogger sd_logger;  // NOLINT(cppcoreguidelines-interfaces-global-init)
 
 #define MAX_FILES 999
+
+#ifndef ENABLE_SILSIM_MODE
+#include "FS.h"
 
 /**
  * @brief Creates the name for a file to be written to SD card.
@@ -64,11 +66,12 @@ char* sdFileNamer(char* fileName, char* fileExtensionParam) {
 
     return fileName;
 }
+#endif
 
 ErrorCode SDLogger::init() {
 #ifdef ENABLE_SD
     queue.attach(dataLogger);
-
+#ifndef ENABLE_SILSIM_MODE
     if (SD.begin(BUILTIN_SDCARD)) {
         char file_extension[8] = ".launch";
 
@@ -84,6 +87,7 @@ ErrorCode SDLogger::init() {
     } else {
         return ErrorCode::SD_BEGIN_FAILED;
     }
+#endif
 #endif
     return ErrorCode::NO_ERROR;
 }
@@ -101,6 +105,7 @@ void SDLogger::update() {
 
 template <typename T>
 void SDLogger::logData(T* data) {
+#ifndef ENABLE_SILSIM_MODE
     sd_file.write((const uint8_t*)data, sizeof(T));
     // Flush data once for every 50 writes
     // Flushing data is the step that actually writes to the card
@@ -112,6 +117,7 @@ void SDLogger::logData(T* data) {
     } else {
         writes_since_flush++;
     }
+#endif
 }
 
 #undef MAX_FILES

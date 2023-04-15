@@ -17,9 +17,7 @@
  */
 
 #include "mcu_main/error.h"
-
-#include <ChRt.h>
-
+#include "mcu_main/Rt.h"
 #include "mcu_main/pins.h"
 
 void handleError(ErrorCode code) {

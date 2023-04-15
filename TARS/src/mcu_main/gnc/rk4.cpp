@@ -5,8 +5,11 @@
  *filter
  */
 #include "mcu_main/gnc/rk4.h"
+#include "mcu_main/debug.h"
 
+#ifndef ENABLE_SILSIM_MODE
 #include <Arduino.h>
+#endif
 
 #include <array>
 #include <cmath>

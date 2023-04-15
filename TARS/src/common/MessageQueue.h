@@ -1,16 +1,14 @@
 #pragma once
 
-#include <ChRt.h>
+#include <cstddef>
 
 template <typename T, size_t max_count>
 class MessageQueue {
    public:
-    MUTEX_DECL(lock);
 
     MessageQueue() = default;
 
     void push(T item) {
-        chMtxLock(&lock);
         buffer[tail_idx++] = item;
         if (tail_idx == max_count) {
             tail_idx = 0;
@@ -23,13 +21,10 @@ class MessageQueue {
         } else {
             count++;
         }
-        chMtxUnlock(&lock);
     }
 
     bool pop(T& item) {
-        chMtxLock(&lock);
         if (count == 0) {
-            chMtxUnlock(&lock);
             return false;
         }
         item = buffer[head_idx++];
@@ -37,7 +32,6 @@ class MessageQueue {
             head_idx = 0;
         }
         count--;
-        chMtxUnlock(&lock);
         return true;
     }
 

@@ -1,11 +1,13 @@
 #pragma once
 
-#include "ChRt.h"
-#include "MS5611.h"
+#include "mcu_main/Rt.h"
 #include "mcu_main/pins.h"
 #include "mcu_main/error.h"
 #include "mcu_main/debug.h"
 #include "mcu_main/hilsim/HILSIMPacket.h"
+#ifndef ENABLE_SILSIM_MODE
+#include "MS5611.h"
+#endif
 
 /**
 * 
@@ -32,7 +34,9 @@ struct BarometerSensor {
 
    private:
 #ifdef ENABLE_BAROMETER
+#ifndef ENABLE_SILSIM_MODE
     MS5611 MS;
+#endif
 #endif
     float pressure = 0.0;
     float temperature = 0.0;

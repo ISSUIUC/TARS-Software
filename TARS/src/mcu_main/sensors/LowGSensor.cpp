@@ -6,6 +6,10 @@
 #include "mcu_main/debug.h"
 #include "mcu_main/hilsim/HILSIMPacket.h"
 
+#ifdef ENABLE_SILSIM_MODE
+#include "mcu_main/emulation.h"
+#endif
+
 LowGSensor lowG;
 
 void LowGSensor::update() {
@@ -13,12 +17,21 @@ void LowGSensor::update() {
     chSysLock();
     chMtxLock(&mutex);
 
+#ifdef ENABLE_SILSIM_MODE
+    ax = emulatedKX->get_data().x();
+    ay = emulatedKX->get_data().y();
+    az = emulatedKX->get_data().z();
+    gx = emulatedGyro->get_data().x();
+    gy = emulatedGyro->get_data().y();
+    gz = emulatedGyro->get_data().z();
+#elif
     ax = LSM.readFloatAccelX();
     ay = LSM.readFloatAccelY();
     az = LSM.readFloatAccelZ();
     gx = LSM.readFloatGyroX();
     gy = LSM.readFloatGyroY();
     gz = LSM.readFloatGyroZ();
+#endif
 
     timestamp = chVTGetSystemTime();
 
@@ -53,7 +66,7 @@ Gyroscope LowGSensor::getGyroscope() { return Gyroscope{gx, gy, gz}; }
 //Magnetometer LowGSensor::getMagnetometer() { return Magnetometer{mx, my, mz}; }
 
 ErrorCode LowGSensor::init() {
-#ifdef ENABLE_LOW_G
+#if defined(ENABLE_LOW_G) && !defined(ENABLE_SILSIM_MODE)
     // note, we need to send this our CS pins (defined above)
     if (!LSM.begin()) {
         return ErrorCode::CANNOT_CONNECT_LSM9DS1;
@@ -62,7 +75,7 @@ ErrorCode LowGSensor::init() {
     return ErrorCode::NO_ERROR;
 }
 
-#ifdef ENABLE_LOW_G
+#if defined(ENABLE_LOW_G) && !defined(ENABLE_SILSIM_MODE)
 LowGSensor::LowGSensor() : LSM(SPI_MODE, LSM6DSLTR) { }
 #else
 LowGSensor::LowGSensor() = default;

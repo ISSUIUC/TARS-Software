@@ -12,16 +12,20 @@
 #ifndef SERVO_CPP
 #define SERVO_CPP
 
-#include "ServoControl.h"
+#include "mcu_main/ServoControl.h"
 
 #include <cmath>
 
 #define A 9.8
 #define B 2.05
-#define C -154
+#define C (-154)
 #define D 4.1
 
+#ifdef ENABLE_SILSIM_MODE
+ServoControl::ServoControl() {}
+#elif
 ServoControl::ServoControl(PWMServo* servo) : servo_(servo) {}
+#endif
 
 /**
  * @brief A function to bound the desired servo angle between the limits
@@ -62,8 +66,9 @@ void ServoControl::servoActuation(float length) {
     //               1.24 * pow(10, -6) * pow(length, 3);
     // roundOffAngle(angle);
     int servo_angle = roundOffAngle(angle);
-
+#ifndef ENABLE_SILSIM_MODE
     servo_->write(servo_angle);
+#endif
 
     // 130 is max
 #ifdef SERVO_DEBUG
