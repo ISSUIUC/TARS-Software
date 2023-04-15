@@ -27,6 +27,10 @@ jobs:
         id: get_email
         run: |
           curl -X GET -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/user/emails | jq '.[0].email'
+          shell: bash
+      - name: Debug JSON response
+        if: ${{ always() }}
+        run: cat email.json
       - name: Send email notification
         if: ${{ always() }}
         uses: dawidd6/action-send-mail@v3.7.1
