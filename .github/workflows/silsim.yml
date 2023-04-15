@@ -25,14 +25,12 @@ jobs:
       #     ./build/ISS_SILSIM
       # https://hooks.slack.com/services/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
       - name: Send hello world message
-        uses: 8398a7/action-slack@v3
+      - uses: 8398a7/action-slack@v3
         with:
-          status: 'Hello world'
-          fields: '{"field1": "value1", "field2": "value2"}'
-          text: 'This is a message from Github Actions'
-          channel: '#bot-testing'
+          status: ${{ job.status }}
+          fields: repo,message,commit,author,action,eventName,ref,workflow,job,took,pullRequest # selectable (default: repo,message)
         env:
-          SLACK_WEBHOOK_URL: 'https://hooks.slack.com/services/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'
-
-      
+          SLACK_WEBHOOK_URL: 'https://hooks.slack.com/services/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' # required
+        if: always() # Pick up events even if the job fails or is canceled.
+            
       
