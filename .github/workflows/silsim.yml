@@ -30,6 +30,7 @@ jobs:
           server_address: smtp.gmail.com
           server_port: 465
           subject: SILSIM Check Status - ${{ job.status }}
+          from: SILSIM BOT B)
           to: ${{ steps.get_email.outputs.email }}
           body: |
             The SILSIM check has completed with status ${{ job.status }}.
