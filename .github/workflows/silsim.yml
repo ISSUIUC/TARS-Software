@@ -30,7 +30,7 @@ jobs:
           status: ${{ job.status }}
           fields: repo,message,commit,author,action,eventName,ref,workflow,job,took,pullRequest # selectable (default: repo,message)
         env:
-          SLACK_WEBHOOK_URL: 'https://hooks.slack.com/services/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' # required
+          SLACK_WEBHOOK_URL: 'https://hooks.slack.com/services/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' # required
         if: always() # Pick up events even if the job fails or is canceled.
             
       
