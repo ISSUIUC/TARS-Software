@@ -23,24 +23,16 @@ jobs:
       #     cd ..
       #     make -C build ISS_SILSIM  
       #     ./build/ISS_SILSIM
-      # - name: Get user email
-      #   id: get_email
-      #   run: |
-      #     curl -X GET -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/user/emails | jq '.[0].email'
-      #     shell: bash
-      # - name: Debug JSON response
-      #   if: ${{ always() }}
-      #   run: cat email.json
-      - name: Send email notification
-        if: ${{ always() }}
-        uses: dawidd6/action-send-mail@v3.7.1
+      # https://hooks.slack.com/services/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
+      - name: Send hello world message
+        uses: 8398a7/action-slack@v3
         with:
-          server_address: smtp.gmail.com
-          server_port: 465
-          subject: SILSIM Check Status - ${{ job.status }}
-          from: SILSIM BOT B)
-          to: ${{github.event.pusher.email}}
-          body: |
-            The SILSIM check has completed with status ${{ job.status }}.
+          status: 'Hello world'
+          fields: '{"field1": "value1", "field2": "value2"}'
+          text: 'This is a message from Github Actions'
+          channel: '#bot-testing'
+        env:
+          SLACK_WEBHOOK_URL: 'https://hooks.slack.com/services/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'
 
+      
       
