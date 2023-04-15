@@ -6,11 +6,15 @@ jobs:
     name: SILSIM Works
     runs-on: ubuntu-latest
     steps:
-      - name: Install dependencies and run SILSIM
+      - name: Install dependencies
         run: |
           sudo apt install git
           sudo apt-get -y install cmake
+      - name: Download SILSIM
+        run: |    
           git clone https://github.com/ISSUIUC/ISS_SILSIM
+      - name: Install SILSIM
+        run: |  
           cd ISS_SILSIM
           git submodule update --init --recursive
           mkdir build
@@ -18,4 +22,18 @@ jobs:
           cmake ..
           cd ..
           make -C build ISS_SILSIM
+      - name: Run SILSIM
+        run: |   
           ./build/ISS_SILSIM
+      - name: Send email notification
+        if: ${{ always() }}
+        uses: dawidd6/action-send-mail@v2.2.0
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ secrets.EMAIL_USERNAME }}
+          password: ${{ secrets.EMAIL_PASSWORD }}
+          subject: SILSIM Check Status - ${{ job.status }}
+          to: ${{ github.actor }}@example.com
+          body: |
+            The SILSIM check has completed with status ${{ job.status }}.
