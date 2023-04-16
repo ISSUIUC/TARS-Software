@@ -1,17 +1,14 @@
 #include "mcu_main/Rt.h"
 
 #ifdef ENABLE_SILSIM_MODE
-#ifdef _WIN32
-#include <windows.h>
-#else
-#include "mcu_main/unix_fiber.h"
-#endif
+
 #include <vector>
-#include <ctime>
 #include <iostream>
+
 #include "mcu_main/ISS_SILSIM/src/Sensors/Sensor.h"
 #include "mcu_main/ISS_SILSIM/src/SILSIM.h"
 #include "mcu_main/emulation.h"
+#include "mcu_main/fiber.h"
 
 void setup();
 
@@ -64,7 +61,6 @@ void createThread(const char* name, void fn(void*), size_t stack, void* arg) {
 }
 
 void threadSleep(int32_t time_ms) {
-    
     double start = g_sim->get_time();
     double wait = time_ms / 1000.0;
     while (true) {
@@ -89,7 +85,7 @@ SerialPatch Serial;
 
 void run_sim(void* arg) {
     for (int i = 0; i < 100000; i++) {
-        if (i % 100 == 0)
+        if (i % 1000 == 0)
             std::cout << "Run " << i << std::endl;
 
         if(i >= 3000){
@@ -99,13 +95,11 @@ void run_sim(void* arg) {
         if(!res) break;
         threadYield();
     }
-    std::cout << "done" << std::endl;
     exit(0);
 }
 
 
 int main() {
-    std::cout << "started" << std::endl;
     thread_manager.threads.emplace_back("main", ConvertThreadToFiber(nullptr));
 
     Rocket rocket = createRocket();
@@ -141,8 +135,6 @@ int main() {
     emulatedMagnetometer = &mag1;
 
     g_sim = &sim;
-
-    std::cout << "to setup" << std::endl;
 
     setup();
 }

@@ -360,7 +360,7 @@ static THD_WORKING_AREA(sensor_fast_WA, THREAD_WA);
 /**
  * @brief Starts all of the threads.
  */
-void chSetup() {
+[[noreturn]] void chSetup() {
 #ifdef ENABLE_HILSIM_MODE
     START_THREAD(hilsim);
 #endif
@@ -506,9 +506,6 @@ void setup() {
 
     Serial.println("chibios begin");
     chBegin(chSetup);
-
-    while (true)
-        ;
 }
 
 void loop() {

@@ -60,7 +60,7 @@ extern SerialPatch Serial;
 typedef uint32_t systime_t;
 typedef uint32_t sysinterval_t;
 
-#define THD_FUNCTION(name, arg) const char* name##_name = #name; void name(void* arg)
+#define THD_FUNCTION(name, arg) const char* name##_name = #name; static void name(void* arg)
 #define THD_WORKING_AREA(name, size) uint8_t name[size];
 #define NORMALPRIO 0
 #define CH_CFG_ST_FREQUENCY 10000

@@ -2,7 +2,9 @@
 
 #include "mcu_main/Rt.h"
 
-#ifndef ENABLE_SILSIM_MODE
+#ifdef ENABLE_SILSIM_MODE
+#include <fstream>
+#else
 #include <SD.h>
 #endif
 
@@ -23,8 +25,10 @@ private:
     void logData(T* data);
 
     DataLogQueue queue;
-#ifndef ENABLE_SILSIM_MODE
-    File sd_file;
+#ifdef ENABLE_SILSIM_MODE
+    std::ofstream file;
+#else
+    File file;
 #endif
     size_t writes_since_flush = 0;
 };

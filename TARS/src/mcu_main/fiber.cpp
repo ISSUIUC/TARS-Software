@@ -1,4 +1,5 @@
-#include"unix_fiber.h"
+#ifndef _WIN32
+#include "unix_fiber.h"
 
 #include <ucontext.h>
 #include <cassert>
@@ -42,3 +43,4 @@ FiberHandle ConvertThreadToFiber(void*){
     current_context = &main_context;
     return &main_context;
 }
+#endif
