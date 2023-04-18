@@ -36,7 +36,8 @@
 #include "mcu_main/dataLog.h"
 #include "mcu_main/finite-state-machines/rocketFSM.h"
 #include "mcu_main/gnc/ActiveControl.h"
-#include "mcu_main/gnc/kalmanFilter.h"
+#include "mcu_main/gnc/linearKalmanFilter.h"
+#include "mcu_main/gnc/rotationalKalman.h"
 #include "mcu_main/pins.h"
 #include "mcu_main/sensors/sensors.h"
 #include "mcu_main/telemetry.h"
@@ -245,7 +246,9 @@ bool kalman_start = false;
 static THD_FUNCTION(kalman_THD, arg) {
     kalman_start = true;
 
-    kalmanFilter.Initialize();
+    linearKalmanFilter.Initialize();
+    rotationalKalmanFilter.Initialize();
+    
 
     systime_t last = chVTGetSystemTime();
 
@@ -254,7 +257,8 @@ static THD_FUNCTION(kalman_THD, arg) {
         Serial.println("### Kalman thread entrance");
 #endif
         // Serial.println("entering tick");
-        kalmanFilter.kfTickFunction(TIME_I2MS(chVTGetSystemTime() - last), 13.0);
+        linearKalmanFilter.kfTickFunction(TIME_I2MS(chVTGetSystemTime() - last), 13.0);
+        rotationalKalmanFilter.kfTickFunction(TIME_I2MS(chVTGetSystemTime() - last), 13.0);
         // Serial.println("exiting tick");
         // Serial.println(TIME_I2MS(chVTGetSystemTime() - last));
         last = chVTGetSystemTime();

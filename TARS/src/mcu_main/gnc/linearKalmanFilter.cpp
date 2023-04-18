@@ -6,13 +6,14 @@
  * @details This class takes input data from a barometer and accelerometer to estimate state data for the rocket.
  */
 
-#include "mcu_main/gnc/kalmanFilter.h"
-
-#include "mcu_main/finite-state-machines/rocketFSM.h"
-
 #include <cmath>
 
+#include "mcu_main/finite-state-machines/rocketFSM.h"
+#include "mcu_main/gnc/linearKalmanFilter.h"
+
 #define EIGEN_MATRIX_PLUGIN "MatrixAddons.h"
+
+LinearKalmanFilter::LinearKalmanFilter() : KalmanFilter() {}
 
 /**
  * @brief Sets the Q matrix given time step and spectral density.
@@ -23,36 +24,36 @@
  * The Q matrix is the covariance matrix for the process noise and is
  * updated based on the time taken per cycle of the Kalman Filter Thread.
  */
-void KalmanFilter::SetQ(float dt, float sd) {    
-    Q(0,0) = pow(s_dt, 5) / 20;
-    Q(0,1) = pow(s_dt, 4) / 8;
-    Q(0,2) = pow(s_dt, 3) / 6;
-    Q(1,1) = pow(s_dt, 3) / 8;
-    Q(1,2) = pow(s_dt, 2) / 2;
-    Q(2,2) = s_dt;
-    Q(1,0) = Q(0,1);
-    Q(2,0) = Q(0,2);
-    Q(2,1) = Q(1,2);
+void LinearKalmanFilter::SetQ(float dt, float sd) {
+    Q(0, 0) = pow(s_dt, 5) / 20;
+    Q(0, 1) = pow(s_dt, 4) / 8;
+    Q(0, 2) = pow(s_dt, 3) / 6;
+    Q(1, 1) = pow(s_dt, 3) / 8;
+    Q(1, 2) = pow(s_dt, 2) / 2;
+    Q(2, 2) = s_dt;
+    Q(1, 0) = Q(0, 1);
+    Q(2, 0) = Q(0, 2);
+    Q(2, 1) = Q(1, 2);
 
-    Q(3,3) = pow(s_dt, 5) / 20;
-    Q(3,4) = pow(s_dt, 4) / 8;
-    Q(3,5) = pow(s_dt, 3) / 6;
-    Q(4,4) = pow(s_dt, 3) / 8;
-    Q(4,5) = pow(s_dt, 2) / 2; 
-    Q(5,5) = s_dt;
-    Q(4,3) = Q(3,4);
-    Q(5,3) = Q(3,5);
-    Q(5,4) = Q(4,5);
+    Q(3, 3) = pow(s_dt, 5) / 20;
+    Q(3, 4) = pow(s_dt, 4) / 8;
+    Q(3, 5) = pow(s_dt, 3) / 6;
+    Q(4, 4) = pow(s_dt, 3) / 8;
+    Q(4, 5) = pow(s_dt, 2) / 2;
+    Q(5, 5) = s_dt;
+    Q(4, 3) = Q(3, 4);
+    Q(5, 3) = Q(3, 5);
+    Q(5, 4) = Q(4, 5);
 
-    Q(6,6) = pow(s_dt, 5) / 20;
-    Q(6,7) = pow(s_dt, 4) / 8;
-    Q(6,8) = pow(s_dt, 3) / 6;
-    Q(7,7) = pow(s_dt, 3) / 8;
-    Q(7,8) = pow(s_dt, 2) / 2;
-    Q(8,8) = s_dt;
-    Q(7,6) = Q(6,7);
-    Q(8,6) = Q(6,8);
-    Q(8,7) = Q(7,8);
+    Q(6, 6) = pow(s_dt, 5) / 20;
+    Q(6, 7) = pow(s_dt, 4) / 8;
+    Q(6, 8) = pow(s_dt, 3) / 6;
+    Q(7, 7) = pow(s_dt, 3) / 8;
+    Q(7, 8) = pow(s_dt, 2) / 2;
+    Q(8, 8) = s_dt;
+    Q(7, 6) = Q(6, 7);
+    Q(8, 6) = Q(6, 8);
+    Q(8, 7) = Q(7, 8);
 
     Q *= sd;
 }
@@ -65,7 +66,7 @@ void KalmanFilter::SetQ(float dt, float sd) {
  * The F matrix is the state transition matrix and is defined
  * by how the states change over time.
  */
-void KalmanFilter::SetF(float dt) {
+void LinearKalmanFilter::SetF(float dt) {
     for (int i = 0; i < 3; i++) {
         F_mat(3 * i, 3 * i + 1) = s_dt;
         F_mat(3 * i, 3 * i + 2) = (s_dt * s_dt) / 2;
@@ -77,26 +78,6 @@ void KalmanFilter::SetF(float dt) {
     }
 }
 
-/**
- * @brief Run Kalman filter calculations as long as FSM has passed IDLE
- *
- * @param dt Time step calculated by the Kalman Filter Thread
- * @param sd Spectral density of the noise
- */
-void KalmanFilter::kfTickFunction(float dt, float sd) {
-    if (getActiveFSM().getFSMState() >= FSM_State::STATE_IDLE) {
-        SetF(float(dt) / 1000);
-        SetQ(float(dt) / 1000, sd);
-        priori();
-        update();
-
-        chMtxLock(&mutex);
-        chMtxLock(&orientation.mutex);
-
-        chMtxUnlock(&orientation.mutex);
-        chMtxUnlock(&mutex);
-    }
-}
 /**
  * @brief Sets altitude by averaging 30 barometer measurements taken 100 ms
  * apart
@@ -115,7 +96,7 @@ void KalmanFilter::kfTickFunction(float dt, float sd) {
  * be kept consistent (do not mix GPS altitude and barometric).
  *
  */
-void KalmanFilter::Initialize() {
+void LinearKalmanFilter::Initialize() {
     // TODO: The altitude initialization is the same code as
     //   setLaunchPadElevation() in AC. Maybe use the same one?
     float sum = 0;
@@ -134,16 +115,15 @@ void KalmanFilter::Initialize() {
         chThdSleepMilliseconds(100);
     }
 
-    init_accel(0,0) /= 30;
-    init_accel(1,0) /= 30;
-    init_accel(2,0) /= 30;
+    init_accel(0, 0) /= 30;
+    init_accel(1, 0) /= 30;
+    init_accel(2, 0) /= 30;
 
     chMtxLock(&orientation.mutex);
     euler_t euler = orientation.getEuler();
     chMtxUnlock(&orientation.mutex);
     euler.yaw = -euler.yaw;
     world_accel = BodyToGlobal(euler, init_accel);
-
 
     // set x_k
     x_k(0, 0) = sum / 30;
@@ -162,35 +142,35 @@ void KalmanFilter::Initialize() {
         F_mat(3 * i + 2, 3 * i + 2) = 1;
     }
 
-    Q(0,0) = pow(s_dt, 5) / 20;
-    Q(0,1) = pow(s_dt, 4) / 8;
-    Q(0,2) = pow(s_dt, 3) / 6;
-    Q(1,1) = pow(s_dt, 3) / 8;
-    Q(1,2) = pow(s_dt, 2) / 2;
-    Q(2,2) = s_dt;
-    Q(1,0) = Q(0,1);
-    Q(2,0) = Q(0,2);
-    Q(2,1) = Q(1,2);
+    Q(0, 0) = pow(s_dt, 5) / 20;
+    Q(0, 1) = pow(s_dt, 4) / 8;
+    Q(0, 2) = pow(s_dt, 3) / 6;
+    Q(1, 1) = pow(s_dt, 3) / 8;
+    Q(1, 2) = pow(s_dt, 2) / 2;
+    Q(2, 2) = s_dt;
+    Q(1, 0) = Q(0, 1);
+    Q(2, 0) = Q(0, 2);
+    Q(2, 1) = Q(1, 2);
 
-    Q(3,3) = pow(s_dt, 5) / 20;
-    Q(3,4) = pow(s_dt, 4) / 8;
-    Q(3,5) = pow(s_dt, 3) / 6;
-    Q(4,4) = pow(s_dt, 3) / 8;
-    Q(4,5) = pow(s_dt, 2) / 2; 
-    Q(5,5) = s_dt;
-    Q(4,3) = Q(3,4);
-    Q(5,3) = Q(3,5);
-    Q(5,4) = Q(4,5);
+    Q(3, 3) = pow(s_dt, 5) / 20;
+    Q(3, 4) = pow(s_dt, 4) / 8;
+    Q(3, 5) = pow(s_dt, 3) / 6;
+    Q(4, 4) = pow(s_dt, 3) / 8;
+    Q(4, 5) = pow(s_dt, 2) / 2;
+    Q(5, 5) = s_dt;
+    Q(4, 3) = Q(3, 4);
+    Q(5, 3) = Q(3, 5);
+    Q(5, 4) = Q(4, 5);
 
-    Q(6,6) = pow(s_dt, 5) / 20;
-    Q(6,7) = pow(s_dt, 4) / 8;
-    Q(6,8) = pow(s_dt, 3) / 6;
-    Q(7,7) = pow(s_dt, 3) / 8;
-    Q(7,8) = pow(s_dt, 2) / 2;
-    Q(8,8) = s_dt;
-    Q(7,6) = Q(6,7);
-    Q(8,6) = Q(6,8);
-    Q(8,7) = Q(7,8);
+    Q(6, 6) = pow(s_dt, 5) / 20;
+    Q(6, 7) = pow(s_dt, 4) / 8;
+    Q(6, 8) = pow(s_dt, 3) / 6;
+    Q(7, 7) = pow(s_dt, 3) / 8;
+    Q(7, 8) = pow(s_dt, 2) / 2;
+    Q(8, 8) = s_dt;
+    Q(7, 6) = Q(6, 7);
+    Q(8, 6) = Q(6, 8);
+    Q(8, 7) = Q(7, 8);
 
     // set H
     H(0, 0) = 1;
@@ -206,7 +186,7 @@ void KalmanFilter::Initialize() {
     R(1, 1) = 1.9;
     R(2, 2) = 10;
     R(3, 3) = 10;
- 
+
     // set B (don't care about what's in B since we have no control input)
     B(2, 0) = -1;
 }
@@ -222,9 +202,7 @@ void KalmanFilter::Initialize() {
  * @param vel_z Initial velocity estimate in the z direction
  */
 
-void KalmanFilter::Initialize(float pos_x, float vel_x,
-                              float pos_y, float vel_y,
-                              float pos_z, float vel_z) {
+void LinearKalmanFilter::Initialize(float pos_x, float vel_x, float pos_y, float vel_y, float pos_z, float vel_z) {
     // set x_k
     x_k(0, 0) = pos_x;
     x_k(1, 0) = vel_x;
@@ -235,16 +213,15 @@ void KalmanFilter::Initialize(float pos_x, float vel_x,
     x_k(6, 0) = pos_z;
     x_k(7, 0) = vel_z;
 
-
     // set F
     for (int i = 0; i < 3; i++) {
-        F_mat(3*i, 3*i + 1) = s_dt;
-        F_mat(3*i, 3*i + 2) = (s_dt * s_dt) / 2;
-        F_mat(3*i + 1, 3*i + 2) = s_dt;
+        F_mat(3 * i, 3 * i + 1) = s_dt;
+        F_mat(3 * i, 3 * i + 2) = (s_dt * s_dt) / 2;
+        F_mat(3 * i + 1, 3 * i + 2) = s_dt;
 
-        F_mat(3*i, 3*i) = 1;
-        F_mat(3*i + 1, 3*i + 1) = 1;
-        F_mat(3*i + 2, 3*i + 2) = 1;
+        F_mat(3 * i, 3 * i) = 1;
+        F_mat(3 * i + 1, 3 * i + 1) = 1;
+        F_mat(3 * i + 2, 3 * i + 2) = 1;
     }
 
     // set H
@@ -271,7 +248,7 @@ void KalmanFilter::Initialize(float pos_x, float vel_x,
  * it extrapolates the state at time n+1 based on the state at time n.
  */
 
-void KalmanFilter::priori() {
+void LinearKalmanFilter::priori() {
     // x_priori = (F @ x_k) + ((B @ u).T) #* For some reason doesnt work when B
     // or u is = 0
     x_priori = (F_mat * x_k);
@@ -286,7 +263,7 @@ void KalmanFilter::priori() {
  * the new sensor data is. After updating the gain, the state estimate is updated.
  *
  */
-void KalmanFilter::update() {
+void LinearKalmanFilter::update() {
     if (getActiveFSM().getFSMState() == FSM_State::STATE_LAUNCH_DETECT) {
         float sum = 0;
         float data[10];
@@ -317,9 +294,33 @@ void KalmanFilter::update() {
     euler_t angles = orientation.getEuler();
     // euler_t angles = (euler_t){0, 0, 0};
     chMtxUnlock(&orientation.mutex);
+
+    chMtxLock(&lowG.mutex);
+    Serial.print("Gyroscope: ");
+    Serial.print(lowG.getGyroscope().gx);
+    Serial.print(" ");
+    Serial.print(lowG.getGyroscope().gy);
+    Serial.print(" ");
+    Serial.println(lowG.getGyroscope().gz);
+    chMtxUnlock(&lowG.mutex);
+
+    Serial.print("Orientation: ");
+    Serial.print(angles.roll);
+    Serial.print(" ");
+    Serial.print(angles.pitch);
+    Serial.print(" ");
+    Serial.println(angles.yaw);
+
+    Serial.print("Acceleration: ");
+    Serial.print(accel(0, 0));
+    Serial.print(" ");
+    Serial.print(accel(1, 0));
+    Serial.print(" ");
+    Serial.println(accel(2, 0));
+
     angles.yaw = -angles.yaw;
 
-    Eigen::Matrix<float, 3, 1> acc = BodyToGlobal(angles, accel);
+    Eigen::Matrix<float, 3, 1> acc = KalmanFilter::BodyToGlobal(angles, accel);
 
     y_k(1, 0) = (acc(0)) * 9.81 - 9.81;
     // Serial.println(y_k(1, 0));
@@ -366,40 +367,24 @@ void KalmanFilter::update() {
 }
 
 /**
- * @brief Converts a vector in the body frame to the global frame
- * 
- * @param angles Roll, pitch, yaw angles
- * @param body_vect Vector for rotation in the body frame
- * @return Eigen::Matrix<float, 3, 1> Rotated vector in the global frame
- */
-Eigen::Matrix<float, 3, 1> KalmanFilter::BodyToGlobal(euler_t angles, Eigen::Matrix<float, 3, 1> body_vect) {
-    Eigen::Matrix3f roll, pitch, yaw;
-
-    roll << 1., 0., 0., 0., cos(angles.roll), -sin(angles.roll ), 0., sin(angles.roll), cos(angles.roll);
-    pitch << cos(angles.pitch), 0., sin(angles.pitch), 0., 1., 0., -sin(angles.pitch), 0., cos(angles.pitch);
-    yaw << cos(angles.yaw), -sin(angles.yaw), 0., sin(angles.yaw), cos(angles.yaw), 0., 0., 0., 1.;
-    return yaw * pitch * body_vect;
-}
-
-/**
  * @brief Getter for state X
- * 
+ *
  * @return Eigen::Matrix<float, 9, 1> State X
  */
-KalmanState KalmanFilter::getState() const { return kalman_state; }
+KalmanState LinearKalmanFilter::getState() const { return kalman_state; }
 
 /**
  * @brief Sets state vector x
- * 
+ *
  * @param state Wanted state vector
  */
-void KalmanFilter::setState(KalmanState state) { kalman_state = state; }
+void LinearKalmanFilter::setState(KalmanState state) { kalman_state = state; }
 
 /**
  * @brief Sets the apogee estimate
- * 
+ *
  * @param estimate Apogee estimate
  */
-void KalmanFilter::updateApogee(float estimate) { kalman_apo = estimate; }
+void LinearKalmanFilter::updateApogee(float estimate) { kalman_apo = estimate; }
 
-KalmanFilter kalmanFilter;
+LinearKalmanFilter linearKalmanFilter = LinearKalmanFilter();

@@ -9,7 +9,7 @@
 #include "mcu_main/gnc/ActiveControl.h"
 
 #include "mcu_main/finite-state-machines/rocketFSM.h"
-#include "mcu_main/gnc/kalmanFilter.h"
+#include "mcu_main/gnc/linearKalmanFilter.h"
 
 Controller activeController;
 
@@ -21,15 +21,15 @@ Controller activeController;
 Controller::Controller() : activeControlServos(&controller_servo_) {}
 
 void Controller::ctrlTickFunction() {
-    chMtxLock(&kalmanFilter.mutex);
-    array<float, 2> init = {kalmanFilter.getState().state_est_pos_x, kalmanFilter.getState().state_est_vel_x};
-    chMtxUnlock(&kalmanFilter.mutex);
+    chMtxLock(&linearKalmanFilter.mutex);
+    array<float, 2> init = {linearKalmanFilter.getState().state_est_pos_x, linearKalmanFilter.getState().state_est_vel_x};
+    chMtxUnlock(&linearKalmanFilter.mutex);
 
     float apogee_est = rk4_.sim_apogee(init, 0.3)[0];
 
-    chMtxLock(&kalmanFilter.mutex);
-    kalmanFilter.updateApogee(apogee_est);
-    chMtxUnlock(&kalmanFilter.mutex);
+    chMtxLock(&linearKalmanFilter.mutex);
+    linearKalmanFilter.updateApogee(apogee_est);
+    chMtxUnlock(&linearKalmanFilter.mutex);
 
     float u = kp * (apogee_est - apogee_des_msl);
 

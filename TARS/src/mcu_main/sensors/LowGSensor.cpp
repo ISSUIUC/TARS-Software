@@ -16,9 +16,12 @@ void LowGSensor::update() {
     ax = LSM.readFloatAccelX();
     ay = LSM.readFloatAccelY();
     az = LSM.readFloatAccelZ();
-    gx = LSM.readFloatGyroX();
-    gy = LSM.readFloatGyroY();
-    gz = LSM.readFloatGyroZ();
+    // gx = LSM.readFloatGyroX();
+    // gy = LSM.readFloatGyroY();
+    // gz = LSM.readFloatGyroZ();
+    gx = LSM.readFloatGyroZ();
+    gy = -1 * LSM.readFloatGyroX();
+    gz = -1 * LSM.readFloatGyroY();
 
     timestamp = chVTGetSystemTime();
 

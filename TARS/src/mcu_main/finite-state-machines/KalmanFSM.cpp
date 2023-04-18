@@ -33,7 +33,7 @@
 #include "mcu_main/Abort.h"
 #include "mcu_main/dataLog.h"
 #include "mcu_main/finite-state-machines/thresholds.h"
-#include "mcu_main/gnc/kalmanFilter.h"
+#include "mcu_main/gnc/linearKalmanFilter.h"
 #include "mcu_main/sensors/sensors.h"
 
 double KalmanFSM::getAltitudeAverage(size_t start, size_t len) {
@@ -80,7 +80,7 @@ void KalmanFSM::tickFSM() {
 
         case FSM_State::STATE_IDLE:
             // If high acceleration is observed in z direction...
-            if (kalmanFilter.getState().state_est_accel_x > launch_linear_acceleration_thresh) {
+            if (linearKalmanFilter.getState().state_est_accel_x > launch_linear_acceleration_thresh) {
                 launch_time_ = chVTGetSystemTime();
                 rocket_state_ = FSM_State::STATE_LAUNCH_DETECT;
             }
@@ -89,7 +89,7 @@ void KalmanFSM::tickFSM() {
 
         case FSM_State::STATE_LAUNCH_DETECT:
             // If the acceleration was too brief, go back to IDLE
-            if (kalmanFilter.getState().state_est_accel_x < launch_linear_acceleration_thresh) {
+            if (linearKalmanFilter.getState().state_est_accel_x < launch_linear_acceleration_thresh) {
                 rocket_state_ = FSM_State::STATE_IDLE;
                 break;
             }
@@ -107,7 +107,7 @@ void KalmanFSM::tickFSM() {
         case FSM_State::STATE_BOOST:
             burn_timer_ = chVTGetSystemTime() - launch_time_;
             // If low acceleration in the Z direction...
-            if (kalmanFilter.getState().state_est_accel_x < coast_thresh) {
+            if (linearKalmanFilter.getState().state_est_accel_x < coast_thresh) {
                 // Serial.println("Acceleration below thresh");
                 burnout_time_ = chVTGetSystemTime();
                 rocket_state_ = FSM_State::STATE_BURNOUT_DETECT;
@@ -127,7 +127,7 @@ void KalmanFSM::tickFSM() {
 
         case FSM_State::STATE_BURNOUT_DETECT:
             // If the 0 acceleration was too brief, go back to BOOST
-            if (kalmanFilter.getState().state_est_accel_x > coast_thresh) {
+            if (linearKalmanFilter.getState().state_est_accel_x > coast_thresh) {
                 rocket_state_ = FSM_State::STATE_BOOST;
                 break;
             }
@@ -153,7 +153,7 @@ void KalmanFSM::tickFSM() {
         case FSM_State::STATE_COAST_GNC:
             coast_timer_ = chVTGetSystemTime() - burnout_time_;
 
-            if (fabs(kalmanFilter.getState().state_est_vel_x) * 0.02 < apogee_altimeter_threshold) {
+            if (fabs(linearKalmanFilter.getState().state_est_vel_x) * 0.02 < apogee_altimeter_threshold) {
                 rocket_state_ = FSM_State::STATE_APOGEE_DETECT;
                 apogee_time_ = chVTGetSystemTime();
                 break;
