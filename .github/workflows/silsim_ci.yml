@@ -34,4 +34,5 @@ jobs:
         git submodule update
     - name: run SILSIM
       run: |
+        cd TARS
         pio run -e mcu_silsim -t upload
