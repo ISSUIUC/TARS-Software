@@ -6,31 +6,31 @@ jobs:
     name: SILSIM Works
     runs-on: ubuntu-latest
     steps:
-      # - name: Install dependencies
-      #   run: |
-      #     sudo apt install git
-      #     sudo apt-get -y install cmake
-      # - name: Download SILSIM
-      #   run: |    
-      #     git clone https://github.com/ISSUIUC/ISS_SILSIM
-      # - name: Install and run SILSIM
-      #   run: |  
-      #     cd ISS_SILSIM
-      #     git submodule update --init --recursive
-      #     mkdir build
-      #     cd build
-      #     cmake ..
-      #     cd ..
-      #     make -C build ISS_SILSIM  
-      #     ./build/ISS_SILSIM
+      - name: Install dependencies
+        run: |
+          sudo apt install git
+          sudo apt-get -y install cmake
+      - name: Download SILSIM
+        run: |    
+          git clone https://github.com/ISSUIUC/ISS_SILSIM
+      - name: Install and run SILSIM
+        run: |  
+          cd ISS_SILSIM
+          git submodule update --init --recursive
+          mkdir build
+          cd build
+          cmake ..
+          cd ..
+          make -C build ISS_SILSIM  
+          ./build/ISS_SILSIM
       - name: Slack Notification
         uses: rtCamp/action-slack-notify@v2
         env:
           SLACK_CHANNEL: bot-testing
           SLACK_COLOR: ${{ job.status }} # or a specific color like 'good' or '#ff00ff'
           SLACK_ICON: https://github.com/rtCamp.png?size=48
-          SLACK_MESSAGE: 'Post Content :rocket:'
-          SLACK_TITLE: Post Title
+          SLACK_MESSAGE: 'SILSIM :troll:'
+          SLACK_TITLE: 'Silsim Status:' ${{ job.status }}
           SLACK_USERNAME: rtCamp
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
 
