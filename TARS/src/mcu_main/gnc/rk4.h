@@ -4,7 +4,7 @@
 #include <array>
 #include <cmath>
 
-#include "../EigenArduino-Eigen30/Eigen30.h"
+#include "Eigen/Eigen"
 #include "mcu_main/gnc/Atmosphere.h"
 
 using std::array;

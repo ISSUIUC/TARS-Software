@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../EigenArduino-Eigen30/Eigen30.h"
+#include "Eigen/Eigen"
 #include "mcu_main/ServoControl.h"
 #include "common/FifoBuffer.h"
 #include "mcu_main/dataLog.h"
