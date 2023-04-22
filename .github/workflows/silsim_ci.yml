@@ -43,10 +43,10 @@ jobs:
         SLACK_MESSAGE: 'SILSIM :troll:'
         SLACK_TITLE: 'Silsim Status: ${{ job.status }}'
         SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
-    #  - name: Upload to slack step
-    #     uses: adrey/slack-file-upload-action@master
-    #     with:
-    #       token: ${{ secrets.BOT_KEY }}
-    #       path: TARS/sdlog.dat
-    #       channel-id: 'C052ZP64ARM'
+    - name: Upload to slack step
+      uses: adrey/slack-file-upload-action@master
+      with:
+        token: ${{ secrets.BOT_KEY }}
+        path: test.txt
+        channel: bot-testing
 
