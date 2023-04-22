@@ -47,6 +47,6 @@ jobs:
       uses: adrey/slack-file-upload-action@master
       with:
         token: ${{ secrets.BOT_KEY }}
-        path: test.txt
+        path: TARS/sdlog.dat
         channel: bot-testing
 
