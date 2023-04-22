@@ -5,3 +5,5 @@
 	path = TARS/src/mcu_main/ISS_SILSIM
 	url = https://github.com/ISSUIUC/ISS_SILSIM.git
 	branch = submodule-integration
+[submodule "src\\mcu_main\\ISS_SILSIM"]
+	branch = submodule-integration
