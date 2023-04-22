@@ -23,31 +23,30 @@ jobs:
       #     cd ..
       #     make -C build ISS_SILSIM  
       #     ./build/ISS_SILSIM
-      - id: slack
-      uses: slackapi/slack-github-action@v1.23.0
-      with:
-        # The following message update step does not accept a channel name.
-        # Setting a channel ID here for consistency is highly recommended.
-        channel-id: "CHANNEL_ID"
-        payload: |
-          {
-            "text": "Deployment started (In Progress)",
-            "attachments": [
-              {
-                "pretext": "Deployment started",
-                "color": "dbab09",
-                "fields": [
-                  {
-                    "title": "Status",
-                    "short": true,
-                    "value": "In Progress"
-                  }
-                ]
-              }
-            ]
-          }
-      env:
-        SLACK_BOT_TOKEN: ${{ secrets.BOT_KEY}}
+      - uses: slackapi/slack-github-action@v1.23.0
+        with:
+          # The following message update step does not accept a channel name.
+          # Setting a channel ID here for consistency is highly recommended.
+          channel-id: "C052ZP64ARM"
+          payload: |
+            {
+              "text": "Deployment started (In Progress)",
+              "attachments": [
+                {
+                  "pretext": "Deployment started",
+                  "color": "dbab09",
+                  "fields": [
+                    {
+                      "title": "Status",
+                      "short": true,
+                      "value": "In Progress"
+                    }
+                  ]
+                }
+              ]
+            }
+          env:
+            SLACK_BOT_TOKEN: ${{ secrets.BOT_KEY}}
       - uses: slackapi/slack-github-action@v1.23.0
         with:
           # Unlike the step posting a new message, this step does not accept a channel name.
