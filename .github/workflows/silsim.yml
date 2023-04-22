@@ -26,12 +26,9 @@ jobs:
       - name: Slack Notification
         uses: rtCamp/action-slack-notify@v2
         env:
-          SLACK_CHANNEL: bot-testing
           SLACK_COLOR: ${{ job.status }} # or a specific color like 'good' or '#ff00ff'
-          SLACK_ICON: https://github.com/rtCamp.png?size=48
           SLACK_MESSAGE: 'SILSIM :troll:'
           SLACK_TITLE: 'Silsim Status: ${{ job.status }}'
-          SLACK_USERNAME: rtCamp
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
 
 
