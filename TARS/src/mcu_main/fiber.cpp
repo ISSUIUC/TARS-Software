@@ -1,7 +1,11 @@
 #ifndef _WIN32
 #include "fiber.h"
 
+#ifdef __APPLE__
+#define _XOPEN_SOURCE
+#endif
 #include <ucontext.h>
+
 #include <cassert>
 #include <iostream>
 #include <string.h>
