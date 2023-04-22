@@ -37,16 +37,16 @@ jobs:
         cd TARS
         pio run -e mcu_silsim -t upload
     - name: Slack Notification
-        uses: rtCamp/action-slack-notify@v2
-        env:
-          SLACK_COLOR: ${{ job.status }} # or a specific color like 'good' or '#ff00ff'
-          SLACK_MESSAGE: 'SILSIM :troll:'
-          SLACK_TITLE: 'Silsim Status: ${{ job.status }}'
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+      uses: rtCamp/action-slack-notify@v2
+      env:
+        SLACK_COLOR: ${{ job.status }} # or a specific color like 'good' or '#ff00ff'
+        SLACK_MESSAGE: 'SILSIM :troll:'
+        SLACK_TITLE: 'Silsim Status: ${{ job.status }}'
+        SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
     #  - name: Upload to slack step
     #     uses: adrey/slack-file-upload-action@master
     #     with:
     #       token: ${{ secrets.BOT_KEY }}
     #       path: TARS/sdlog.dat
     #       channel-id: 'C052ZP64ARM'
-    
+
