@@ -1,0 +1,3 @@
+[submodule "src/mcu_main/ISS_SILSIM"]
+    url = https://github.com/ISSUIUC/ISS_SILSIM.git
+	branch = submodule-integration
