@@ -69,6 +69,6 @@ jobs:
                   ]
                 }
               ]
-            }
+            },
         env:
           SLACK_BOT_TOKEN: ${{ secrets.BOT_KEY}}
