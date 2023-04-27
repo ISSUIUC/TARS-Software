@@ -295,28 +295,36 @@ void LinearKalmanFilter::update() {
     // euler_t angles = (euler_t){0, 0, 0};
     chMtxUnlock(&orientation.mutex);
 
-    chMtxLock(&lowG.mutex);
-    Serial.print("Gyroscope: ");
-    Serial.print(lowG.getGyroscope().gx);
-    Serial.print(" ");
-    Serial.print(lowG.getGyroscope().gy);
-    Serial.print(" ");
-    Serial.println(lowG.getGyroscope().gz);
-    chMtxUnlock(&lowG.mutex);
+    // chMtxLock(&lowG.mutex);
+    // Serial.print("Gyroscope: ");
+    // Serial.print(lowG.getGyroscope().gx);
+    // Serial.print(" ");
+    // Serial.print(lowG.getGyroscope().gy);
+    // Serial.print(" ");
+    // Serial.println(lowG.getGyroscope().gz);
+    // chMtxUnlock(&lowG.mutex);
 
-    Serial.print("Orientation: ");
-    Serial.print(angles.roll);
-    Serial.print(" ");
-    Serial.print(angles.pitch);
-    Serial.print(" ");
-    Serial.println(angles.yaw);
+    // Serial.print("Orientation: ");
+    // Serial.print(angles.roll);
+    // Serial.print(" ");
+    // Serial.print(angles.pitch);
+    // Serial.print(" ");
+    // Serial.println(angles.yaw);
 
-    Serial.print("Acceleration: ");
-    Serial.print(accel(0, 0));
-    Serial.print(" ");
-    Serial.print(accel(1, 0));
-    Serial.print(" ");
-    Serial.println(accel(2, 0));
+    // Serial.print("Acceleration: ");
+    // Serial.print(accel(0, 0));
+    // Serial.print(" ");
+    // Serial.print(accel(1, 0));
+    // Serial.print(" ");
+    // Serial.println(accel(2, 0));
+
+    // Serial.print("Magnetometer: ");
+    // // chMtxLock(&magnetometer.mutex);
+    // Serial.print(magnetometer.getMagnetometer().mx);
+    // Serial.print(" ");
+    // Serial.print(magnetometer.getMagnetometer().my);
+    // Serial.print(" ");
+    // Serial.println(magnetometer.getMagnetometer().mz);
 
     angles.yaw = -angles.yaw;
 
