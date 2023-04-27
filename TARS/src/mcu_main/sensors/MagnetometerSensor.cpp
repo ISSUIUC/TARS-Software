@@ -1,7 +1,8 @@
 #include "MagnetometerSensor.h"
 
-#include "mcu_main/pins.h"
 #include "mcu_main/dataLog.h"
+#include "mcu_main/debug.h"
+#include "mcu_main/pins.h"
 
 MagnetometerSensor magnetometer;
 
@@ -16,6 +17,7 @@ ErrorCode MagnetometerSensor::init() {
 }
 
 void MagnetometerSensor::update() {
+    // Serial.println("hi");
     #ifdef ENABLE_MAGNETOMETER
     sensor.read();
 
@@ -23,6 +25,7 @@ void MagnetometerSensor::update() {
     mx = sensor.x_gauss;
     my = sensor.y_gauss;
     mz = sensor.z_gauss;
+    // Serial.println("Updated magnetometer");
     dataLogger.pushMagnetometerFifo((MagnetometerData) { {mx, my, mz}, time_stamp });
     #endif
 }
