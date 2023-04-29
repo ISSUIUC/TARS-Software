@@ -35,5 +35,13 @@ class RotationalKalmanFilter : public KalmanFilter<9, 6>{
         float s_dt = 0.050;
         float rqf = 1;
 
+        float x_gyro_avg = 0;
+        float y_gyro_avg = 0;
+        float z_gyro_avg = 0;
+
+        float x_accum = 0;
+        float y_accum = 0;
+        float z_accum = 0;
+
         KalmanState rotational_kalman_state;
 };

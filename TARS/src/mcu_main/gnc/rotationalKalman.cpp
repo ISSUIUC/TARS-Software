@@ -101,6 +101,24 @@ void RotationalKalmanFilter::Initialize() {
     x_k(3, 0) = y_sum / 30;
     x_k(6, 0) = z_sum / 30;
 
+    for (int i = 0; i < 30; i++) {
+        chMtxLock(&lowG.mutex);
+        x_gyro_avg += lowG.getGyroscope().gx;
+        y_gyro_avg += lowG.getGyroscope().gy;
+        z_gyro_avg += lowG.getGyroscope().gz;
+        chThdSleepMilliseconds(10);
+        chMtxUnlock(&lowG.mutex);
+    }
+
+    x_gyro_avg /= 30;
+    y_gyro_avg /= 30;
+    z_gyro_avg /= 30;
+
+    // x_k(1, 0) = x_gyro_avg / 30;
+    // x_k(4, 0) = y_gyro_avg / 30;
+    // x_k(7, 0) = z_gyro_avg / 30;
+
+
     R(0, 0) = 1.9;
     R(1, 1) = 1.9;
     R(2, 2) = 1.9;
@@ -129,10 +147,28 @@ void RotationalKalmanFilter::update() {
     // Sensor Measurements
     Eigen::Matrix<float, 3, 1> gyro = Eigen::Matrix<float, 3, 1>::Zero();
     chMtxLock(&lowG.mutex);
-    gyro(0, 0) = lowG.getGyroscope().gz;
-    gyro(1, 0) = lowG.getGyroscope().gx;
-    gyro(2, 0) = lowG.getGyroscope().gy;
+    gyro(0, 0) = lowG.getGyroscope().gx - x_gyro_avg;
+    gyro(1, 0) = lowG.getGyroscope().gy - y_gyro_avg;
+    gyro(2, 0) = lowG.getGyroscope().gz - z_gyro_avg;
     chMtxUnlock(&lowG.mutex);
+
+    x_accum += gyro(0, 0) * s_dt;
+    y_accum += gyro(1, 0) * s_dt;
+    z_accum += gyro(2, 0) * s_dt;
+
+    Serial.print("Accum: ");
+    Serial.print(x_accum);
+    Serial.print(", ");
+    Serial.print(y_accum);
+    Serial.print(", ");
+    Serial.println(z_accum);
+
+    // Serial.print("Gyro: ");
+    // Serial.print(gyro(0, 0));
+    // Serial.print(", ");
+    // Serial.print(gyro(1, 0));
+    // Serial.print(", ");
+    // Serial.println(gyro(2, 0));
 
     euler_t angles;
     angles.roll = x_k(0);
@@ -147,6 +183,25 @@ void RotationalKalmanFilter::update() {
     // # Posteriori Update
     x_k = x_priori + K * (y_k - (H * x_priori));
     P_k = (identity - K * H) * P_priori;
+
+    // Serial.print("Angular Pos: ");
+    // Serial.print(x_k(0, 0));
+    // Serial.print(", ");
+    // Serial.print(x_k(3, 0));
+    // Serial.print(", ");
+    // Serial.println(x_k(6, 0));
+    // Serial.print("Angular Vel: ");
+    // Serial.print(x_k(1, 0));
+    // Serial.print(", ");
+    // Serial.print(x_k(4, 0));
+    // Serial.print(", ");
+    // Serial.println(x_k(7, 0));
+    // Serial.print("Angular Accel: ");
+    // Serial.print(x_k(2, 0));
+    // Serial.print(", ");
+    // Serial.print(x_k(5, 0));
+    // Serial.print(", ");
+    // Serial.println(x_k(8, 0));
 
     chMtxLock(&mutex);
     rotational_kalman_state.state_est_r_pos_x = x_k(0, 0);
