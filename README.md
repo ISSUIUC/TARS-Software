@@ -1,9 +1,9 @@
 # TARS Flight Software Repository
 Illinois Space Society's flight software codebase for the TARS system.
 
-<p align="center">
+<div align="center">
 [![Onboard video from amateur rocket with graphs alongside](https://img.youtube.com/vi/OQC60KljR3A/0.jpg)](https://www.youtube.com/watch?v=OQC60KljR3A)
-</p>
+</div>
 
 ### Directory Structure:
 - `TARS/`: Mission critical flight software running on TARS. This is the code that actually flies on the rocket
