@@ -8,7 +8,7 @@ Illinois Space Society's flight software codebase for the TARS system.
 
 ### Directory Structure:
 - `TARS/`: Mission critical flight software running on TARS. This is the code that actually flies on the rocket
-	- 'src/': All the flight code that we write ourselves is in this directory. 
+	- `src/`: All the flight code that we write ourselves is in this directory. 
 		- `common`: Utility code we write that is used across microcontrollers.
 		- `mcu_main`: Code for the primary microcontroller on TARS (Teensy 4.1)
 		- `mcu_telemetry`: Code for the microcontroller in charge of telemetry and GPS (ESP32-S3)
