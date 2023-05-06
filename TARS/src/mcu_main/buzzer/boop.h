@@ -1,8 +1,9 @@
 #pragma once
+#include<cstdint>
 
 #include <mcu_main/buzzer/notes.h>
 
-const int8_t melody[] = {
+static constexpr int8_t melody[] = {
     NOTE_E4, 8, NOTE_F4, 8, NOTE_GS4, 8, NOTE_AS4, 8, NOTE_C5, 4, NOTE_F5, 8, NOTE_DS5, 8,
 
     NOTE_C5, 4, NOTE_F4, 4, NOTE_C5, 8, NOTE_AS4, 8, NOTE_GS4, 8, NOTE_F4, 8,
@@ -58,7 +59,7 @@ const int8_t melody[] = {
     NOTE_F4, 8, NOTE_GS4, 8, NOTE_AS4, 8, NOTE_C5, 8, NOTE_E4, 4, NOTE_E4, 2, STOP
 };
 
-const int8_t melody1[] = {
+static constexpr int8_t melody1[] = {
         NOTE_C4, 8, NOTE_D4, 8, NOTE_F4, 2, NOTE_D4, 8, NOTE_E4, 8,
 
         NOTE_F4, 2, NOTE_E4, 4, NOTE_C4, 8, NOTE_D4, 8, STOP

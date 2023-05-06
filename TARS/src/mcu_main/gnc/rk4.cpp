@@ -11,7 +11,6 @@
 #include <array>
 #include <cmath>
 
-#define EIGEN_MATRIX_PLUGIN "MatrixAddons.h"
 // TODO: make a typedef for array<float, 2>
 // using std::array;
 

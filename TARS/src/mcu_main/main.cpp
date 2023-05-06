@@ -45,13 +45,14 @@
 #include "mcu_main/debug.h"
 #include "mcu_main/hilsim/HILSIMPacket.h"
 
-HILSIMPacket hilsim_reader;
 
 #if defined(ENABLE_HIGH_G) || defined(ENABLE_ORIENTATION) || defined(ENABLE_BAROMETER) || defined(ENABLE_LOW_G) || defined(ENABLE_MAGNETOMETER) || defined(ENABLE_GAS)
 #define ENABLE_SENSOR_FAST
 #endif
 
 #ifdef ENABLE_HILSIM_MODE
+HILSIMPacket hilsim_reader;
+
 static THD_FUNCTION(hilsim_THD, arg) {
     // Creating array for data to be read into
     char data_read[512];

@@ -2,7 +2,7 @@
 
 #include "mcu_main/buzzer/notes.h"
 
-uint16_t note_frequencies[] = {
+static constexpr uint16_t note_frequencies[] = {
     31,
     33,
     35,
