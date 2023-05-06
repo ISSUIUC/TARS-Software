@@ -2,7 +2,7 @@
 
 #include "mcu_main/buzzer/notes.h"
 
-uint16_t note_frequencies[] = {
+static constexpr uint16_t note_frequencies[] = {
     31,
     33,
     35,
@@ -131,7 +131,7 @@ void BuzzerController::init_sponge() {
 
     for (int i = 0; i < 8; i++) {
         tone(15, note_frequencies[spongebob[i]]);
-        delay(spongebob_delays[i]);
+        chThdSleepMilliseconds(spongebob_delays[i]);
         noTone(15);
     }
 }
@@ -163,7 +163,7 @@ void BuzzerController::init_mario() {
     };
     for (int i = 0; i < 8; i++) {
         tone(15, note_frequencies[mario[i]]);
-        delay(mario_delays[i]);
+        chThdSleepMilliseconds(mario_delays[i]);
         noTone(15);
     }
 }

@@ -11,7 +11,7 @@
 
 #define NUM_STATES 9
 #define NUM_SENSOR_INPUTS 4
-#define BUFFER_BIGGNESS 10
+#define ALTITUDE_BUFFER_SIZE 10
 
 class KalmanFilter;
 extern KalmanFilter kalmanFilter;
@@ -67,7 +67,7 @@ class KalmanFilter {
     Eigen::Matrix<float, 3, 1> init_accel = Eigen::Matrix<float, 3, 1>::Zero();
     Eigen::Matrix<float, 3, 1> world_accel;
 
-    FifoBuffer<float, BUFFER_BIGGNESS> alt_buffer;
+    FifoBuffer<float, ALTITUDE_BUFFER_SIZE> alt_buffer;
 
     Eigen::Matrix<float, NUM_STATES, 1> x_k = Eigen::Matrix<float, NUM_STATES, 1>::Zero();
     Eigen::Matrix<float, NUM_STATES, NUM_STATES> F_mat = Eigen::Matrix<float, NUM_STATES, NUM_STATES>::Zero();

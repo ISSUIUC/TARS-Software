@@ -2,6 +2,7 @@
 
 #include "mcu_main/pins.h"
 #include "mcu_main/dataLog.h"
+#include "mcu_main/debug.h"
 
 MagnetometerSensor magnetometer;
 
