@@ -2,7 +2,7 @@
 Illinois Space Society's flight software codebase for the TARS system.
 
 <div align="center">
-<a href="https://www.youtube.com/watch?v=OQC60KljR3A"><img src="https://img.youtube.com/vi/OQC60KljR3A/0.jpg"></img></a>
+<a href="https://www.youtube.com/watch?v=OQC60KljR3A"><img src="https://img.youtube.com/vi/OQC60KljR3A/0.jpg"></img></a><br>
 <i>Click to see a cool video!</i>
 </div>
 
