@@ -1,11 +1,12 @@
 # TARS Flight Software Repository
 Illinois Space Society's flight software codebase for the TARS system.
 
+[![Onboard video from amateur rocket with graphs alongside](https://img.youtube.com/vi/OQC60KljR3A/0.jpg)](https://www.youtube.com/watch?v=OQC60KljR3A)
+
+
 ### Directory Structure:
-- `flight/`: Mission critical flight software running on TARS. This is the code that actually flies on the rocket
+- `TARS/`: Mission critical flight software running on TARS. This is the code that actually flies on the rocket
 - `ground/`: Code running on ground station hardware
-- `misc/`: Miscellaneous one-off projects for particular tests or R&D
-- `utils/`: Tools and utilities that make life easier
 
 ### Branch Naming Convention
 Please use the following naming conventions when creating branches while developing:
@@ -58,8 +59,8 @@ You can run the script on Linux, Mac, or WSL like so:
 ```
 
 Things to keep in mind about code formatting:
-- The code style being used is defined in `.clang-format`. It currently follows Google's C++ style guide exactly.
-- Third party libraries (e.g.`ChRt` which is ChibiOS) are exempted from code-style checks and the auto formatting script. This is to avoid any possibility of breaking proven/working libraries.
+- The code style being used is defined in `.clang-format`. It currently follows Google's C++ style guide exactly. However, a modification was made so that the maximum characters per line was increased from 80 to 120. 
+- Third party libraries (e.g.`ChRt` which is ChibiOS) are exempted from code-style checks and the auto formatting script. This is to avoid any possibility of breaking proven/working libraries. If adding a new library to flight code, make sure to update `.clang-format-ignore` with the relevant file path if it isn't in `lib`.
   - Exempt directories should be listed in `.clang-format-ignore` so they don't get auto-formatted by the script.
   - Exempt directories should also be listed in `.github/workflows/clang_format_check.yml` on the lines with `exclude:`, so they're not checked for style violations by GitHub. 
 - Changing/tweaking the style guide is always option! If you have ideas, reach out!
