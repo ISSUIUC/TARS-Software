@@ -3,6 +3,7 @@ Illinois Space Society's flight software codebase for the TARS system.
 
 <div align="center">
 [![Onboard video from amateur rocket with graphs alongside](https://img.youtube.com/vi/OQC60KljR3A/0.jpg)](https://www.youtube.com/watch?v=OQC60KljR3A)
+<img src="https://img.youtube.com/vi/OQC60KljR3A/0.jpg"></img>
 </div>
 
 ### Directory Structure:
