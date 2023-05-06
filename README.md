@@ -9,11 +9,11 @@ Illinois Space Society's flight software codebase for the TARS system.
 ### Directory Structure:
 - `TARS/`: Mission critical flight software running on TARS. This is the code that actually flies on the rocket
 	- `src/`: All the flight code that we write ourselves is in this directory. 
-		- `common`: Utility code we write that is used across microcontrollers.
-		- `mcu_main`: Code for the primary microcontroller on TARS (Teensy 4.1)
-		- `mcu_telemetry`: Code for the microcontroller in charge of telemetry and GPS (ESP32-S3)
+		- `common/`: Utility code we write that is used across microcontrollers.
+		- `mcu_main/`: Code for the primary microcontroller on TARS (Teensy 4.1)
+		- `mcu_telemetry/`: Code for the microcontroller in charge of telemetry and GPS (ESP32-S3)
 		- `mcu_power`: Code for the microcontroller on the power board (ATMega328P)
-	- `lib`: Third-party libraries that are not available on the PlatformIO Registry. Other libraries are included via the `lib_deps` build flag in `platformio.ini`
+	- `lib/`: Third-party libraries that are not available on the PlatformIO Registry. Other libraries are included via the `lib_deps` build flag in `platformio.ini`
 - `ground/`: Code running on ground station hardware (Adafruit LoRa Feather)
 
 ### Branch Naming Convention
