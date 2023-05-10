@@ -2,10 +2,9 @@
 
 #include "FS.h"
 #include "mcu_main/pins.h"
+#include "mcu_main/debug.h"
 
 SDLogger sd_logger;  // NOLINT(cppcoreguidelines-interfaces-global-init)
-
-// SDLogger::SDLogger() { }
 
 #define MAX_FILES 999
 
@@ -66,11 +65,12 @@ char* sdFileNamer(char* fileName, char* fileExtensionParam) {
     return fileName;
 }
 
-void SDLogger::init() {
+ErrorCode SDLogger::init() {
+#ifdef ENABLE_SD
     queue.attach(dataLogger);
 
     if (SD.begin(BUILTIN_SDCARD)) {
-        char file_extension[6] = ".dat";
+        char file_extension[8] = ".launch";
 
         char data_name[16] = "data";
         sdFileNamer(data_name, file_extension);
@@ -82,28 +82,21 @@ void SDLogger::init() {
 
         Serial.println(sd_file.name());
     } else {
-        digitalWrite(LED_RED, HIGH);
-        digitalWrite(LED_ORANGE, HIGH);
-        digitalWrite(LED_BLUE, HIGH);
-        Serial.println("SD Begin Failed. Stalling Program");
-        while (true) {
-            digitalWrite(LED_RED, HIGH);
-            delay(100);
-            digitalWrite(LED_RED, LOW);
-            delay(100);
-        }
+        return ErrorCode::SD_BEGIN_FAILED;
     }
+#endif
+    return ErrorCode::NO_ERROR;
 }
 
 void SDLogger::update() {
+#ifdef ENABLE_SD
     sensorDataStruct_t current_data = queue.next();
-    Serial.print("Has Data?");
-    Serial.println(current_data.hasData());
     if (!current_data.hasData()) {
         return;
     }
 
     logData(&current_data);
+#endif
 }
 
 template <typename T>

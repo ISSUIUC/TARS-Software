@@ -32,11 +32,12 @@ float rk4::cd(float alt, float vel) {
 
     double cd = 0;
 
-    double mach_power = 1;
-    for (int i = 0; i < 151; i++) {
-        cd += poly[150 - i] * mach_power;
-        mach_power *= mach;
-    }
+    // double mach_power = 1;
+    // for (int i = 0; i < 151; i++) {
+    //     cd += poly[150 - i] * mach_power;
+    //     mach_power *= mach;
+    // }
+    approximate_cubic_spline_(mach);
     return float(cd);
 }
 

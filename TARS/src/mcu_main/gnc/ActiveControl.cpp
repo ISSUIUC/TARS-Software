@@ -13,11 +13,16 @@
 
 Controller activeController;
 
+/**
+ * @brief Initializes the Servos for either drag or roll control
+ * 
+ * Initializes a PWMServo object and sets the angle limits for the ServoControl object
+*/
 Controller::Controller() : activeControlServos(&controller_servo_) {}
 
 void Controller::ctrlTickFunction() {
     chMtxLock(&kalmanFilter.mutex);
-    array<float, 2> init = {kalmanFilter.getState().x, kalmanFilter.getState().vx};
+    array<float, 2> init = {kalmanFilter.getState().state_est_pos_x, kalmanFilter.getState().state_est_vel_x};
     chMtxUnlock(&kalmanFilter.mutex);
 
     float apogee_est = rk4_.sim_apogee(init, 0.3)[0];
@@ -65,6 +70,7 @@ void Controller::ctrlTickFunction() {
         dataLogger.pushFlapsFifo((FlapData){u, chVTGetSystemTime()});
     } else {
         activeControlServos.servoActuation(min_extension);
+        // controller_servo_.write(activeControlServos.min_angle);
     }
 }
 
@@ -105,14 +111,16 @@ void Controller::init() {
 
     /*
      * Startup sequence
-     * 15 degrees written to servo since this was
+     * 30 degrees written to servo since this was
      * experimentally determined to be the position in which
      * the flaps are perfectly flush with the airframe.
      */
-    controller_servo_.write(180);
+    
+    controller_servo_.write(activeControlServos.max_angle);
     chThdSleepMilliseconds(1000);
-    controller_servo_.write(15);
+    controller_servo_.write(activeControlServos.min_angle);
     chThdSleepMilliseconds(1000);
+
 
     setLaunchPadElevation();
 }

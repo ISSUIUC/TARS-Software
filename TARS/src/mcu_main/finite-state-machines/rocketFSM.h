@@ -4,9 +4,10 @@
 #include "mcu_main/finite-state-machines/HistoryBufferFSM.h"
 #include "mcu_main/finite-state-machines/KalmanFSM.h"
 #include "mcu_main/finite-state-machines/TimerFSM.h"
+#include "mcu_main/finite-state-machines/ModularFSM.h"
 
 extern TimerFSM timer_fsm;
-extern HistoryBufferFSM<50> history_buffer_fsm_50;
+extern ModularFSM modular_fsm;
 extern HistoryBufferFSM<6> history_buffer_fsm_6;
 extern KalmanFSM kalman_fsm;
 
