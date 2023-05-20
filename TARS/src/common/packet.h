@@ -1,12 +1,16 @@
 #pragma once
 
-#include "ChRt.h"
+//#include "ChRt.h"
+
+#include <cstdint>
+
+typedef uint32_t systime_t;
 
 /**
  * @brief Labels for each FSM state
  */
-enum class FSM_State {
-    STATE_INIT,
+enum FSM_State {
+    STATE_INIT = 0,
     STATE_IDLE,
     STATE_LAUNCH_DETECT,
     STATE_BOOST,
