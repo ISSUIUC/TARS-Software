@@ -51,16 +51,14 @@ void ServoControl::servoActuation(float length) {
     // The angle is found through utilizing a fft and mapping extension/angle
     // values to a sine function. len (mm), pass in ang (rad)
 
-    // if (length < 0) length = 0;
-    // if (length > 0.018) length = 0.018;
-    // float angle = ((180 / 3.1415) * asin((length * 1000 + 2) / 20) + 30) / 0.69;
+    // 2023 Mechanism
     float angle = (((180 / 3.1415) * asin((length - D) / A)) - C) / B;
 
+    // 2021-2022 Mechanism
     // Maps the length to an angle based on calibration
     // float angle = -0.035 + 1.09 * pow(10, 3) * length +
     //               2.98 * pow(10, -4) * pow(length, 2) -
     //               1.24 * pow(10, -6) * pow(length, 3);
-    // roundOffAngle(angle);
     int servo_angle = roundOffAngle(angle);
 
     servo_->write(servo_angle);

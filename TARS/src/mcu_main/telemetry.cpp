@@ -128,8 +128,6 @@ void Telemetry::handleCommand(const telemetry_command &cmd) {
     }
 }
 
-//#define TLM_DEBUG
-
 /**
  * @brief This function transmits data from the struct provided as
  * the parameter (data collected from sensor suite) to the
