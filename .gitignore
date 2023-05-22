@@ -45,3 +45,6 @@
 
 # Mac stuff
 .DS_Store
+
+# Actual data -- Don't commit flight data to this repo or you'll make Gautam's hair go gray
+*.csv

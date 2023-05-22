@@ -1,5 +1,8 @@
 
 /**
+ * @file error.cpp
+ * @brief Defines how different errors correspond to LED patterns
+ * 
  * If an error during initialization was detected, some combination of the blue, green, and orange LEDs will be on,
  * and the red LED will flash at some frequency. The Blue, Green, and Orange LEDs tells you what sensor is errored.
  *
