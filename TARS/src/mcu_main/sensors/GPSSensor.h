@@ -15,7 +15,7 @@
 * SFE_UBLOX_GNSS. Using this class one can obtain latitude, longitude, and altitude. One can also
 * get the time, fix type, and satellite in view count.
 */
-struct GPSSensor {
+class GPSSensor {
    public:
     GPSSensor() = default;
 

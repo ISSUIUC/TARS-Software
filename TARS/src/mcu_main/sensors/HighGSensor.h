@@ -20,7 +20,7 @@
 * The range on the high-g sensor is better than the low-g sensor, with a range higher than could reasonably be obtained.
 */
 
-struct HighGSensor {
+class HighGSensor {
    public:
     HighGSensor() = default;
 

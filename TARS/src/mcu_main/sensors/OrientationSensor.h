@@ -17,11 +17,10 @@
 * 
 * @class OrientationSensor
 * 
-* @brief This class initializes and controls the orientation sensor. One can obtain data using the functions provided in the class.
+* @brief Initializes and polls orientation sensor
 * 
 * 
-* 
-* This class utilizes an imu that is capable of orientation. Currently the constructor can accept 0 parameters or the 
+* Encapsulates functionality for a orientation sensor-fusion capable IMU. Currently the constructor can accept 0 parameters or the 
 * Adafruit_BNO08x imu sensor for data collection. Using this class one can obtain temperature, pressure, gyroscope
 * acceleration, and magnetometer data. One also has the choice to receive the current orientation in Euler angles or
 * quaternions.

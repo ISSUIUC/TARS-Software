@@ -16,7 +16,7 @@
 * This class utilizes a barometer. Currently the chip select is given to the default constructor using the
 * MS5611. Using this class one can obtain temperature, pressure, and altitude.
 */
-struct BarometerSensor {
+class BarometerSensor {
    public:
     BarometerSensor();
 

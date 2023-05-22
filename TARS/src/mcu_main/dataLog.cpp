@@ -6,7 +6,7 @@
  * important data structs.
  */
 
-#include "mcu_main/dataLog.h"
+#include "mcu_main/DataLog.h"
 
 DataLogBuffer dataLogger;
 

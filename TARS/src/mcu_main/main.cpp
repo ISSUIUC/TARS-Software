@@ -33,10 +33,10 @@
 
 #include "mcu_main/Abort.h"
 #include "mcu_main/SDLogger.h"
-#include "mcu_main/dataLog.h"
-#include "mcu_main/finite-state-machines/rocketFSM.h"
+#include "mcu_main/DataLog.h"
+#include "mcu_main/finite-state-machines/RocketFSM.h"
 #include "mcu_main/gnc/ActiveControl.h"
-#include "mcu_main/gnc/kalmanFilter.h"
+#include "mcu_main/gnc/KalmanFilter.h"
 #include "mcu_main/pins.h"
 #include "mcu_main/sensors/sensors.h"
 #include "mcu_main/telemetry.h"
