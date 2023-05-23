@@ -20,7 +20,7 @@ struct Magnetometer {
     float mz;
 };
 
-struct euler_t {
+struct euler_angles_t {
     float yaw;
     float pitch;
     float roll;
@@ -82,9 +82,6 @@ struct LowGData {
     float gx;
     float gy;
     float gz;
-    //    float mx;
-    //    float my;
-    //    float mz;
     systime_t timeStamp_lowG;
 };
 
@@ -156,7 +153,7 @@ struct OrientationData {
     Acceleration accel{};
     Gyroscope gyro{};
     Magnetometer magnet{};
-    euler_t angle{};
+    euler_angles_t angle{};
     systime_t timeStamp_orientation = 0;
 };
 

@@ -27,11 +27,14 @@ bool ModularFSM::idleEventCheck(){
 bool ModularFSM::idleStateCheck(){
     // vel subject to change pending derivative calculations
     float vel = getAltitudeAverage(0, 3) - getAltitudeAverage(3, 3);
+    float roll = orientation.getEulerAngles().roll;
+    float pitch = orientation.getEulerAngles().pitch;
+    float yaw = orientation.getEulerAngles().yaw;
 
     bool altitude_in_range = (launch_site_altitude_ - alt_error) <= barometer.getAltitude() && barometer.getAltitude() <= (launch_site_altitude_ + alt_error);
     bool acc_in_range = (1 - acc_error) <= highG.getAccel().az && highG.getAccel().az <= (1 + acc_error);
-    bool ang_in_range_pitch = (ang_start - ang_error) <= orientation.getEuler().pitch && orientation.getEuler().pitch <= (ang_start + ang_error);
-    bool ang_in_range_yaw = (ang_start - ang_error) <= orientation.getEuler().yaw && orientation.getEuler().yaw <= (ang_start + ang_error);
+    bool ang_in_range_pitch = (ang_start - ang_error) <= pitch && pitch <= (ang_start + ang_error);
+    bool ang_in_range_yaw = (ang_start - ang_error) <= yaw && yaw <= (ang_start + ang_error);
     bool vel_in_range = -vel_error <= vel && vel <= vel_error;
 
 
@@ -61,8 +64,8 @@ bool ModularFSM::boostStateCheck(){
 
     bool altitude_in_range = barometer.getAltitude() > launch_site_altitude_ + alt_error;
     bool acc_in_range = getAccelerationAverage(0,6) > boost_acc_thresh;
-    bool ang_in_range_pitch = -boost_ang_thresh <= orientation.getEuler().pitch && orientation.getEuler().pitch <= boost_ang_thresh;
-    bool ang_in_range_yaw = -boost_ang_thresh <= orientation.getEuler().yaw && orientation.getEuler().yaw <= boost_ang_thresh;
+    bool ang_in_range_pitch = -boost_ang_thresh <= orientation.getEulerAngles().pitch && orientation.getEulerAngles().pitch <= boost_ang_thresh;
+    bool ang_in_range_yaw = -boost_ang_thresh <= orientation.getEulerAngles().yaw && orientation.getEulerAngles().yaw <= boost_ang_thresh;
     bool vel_in_range = vel > vel_error;
 
      if (altitude_in_range && acc_in_range && ang_in_range_pitch && ang_in_range_yaw && vel_in_range) {
@@ -90,8 +93,8 @@ bool ModularFSM::coastPreGNCStateCheck(){
 
     bool altitude_in_range = barometer.getAltitude() > launch_site_altitude_ + alt_error;
     bool acc_in_range = -4 < getAccelerationAverage(0, 6) && getAccelerationAverage(0, 6) < acc_error;
-    bool ang_in_range_pitch = -boost_ang_thresh <= orientation.getEuler().pitch && orientation.getEuler().pitch <= boost_ang_thresh;
-    bool ang_in_range_yaw = -boost_ang_thresh <= orientation.getEuler().yaw && orientation.getEuler().yaw <= -boost_ang_thresh;
+    bool ang_in_range_pitch = -boost_ang_thresh <= orientation.getEulerAngles().pitch && orientation.getEulerAngles().pitch <= boost_ang_thresh;
+    bool ang_in_range_yaw = -boost_ang_thresh <= orientation.getEulerAngles().yaw && orientation.getEulerAngles().yaw <= -boost_ang_thresh;
     bool vel_in_range =  vel > 0 + vel_error;
 
     if (altitude_in_range && acc_in_range && ang_in_range_pitch && ang_in_range_yaw && vel_in_range) {
@@ -121,8 +124,8 @@ bool ModularFSM::coastGNCStateCheck(){
 
     bool altitude_in_range = barometer.getAltitude() > launch_site_altitude_ + alt_error;
     bool acc_in_range = -4 < getAccelerationAverage(0, 6) && getAccelerationAverage(0, 6) < acc_error;
-    bool ang_in_range_pitch = -coast_gnc_thresh <= orientation.getEuler().pitch && orientation.getEuler().pitch <= coast_gnc_thresh;
-    bool ang_in_range_yaw = -coast_gnc_thresh <= orientation.getEuler().yaw && orientation.getEuler().yaw <= coast_gnc_thresh;
+    bool ang_in_range_pitch = -coast_gnc_thresh <= orientation.getEulerAngles().pitch && orientation.getEulerAngles().pitch <= coast_gnc_thresh;
+    bool ang_in_range_yaw = -coast_gnc_thresh <= orientation.getEulerAngles().yaw && orientation.getEulerAngles().yaw <= coast_gnc_thresh;
     bool vel_in_range =  vel > 0 + vel_error;
 
     if (altitude_in_range && acc_in_range && ang_in_range_pitch && ang_in_range_yaw && vel_in_range) {
@@ -209,8 +212,8 @@ bool ModularFSM::drogueStateCheck(){
     bool altitude_in_range = (launch_site_altitude_ < barometer.getAltitude()) && (barometer.getAltitude() < apogee_altitude_);
     bool acceleration_in_range = (drogue_acc_bottom < getAccelerationAverage(0,6)) && (getAccelerationAverage(0,6) < drogue_acc_top);
     bool velocity_in_range = velocity < vel_error;
-    bool ang_in_range_pitch = drogue_ang_thresh_bottom <= orientation.getEuler().pitch && orientation.getEuler().pitch <= drogue_ang_thresh_top;
-    bool ang_in_range_yaw = drogue_ang_thresh_bottom <= orientation.getEuler().yaw && orientation.getEuler().yaw <= drogue_ang_thresh_top;
+    bool ang_in_range_pitch = drogue_ang_thresh_bottom <= orientation.getEulerAngles().pitch && orientation.getEulerAngles().pitch <= drogue_ang_thresh_top;
+    bool ang_in_range_yaw = drogue_ang_thresh_bottom <= orientation.getEulerAngles().yaw && orientation.getEulerAngles().yaw <= drogue_ang_thresh_top;
 
     if (altitude_in_range && acceleration_in_range && velocity_in_range && ang_in_range_pitch && ang_in_range_yaw) {
         last_state_ = rocket_state_;
@@ -239,8 +242,8 @@ bool ModularFSM::mainStateCheck(){
     bool altitude_in_range = (launch_site_altitude_ < barometer.getAltitude()) && (barometer.getAltitude() < apogee_altitude_);
     bool acceleration_in_range = (getAccelerationAverage(0,6) < main_acc_top);
     bool velocity_in_range = velocity < vel_error;
-    bool ang_in_range_pitch = main_ang_thresh_bottom <= orientation.getEuler().pitch && orientation.getEuler().pitch <= main_ang_thresh_top;
-    bool ang_in_range_yaw = main_ang_thresh_bottom <= orientation.getEuler().yaw && orientation.getEuler().yaw <= main_ang_thresh_top;
+    bool ang_in_range_pitch = main_ang_thresh_bottom <= orientation.getEulerAngles().pitch && orientation.getEulerAngles().pitch <= main_ang_thresh_top;
+    bool ang_in_range_yaw = main_ang_thresh_bottom <= orientation.getEulerAngles().yaw && orientation.getEulerAngles().yaw <= main_ang_thresh_top;
 
     if (altitude_in_range && acceleration_in_range && velocity_in_range && ang_in_range_yaw && ang_in_range_pitch) {
         last_state_ = rocket_state_;

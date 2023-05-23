@@ -133,7 +133,7 @@ void KalmanFilter::Initialize() {
     init_accel(2,0) /= 30;
 
     chMtxLock(&orientation.mutex);
-    euler_t euler = orientation.getEuler();
+    euler_angles_t euler = orientation.getEulerAngles();
     chMtxUnlock(&orientation.mutex);
     euler.yaw = -euler.yaw;
     world_accel = BodyToGlobal(euler, init_accel);
@@ -308,7 +308,7 @@ void KalmanFilter::update() {
     chMtxUnlock(&highG.mutex);
 
     chMtxLock(&orientation.mutex);
-    euler_t angles = orientation.getEuler();
+    euler_angles_t angles = orientation.getEulerAngles();
     // euler_t angles = (euler_t){0, 0, 0};
     chMtxUnlock(&orientation.mutex);
     angles.yaw = -angles.yaw;
@@ -366,7 +366,7 @@ void KalmanFilter::update() {
  * @param body_vect Vector for rotation in the body frame
  * @return Eigen::Matrix<float, 3, 1> Rotated vector in the global frame
  */
-Eigen::Matrix<float, 3, 1> KalmanFilter::BodyToGlobal(euler_t angles, Eigen::Matrix<float, 3, 1> body_vect) {
+Eigen::Matrix<float, 3, 1> KalmanFilter::BodyToGlobal(euler_angles_t angles, Eigen::Matrix<float, 3, 1> body_vect) {
     Eigen::Matrix3f roll, pitch, yaw;
 
     roll << 1., 0., 0., 0., cos(angles.roll), -sin(angles.roll ), 0., sin(angles.roll), cos(angles.roll);

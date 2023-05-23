@@ -44,7 +44,7 @@ class OrientationSensor {
     Acceleration getAccelerations();
     Gyroscope getGyroscope();
     Magnetometer getMagnetometer();
-    euler_t getEuler();
+    euler_angles_t getEulerAngles();
     float getTemp();
     float getPressure();
     void setReports(sh2_SensorId_t reportType, long report_interval);
@@ -70,7 +70,7 @@ class OrientationSensor {
                              bool degrees = false);
 
     Adafruit_BNO08x _imu;
-    euler_t _orientationEuler{};
+    euler_angles_t _orientationEuler{};
     Acceleration _accelerations{};
     Gyroscope _gyro{};
     Magnetometer _magnetometer{};

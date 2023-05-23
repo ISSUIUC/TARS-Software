@@ -87,7 +87,7 @@ void OrientationSensor::update(HILSIMPacket hilsim_packet) {
 #ifdef ENABLE_ORIENTATION
     chSysLock();
     chMtxLock(&mutex);
-    _orientationEuler = (euler_t) {hilsim_packet.ornt_roll, hilsim_packet.ornt_pitch, hilsim_packet.ornt_yaw};
+    _orientationEuler = (euler_angles_t) {hilsim_packet.ornt_roll, hilsim_packet.ornt_pitch, hilsim_packet.ornt_yaw};
     dataLogger.pushOrientationFifo(
         (OrientationData){_accelerations, _gyro, _magnetometer, _orientationEuler, chVTGetSystemTime()});
     chMtxUnlock(&mutex);
@@ -126,7 +126,7 @@ Magnetometer OrientationSensor::getMagnetometer() { return _magnetometer; }
 
 Acceleration OrientationSensor::getAccelerations() { return _accelerations; }
 
-euler_t OrientationSensor::getEuler() { return _orientationEuler; }
+euler_angles_t OrientationSensor::getEulerAngles() { return _orientationEuler; }
 
 ErrorCode OrientationSensor::init() {
     if (!_imu.begin_SPI(BNO086_CS, BNO086_INT)) {

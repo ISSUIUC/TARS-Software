@@ -49,7 +49,7 @@ class KalmanFilter {
 
     void SetQ(float dt, float sd);
     void SetF(float dt);
-    Eigen::Matrix<float, 3, 1> BodyToGlobal(euler_t angles, Eigen::Matrix<float, 3, 1> x_k);
+    Eigen::Matrix<float, 3, 1> BodyToGlobal(euler_angles_t angles, Eigen::Matrix<float, 3, 1> x_k);
 
     void kfTickFunction(float dt, float sd);
 
