@@ -7,9 +7,7 @@
 
 class GenericSensor {
     public:
-        ErrorCode __attribute__((warn_unused_result)) init();
-        void update();
-        void update(HILSIMPacket hilsim_packet);
-        
-    private:
+        virtual ErrorCode __attribute__((warn_unused_result)) initialize();
+        virtual void update();
+        virtual void update(HILSIMPacket hilsim_packet);
 };
