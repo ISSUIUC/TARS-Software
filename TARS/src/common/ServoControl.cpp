@@ -16,10 +16,10 @@
 
 #include <cmath>
 
-#define A 9.8
-#define B 2.05
-#define C -154
-#define D 4.1
+#define A 11.0333
+#define B 2.5751
+#define C -1.5724
+#define D 1.6755
 
 ServoControl::ServoControl(PWMServo* servo) : servo_(servo) {}
 
@@ -54,7 +54,8 @@ void ServoControl::servoActuation(float length) {
     // if (length < 0) length = 0;
     // if (length > 0.018) length = 0.018;
     // float angle = ((180 / 3.1415) * asin((length * 1000 + 2) / 20) + 30) / 0.69;
-    float angle = (((180 / 3.1415) * asin((length - D) / A)) - C) / B;
+    float angle = ((asin((length - D) / A)) - C) / B;
+    angle = (180 / 3.1415) * angle;
 
     // Maps the length to an angle based on calibration
     // float angle = -0.035 + 1.09 * pow(10, 3) * length +
