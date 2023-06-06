@@ -31,7 +31,7 @@ void Controller::ctrlTickFunction() {
     kalmanFilter.updateApogee(apogee_est);
     chMtxUnlock(&kalmanFilter.mutex);
 
-    float u = kp * (apogee_est - apogee_des_msl);
+    float u = kp * (apogee_est - apogee_des_msl) * 1000;
 
     // Limit rate of the servo so that it does not command a large change in a
     // short period of time

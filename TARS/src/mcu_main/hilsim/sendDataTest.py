@@ -8,7 +8,8 @@ SPEED_FACTOR = 1
 # n means that only 1 out of every n packets will be sent. Lower is more granular (min 1, must be integer).
 GRANULARITY_FACTOR = 2
 
-ser = serial.Serial("COM8", 9600, timeout=10, write_timeout=10)
+# -----------------<Change first param to the correct port, MacOS (ls /dev/tty.*)>-----------------
+ser = serial.Serial("/dev/tty.usbmodem132228101", 9600, timeout=10, write_timeout=10)
 
 csv = pandas.read_csv('flight_computer.csv')
 total_rows = csv.shape[0]
