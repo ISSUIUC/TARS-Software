@@ -28,7 +28,7 @@ class Controller {
 
     float launch_pad_alt = 0.0;
     float apogee_des_msl = 0.0;
-    float apogee_des_agl = 4000;
+    float apogee_des_agl = 9144;
 
     ServoControl activeControlServos;
 };
