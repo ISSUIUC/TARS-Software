@@ -27,7 +27,7 @@ static constexpr float coast_thresh = 0.2;
 static constexpr float coast_to_apogee_time_thresh = 26300;
 
 // For preventing GNC flaps from actuating even when in coast state
-static constexpr float coast_ac_delay_thresh = 1000;
+static constexpr float coast_ac_delay_thresh = 8121.4;
 
 // Rocket will leave boost state when burn_timer has exceeded this limit
 static constexpr int burn_time_thresh_ms = 5200;
