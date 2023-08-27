@@ -3,8 +3,8 @@
 #include "mcu_main/finite-state-machines/FSMCollection.h"
 #include "mcu_main/finite-state-machines/HistoryBufferFSM.h"
 #include "mcu_main/finite-state-machines/KalmanFSM.h"
-#include "mcu_main/finite-state-machines/TimerFSM.h"
 #include "mcu_main/finite-state-machines/ModularFSM.h"
+#include "mcu_main/finite-state-machines/TimerFSM.h"
 
 extern TimerFSM timer_fsm;
 extern ModularFSM modular_fsm;

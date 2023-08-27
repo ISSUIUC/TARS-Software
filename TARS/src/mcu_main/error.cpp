@@ -134,6 +134,4 @@ void handleError(ErrorCode code) {
                 delay(100);
             }
     }
-
 }
-

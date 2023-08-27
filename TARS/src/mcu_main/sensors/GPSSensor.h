@@ -4,17 +4,16 @@
 #include "SparkFun_u-blox_GNSS_v3.h"
 #include "mcu_main/error.h"
 
-
 /**
-* 
-* @class GPSSensor
-* 
-* @brief This class initializes and controls the GPS. One can obtain data using the functions provided in the class.
-* 
-* This class utilizes a GPS. Currently the chip select is given to the default constructor using the
-* SFE_UBLOX_GNSS. Using this class one can obtain latitude, longitude, and altitude. One can also
-* get the time, fix type, and satellite in view count.
-*/
+ *
+ * @class GPSSensor
+ *
+ * @brief This class initializes and controls the GPS. One can obtain data using the functions provided in the class.
+ *
+ * This class utilizes a GPS. Currently the chip select is given to the default constructor using the
+ * SFE_UBLOX_GNSS. Using this class one can obtain latitude, longitude, and altitude. One can also
+ * get the time, fix type, and satellite in view count.
+ */
 struct GPSSensor {
    public:
     GPSSensor() = default;
@@ -27,11 +26,11 @@ struct GPSSensor {
     float getLongitude() const;
     float getAltitude() const;
     /**
-     * @brief This returns the fix type which refers to the current encoding scheme. 
+     * @brief This returns the fix type which refers to the current encoding scheme.
      * @return An integer corresponding to the current fix type.
-     * 
+     *
      * 0 = no fix (GPS cannot get valid location),
-     * 3 = 3D (GPS Working normally), 
+     * 3 = 3D (GPS Working normally),
      * 4 = GNSS+Deadreckoning (Has gps lock and using IMU data to increase accuracy)
      */
     uint32_t getFixType() const;
@@ -46,7 +45,6 @@ struct GPSSensor {
    private:
     SFE_UBLOX_GNSS GNSS;
 
-    
     systime_t timeStamp{};
     float latitude{};
     float longitude{};

@@ -15,9 +15,9 @@ Controller activeController;
 
 /**
  * @brief Initializes the Servos for either drag or roll control
- * 
+ *
  * Initializes a PWMServo object and sets the angle limits for the ServoControl object
-*/
+ */
 Controller::Controller() : activeControlServos(&controller_servo_) {}
 
 void Controller::ctrlTickFunction() {
@@ -115,12 +115,11 @@ void Controller::init() {
      * experimentally determined to be the position in which
      * the flaps are perfectly flush with the airframe.
      */
-    
+
     controller_servo_.write(activeControlServos.max_angle);
     chThdSleepMilliseconds(1000);
     controller_servo_.write(activeControlServos.min_angle);
     chThdSleepMilliseconds(1000);
-
 
     setLaunchPadElevation();
 }

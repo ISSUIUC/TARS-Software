@@ -8,9 +8,9 @@
 
 #include "mcu_main/gnc/kalmanFilter.h"
 
-#include "mcu_main/finite-state-machines/rocketFSM.h"
-
 #include <cmath>
+
+#include "mcu_main/finite-state-machines/rocketFSM.h"
 
 #define EIGEN_MATRIX_PLUGIN "MatrixAddons.h"
 
@@ -23,36 +23,36 @@
  * The Q matrix is the covariance matrix for the process noise and is
  * updated based on the time taken per cycle of the Kalman Filter Thread.
  */
-void KalmanFilter::SetQ(float dt, float sd) {    
-    Q(0,0) = pow(dt, 5) / 20;
-    Q(0,1) = pow(dt, 4) / 8;
-    Q(0,2) = pow(dt, 3) / 6;
-    Q(1,1) = pow(dt, 3) / 8;
-    Q(1,2) = pow(dt, 2) / 2;
-    Q(2,2) = dt;
-    Q(1,0) = Q(0,1);
-    Q(2,0) = Q(0,2);
-    Q(2,1) = Q(1,2);
+void KalmanFilter::SetQ(float dt, float sd) {
+    Q(0, 0) = pow(dt, 5) / 20;
+    Q(0, 1) = pow(dt, 4) / 8;
+    Q(0, 2) = pow(dt, 3) / 6;
+    Q(1, 1) = pow(dt, 3) / 8;
+    Q(1, 2) = pow(dt, 2) / 2;
+    Q(2, 2) = dt;
+    Q(1, 0) = Q(0, 1);
+    Q(2, 0) = Q(0, 2);
+    Q(2, 1) = Q(1, 2);
 
-    Q(3,3) = pow(dt, 5) / 20;
-    Q(3,4) = pow(dt, 4) / 8;
-    Q(3,5) = pow(dt, 3) / 6;
-    Q(4,4) = pow(dt, 3) / 8;
-    Q(4,5) = pow(dt, 2) / 2; 
-    Q(5,5) = dt;
-    Q(4,3) = Q(3,4);
-    Q(5,3) = Q(3,5);
-    Q(5,4) = Q(4,5);
+    Q(3, 3) = pow(dt, 5) / 20;
+    Q(3, 4) = pow(dt, 4) / 8;
+    Q(3, 5) = pow(dt, 3) / 6;
+    Q(4, 4) = pow(dt, 3) / 8;
+    Q(4, 5) = pow(dt, 2) / 2;
+    Q(5, 5) = dt;
+    Q(4, 3) = Q(3, 4);
+    Q(5, 3) = Q(3, 5);
+    Q(5, 4) = Q(4, 5);
 
-    Q(6,6) = pow(dt, 5) / 20;
-    Q(6,7) = pow(dt, 4) / 8;
-    Q(6,8) = pow(dt, 3) / 6;
-    Q(7,7) = pow(dt, 3) / 8;
-    Q(7,8) = pow(dt, 2) / 2;
-    Q(8,8) = dt;
-    Q(7,6) = Q(6,7);
-    Q(8,6) = Q(6,8);
-    Q(8,7) = Q(7,8);
+    Q(6, 6) = pow(dt, 5) / 20;
+    Q(6, 7) = pow(dt, 4) / 8;
+    Q(6, 8) = pow(dt, 3) / 6;
+    Q(7, 7) = pow(dt, 3) / 8;
+    Q(7, 8) = pow(dt, 2) / 2;
+    Q(8, 8) = dt;
+    Q(7, 6) = Q(6, 7);
+    Q(8, 6) = Q(6, 8);
+    Q(8, 7) = Q(7, 8);
 
     Q *= sd;
 }
@@ -128,16 +128,15 @@ void KalmanFilter::Initialize() {
         chThdSleepMilliseconds(100);
     }
 
-    init_accel(0,0) /= 30;
-    init_accel(1,0) /= 30;
-    init_accel(2,0) /= 30;
+    init_accel(0, 0) /= 30;
+    init_accel(1, 0) /= 30;
+    init_accel(2, 0) /= 30;
 
     chMtxLock(&orientation.mutex);
     euler_t euler = orientation.getEuler();
     chMtxUnlock(&orientation.mutex);
     euler.yaw = -euler.yaw;
     world_accel = BodyToGlobal(euler, init_accel);
-
 
     // set x_k
     x_k(0, 0) = sum / 30;
@@ -156,35 +155,35 @@ void KalmanFilter::Initialize() {
         F_mat(3 * i + 2, 3 * i + 2) = 1;
     }
 
-    Q(0,0) = pow(s_dt, 5) / 20;
-    Q(0,1) = pow(s_dt, 4) / 8;
-    Q(0,2) = pow(s_dt, 3) / 6;
-    Q(1,1) = pow(s_dt, 3) / 8;
-    Q(1,2) = pow(s_dt, 2) / 2;
-    Q(2,2) = s_dt;
-    Q(1,0) = Q(0,1);
-    Q(2,0) = Q(0,2);
-    Q(2,1) = Q(1,2);
+    Q(0, 0) = pow(s_dt, 5) / 20;
+    Q(0, 1) = pow(s_dt, 4) / 8;
+    Q(0, 2) = pow(s_dt, 3) / 6;
+    Q(1, 1) = pow(s_dt, 3) / 8;
+    Q(1, 2) = pow(s_dt, 2) / 2;
+    Q(2, 2) = s_dt;
+    Q(1, 0) = Q(0, 1);
+    Q(2, 0) = Q(0, 2);
+    Q(2, 1) = Q(1, 2);
 
-    Q(3,3) = pow(s_dt, 5) / 20;
-    Q(3,4) = pow(s_dt, 4) / 8;
-    Q(3,5) = pow(s_dt, 3) / 6;
-    Q(4,4) = pow(s_dt, 3) / 8;
-    Q(4,5) = pow(s_dt, 2) / 2; 
-    Q(5,5) = s_dt;
-    Q(4,3) = Q(3,4);
-    Q(5,3) = Q(3,5);
-    Q(5,4) = Q(4,5);
+    Q(3, 3) = pow(s_dt, 5) / 20;
+    Q(3, 4) = pow(s_dt, 4) / 8;
+    Q(3, 5) = pow(s_dt, 3) / 6;
+    Q(4, 4) = pow(s_dt, 3) / 8;
+    Q(4, 5) = pow(s_dt, 2) / 2;
+    Q(5, 5) = s_dt;
+    Q(4, 3) = Q(3, 4);
+    Q(5, 3) = Q(3, 5);
+    Q(5, 4) = Q(4, 5);
 
-    Q(6,6) = pow(s_dt, 5) / 20;
-    Q(6,7) = pow(s_dt, 4) / 8;
-    Q(6,8) = pow(s_dt, 3) / 6;
-    Q(7,7) = pow(s_dt, 3) / 8;
-    Q(7,8) = pow(s_dt, 2) / 2;
-    Q(8,8) = s_dt;
-    Q(7,6) = Q(6,7);
-    Q(8,6) = Q(6,8);
-    Q(8,7) = Q(7,8);
+    Q(6, 6) = pow(s_dt, 5) / 20;
+    Q(6, 7) = pow(s_dt, 4) / 8;
+    Q(6, 8) = pow(s_dt, 3) / 6;
+    Q(7, 7) = pow(s_dt, 3) / 8;
+    Q(7, 8) = pow(s_dt, 2) / 2;
+    Q(8, 8) = s_dt;
+    Q(7, 6) = Q(6, 7);
+    Q(8, 6) = Q(6, 8);
+    Q(8, 7) = Q(7, 8);
 
     // set H
     H(0, 0) = 1;
@@ -200,7 +199,7 @@ void KalmanFilter::Initialize() {
     R(1, 1) = 1.9;
     R(2, 2) = 10;
     R(3, 3) = 10;
- 
+
     // set B (don't care about what's in B since we have no control input)
     B(2, 0) = -1;
 }
@@ -216,9 +215,7 @@ void KalmanFilter::Initialize() {
  * @param vel_z Initial velocity estimate in the z direction
  */
 
-void KalmanFilter::Initialize(float pos_x, float vel_x,
-                              float pos_y, float vel_y,
-                              float pos_z, float vel_z) {
+void KalmanFilter::Initialize(float pos_x, float vel_x, float pos_y, float vel_y, float pos_z, float vel_z) {
     // set x_k
     x_k(0, 0) = pos_x;
     x_k(1, 0) = vel_x;
@@ -229,16 +226,15 @@ void KalmanFilter::Initialize(float pos_x, float vel_x,
     x_k(6, 0) = pos_z;
     x_k(7, 0) = vel_z;
 
-
     // set F
     for (int i = 0; i < 3; i++) {
-        F_mat(3*i, 3*i + 1) = s_dt;
-        F_mat(3*i, 3*i + 2) = (s_dt * s_dt) / 2;
-        F_mat(3*i + 1, 3*i + 2) = s_dt;
+        F_mat(3 * i, 3 * i + 1) = s_dt;
+        F_mat(3 * i, 3 * i + 2) = (s_dt * s_dt) / 2;
+        F_mat(3 * i + 1, 3 * i + 2) = s_dt;
 
-        F_mat(3*i, 3*i) = 1;
-        F_mat(3*i + 1, 3*i + 1) = 1;
-        F_mat(3*i + 2, 3*i + 2) = 1;
+        F_mat(3 * i, 3 * i) = 1;
+        F_mat(3 * i + 1, 3 * i + 1) = 1;
+        F_mat(3 * i + 2, 3 * i + 2) = 1;
     }
 
     // set H
@@ -361,7 +357,7 @@ void KalmanFilter::update() {
 
 /**
  * @brief Converts a vector in the body frame to the global frame
- * 
+ *
  * @param angles Roll, pitch, yaw angles
  * @param body_vect Vector for rotation in the body frame
  * @return Eigen::Matrix<float, 3, 1> Rotated vector in the global frame
@@ -369,7 +365,7 @@ void KalmanFilter::update() {
 Eigen::Matrix<float, 3, 1> KalmanFilter::BodyToGlobal(euler_t angles, Eigen::Matrix<float, 3, 1> body_vect) {
     Eigen::Matrix3f roll, pitch, yaw;
 
-    roll << 1., 0., 0., 0., cos(angles.roll), -sin(angles.roll ), 0., sin(angles.roll), cos(angles.roll);
+    roll << 1., 0., 0., 0., cos(angles.roll), -sin(angles.roll), 0., sin(angles.roll), cos(angles.roll);
     pitch << cos(angles.pitch), 0., sin(angles.pitch), 0., 1., 0., -sin(angles.pitch), 0., cos(angles.pitch);
     yaw << cos(angles.yaw), -sin(angles.yaw), 0., sin(angles.yaw), cos(angles.yaw), 0., 0., 0., 1.;
     return yaw * pitch * body_vect;
@@ -377,21 +373,21 @@ Eigen::Matrix<float, 3, 1> KalmanFilter::BodyToGlobal(euler_t angles, Eigen::Mat
 
 /**
  * @brief Getter for state X
- * 
+ *
  * @return Eigen::Matrix<float, 9, 1> State X
  */
 KalmanState KalmanFilter::getState() const { return kalman_state; }
 
 /**
  * @brief Sets state vector x
- * 
+ *
  * @param state Wanted state vector
  */
 void KalmanFilter::setState(KalmanState state) { kalman_state = state; }
 
 /**
  * @brief Sets the apogee estimate
- * 
+ *
  * @param estimate Apogee estimate
  */
 void KalmanFilter::updateApogee(float estimate) { kalman_apo = estimate; }

@@ -2,9 +2,9 @@
 
 #include "common/packet.h"
 #include "mcu_main/dataLog.h"
-#include "mcu_main/pins.h"
 #include "mcu_main/debug.h"
 #include "mcu_main/hilsim/HILSIMPacket.h"
+#include "mcu_main/pins.h"
 
 LowGSensor lowG;
 
@@ -50,7 +50,7 @@ void LowGSensor::update(HILSIMPacket hilsim_packet) {
 Acceleration LowGSensor::getAcceleration() { return Acceleration{ax, ay, az}; }
 
 Gyroscope LowGSensor::getGyroscope() { return Gyroscope{gx, gy, gz}; }
-//Magnetometer LowGSensor::getMagnetometer() { return Magnetometer{mx, my, mz}; }
+// Magnetometer LowGSensor::getMagnetometer() { return Magnetometer{mx, my, mz}; }
 
 ErrorCode LowGSensor::init() {
 #ifdef ENABLE_LOW_G
@@ -63,7 +63,7 @@ ErrorCode LowGSensor::init() {
 }
 
 #ifdef ENABLE_LOW_G
-LowGSensor::LowGSensor() : LSM(SPI_MODE, LSM6DSLTR) { }
+LowGSensor::LowGSensor() : LSM(SPI_MODE, LSM6DSLTR) {}
 #else
 LowGSensor::LowGSensor() = default;
 #endif

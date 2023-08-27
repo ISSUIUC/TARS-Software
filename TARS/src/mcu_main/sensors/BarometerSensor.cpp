@@ -44,7 +44,7 @@ float BarometerSensor::getTemperature() const { return temperature; }
 float BarometerSensor::getAltitude() const { return altitude; }
 
 #ifdef ENABLE_BAROMETER
-BarometerSensor::BarometerSensor() : MS{MS5611_CS} { }
+BarometerSensor::BarometerSensor() : MS{MS5611_CS} {}
 #else
 BarometerSensor::BarometerSensor() = default;
 #endif

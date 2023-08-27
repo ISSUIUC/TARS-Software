@@ -35,7 +35,7 @@ class RocketFSMBase {
             double first = access_value(items[i]);
             double second = access_value(items[i + 1]);
             systime_t delta_t = access_time(items[i + 1]) - access_time(items[i]);
-            derivatives[i-start] = (second - first) / (delta_t == 0 ? 0.02 : delta_t);
+            derivatives[i - start] = (second - first) / (delta_t == 0 ? 0.02 : delta_t);
         }
 
         double second_derivatives[len - 2];
@@ -43,7 +43,7 @@ class RocketFSMBase {
             double first = derivatives[i - start];
             double second = derivatives[i + 1 - start];
             systime_t delta_t = access_time(items[i + 1]) - access_time(items[i]);
-            derivatives[i-start] = (second - first) / (delta_t == 0 ? 0.02 : delta_t);
+            derivatives[i - start] = (second - first) / (delta_t == 0 ? 0.02 : delta_t);
         }
 
         double sum = 0.0;

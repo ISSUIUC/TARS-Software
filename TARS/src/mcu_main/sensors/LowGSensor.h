@@ -2,22 +2,22 @@
 
 #include "ChRt.h"
 #include "SparkFunLSM6DS3.h"
-
-#include "mcu_main/sensors/HighGSensor.h"
 #include "common/packet.h"
 #include "mcu_main/error.h"
 #include "mcu_main/hilsim/HILSIMPacket.h"
+#include "mcu_main/sensors/HighGSensor.h"
 
 /**
-* 
-* @class LowGSensor
-* 
-* @brief This class initializes and controls the LowG sensor. One can obtain data using the functions provided in the class.
-* 
-* Currently the chip select is given to the default constructor using the
-* LSM9DS1. Using this class one can obtain the current acceleration, gyroscope, and magnetometer data. 
-* The range on the low-g sensor is worse than the high-g sensor for acceleration, only -2 to 2gs.
-*/
+ *
+ * @class LowGSensor
+ *
+ * @brief This class initializes and controls the LowG sensor. One can obtain data using the functions provided in the
+ * class.
+ *
+ * Currently the chip select is given to the default constructor using the
+ * LSM9DS1. Using this class one can obtain the current acceleration, gyroscope, and magnetometer data.
+ * The range on the low-g sensor is worse than the high-g sensor for acceleration, only -2 to 2gs.
+ */
 class LowGSensor {
    public:
     MUTEX_DECL(mutex);

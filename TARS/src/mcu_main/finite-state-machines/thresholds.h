@@ -69,37 +69,37 @@ static constexpr float alt_error = 20;
 static constexpr float acc_error = 0.75;
 
 // idle angle error
-static constexpr float ang_error = 45/180.0 * M_PI;
+static constexpr float ang_error = 45 / 180.0 * M_PI;
 
 // idle velocity error
 static constexpr float vel_error = 5;
 
-//boost acceleration tolerance
+// boost acceleration tolerance
 static constexpr float boost_to_coast_acceleration = 1;
 
-//lower bound for allowable acceleration for boost
+// lower bound for allowable acceleration for boost
 
 static constexpr float drogue_to_main_acceleration = -4;
-//lower bound for allowable accerleation for boost
+// lower bound for allowable accerleation for boost
 static constexpr float boost_acc_thresh = 1;
 
-//bounds for allowable angle for boost (radians)
-static constexpr float boost_ang_thresh = 85/180.0 * M_PI;
+// bounds for allowable angle for boost (radians)
+static constexpr float boost_ang_thresh = 85 / 180.0 * M_PI;
 
 // coast gnc angle threshold
-static constexpr float coast_gnc_thresh = 30/180.0 * M_PI;
+static constexpr float coast_gnc_thresh = 30 / 180.0 * M_PI;
 
 // main angle bottom threshold
-static constexpr float main_ang_thresh_bottom = 95/180.0 * M_PI;
+static constexpr float main_ang_thresh_bottom = 95 / 180.0 * M_PI;
 
 // main angle bottom threshold
-static constexpr float main_ang_thresh_top = -95/180.0 * M_PI;
+static constexpr float main_ang_thresh_top = -95 / 180.0 * M_PI;
 
 // drogue angle bottom threshold
-static constexpr float drogue_ang_thresh_bottom = 95/180.0 * M_PI;
+static constexpr float drogue_ang_thresh_bottom = 95 / 180.0 * M_PI;
 
 // drogue angle bottom threshold
-static constexpr float drogue_ang_thresh_top = -95/180.0 * M_PI;
+static constexpr float drogue_ang_thresh_top = -95 / 180.0 * M_PI;
 
 // drogue acceleration bottom threshold
 static constexpr float drogue_acc_bottom = -4;
@@ -110,11 +110,11 @@ static constexpr float drogue_acc_top = 1;
 // main acceleration top threshold
 static constexpr float main_acc_top = -4;
 
-//acceleration to go from apogee to separation
+// acceleration to go from apogee to separation
 static constexpr float apogee_to_separation_acceleration = 4;
 
-//acceleration to go from separation to drogue
+// acceleration to go from separation to drogue
 static constexpr float separation_to_drogue_acceleration = -0.5;
 
-//lower bound for allowable acceleration for separation
+// lower bound for allowable acceleration for separation
 static constexpr float separation_acc_thresh = 4;

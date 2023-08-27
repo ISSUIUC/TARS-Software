@@ -1,21 +1,19 @@
 #include "GasSensor.h"
 
-#include "mcu_main/pins.h"
-#include "mcu_main/dataLog.h"
 #include "common/packet.h"
+#include "mcu_main/dataLog.h"
+#include "mcu_main/pins.h"
 
 GasSensor gas;
 
-GasSensor::GasSensor() : bme(BME688_CS) { }
+GasSensor::GasSensor() : bme(BME688_CS) {}
 
 ErrorCode GasSensor::init() {
     bme.begin();
     return ErrorCode::NO_ERROR;
 }
 
-float GasSensor::readTemperature() {
-    return temperature;
-}
+float GasSensor::readTemperature() { return temperature; }
 
 void GasSensor::refresh() {
     int remaining = bme.remainingReadingMillis();
@@ -26,7 +24,7 @@ void GasSensor::refresh() {
         pressure = bme.pressure;
         resistance = bme.gas_resistance;
         time_stamp = chVTGetSystemTime();
-        dataLogger.pushGasFifo((GasData) {temperature, humidity, pressure, resistance, time_stamp});
+        dataLogger.pushGasFifo((GasData){temperature, humidity, pressure, resistance, time_stamp});
     } else if (remaining == -1) {
         bme.beginReading();
     }

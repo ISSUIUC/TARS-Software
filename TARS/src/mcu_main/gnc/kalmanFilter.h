@@ -1,13 +1,13 @@
 #pragma once
 
 #include "../EigenArduino-Eigen30/Eigen30.h"
-#include "common/ServoControl.h"
 #include "common/FifoBuffer.h"
+#include "common/ServoControl.h"
+#include "common/packet.h"
 #include "mcu_main/dataLog.h"
 #include "mcu_main/finite-state-machines/RocketFSMBase.h"
 #include "mcu_main/gnc/rk4.h"
 #include "mcu_main/sensors/sensors.h"
-#include "common/packet.h"
 
 #define NUM_STATES 9
 #define NUM_SENSOR_INPUTS 4
@@ -74,7 +74,8 @@ class KalmanFilter {
     Eigen::Matrix<float, NUM_SENSOR_INPUTS, NUM_STATES> H = Eigen::Matrix<float, NUM_SENSOR_INPUTS, NUM_STATES>::Zero();
     Eigen::Matrix<float, NUM_STATES, NUM_STATES> P_k = Eigen::Matrix<float, NUM_STATES, NUM_STATES>::Zero();
     Eigen::Matrix<float, NUM_STATES, NUM_STATES> Q = Eigen::Matrix<float, NUM_STATES, NUM_STATES>::Zero();
-    Eigen::Matrix<float, NUM_SENSOR_INPUTS, NUM_SENSOR_INPUTS> R = Eigen::Matrix<float, NUM_SENSOR_INPUTS, NUM_SENSOR_INPUTS>::Zero();  // Diagonal
+    Eigen::Matrix<float, NUM_SENSOR_INPUTS, NUM_SENSOR_INPUTS> R =
+        Eigen::Matrix<float, NUM_SENSOR_INPUTS, NUM_SENSOR_INPUTS>::Zero();  // Diagonal
     Eigen::Matrix<float, NUM_STATES, NUM_STATES> P_priori = Eigen::Matrix<float, NUM_STATES, NUM_STATES>::Zero();
     Eigen::Matrix<float, NUM_STATES, 1> x_priori = Eigen::Matrix<float, NUM_STATES, 1>::Zero();
     Eigen::Matrix<float, NUM_STATES, NUM_SENSOR_INPUTS> K = Eigen::Matrix<float, NUM_STATES, NUM_SENSOR_INPUTS>::Zero();
