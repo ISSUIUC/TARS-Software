@@ -14,5 +14,4 @@ enum __attribute__((warn_unused)) ErrorCode {
     RADIO_SET_FREQUENCY_FAILED
 };
 
-
 void handleError(ErrorCode);

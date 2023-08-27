@@ -1,8 +1,8 @@
 #include "mcu_main/sensors/GPSSensor.h"
 
 #include "mcu_main/dataLog.h"
-#include "mcu_main/pins.h"
 #include "mcu_main/debug.h"
+#include "mcu_main/pins.h"
 
 GPSSensor gps;
 
@@ -12,14 +12,14 @@ ErrorCode GPSSensor::init() {
     digitalWrite(LED_ORANGE, HIGH);
 
     if (!GNSS.begin(Wire)) {
-     return ErrorCode::CANNOT_CONNECT_GPS;
+        return ErrorCode::CANNOT_CONNECT_GPS;
     }
     GNSS.setI2COutput(COM_TYPE_UBX);
 
     digitalWrite(LED_RED, LOW);
     digitalWrite(LED_ORANGE, LOW);
 
-//    GNSS.setPortOutput(COM_PORT_SPI, COM_TYPE_UBX);  // Set the SPI port to output UBX only
+    //    GNSS.setPortOutput(COM_PORT_SPI, COM_TYPE_UBX);  // Set the SPI port to output UBX only
     // (turn off NMEA noise)
     GNSS.saveConfigSelective(VAL_CFG_SUBSEC_IOPORT);  // Save (only) the communications port settings
     // to flash and BBR

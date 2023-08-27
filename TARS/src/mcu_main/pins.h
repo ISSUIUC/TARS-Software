@@ -7,7 +7,6 @@
 #define LED_ORANGE 29
 #define LED_GREEN 30
 
-
 // define barometer chip select pin
 #define MS5611_CS 9
 // kx chip select pin

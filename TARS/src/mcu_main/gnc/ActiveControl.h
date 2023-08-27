@@ -21,14 +21,14 @@ class Controller {
     float kp = 0.0002;
 
     float min_extension = 0.0;
-    float max_extension = 12.5 / 1000.0;
+    float max_extension = 12.70362857;
     float dt = .006;
     float prev_u = 0;
     float du_max = 0.01;
 
     float launch_pad_alt = 0.0;
     float apogee_des_msl = 0.0;
-    float apogee_des_agl = 4000;
+    float apogee_des_agl = 9144;
 
     ServoControl activeControlServos;
 };

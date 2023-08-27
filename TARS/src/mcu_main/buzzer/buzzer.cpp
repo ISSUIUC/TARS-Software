@@ -1,6 +1,5 @@
 #include "mcu_main/buzzer/buzzer.h"
 
-
 #include "mcu_main/buzzer/boop.h"
 #include "mcu_main/pins.h"
 

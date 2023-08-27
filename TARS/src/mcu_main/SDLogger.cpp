@@ -1,8 +1,8 @@
 #include "mcu_main/SDLogger.h"
 
 #include "FS.h"
-#include "mcu_main/pins.h"
 #include "mcu_main/debug.h"
+#include "mcu_main/pins.h"
 
 SDLogger sd_logger;  // NOLINT(cppcoreguidelines-interfaces-global-init)
 

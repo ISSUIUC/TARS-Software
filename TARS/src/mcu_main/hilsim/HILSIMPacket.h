@@ -1,17 +1,17 @@
 #pragma once
 
 #include <ChRt.h>
-#include <cstdint>
 
+#include <cstdint>
 
 /**
  * @struct HILSIMPacket
  * @brief Structure to hold data received serially from a desktop computer
- * 
- * The simulated/past-launch data is streamed through serial row-by-row to TARS. TARS receives it in the HILSIM thread and populates
- * data that would otherwise be read from sensors via the received HILSIM packet. Used for rapid testing and iteration of onboard 
- * hardware, GNC, and telemetry systems.
-*/
+ *
+ * The simulated/past-launch data is streamed through serial row-by-row to TARS. TARS receives it in the HILSIM thread
+ * and populates data that would otherwise be read from sensors via the received HILSIM packet. Used for rapid testing
+ * and iteration of onboard hardware, GNC, and telemetry systems.
+ */
 typedef struct HILSIMPacket {
     uint32_t timestamp{};
 
@@ -43,4 +43,3 @@ typedef struct HILSIMPacket {
     float ornt_pitch{};
     float ornt_yaw{};
 } HILSIMPacket;
-

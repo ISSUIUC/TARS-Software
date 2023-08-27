@@ -1,8 +1,8 @@
 #include "MagnetometerSensor.h"
 
-#include "mcu_main/pins.h"
 #include "mcu_main/dataLog.h"
 #include "mcu_main/debug.h"
+#include "mcu_main/pins.h"
 
 MagnetometerSensor magnetometer;
 
@@ -17,15 +17,15 @@ ErrorCode MagnetometerSensor::init() {
 }
 
 void MagnetometerSensor::update() {
-    #ifdef ENABLE_MAGNETOMETER
+#ifdef ENABLE_MAGNETOMETER
     sensor.read();
 
     time_stamp = chVTGetSystemTime();
     mx = sensor.x_gauss;
     my = sensor.y_gauss;
     mz = sensor.z_gauss;
-    dataLogger.pushMagnetometerFifo((MagnetometerData) { {mx, my, mz}, time_stamp });
-    #endif
+    dataLogger.pushMagnetometerFifo((MagnetometerData){{mx, my, mz}, time_stamp});
+#endif
 }
 
 void MagnetometerSensor::update(HILSIMPacket hilsim_packet) {
@@ -34,11 +34,9 @@ void MagnetometerSensor::update(HILSIMPacket hilsim_packet) {
     mx = hilsim_packet.mag_x;
     my = hilsim_packet.mag_y;
     mz = hilsim_packet.mag_z;
-    dataLogger.pushMagnetometerFifo((MagnetometerData) { {mx, my, mz}, time_stamp });
+    dataLogger.pushMagnetometerFifo((MagnetometerData){{mx, my, mz}, time_stamp});
 
-#endif 
+#endif
 }
 
-Magnetometer MagnetometerSensor::getMagnetometer() {
-    return { sensor.x_gauss, sensor.y_gauss, sensor.z_gauss };
-}
+Magnetometer MagnetometerSensor::getMagnetometer() { return {sensor.x_gauss, sensor.y_gauss, sensor.z_gauss}; }

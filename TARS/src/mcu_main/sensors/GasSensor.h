@@ -1,12 +1,12 @@
 #pragma once
 
-#include <ChRt.h>
 #include <Adafruit_BME680.h>
+#include <ChRt.h>
 
 #include "mcu_main/error.h"
 
 class GasSensor {
-public:
+   public:
     GasSensor();
 
     ErrorCode __attribute__((warn_unused_result)) init();
@@ -14,7 +14,7 @@ public:
 
     float readTemperature();
 
-private:
+   private:
     Adafruit_BME680 bme;
 
     float temperature = 0.0;

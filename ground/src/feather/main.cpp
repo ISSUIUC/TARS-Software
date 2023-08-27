@@ -71,7 +71,7 @@ struct TelemetryDataLite {
     int16_t bno_pitch;            //[-4,4]
     int16_t bno_yaw;              //[-4,4]
 
-    float flap_extension; 
+    float flap_extension;
 };
 
 struct TelemetryPacket {
@@ -92,30 +92,30 @@ struct TelemetryPacket {
     float gnc_state_vz;
     float gnc_state_az;
     float gnc_state_apo;
-    int16_t mag_x;                //[-4, 4]
-    int16_t mag_y;                //[-4, 4]
-    int16_t mag_z;                //[-4, 4]
-    int16_t gyro_x;               //[-4096, 4096]
-    int16_t gyro_y;               //[-4096, 4096]
-    int16_t gyro_z;               //[-4096, 4096]
+    int16_t mag_x;            //[-4, 4]
+    int16_t mag_y;            //[-4, 4]
+    int16_t mag_z;            //[-4, 4]
+    int16_t gyro_x;           //[-4096, 4096]
+    int16_t gyro_y;           //[-4096, 4096]
+    int16_t gyro_z;           //[-4096, 4096]
     int16_t response_ID;      //[0, 2^16]
     int8_t rssi;              //[-128, 128]
     int8_t datapoint_count;   //[0,4]
     uint8_t voltage_battery;  //[0, 16]
     uint8_t FSM_State;        //[0,256]
-    int16_t barometer_temp;  //[-128, 128]
+    int16_t barometer_temp;   //[-128, 128]
 };
 
 struct FullTelemetryData {
     systime_t timestamp;  //[0, 2^32]
 
     float barometer_pressure;  //[0, 4096]
-    float highG_ax;             //[128, -128]
-    float highG_ay;             //[128, -128]
-    float highG_az;             //[128, -128]
-    float bno_yaw;              //[-4,4]
-    float bno_pitch;            //[-4,4]
-    float bno_roll;             //[-4,4]
+    float highG_ax;            //[128, -128]
+    float highG_ay;            //[128, -128]
+    float highG_az;            //[128, -128]
+    float bno_yaw;             //[-4,4]
+    float bno_pitch;           //[-4,4]
+    float bno_roll;            //[-4,4]
 
     float flap_extension;  //[0, 256]
     float gps_lat;
@@ -125,17 +125,17 @@ struct FullTelemetryData {
     float gnc_state_vx;
     float gnc_state_ax;
     float gnc_state_apo;
-    float mag_x;                //[-4, 4]
-    float mag_y;                //[-4, 4]
-    float mag_z;                //[-4, 4]
-    float gyro_x;               //[-4096, 4096]
-    float gyro_y;               //[-4096, 4096]
-    float gyro_z;               //[-4096, 4096]
-    int16_t response_ID;      //[0, 2^16]
-    int8_t rssi;              //[-128, 128]
+    float mag_x;            //[-4, 4]
+    float mag_y;            //[-4, 4]
+    float mag_z;            //[-4, 4]
+    float gyro_x;           //[-4096, 4096]
+    float gyro_y;           //[-4096, 4096]
+    float gyro_z;           //[-4096, 4096]
+    int16_t response_ID;    //[0, 2^16]
+    int8_t rssi;            //[-128, 128]
     float voltage_battery;  //[0, 16]
-    uint8_t FSM_State;        //[0,256]
-    float barometer_temp;  //[-128, 128]
+    uint8_t FSM_State;      //[0,256]
+    float barometer_temp;   //[-128, 128]
     float freq;
     int64_t print_time;
 };
@@ -223,32 +223,32 @@ void EnqueuePacket(const TelemetryPacket& packet, float frequency) {
     }
 }
 
-void printJSONField(const char * name, float val, bool comma=true){
+void printJSONField(const char* name, float val, bool comma = true) {
     Serial.print('\"');
     Serial.print(name);
     Serial.print("\":");
     printFloat(val);
-    if(comma) Serial.print(',');
+    if (comma) Serial.print(',');
 }
 
-void printJSONField(const char * name, int val, bool comma=true){
+void printJSONField(const char* name, int val, bool comma = true) {
     Serial.print('\"');
     Serial.print(name);
     Serial.print("\":");
     Serial.print(val);
-    if(comma) Serial.print(',');
+    if (comma) Serial.print(',');
 }
 
-void printJSONField(const char * name, const char * val, bool comma=true){
+void printJSONField(const char* name, const char* val, bool comma = true) {
     Serial.print('\"');
     Serial.print(name);
     Serial.print("\":\"");
     Serial.print(val);
     Serial.print('"');
-    if(comma) Serial.print(',');
+    if (comma) Serial.print(',');
 }
 
-void printPacketJson(FullTelemetryData const& packet){
+void printPacketJson(FullTelemetryData const& packet) {
     Serial.print(R"({"type": "data", "value": {)");
     printJSONField("response_ID", packet.response_ID);
     printJSONField("gps_lat", packet.gps_lat);
