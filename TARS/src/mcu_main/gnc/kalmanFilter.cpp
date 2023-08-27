@@ -6,11 +6,11 @@
  * @details This class takes input data from a barometer and accelerometer to estimate state data for the rocket.
  */
 
-#include "mcu_main/gnc/kalmanFilter.h"
-
 #include "mcu_main/finite-state-machines/rocketFSM.h"
 
 #include <cmath>
+
+#include "mcu_main/gnc/kalmanFilter.h"
 
 #define EIGEN_MATRIX_PLUGIN "MatrixAddons.h"
 

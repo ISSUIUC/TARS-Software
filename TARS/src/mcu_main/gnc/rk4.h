@@ -4,8 +4,13 @@
 #include <array>
 #include <cmath>
 
-#include "Eigen/Eigen"
 #include "mcu_main/gnc/Atmosphere.h"
+
+#undef abs
+#undef F
+#undef round
+#undef B1
+#include "Eigen/Eigen"
 
 using std::array;
 

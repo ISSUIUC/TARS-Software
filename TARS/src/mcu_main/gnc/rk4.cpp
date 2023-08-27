@@ -4,7 +4,6 @@
  *Contains the code to dynamically predict the apogee using data from the kalman
  *filter
  */
-#include "mcu_main/gnc/rk4.h"
 #include "mcu_main/debug.h"
 
 #ifndef ENABLE_SILSIM_MODE
@@ -13,6 +12,8 @@
 
 #include <array>
 #include <cmath>
+
+#include "mcu_main/gnc/rk4.h"
 
 #define EIGEN_MATRIX_PLUGIN "MatrixAddons.h"
 // TODO: make a typedef for array<float, 2>
