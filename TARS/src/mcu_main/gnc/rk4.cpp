@@ -14,8 +14,6 @@
 #include <cmath>
 
 #include "mcu_main/gnc/rk4.h"
-
-#define EIGEN_MATRIX_PLUGIN "MatrixAddons.h"
 // TODO: make a typedef for array<float, 2>
 // using std::array;
 
@@ -37,7 +35,7 @@ float rk4::cd(float alt, float vel) {
 
     double cd = 0;
 
-    double mach_power = 1;
+    // double mach_power = 1;
     // for (int i = 0; i < 151; i++) {
     //     cd += poly[150 - i] * mach_power;
     //     mach_power *= mach;

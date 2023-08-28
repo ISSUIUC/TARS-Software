@@ -2,17 +2,17 @@
 
 #include "mcu_main/ServoControl.h"
 #include "common/FifoBuffer.h"
+#include "common/packet.h"
 #include "mcu_main/dataLog.h"
 #include "mcu_main/finite-state-machines/RocketFSMBase.h"
 
 #include "mcu_main/sensors/sensors.h"
-#include "common/packet.h"
 
 #include "mcu_main/gnc/rk4.h"
 
 #define NUM_STATES 9
 #define NUM_SENSOR_INPUTS 4
-#define BUFFER_BIGGNESS 10
+#define ALTITUDE_BUFFER_SIZE 10
 
 class KalmanFilter;
 extern KalmanFilter kalmanFilter;
@@ -68,14 +68,15 @@ class KalmanFilter {
     Eigen::Matrix<float, 3, 1> init_accel = Eigen::Matrix<float, 3, 1>::Zero();
     Eigen::Matrix<float, 3, 1> world_accel;
 
-    FifoBuffer<float, BUFFER_BIGGNESS> alt_buffer;
+    FifoBuffer<float, ALTITUDE_BUFFER_SIZE> alt_buffer;
 
     Eigen::Matrix<float, NUM_STATES, 1> x_k = Eigen::Matrix<float, NUM_STATES, 1>::Zero();
     Eigen::Matrix<float, NUM_STATES, NUM_STATES> F_mat = Eigen::Matrix<float, NUM_STATES, NUM_STATES>::Zero();
     Eigen::Matrix<float, NUM_SENSOR_INPUTS, NUM_STATES> H = Eigen::Matrix<float, NUM_SENSOR_INPUTS, NUM_STATES>::Zero();
     Eigen::Matrix<float, NUM_STATES, NUM_STATES> P_k = Eigen::Matrix<float, NUM_STATES, NUM_STATES>::Zero();
     Eigen::Matrix<float, NUM_STATES, NUM_STATES> Q = Eigen::Matrix<float, NUM_STATES, NUM_STATES>::Zero();
-    Eigen::Matrix<float, NUM_SENSOR_INPUTS, NUM_SENSOR_INPUTS> R = Eigen::Matrix<float, NUM_SENSOR_INPUTS, NUM_SENSOR_INPUTS>::Zero();  // Diagonal
+    Eigen::Matrix<float, NUM_SENSOR_INPUTS, NUM_SENSOR_INPUTS> R =
+        Eigen::Matrix<float, NUM_SENSOR_INPUTS, NUM_SENSOR_INPUTS>::Zero();  // Diagonal
     Eigen::Matrix<float, NUM_STATES, NUM_STATES> P_priori = Eigen::Matrix<float, NUM_STATES, NUM_STATES>::Zero();
     Eigen::Matrix<float, NUM_STATES, 1> x_priori = Eigen::Matrix<float, NUM_STATES, 1>::Zero();
     Eigen::Matrix<float, NUM_STATES, NUM_SENSOR_INPUTS> K = Eigen::Matrix<float, NUM_STATES, NUM_SENSOR_INPUTS>::Zero();

@@ -16,7 +16,7 @@ public:
 
     float readTemperature();
 
-private:
+   private:
 #ifndef ENABLE_SILSIM_MODE
     Adafruit_BME680 bme;
 #endif

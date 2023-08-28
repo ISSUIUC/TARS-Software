@@ -12,11 +12,9 @@ public:
 
     void tick();
 
-private:
+   private:
     int pin;
     int8_t const* sequences;
     size_t idx = 0;
     bool playing = false;
 };
-
-

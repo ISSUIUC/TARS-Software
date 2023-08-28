@@ -23,7 +23,7 @@ ErrorCode GPSSensor::init() {
     digitalWrite(LED_RED, LOW);
     digitalWrite(LED_ORANGE, LOW);
 
-//    GNSS.setPortOutput(COM_PORT_SPI, COM_TYPE_UBX);  // Set the SPI port to output UBX only
+    //    GNSS.setPortOutput(COM_PORT_SPI, COM_TYPE_UBX);  // Set the SPI port to output UBX only
     // (turn off NMEA noise)
     GNSS.saveConfigSelective(VAL_CFG_SUBSEC_IOPORT);  // Save (only) the communications port settings
     // to flash and BBR

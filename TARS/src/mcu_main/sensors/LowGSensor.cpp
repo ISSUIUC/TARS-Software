@@ -63,7 +63,7 @@ void LowGSensor::update(HILSIMPacket hilsim_packet) {
 Acceleration LowGSensor::getAcceleration() { return Acceleration{ax, ay, az}; }
 
 Gyroscope LowGSensor::getGyroscope() { return Gyroscope{gx, gy, gz}; }
-//Magnetometer LowGSensor::getMagnetometer() { return Magnetometer{mx, my, mz}; }
+// Magnetometer LowGSensor::getMagnetometer() { return Magnetometer{mx, my, mz}; }
 
 ErrorCode LowGSensor::init() {
 #if defined(ENABLE_LOW_G) && !defined(ENABLE_SILSIM_MODE)

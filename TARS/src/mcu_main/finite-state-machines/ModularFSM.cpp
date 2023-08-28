@@ -37,7 +37,6 @@ bool ModularFSM::idleStateCheck(){
     bool ang_in_range_yaw = (ang_start - ang_error) <= orientation.getEuler().yaw && orientation.getEuler().yaw <= (ang_start + ang_error);
     bool vel_in_range = -vel_error <= vel && vel <= vel_error;
 
-
     if (altitude_in_range && acc_in_range && ang_in_range_pitch && ang_in_range_yaw && vel_in_range) {
         last_state_ = rocket_state_;
         rocket_state_ = FSM_State::STATE_IDLE;
@@ -49,8 +48,8 @@ bool ModularFSM::idleStateCheck(){
     return false;
 }
 
-bool ModularFSM::boostEventCheck(){
-    if(highG.getAccel().az < boost_to_coast_acceleration){
+bool ModularFSM::boostEventCheck() {
+    if (highG.getAccel().az < boost_to_coast_acceleration) {
         last_state_ = rocket_state_;
         rocket_state_ = FSM_State::STATE_COAST_PREGNC;
         return true;
@@ -79,7 +78,7 @@ bool ModularFSM::boostStateCheck(){
     return false;
 }
 
-bool ModularFSM::coastPreGNCEventCheck(){
+bool ModularFSM::coastPreGNCEventCheck() {
     if ((chVTGetSystemTime() - coast_time_) > coast_ac_delay_thresh) {
         last_state_ = rocket_state_;
         rocket_state_ = FSM_State::STATE_COAST_GNC;
@@ -88,7 +87,7 @@ bool ModularFSM::coastPreGNCEventCheck(){
     return false;
 }
 
-bool ModularFSM::coastPreGNCStateCheck(){
+bool ModularFSM::coastPreGNCStateCheck() {
     float vel = getAltitudeAverage(0, 3) - getAltitudeAverage(3, 3);
 
     bool altitude_in_range = barometer.getAltitude() > launch_site_altitude_ + alt_error;
@@ -107,7 +106,7 @@ bool ModularFSM::coastPreGNCStateCheck(){
     return false;
 }
 
-bool ModularFSM::coastGNCEventCheck(){
+bool ModularFSM::coastGNCEventCheck() {
     float vel = getAltitudeAverage(0, 3) - getAltitudeAverage(3, 3);
 
     if (vel < 0 + vel_error) {
@@ -119,7 +118,7 @@ bool ModularFSM::coastGNCEventCheck(){
     return false;
 }
 
-bool ModularFSM::coastGNCStateCheck(){
+bool ModularFSM::coastGNCStateCheck() {
     float vel = getAltitudeAverage(0, 3) - getAltitudeAverage(3, 3);
 
     bool altitude_in_range = barometer.getAltitude() > launch_site_altitude_ + alt_error;
@@ -139,23 +138,20 @@ bool ModularFSM::coastGNCStateCheck(){
     return false;
 }
 
-bool ModularFSM::apogeeEventCheck(){
-
-    if(highG.getAccel().az > apogee_to_separation_acceleration){
-		last_state_ = rocket_state_;
-		rocket_state_ = FSM_State::STATE_SEPARATION;
-		return true;
-	}
+bool ModularFSM::apogeeEventCheck() {
+    if (highG.getAccel().az > apogee_to_separation_acceleration) {
+        last_state_ = rocket_state_;
+        rocket_state_ = FSM_State::STATE_SEPARATION;
+        return true;
+    }
     return false;
-
 }
 
-bool ModularFSM::apogeeStateCheck(){
+bool ModularFSM::apogeeStateCheck() {
     float vel = getAltitudeAverage(0, 3) - getAltitudeAverage(3, 3);
 
-
     bool altitude_in_range = barometer.getAltitude() > launch_site_altitude_ + alt_error;
-    bool acc_in_range = -acc_error < getAccelerationAverage(0,6) && getAccelerationAverage(0,6) < acc_error;
+    bool acc_in_range = -acc_error < getAccelerationAverage(0, 6) && getAccelerationAverage(0, 6) < acc_error;
     bool vel_in_range = -vel_error < vel && vel < vel_error;
 
     if (altitude_in_range && acc_in_range && vel_in_range) {
@@ -197,7 +193,7 @@ bool ModularFSM::separationStateCheck(){
     return false;
 }
 
-bool ModularFSM::drogueEventCheck(){
+bool ModularFSM::drogueEventCheck() {
     if (highG.getAccel().az < drogue_to_main_acceleration) {
         last_state_ = rocket_state_;
         rocket_state_ = FSM_State::STATE_MAIN;
@@ -226,7 +222,7 @@ bool ModularFSM::drogueStateCheck(){
     return false;
 }
 
-bool ModularFSM::mainEventCheck(){
+bool ModularFSM::mainEventCheck() {
     float velocity = getAltitudeAverage(0, 3) - getAltitudeAverage(3, 3);
 
     if (-vel_error < velocity && velocity < vel_error) {
@@ -262,7 +258,7 @@ bool ModularFSM::landedStateCheck(){
     bool altitude_in_range = (launch_site_altitude_ - alt_error < barometer.getAltitude()) && (barometer.getAltitude() < alt_error + launch_site_altitude_);
     bool acceleration_in_range = (1 - acc_error < getAccelerationAverage(0,6)) && (getAccelerationAverage(0,6) < 1 + acc_error);
     bool velocity_in_range = (-vel_error < velocity) && (velocity < vel_error);
-    
+
     if (altitude_in_range && acceleration_in_range && velocity_in_range) {
         last_state_ = rocket_state_;
         rocket_state_ = FSM_State::STATE_LANDED;
@@ -284,7 +280,7 @@ void ModularFSM::tickFSM(){
         Serial.print("Last State: ");
         Serial.println((int) last_state_);
         //lock mutexes
-        
+
 
         Serial.print("altitude: ");
         Serial.println(barometer.getAltitude());
@@ -373,16 +369,15 @@ void ModularFSM::tickFSM(){
 
         case FSM_State::STATE_APOGEE:
 
-            if (last_state_ == FSM_State::STATE_APOGEE){
-                //record our apogee
+            if (last_state_ == FSM_State::STATE_APOGEE) {
+                // record our apogee
                 apogee_altitude_ = barometer.getAltitude();
 
-                if (!apogeeEventCheck()){
+                if (!apogeeEventCheck()) {
                     apogeeStateCheck();
                 }
-            }
-            else{
-                if(apogeeStateCheck()){
+            } else {
+                if (apogeeStateCheck()) {
                     apogeeEventCheck();
                 }
             }
@@ -431,12 +426,12 @@ void ModularFSM::tickFSM(){
             break;
 
         case FSM_State::STATE_LANDED:
-        
+
             landedStateCheck();
             break;
 
         case FSM_State::STATE_UNKNOWN:
-            
+
             if(last_state_ == FSM_State::STATE_IDLE || last_state_ == FSM_State::STATE_BOOST){
 			    if(idleStateCheck()){
 				    break;
@@ -449,8 +444,8 @@ void ModularFSM::tickFSM(){
                 }
             }
 
-            boostStateCheck() || coastGNCStateCheck() || apogeeStateCheck() 
-            || drogueStateCheck() || mainStateCheck();		
+            boostStateCheck() || coastGNCStateCheck() || apogeeStateCheck()
+            || drogueStateCheck() || mainStateCheck();
             break;
 
         default:

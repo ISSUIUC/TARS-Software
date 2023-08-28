@@ -22,11 +22,11 @@ SFE_UBLOX_GNSS myGNSS; // SFE_UBLOX_GNSS uses I2C. For Serial or SPI, see Exampl
 void setup()
 {
   Serial.begin(115200);
-  delay(1000); 
+  delay(1000);
   Serial.println("SparkFun u-blox Example");
   // Wire.setPins(2, 1);
   Wire.begin(2, 1); // Start I2C
-  
+
 
   //myGNSS.enableDebugging(); // Uncomment this line to enable helpful debug messages on Serial
 
@@ -37,7 +37,7 @@ void setup()
   }
 
   myGNSS.setI2COutput(COM_TYPE_UBX); //Set the I2C port to output UBX only (turn off NMEA noise)
-  
+
   //myGNSS.saveConfigSelective(VAL_CFG_SUBSEC_IOPORT); //Optional: save (only) the communications port settings to flash and BBR
 }
 

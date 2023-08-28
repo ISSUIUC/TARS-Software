@@ -10,11 +10,11 @@
 #endif
 
 /**
-* 
+*
 * @class BarometerSensor
-* 
+*
 * @brief This class initializes and controls the barometer. One can obtain data using the functions provided in the class.
-* 
+*
 * This class utilizes a barometer. Currently the chip select is given to the default constructor using the
 * MS5611. Using this class one can obtain temperature, pressure, and altitude.
 */

@@ -43,8 +43,7 @@ void MagnetometerSensor::update(HILSIMPacket hilsim_packet) {
     my = hilsim_packet.mag_y;
     mz = hilsim_packet.mag_z;
     dataLogger.pushMagnetometerFifo((MagnetometerData) { {mx, my, mz}, time_stamp });
-
-#endif 
+#endif
 }
 
 Magnetometer MagnetometerSensor::getMagnetometer() {

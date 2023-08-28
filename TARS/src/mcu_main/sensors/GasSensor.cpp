@@ -41,7 +41,7 @@ void GasSensor::refresh() {
         pressure = bme.pressure;
         resistance = bme.gas_resistance;
         time_stamp = chVTGetSystemTime();
-        dataLogger.pushGasFifo((GasData) {temperature, humidity, pressure, resistance, time_stamp});
+        dataLogger.pushGasFifo((GasData){temperature, humidity, pressure, resistance, time_stamp});
     } else if (remaining == -1) {
         bme.beginReading();
     }
