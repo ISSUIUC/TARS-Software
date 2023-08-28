@@ -61,7 +61,7 @@ void BuzzerController::tick() {
     }
     //    Serial.println(idx);
     tone(pin, note, note_duration * 0.9);
-    chThdSleep((int)note_duration * 100);
+    chThdSleepMilliseconds((int)note_duration * 100);
     noTone(pin);
     idx += 2;
 }

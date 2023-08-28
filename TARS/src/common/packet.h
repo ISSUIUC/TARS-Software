@@ -29,30 +29,6 @@ struct euler_t {
     float roll;
 };
 
-struct Acceleration {
-    float ax;
-    float ay;
-    float az;
-};
-
-struct Gyroscope {
-    float gx;
-    float gy;
-    float gz;
-};
-
-struct Magnetometer {
-    float mx;
-    float my;
-    float mz;
-};
-
-struct euler_t {
-    float yaw;
-    float pitch;
-    float roll;
-};
-
 /**
  * @brief Labels for each FSM state
  */

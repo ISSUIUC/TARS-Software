@@ -19,6 +19,10 @@ void threadSleep(int32_t time_ms);
 void threadYield();
 uint32_t getTime();
 
+void tone(uint8_t pin, uint16_t frequency);
+void tone(uint8_t pin, uint16_t frequency, uint32_t duration);
+void noTone(uint8_t pin);
+
 struct Mutex {
 public:
     Mutex() : locked(false) { }

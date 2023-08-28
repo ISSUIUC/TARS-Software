@@ -73,6 +73,10 @@ void threadSleep(int32_t time_ms) {
     }
 }
 
+void tone(uint8_t pin, uint16_t frequency) { }
+void tone(uint8_t pin, uint16_t frequency, uint32_t duration) { }
+void noTone(uint8_t pin) { }
+
 void SerialPatch::println(const char* s) {
     std::cout << s << '\n';
 }

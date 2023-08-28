@@ -18,12 +18,6 @@ ErrorCode BarometerSensor::init() {
 #endif
     return ErrorCode::NO_ERROR;
 }
-ErrorCode BarometerSensor::init() {
-#ifdef ENABLE_BAROMETER
-    MS.init();
-#endif
-    return ErrorCode::NO_ERROR;
-}
 
 void BarometerSensor::update() {
     chMtxLock(&mutex);
