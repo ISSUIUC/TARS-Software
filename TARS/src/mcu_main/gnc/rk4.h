@@ -9,7 +9,7 @@
 #undef F
 #undef round
 #undef B1
-#include "Eigen/Eigen"
+#include "EigenArduino-Eigen30/Eigen30.h"
 
 using std::array;
 
