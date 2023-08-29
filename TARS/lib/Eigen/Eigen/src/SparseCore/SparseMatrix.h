@@ -1441,7 +1441,7 @@ EIGEN_DONT_INLINE typename SparseMatrix<_Scalar,_Options,_StorageIndex>::Scalar&
       // furthermore we bound the realloc ratio to:
       //   1) reduce multiple minor realloc when the matrix is almost filled
       //   2) avoid to allocate too much memory when the matrix is almost empty
-      reallocRatio = (std::min)((std::max)(reallocRatio,1.5),8.);
+      reallocRatio = std::min<double>(std::max<double>(reallocRatio, 1.5), 8.);
     }
   }
   m_data.resize(m_data.size()+1,reallocRatio);
