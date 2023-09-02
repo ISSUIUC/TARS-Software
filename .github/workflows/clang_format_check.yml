@@ -7,8 +7,8 @@ jobs:
     strategy:
       matrix:
         path:
-          - check: 'flight'
-            exclude: '(ChRt|SparkFunLSM9DS1|eigen-3.4.0|EigenArduino-Eigen30|MS5611|RH|RadioHead|SparkFun_KX13X_Arduino_Library-1.0.7|SparkFun_u-blox_GNSS_Arduino_Library-main)' # Exclude files containing these words
+          - check: 'TARS/src'
+            exclude: '(ChRt|SparkFunLSM9DS1|Eigen|MS5611|RH|RadioHead|SparkFun_KX13X_Arduino_Library-1.0.7|SparkFun_u-blox_GNSS_Arduino_Library-main)' # Exclude files containing these words
     steps:
     - uses: actions/checkout@v2
     - name: Run clang-format style check for C/C++ programs.
