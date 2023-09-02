@@ -3,8 +3,8 @@
 #include "mcu_main/finite-state-machines/RocketFSMBase.h"
 
 class ModularFSM : public RocketFSMBase {
-    public:
-        ModularFSM() = default;
+   public:
+    ModularFSM() = default;
 
     void tickFSM() override;
 

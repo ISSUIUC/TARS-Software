@@ -8,7 +8,6 @@
 #include "mcu_main/emulation.h"
 #endif
 
-
 HighGSensor highG;
 
 void HighGSensor::update() {
@@ -58,9 +57,9 @@ ErrorCode HighGSensor::init() {
     KX.beginSPI(KX134_CS);
     // TODO for some reason it works fine even if beginSPI claims it fails
     //   idk lmao
-//    if (!KX.beginSPI(KX134_CS)) {
-//        return ErrorCode::CANNOT_CONNECT_KX134_CS;
-//    }
+    //    if (!KX.beginSPI(KX134_CS)) {
+    //        return ErrorCode::CANNOT_CONNECT_KX134_CS;
+    //    }
 
     if (!KX.initialize(DEFAULT_SETTINGS)) {
         return ErrorCode::CANNOT_INIT_KX134_CS;

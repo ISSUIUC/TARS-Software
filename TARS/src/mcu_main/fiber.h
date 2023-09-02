@@ -3,11 +3,10 @@
 #if defined(_WIN32) || defined(_WIN64)
 #include <windows.h>
 #else
-#include<cstddef>
-//SwitchToFiber -> swapcontext
-//CreateFiber -> make context
-//ConvertThreadToFiber
-
+#include <cstddef>
+// SwitchToFiber -> swapcontext
+// CreateFiber -> make context
+// ConvertThreadToFiber
 
 typedef void* FiberHandle;
 typedef void ThreadFunc(void*);

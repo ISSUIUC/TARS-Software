@@ -10,7 +10,7 @@ GasSensor gas;
 #ifdef ENABLE_SILSIM_MODE
 GasSensor::GasSensor() = default;
 #else
-GasSensor::GasSensor() : bme(BME688_CS) { }
+GasSensor::GasSensor() : bme(BME688_CS) {}
 #endif
 
 ErrorCode GasSensor::init() {
@@ -20,9 +20,7 @@ ErrorCode GasSensor::init() {
     return ErrorCode::NO_ERROR;
 }
 
-float GasSensor::readTemperature() {
-    return temperature;
-}
+float GasSensor::readTemperature() { return temperature; }
 
 void GasSensor::refresh() {
 #ifdef ENABLE_SILSIM_MODE
@@ -31,7 +29,7 @@ void GasSensor::refresh() {
     humidity = 0;
     resistance = 0;
     time_stamp = chVTGetSystemTime();
-    dataLogger.pushGasFifo((GasData) {temperature, humidity, pressure, resistance, time_stamp});
+    dataLogger.pushGasFifo((GasData){temperature, humidity, pressure, resistance, time_stamp});
 #else
     int remaining = bme.remainingReadingMillis();
     if (remaining == 0) {

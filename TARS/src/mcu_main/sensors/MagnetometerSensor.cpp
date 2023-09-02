@@ -32,7 +32,7 @@ void MagnetometerSensor::update() {
     mz = sensor.z_gauss;
 #endif
     time_stamp = chVTGetSystemTime();
-    dataLogger.pushMagnetometerFifo((MagnetometerData) { {mx, my, mz}, time_stamp });
+    dataLogger.pushMagnetometerFifo((MagnetometerData){{mx, my, mz}, time_stamp});
 #endif
 }
 
@@ -42,10 +42,8 @@ void MagnetometerSensor::update(HILSIMPacket hilsim_packet) {
     mx = hilsim_packet.mag_x;
     my = hilsim_packet.mag_y;
     mz = hilsim_packet.mag_z;
-    dataLogger.pushMagnetometerFifo((MagnetometerData) { {mx, my, mz}, time_stamp });
+    dataLogger.pushMagnetometerFifo((MagnetometerData){{mx, my, mz}, time_stamp});
 #endif
 }
 
-Magnetometer MagnetometerSensor::getMagnetometer() {
-    return { mx, my, mz };
-}
+Magnetometer MagnetometerSensor::getMagnetometer() { return {mx, my, mz}; }

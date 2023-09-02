@@ -8,7 +8,7 @@
 #endif
 
 class GasSensor {
-public:
+   public:
     GasSensor();
 
     ErrorCode __attribute__((warn_unused_result)) init();

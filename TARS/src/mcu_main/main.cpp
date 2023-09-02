@@ -49,7 +49,8 @@
 
 HILSIMPacket hilsim_reader;
 
-#if defined(ENABLE_HIGH_G) || defined(ENABLE_ORIENTATION) || defined(ENABLE_BAROMETER) || defined(ENABLE_LOW_G) || defined(ENABLE_MAGNETOMETER) || defined(ENABLE_GAS)
+#if defined(ENABLE_HIGH_G) || defined(ENABLE_ORIENTATION) || defined(ENABLE_BAROMETER) || defined(ENABLE_LOW_G) || \
+    defined(ENABLE_MAGNETOMETER) || defined(ENABLE_GAS)
 #define ENABLE_SENSOR_FAST
 #endif
 
@@ -67,7 +68,7 @@ static THD_FUNCTION(hilsim_THD, arg) {
             Serial.println(bytes_read);
             Serial.println("Got something");
             if (data_read[bytes_read - 1] == '\r') data_read[bytes_read - 1] = 0;
-            
+
             char* token;
             float parsed_values[fields_to_read];
             int i = 0;
@@ -203,7 +204,6 @@ static THD_FUNCTION(sensor_fast_THD, arg) {
         voltage.read();
         highG.update(hilsim_reader);
 
-
 #else
         barometer.update();
         magnetometer.update();
@@ -261,7 +261,6 @@ static THD_FUNCTION(kalman_THD, arg) {
         last = chVTGetSystemTime();
 
         chThdSleepMilliseconds(50);
-
     }
 }
 
@@ -355,7 +354,12 @@ static THD_WORKING_AREA(sensor_fast_WA, THREAD_WA);
 #undef THREAD_WA
 
 #define START_THREAD(NAME) chThdCreateStatic(NAME##_WA, sizeof(NAME##_WA), NORMALPRIO + 1, NAME##_THD, nullptr)
-#define CHECK_THREAD(NAME, SHORT) do { Serial.print(" " SHORT ": "); Serial.print(NAME##_start ? "\u2713" : "\u2717"); all_passed &= NAME##_start; } while (0)
+#define CHECK_THREAD(NAME, SHORT)                         \
+    do {                                                  \
+        Serial.print(" " SHORT ": ");                     \
+        Serial.print(NAME##_start ? "\u2713" : "\u2717"); \
+        all_passed &= NAME##_start;                       \
+    } while (0)
 
 /**
  * @brief Starts all of the threads.
@@ -435,7 +439,8 @@ void setup() {
     Serial.begin(9600);
 #ifdef WAIT_SERIAL
     // Stall until serial monitor opened
-    while (!Serial);
+    while (!Serial)
+        ;
 #endif
     Serial.println("Starting SPI...");
 

@@ -16,7 +16,7 @@ ErrorCode GPSSensor::init() {
     digitalWrite(LED_ORANGE, HIGH);
 
     if (!GNSS.begin(Wire)) {
-     return ErrorCode::CANNOT_CONNECT_GPS;
+        return ErrorCode::CANNOT_CONNECT_GPS;
     }
     GNSS.setI2COutput(COM_TYPE_UBX);
 
@@ -48,7 +48,6 @@ void GPSSensor::update() {
         chMtxUnlock(&mutex);
         return;
     }
-
 
     latitude = static_cast<float>(GNSS.getLatitude() / 10000000.0);
     longitude = static_cast<float>(GNSS.getLongitude() / 10000000.0);

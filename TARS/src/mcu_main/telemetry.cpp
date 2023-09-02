@@ -83,7 +83,7 @@ ErrorCode Telemetry::init() {
 }
 
 #if defined(ENABLE_TELEMETRY) && !defined(ENABLE_SILSIM_MODE)
-Telemetry::Telemetry() : rf95(RFM96_CS, RFM96_INT, hardware_spi1) { }
+Telemetry::Telemetry() : rf95(RFM96_CS, RFM96_INT, hardware_spi1) {}
 #else
 Telemetry::Telemetry() {}
 #endif
@@ -132,7 +132,7 @@ void Telemetry::handleCommand(const telemetry_command &cmd) {
     }
 }
 
-//#define TLM_DEBUG
+// #define TLM_DEBUG
 
 /**
  * @brief This function transmits data from the struct provided as
@@ -195,32 +195,32 @@ void printFloat(float f, int precision = 5) {
     }
 }
 
-void printJSONField(const char * name, float val, bool comma=true){
+void printJSONField(const char *name, float val, bool comma = true) {
     Serial.print('\"');
     Serial.print(name);
     Serial.print("\":");
     printFloat(val);
-    if(comma) Serial.print(',');
+    if (comma) Serial.print(',');
 }
 
-void printJSONField(const char * name, int val, bool comma=true){
+void printJSONField(const char *name, int val, bool comma = true) {
     Serial.print('\"');
     Serial.print(name);
     Serial.print("\":");
     Serial.print(val);
-    if(comma) Serial.print(',');
+    if (comma) Serial.print(',');
 }
 
-void printJSONField(const char * name, const char * val, bool comma=true){
+void printJSONField(const char *name, const char *val, bool comma = true) {
     Serial.print('\"');
     Serial.print(name);
     Serial.print("\":\"");
     Serial.print(val);
     Serial.print('"');
-    if(comma) Serial.print(',');
+    if (comma) Serial.print(',');
 }
 void Telemetry::serialPrint(const sensorDataStruct_t &sensor_data) {
-     Serial.print(R"({"type": "data", "value": {)");
+    Serial.print(R"({"type": "data", "value": {)");
     printJSONField("response_ID", -1);
     printJSONField("gps_lat", sensor_data.gps_data.latitude);
     printJSONField("gps_long", sensor_data.gps_data.longitude);

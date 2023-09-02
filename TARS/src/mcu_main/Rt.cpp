@@ -14,16 +14,16 @@ void setup();
 
 static Simulation* g_sim;
 struct ThreadInfo {
-public:
-    explicit ThreadInfo(const char* name, void* handle) : _name(name), fiber_handle(handle) { }
+   public:
+    explicit ThreadInfo(const char* name, void* handle) : _name(name), fiber_handle(handle) {}
 
     const char* _name;
     void* fiber_handle;
 };
 
 struct ThreadManager {
-public:
-    ThreadManager() : threads(), next_thread(1) { }
+   public:
+    ThreadManager() : threads(), next_thread(1) {}
 
     std::vector<ThreadInfo> threads;
     size_t next_thread;
@@ -39,21 +39,16 @@ public:
         }
         ThreadInfo* switch_to = &threads[next_thread];
         next_thread++;
-        if (debug)
-            std::cout << "Switching to " << switch_to->_name << std::endl;
+        if (debug) std::cout << "Switching to " << switch_to->_name << std::endl;
         SwitchToFiber(switch_to->fiber_handle);
     }
 };
 
 ThreadManager thread_manager;
 
-uint32_t getTime() {
-    return g_sim->get_time();
-}
+uint32_t getTime() { return g_sim->get_time(); }
 
-void threadYield() {
-    thread_manager.yield();
-}
+void threadYield() { thread_manager.yield(); }
 
 void createThread(const char* name, void fn(void*), size_t stack, void* arg) {
     void* handle = CreateFiber(stack, fn, arg);
@@ -73,35 +68,29 @@ void threadSleep(int32_t time_ms) {
     }
 }
 
-void tone(uint8_t pin, uint16_t frequency) { }
-void tone(uint8_t pin, uint16_t frequency, uint32_t duration) { }
-void noTone(uint8_t pin) { }
+void tone(uint8_t pin, uint16_t frequency) {}
+void tone(uint8_t pin, uint16_t frequency, uint32_t duration) {}
+void noTone(uint8_t pin) {}
 
-void SerialPatch::println(const char* s) {
-    std::cout << s << '\n';
-}
+void SerialPatch::println(const char* s) { std::cout << s << '\n'; }
 
-void SerialPatch::begin(int baudrate) {
-
-}
+void SerialPatch::begin(int baudrate) {}
 
 SerialPatch Serial;
 
 void run_sim(void* arg) {
     for (int i = 0; i < 100000; i++) {
-        if (i % 1000 == 0)
-            std::cout << "Run " << i << std::endl;
+        if (i % 1000 == 0) std::cout << "Run " << i << std::endl;
 
-        if(i >= 3000){
+        if (i >= 3000) {
             // thread_manager.debug = true;
         }
         bool res = g_sim->step();
-        if(!res) break;
+        if (!res) break;
         threadYield();
     }
     exit(0);
 }
-
 
 int main() {
     thread_manager.threads.emplace_back("main", ConvertThreadToFiber(nullptr));

@@ -76,7 +76,7 @@ ErrorCode LowGSensor::init() {
 }
 
 #if defined(ENABLE_LOW_G) && !defined(ENABLE_SILSIM_MODE)
-LowGSensor::LowGSensor() : LSM(SPI_MODE, LSM6DSLTR) { }
+LowGSensor::LowGSensor() : LSM(SPI_MODE, LSM6DSLTR) {}
 #else
 LowGSensor::LowGSensor() = default;
 #endif

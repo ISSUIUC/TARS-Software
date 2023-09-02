@@ -17,7 +17,7 @@ Controller activeController;
  * @brief Initializes the Servos for either drag or roll control
  *
  * Initializes a PWMServo object and sets the angle limits for the ServoControl object
-*/
+ */
 #ifdef ENABLE_SILSIM_MODE
 Controller::Controller() = default;
 #else

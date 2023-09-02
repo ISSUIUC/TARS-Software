@@ -15,12 +15,12 @@ class SDLogger;
 extern SDLogger sd_logger;
 
 class SDLogger {
-public:
+   public:
     ErrorCode __attribute__((warn_unused_result)) init();
 
     void update();
 
-private:
+   private:
     template <typename T>
     void logData(T* data);
 

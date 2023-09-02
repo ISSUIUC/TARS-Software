@@ -5,7 +5,6 @@
 template <typename T, size_t max_count>
 class MessageQueue {
    public:
-
     MessageQueue() = default;
 
     void push(T item) {

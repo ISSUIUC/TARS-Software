@@ -107,7 +107,7 @@ void SDLogger::update() {
 
 template <typename T>
 void SDLogger::logData(T* data) {
-    file.write((const char*) data, sizeof(T));
+    file.write((const char*)data, sizeof(T));
     // Flush data once for every 50 writes
     // Flushing data is the step that actually writes to the card
     // Flushing more frequently incurs more of a latency penalty, but less

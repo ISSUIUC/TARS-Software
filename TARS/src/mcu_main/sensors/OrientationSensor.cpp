@@ -108,7 +108,7 @@ void OrientationSensor::update(HILSIMPacket hilsim_packet) {
 #ifdef ENABLE_ORIENTATION
     chSysLock();
     chMtxLock(&mutex);
-    _orientationEuler = (euler_t) {hilsim_packet.ornt_roll, hilsim_packet.ornt_pitch, hilsim_packet.ornt_yaw};
+    _orientationEuler = (euler_t){hilsim_packet.ornt_roll, hilsim_packet.ornt_pitch, hilsim_packet.ornt_yaw};
     dataLogger.pushOrientationFifo(
         (OrientationData){_accelerations, _gyro, _magnetometer, _orientationEuler, chVTGetSystemTime()});
     chMtxUnlock(&mutex);

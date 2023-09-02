@@ -7,16 +7,15 @@
 #include <Adafruit_LIS3MDL.h>
 #endif
 
-
 class MagnetometerSensor {
-public:
+   public:
     void update();
     void update(HILSIMPacket hilsim_packet);
     ErrorCode __attribute__((warn_unused_result)) init();
 
     Magnetometer getMagnetometer();
 
-private:
+   private:
 #ifndef ENABLE_SILSIM_MODE
     Adafruit_LIS3MDL sensor;
 #endif
