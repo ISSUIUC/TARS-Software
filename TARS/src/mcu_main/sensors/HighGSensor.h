@@ -6,7 +6,7 @@
 
 #include "common/packet.h"
 #include "mcu_main/error.h"
-#include "mcu_main/hilsim/HILSIMPacket.h"
+#include "mcu_main/hilsim/HILSIMPacket.pb.h"
 
 #ifndef ENABLE_SILSIM_MODE
 #include "SparkFun_Qwiic_KX13X.h"

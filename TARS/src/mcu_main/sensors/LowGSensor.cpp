@@ -4,7 +4,7 @@
 #include "mcu_main/dataLog.h"
 #include "mcu_main/pins.h"
 #include "mcu_main/debug.h"
-#include "mcu_main/hilsim/HILSIMPacket.h"
+#include "mcu_main/hilsim/HILSIMPacket.pb.h"
 
 #ifdef ENABLE_SILSIM_MODE
 #include "mcu_main/emulation.h"
