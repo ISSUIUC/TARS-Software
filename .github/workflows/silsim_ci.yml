@@ -46,10 +46,10 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v1
     - run: echo "Test file " > test.txt
-    - name: Upload log file to slack
-      uses: adrey/slack-file-upload-action@master
-      with:
-        token: ${{ secrets.BOT_KEY }}
-        path: test.txt
-        channel: silsim_bot_playground
+    # - name: Upload log file to slack
+    #   uses: adrey/slack-file-upload-action@master
+    #   with:
+    #     token: ${{ secrets.BOT_KEY }}
+    #     path: test.txt
+    #     channel: silsim_bot_playground
 
