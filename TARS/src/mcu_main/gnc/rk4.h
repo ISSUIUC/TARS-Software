@@ -1,11 +1,15 @@
-
 #pragma once
 
 #include <array>
 #include <cmath>
 
-#include "../EigenArduino-Eigen30/Eigen30.h"
 #include "mcu_main/gnc/Atmosphere.h"
+
+#undef abs
+#undef F
+#undef round
+#undef B1
+#include "Eigen/Eigen"
 
 using std::array;
 

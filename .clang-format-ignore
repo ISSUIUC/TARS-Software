@@ -1,1 +1,4 @@
 TARS/lib/*
+TARS/purgatory/*
+TARS/.pio/*
+TARS/src/mcu_main/ISS_SILSIM/*

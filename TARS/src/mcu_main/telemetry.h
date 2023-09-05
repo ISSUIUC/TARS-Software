@@ -1,14 +1,17 @@
 #pragma once
 
-#include <ChRt.h>
-#include <RH_RF95.h>
+#include "mcu_main/Rt.h"
 
 #include <array>
 
 #include "common/MessageQueue.h"
 #include "common/packet.h"
-#include "mcu_main/error.h"
 #include "mcu_main/pins.h"
+#include "mcu_main/error.h"
+
+#ifndef ENABLE_SILSIM_MODE
+#include <RH_RF95.h>
+#endif
 
 // Make sure to change these pinout depending on wiring
 // Don't forget to change the ini file to build the correct main file
@@ -101,7 +104,9 @@ class Telemetry {
     void serialPrint(const sensorDataStruct_t& sensor_data);
 
    private:
+#ifndef ENABLE_SILSIM_MODE
     RH_RF95 rf95;
+#endif
     MessageQueue<TelemetryDataLite, 4> buffered_data;
 
     // Initializing command ID

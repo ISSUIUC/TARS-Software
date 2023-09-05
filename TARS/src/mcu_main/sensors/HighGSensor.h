@@ -2,11 +2,15 @@
 
 #include <tuple>
 
-#include "ChRt.h"
-#include "SparkFun_Qwiic_KX13X.h"
+#include "mcu_main/Rt.h"
+
 #include "common/packet.h"
 #include "mcu_main/error.h"
 #include "mcu_main/hilsim/HILSIMPacket.h"
+
+#ifndef ENABLE_SILSIM_MODE
+#include "SparkFun_Qwiic_KX13X.h"
+#endif
 
 /**
  *
@@ -35,5 +39,7 @@ struct HighGSensor {
    private:
     float ax = 0.0, ay = 0.0, az = 0.0;
     systime_t timestamp = 0;
+#ifndef ENABLE_SILSIM_MODE
     QwiicKX134 KX;
+#endif
 };

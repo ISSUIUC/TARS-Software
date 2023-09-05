@@ -1,13 +1,17 @@
 #include "mcu_main/sensors/GPSSensor.h"
 
 #include "mcu_main/dataLog.h"
-#include "mcu_main/debug.h"
 #include "mcu_main/pins.h"
+#include "mcu_main/debug.h"
+
+#ifdef ENABLE_SILSIM_MODE
+#include "mcu_main/emulation.h"
+#endif
 
 GPSSensor gps;
 
 ErrorCode GPSSensor::init() {
-#ifdef ENABLE_GPS
+#if defined(ENABLE_GPS) && !defined(ENABLE_SILSIM_MODE)
     digitalWrite(LED_RED, HIGH);
     digitalWrite(LED_ORANGE, HIGH);
 
@@ -31,19 +35,28 @@ ErrorCode GPSSensor::init() {
 void GPSSensor::update() {
 #ifdef ENABLE_GPS
     chMtxLock(&mutex);
+#ifdef ENABLE_SILSIM_MODE
+    // todo
+    latitude = 0;
+    longitude = 0;
+    altitude = 0;
+    fix_type = 3;
+    SIV_count = 4;
+#else
     bool succeed = GNSS.getPVT(20);
     if (!succeed) {
         chMtxUnlock(&mutex);
         return;
     }
 
-    timeStamp = chVTGetSystemTime();
     latitude = static_cast<float>(GNSS.getLatitude() / 10000000.0);
     longitude = static_cast<float>(GNSS.getLongitude() / 10000000.0);
     altitude = static_cast<float>(GNSS.getAltitudeMSL());
     fix_type = GNSS.getFixType();
-    pos_lock = fix_type == 3;
     SIV_count = GNSS.getSIV();
+#endif
+    pos_lock = fix_type == 3;
+    timeStamp = chVTGetSystemTime();
 
     dataLogger.pushGpsFifo((GpsData){latitude, longitude, altitude, SIV_count, fix_type, pos_lock, timeStamp});
     chMtxUnlock(&mutex);

@@ -1,9 +1,11 @@
 #pragma once
 
-#include <Adafruit_BME680.h>
-#include <ChRt.h>
-
+#include "mcu_main/Rt.h"
 #include "mcu_main/error.h"
+
+#ifndef ENABLE_SILSIM_MODE
+#include <Adafruit_BME680.h>
+#endif
 
 class GasSensor {
    public:
@@ -15,7 +17,9 @@ class GasSensor {
     float readTemperature();
 
    private:
+#ifndef ENABLE_SILSIM_MODE
     Adafruit_BME680 bme;
+#endif
 
     float temperature = 0.0;
     float humidity = 0.0;

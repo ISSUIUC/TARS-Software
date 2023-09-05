@@ -1,18 +1,20 @@
 #pragma once
 
-#include <Arduino.h>
-#include <ChRt.h>
-#include <Wire.h>
-
+#include "mcu_main/Rt.h"
 #include <cmath>
 
-#include "Adafruit_BNO08x.h"
 #include "common/packet.h"
 #include "mcu_main/dataLog.h"
 #include "mcu_main/debug.h"
 #include "mcu_main/error.h"
-#include "mcu_main/hilsim/HILSIMPacket.h"
 #include "mcu_main/pins.h"
+#include "mcu_main/hilsim/HILSIMPacket.h"
+
+#ifndef ENABLE_SILSIM_MODE
+#include <Wire.h>
+#include "Adafruit_BNO08x.h"
+#include <Arduino.h>
+#endif
 
 /**
  *
@@ -36,28 +38,31 @@ class OrientationSensor {
    public:
     MUTEX_DECL(mutex);
     OrientationSensor();
-    explicit OrientationSensor(Adafruit_BNO08x const& imu);
 
     void update();
     void update(HILSIMPacket hilsim_packet);
 
     ErrorCode __attribute__((warn_unused_result)) init();
 
-    void setIMU(Adafruit_BNO08x const& imu);
     Acceleration getAccelerations();
     Gyroscope getGyroscope();
     Magnetometer getMagnetometer();
     euler_t getEuler();
     float getTemp();
     float getPressure();
+
+#ifndef ENABLE_SILSIM_MODE
+    void setIMU(Adafruit_BNO08x const& imu);
+    explicit OrientationSensor(Adafruit_BNO08x const& imu);
     void setReports(sh2_SensorId_t reportType, long report_interval);
+#endif
 
    private:
     /**
      *  Converts quaternions to Euler angles using quaternion components
      */
     void quaternionToEuler(float qr, float qi, float qj, float qk, bool degrees = false);
-
+#ifndef ENABLE_SILSIM_MODE
     /**
      *  Converts quaternions to Euler angles using rotation vectors
      */
@@ -67,8 +72,8 @@ class OrientationSensor {
      *  Converts quaternions to Euler angles using the integration gyroscope
      */
     void quaternionToEulerGI(sh2_GyroIntegratedRV_t* rotational_vector, bool degrees = false);
-
     Adafruit_BNO08x _imu;
+#endif
     euler_t _orientationEuler{};
     Acceleration _accelerations{};
     Gyroscope _gyro{};

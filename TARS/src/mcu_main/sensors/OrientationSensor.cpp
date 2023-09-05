@@ -6,6 +6,9 @@
 
 OrientationSensor orientation;
 
+#ifdef ENABLE_SILSIM_MODE
+#include "mcu_main/emulation.h"
+#else
 #ifdef FAST_MODE
 // Top frequency is reported to be 1000Hz (but freq is somewhat variable)
 sh2_SensorId_t reportType = SH2_GYRO_INTEGRATED_RV;
@@ -24,13 +27,15 @@ void OrientationSensor::setReports(sh2_SensorId_t reportType, long report_interv
     }
 #endif
 }
-
-#ifdef ENABLE_ORIENTATION
-OrientationSensor::OrientationSensor() : _imu(Adafruit_BNO08x(BNO086_RESET)) {}
-#else
-OrientationSensor::OrientationSensor() {}
 #endif
 
+#if defined(ENABLE_ORIENTATION) && !defined(ENABLE_SILSIM_MODE)
+OrientationSensor::OrientationSensor() : _imu(Adafruit_BNO08x(BNO086_RESET)) {}
+#else
+OrientationSensor::OrientationSensor() = default;
+#endif
+
+#ifndef ENABLE_SILSIM_MODE
 OrientationSensor::OrientationSensor(Adafruit_BNO08x const& bno) {
 #ifdef ENABLE_ORIENTATION
     _imu = bno;
@@ -44,11 +49,26 @@ void OrientationSensor::setIMU(Adafruit_BNO08x const& bno) {
     setReports(reportType, reportIntervalUs);
 #endif
 }
+#endif
 
 void OrientationSensor::update() {
 #ifdef ENABLE_ORIENTATION
     chSysLock();
     chMtxLock(&mutex);
+#ifdef ENABLE_SILSIM_MODE
+    auto data = emulatedKX->get_data();
+    _accelerations.ax = data.x();
+    _accelerations.ay = data.y();
+    _accelerations.az = data.z();
+    _gyro.gx = emulatedGyro->get_data().x();
+    _gyro.gy = emulatedGyro->get_data().y();
+    _gyro.gz = emulatedGyro->get_data().z();
+    _pressure = emulatedMS->get_data();
+    _temp = emulatedThermometer->get_data();
+    _magnetometer.mx = emulatedMagnetometer->get_data().x();
+    _magnetometer.my = emulatedMagnetometer->get_data().y();
+    _magnetometer.mz = emulatedMagnetometer->get_data().z();
+#else
     sh2_SensorValue_t event;
     if (_imu.getSensorEvent(&event)) {
         switch (event.sensorId) {
@@ -75,6 +95,7 @@ void OrientationSensor::update() {
         _temp = event.un.temperature.value;
         _pressure = event.un.pressure.value;
     }
+#endif
     time_stamp = chVTGetSystemTime();
     dataLogger.pushOrientationFifo(
         (OrientationData){_accelerations, _gyro, _magnetometer, _orientationEuler, time_stamp});
@@ -95,6 +116,8 @@ void OrientationSensor::update(HILSIMPacket hilsim_packet) {
 #endif
 }
 
+#define sq(v) (std::pow(v, 2))
+
 void OrientationSensor::quaternionToEuler(float qr, float qi, float qj, float qk, bool degrees) {
     float sqr = sq(qr);
     float sqi = sq(qi);
@@ -106,6 +129,7 @@ void OrientationSensor::quaternionToEuler(float qr, float qi, float qj, float qk
     _orientationEuler.pitch = -1 * atan2(2.0 * (qj * qk + qi * qr), (-sqi - sqj + sqk + sqr));
 }
 
+#ifndef ENABLE_SILSIM_MODE
 void OrientationSensor::quaternionToEulerRV(sh2_RotationVectorWAcc_t* rotational_vector, bool degrees) {
     quaternionToEuler(rotational_vector->real, rotational_vector->i, rotational_vector->j, rotational_vector->k,
                       degrees);
@@ -115,6 +139,7 @@ void OrientationSensor::quaternionToEulerGI(sh2_GyroIntegratedRV_t* rotational_v
     quaternionToEuler(rotational_vector->real, rotational_vector->i, rotational_vector->j, rotational_vector->k,
                       degrees);
 }
+#endif
 
 float OrientationSensor::getTemp() { return _temp; }
 
@@ -129,6 +154,7 @@ Acceleration OrientationSensor::getAccelerations() { return _accelerations; }
 euler_t OrientationSensor::getEuler() { return _orientationEuler; }
 
 ErrorCode OrientationSensor::init() {
+#ifndef ENABLE_SILSIM_MODE
     if (!_imu.begin_SPI(BNO086_CS, BNO086_INT)) {
         return ErrorCode::CANNOT_CONNECT_BNO;
     }
@@ -138,5 +164,6 @@ ErrorCode OrientationSensor::init() {
         Serial.println("Could not enable stabilized remote vector");
         return ErrorCode::CANNOT_INIT_BNO;
     }
+#endif
     return ErrorCode::NO_ERROR;
 }

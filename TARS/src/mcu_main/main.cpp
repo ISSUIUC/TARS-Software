@@ -25,25 +25,29 @@
  * Magilan Sendhil
  */
 
+#include "mcu_main/Rt.h"
+#ifndef ENABLE_SILSIM_MODE
 #include <Arduino.h>
-#include <ChRt.h>
 #include <PWMServo.h>
 #include <SPI.h>
 #include <Wire.h>
+#endif
 
 #include "mcu_main/Abort.h"
 #include "mcu_main/SDLogger.h"
-#include "mcu_main/buzzer/buzzer.h"
 #include "mcu_main/dataLog.h"
-#include "mcu_main/debug.h"
-#include "mcu_main/error.h"
 #include "mcu_main/finite-state-machines/rocketFSM.h"
 #include "mcu_main/gnc/ActiveControl.h"
 #include "mcu_main/gnc/kalmanFilter.h"
-#include "mcu_main/hilsim/HILSIMPacket.h"
 #include "mcu_main/pins.h"
 #include "mcu_main/sensors/sensors.h"
 #include "mcu_main/telemetry.h"
+#include "mcu_main/error.h"
+#include "mcu_main/buzzer/buzzer.h"
+#include "mcu_main/debug.h"
+#include "mcu_main/hilsim/HILSIMPacket.h"
+
+HILSIMPacket hilsim_reader;
 
 #if defined(ENABLE_HIGH_G) || defined(ENABLE_ORIENTATION) || defined(ENABLE_BAROMETER) || defined(ENABLE_LOW_G) || \
     defined(ENABLE_MAGNETOMETER) || defined(ENABLE_GAS)
@@ -51,8 +55,6 @@
 #endif
 
 #ifdef ENABLE_HILSIM_MODE
-HILSIMPacket hilsim_reader;
-
 static THD_FUNCTION(hilsim_THD, arg) {
     // Creating array for data to be read into
     char data_read[512];
@@ -248,7 +250,6 @@ static THD_FUNCTION(kalman_THD, arg) {
     kalmanFilter.Initialize();
 
     systime_t last = chVTGetSystemTime();
-
     while (true) {
 #ifdef THREAD_DEBUG
         Serial.println("### Kalman thread entrance");
@@ -325,7 +326,7 @@ static THD_FUNCTION(buzzer_THD, arg) {
 }
 #endif
 
-#define THREAD_WA 4096
+#define THREAD_WA 8192
 
 #ifdef ENABLE_HILSIM_MODE
 static THD_WORKING_AREA(hilsim_WA, THREAD_WA);
@@ -363,7 +364,7 @@ static THD_WORKING_AREA(sensor_fast_WA, THREAD_WA);
 /**
  * @brief Starts all of the threads.
  */
-void chSetup() {
+[[noreturn]] void chSetup() {
 #ifdef ENABLE_HILSIM_MODE
     START_THREAD(hilsim);
 #endif
@@ -421,8 +422,9 @@ void chSetup() {
     // buzzer1.init_sponge();
     buzzer1.init_sponge();
     // buzzer1.init_mario();
-    while (true)
-        ;
+    while (true) {
+        chThdYield();
+    }
 }
 
 #undef CHECK_THREAD
@@ -442,6 +444,7 @@ void setup() {
 #endif
     Serial.println("Starting SPI...");
 
+#ifndef ENABLE_SILSIM_MODE
     SPI.begin();
     SPI.setMOSI(SPI_MOSI);
     SPI.setMISO(SPI_MISO);
@@ -475,6 +478,7 @@ void setup() {
     Wire.setSCL(MAXM10S_SCL);
     Wire.setSDA(MAXM10S_SDA);
     Wire.begin();
+#endif
 
 #ifdef ENABLE_BAROMETER
     handleError(barometer.init());
@@ -507,9 +511,6 @@ void setup() {
 
     Serial.println("chibios begin");
     chBegin(chSetup);
-
-    while (true)
-        ;
 }
 
 void loop() {

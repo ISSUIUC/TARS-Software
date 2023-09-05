@@ -1,33 +1,26 @@
 #pragma once
 
-#include <ChRt.h>
+#include <cstddef>
 
 template <typename T, size_t max_size>
 class FifoBuffer {
    public:
-    MUTEX_DECL(lock);
-
     FifoBuffer() = default;
 
     bool push(T const& element) {
-        chMtxLock(&lock);
         arr[tail_idx++] = element;
         if (tail_idx == max_size) {
             tail_idx = 0;
         }
         if (count < max_size) count++;
-        chMtxUnlock(&lock);
         return true;
     }
 
     bool read(T& item) {
-        chMtxLock(&lock);
         if (count == 0) {
-            chMtxUnlock(&lock);
             return false;
         }
         item = arr[newest()];
-        chMtxUnlock(&lock);
         return true;
     }
 
@@ -41,7 +34,6 @@ class FifoBuffer {
      */
     // TODO make this function return a std::array?
     size_t readSlice(T write_to[], size_t start, size_t len) {
-        chMtxLock(&lock);
         size_t i = 0;
         size_t idx = head() + start;
         while (i < len) {
@@ -50,7 +42,6 @@ class FifoBuffer {
                 idx = 0;
             }
         }
-        chMtxUnlock(&lock);
         return i;
     }
 

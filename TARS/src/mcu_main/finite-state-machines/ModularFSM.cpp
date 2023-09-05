@@ -1,9 +1,11 @@
+#include "mcu_main/Rt.h"
+
 #include "mcu_main/finite-state-machines/ModularFSM.h"
 
-#include "mcu_main/dataLog.h"
-#include "mcu_main/debug.h"
 #include "mcu_main/finite-state-machines/thresholds.h"
 #include "mcu_main/sensors/sensors.h"
+#include "mcu_main/dataLog.h"
+#include "mcu_main/debug.h"
 
 double ModularFSM::getAltitudeAverage(size_t start, size_t len) {
     return ModularFSM::getAverage(
@@ -307,11 +309,11 @@ void ModularFSM::tickFSM() {
 
     Serial.print("launch site altitude: ");
     Serial.println(launch_site_altitude_);
-#endif  // FSM_DEBUG
+#endif
 
     switch (rocket_state_) {
             // include a case for init?
-            // cheeky bloke init
+            //  cheeky bloke init
 
         case FSM_State::STATE_INIT:
             if (barometer.getAltitude() != 0.00) {

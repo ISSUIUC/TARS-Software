@@ -13,13 +13,18 @@
  * Peter Giannetos
  */
 
-#include "mcu_main/telemetry.h"
-
 #include <limits>
 
-#include "RHHardwareSPI1.h"
-#include "mcu_main/dataLog.h"
+#include "mcu_main/telemetry.h"
 #include "mcu_main/debug.h"
+#include "mcu_main/dataLog.h"
+#include "mcu_main/Rt.h"
+#include <cstring>
+#include <cmath>
+
+#ifndef ENABLE_SILSIM_MODE
+#include "RHHardwareSPI1.h"
+#endif
 
 Telemetry tlm;
 
@@ -41,7 +46,7 @@ T inv_convert_range(float val, float range) {
 }
 
 ErrorCode Telemetry::init() {
-#ifdef ENABLE_TELEMETRY
+#if defined(ENABLE_TELEMETRY) && !defined(ENABLE_SILSIM_MODE)
     pinMode(RFM96_RST, OUTPUT);
     digitalWrite(RFM96_RST, HIGH);
     delay(10);
@@ -77,7 +82,7 @@ ErrorCode Telemetry::init() {
     return ErrorCode::NO_ERROR;
 }
 
-#ifdef ENABLE_TELEMETRY
+#if defined(ENABLE_TELEMETRY) && !defined(ENABLE_SILSIM_MODE)
 Telemetry::Telemetry() : rf95(RFM96_CS, RFM96_INT, hardware_spi1) {}
 #else
 Telemetry::Telemetry() {}
@@ -127,7 +132,7 @@ void Telemetry::handleCommand(const telemetry_command &cmd) {
     }
 }
 
-//#define TLM_DEBUG
+// #define TLM_DEBUG
 
 /**
  * @brief This function transmits data from the struct provided as
@@ -155,6 +160,7 @@ void Telemetry::transmit() {
     blue_state = !blue_state;
 
     TelemetryPacket packet = makePacket(dataLogger.read());
+#ifndef ENABLE_SILSIM_MODE
     rf95.send((uint8_t *)&packet, sizeof(packet));
 
     chThdSleepMilliseconds(170);
@@ -178,10 +184,11 @@ void Telemetry::transmit() {
     }
 #endif
 #endif
+#endif
 }
 
 void printFloat(float f, int precision = 5) {
-    if (isinf(f) || isnan(f)) {
+    if (std::isinf(f) || std::isnan(f)) {
         Serial.print(-1);
     } else {
         Serial.print(f, precision);
@@ -229,7 +236,11 @@ void Telemetry::serialPrint(const sensorDataStruct_t &sensor_data) {
     printJSONField("IMU_mz", sensor_data.magnetometer_data.magnetometer.mz);
     printJSONField("FSM_state", (int)sensor_data.rocketState_data.rocketStates[0]);
     printJSONField("sign", "NOSIGN");
+#ifdef ENABLE_SILSIM_MODE
+    printJSONField("RSSI", 0);
+#else
     printJSONField("RSSI", rf95.lastRssi());
+#endif
     printJSONField("Voltage", sensor_data.voltage_data.v_battery);
     printJSONField("frequency", -1);
     printJSONField("flap_extension", sensor_data.flap_data.extension);
@@ -363,7 +374,11 @@ TelemetryPacket Telemetry::makePacket(const sensorDataStruct_t &data_struct) {
     packet.gyro_z = inv_convert_range<int16_t>(data_struct.lowG_data.gz, 8192);
 
     packet.response_ID = last_command_id;
+#ifdef ENABLE_SILSIM_MODE
+    packet.rssi = 0;
+#else
     packet.rssi = rf95.lastRssi();
+#endif
     packet.voltage_battery = inv_convert_range<uint8_t>(data_struct.voltage_data.v_battery, 16);
     packet.FSM_State = (uint8_t)data_struct.rocketState_data.rocketStates[0];
     packet.barometer_temp = inv_convert_range<int16_t>(data_struct.barometer_data.temperature, 256);

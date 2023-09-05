@@ -1,13 +1,14 @@
 #pragma once
 
-#include "../EigenArduino-Eigen30/Eigen30.h"
+#include "mcu_main/ServoControl.h"
 #include "common/FifoBuffer.h"
-#include "common/ServoControl.h"
 #include "common/packet.h"
 #include "mcu_main/dataLog.h"
 #include "mcu_main/finite-state-machines/RocketFSMBase.h"
-#include "mcu_main/gnc/rk4.h"
+
 #include "mcu_main/sensors/sensors.h"
+
+#include "mcu_main/gnc/rk4.h"
 
 #define NUM_STATES 9
 #define NUM_SENSOR_INPUTS 4

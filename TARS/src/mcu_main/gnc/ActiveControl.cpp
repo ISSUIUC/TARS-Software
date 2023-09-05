@@ -18,7 +18,11 @@ Controller activeController;
  *
  * Initializes a PWMServo object and sets the angle limits for the ServoControl object
  */
+#ifdef ENABLE_SILSIM_MODE
+Controller::Controller() = default;
+#else
 Controller::Controller() : activeControlServos(&controller_servo_) {}
+#endif
 
 void Controller::ctrlTickFunction() {
     chMtxLock(&kalmanFilter.mutex);
@@ -107,6 +111,7 @@ void Controller::setLaunchPadElevation() {
 }
 
 void Controller::init() {
+#ifndef ENABLE_SILSIM_MODE
     controller_servo_.attach(AC_SERVO_PIN, 770, 2250);
 
     /*
@@ -117,9 +122,12 @@ void Controller::init() {
      */
 
     controller_servo_.write(activeControlServos.max_angle);
+
+    controller_servo_.write(activeControlServos.max_angle);
     chThdSleepMilliseconds(1000);
     controller_servo_.write(activeControlServos.min_angle);
     chThdSleepMilliseconds(1000);
+#endif
 
     setLaunchPadElevation();
 }

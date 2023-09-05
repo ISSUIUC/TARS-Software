@@ -15,18 +15,21 @@ class RocketFSMBase {
    public:
     template <typename T, size_t count>
     static double getAverage(FifoBuffer<T, count>& buffer, double (*access_value)(T&), size_t start, size_t len) {
+        // chMtxLock(&buffer.lock);
         T items[len];
         buffer.readSlice(items, start, len);
         double sum = 0.0;
         for (size_t i = 0; i < len; i++) {
             sum += access_value(items[i]);
         }
+        // chMtxUnlock(&buffer.lock);
         return sum / (double)len;
     }
 
     template <typename T, size_t count>
     static double getSecondDerivativeAverage(FifoBuffer<T, count>& buffer, double (*access_value)(T&),
                                              systime_t (*access_time)(T&), size_t start, size_t len) {
+        // chMtxLock(&buffer.lock);
         T items[len];
         buffer.readSlice(items, start, len);
 
@@ -45,6 +48,7 @@ class RocketFSMBase {
             systime_t delta_t = access_time(items[i + 1]) - access_time(items[i]);
             derivatives[i - start] = (second - first) / (delta_t == 0 ? 0.02 : delta_t);
         }
+        // chMtxUnlock(&buffer.lock);
 
         double sum = 0.0;
         for (size_t i = 0; i < len - 2; i++) {

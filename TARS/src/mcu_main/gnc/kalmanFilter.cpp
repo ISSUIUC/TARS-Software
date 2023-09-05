@@ -6,11 +6,11 @@
  * @details This class takes input data from a barometer and accelerometer to estimate state data for the rocket.
  */
 
-#include "mcu_main/gnc/kalmanFilter.h"
+#include "mcu_main/finite-state-machines/rocketFSM.h"
 
 #include <cmath>
 
-#include "mcu_main/finite-state-machines/rocketFSM.h"
+#include "mcu_main/gnc/kalmanFilter.h"
 
 #define EIGEN_MATRIX_PLUGIN "MatrixAddons.h"
 
@@ -67,9 +67,9 @@ void KalmanFilter::SetQ(float dt, float sd) {
  */
 void KalmanFilter::SetF(float dt) {
     for (int i = 0; i < 3; i++) {
-        F_mat(3 * i, 3 * i + 1) = dt;
-        F_mat(3 * i, 3 * i + 2) = (dt * dt) / 2;
-        F_mat(3 * i + 1, 3 * i + 2) = dt;
+        F_mat(3 * i, 3 * i + 1) = s_dt;
+        F_mat(3 * i, 3 * i + 2) = (dt * s_dt) / 2;
+        F_mat(3 * i + 1, 3 * i + 2) = s_dt;
 
         F_mat(3 * i, 3 * i) = 1;
         F_mat(3 * i + 1, 3 * i + 1) = 1;

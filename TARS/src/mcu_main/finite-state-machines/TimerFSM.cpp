@@ -24,6 +24,7 @@
  *
  */
 
+#include "mcu_main/Rt.h"
 #include "mcu_main/finite-state-machines/TimerFSM.h"
 
 #include "mcu_main/Abort.h"

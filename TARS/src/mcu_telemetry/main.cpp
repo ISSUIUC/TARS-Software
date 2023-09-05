@@ -13,8 +13,9 @@
   (https://www.sparkfun.com/products/14425) Open the serial monitor at 115200 baud to see the output
 */
 
+#include <Wire.h>  //Needed for I2C to GNSS
+
 #include <SparkFun_u-blox_GNSS_v3.h>  //http://librarymanager/All#SparkFun_u-blox_GNSS_v3
-#include <Wire.h>                     //Needed for I2C to GNSS
 
 SFE_UBLOX_GNSS myGNSS;  // SFE_UBLOX_GNSS uses I2C. For Serial or SPI, see Example2 and Example3
 

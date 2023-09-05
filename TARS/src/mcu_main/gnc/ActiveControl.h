@@ -1,7 +1,9 @@
-#include <PWMServo.h>
 #include <mcu_main/gnc/rk4.h>
+#include "mcu_main/ServoControl.h"
 
-#include "common/ServoControl.h"
+#ifndef ENABLE_SILSIM_MODE
+#include <PWMServo.h>
+#endif
 
 class Controller;
 
@@ -16,7 +18,9 @@ class Controller {
 
     void setLaunchPadElevation();
 
+#ifndef ENABLE_SILSIM_MODE
     PWMServo controller_servo_;
+#endif
     rk4 rk4_;
     float kp = 0.0002;
 
