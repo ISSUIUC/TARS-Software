@@ -10,8 +10,9 @@
 #endif
 
 /* Struct definitions */
+/* TODO(Zyun): Might be more optimal to change all of this to required because protobuf for platformio
+ adds an extra bool between each data package, which could lead to some data wastage */
 typedef struct _HILSIMPacket {
-    uint32_t timestamp;
     /* High-G IMU data */
     bool has_imu_high_ax;
     float imu_high_ax;
@@ -61,51 +62,49 @@ extern "C" {
 #endif
 
 /* Initializer values for message structs */
-#define HILSIMPacket_init_default                {0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0}
-#define HILSIMPacket_init_zero                   {0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0}
+#define HILSIMPacket_init_default                {false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0}
+#define HILSIMPacket_init_zero                   {false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0}
 
 /* Field tags (for use in manual encoding/decoding) */
-#define HILSIMPacket_timestamp_tag               1
-#define HILSIMPacket_imu_high_ax_tag             2
-#define HILSIMPacket_imu_high_ay_tag             3
-#define HILSIMPacket_imu_high_az_tag             4
-#define HILSIMPacket_barometer_altitude_tag      5
-#define HILSIMPacket_barometer_temperature_tag   6
-#define HILSIMPacket_barometer_pressure_tag      7
-#define HILSIMPacket_imu_low_ax_tag              8
-#define HILSIMPacket_imu_low_ay_tag              9
-#define HILSIMPacket_imu_low_az_tag              10
-#define HILSIMPacket_imu_low_gx_tag              11
-#define HILSIMPacket_imu_low_gy_tag              12
-#define HILSIMPacket_imu_low_gz_tag              13
-#define HILSIMPacket_mag_x_tag                   14
-#define HILSIMPacket_mag_y_tag                   15
-#define HILSIMPacket_mag_z_tag                   16
-#define HILSIMPacket_ornt_roll_tag               17
-#define HILSIMPacket_ornt_pitch_tag              18
-#define HILSIMPacket_ornt_yaw_tag                19
+#define HILSIMPacket_imu_high_ax_tag             1
+#define HILSIMPacket_imu_high_ay_tag             2
+#define HILSIMPacket_imu_high_az_tag             3
+#define HILSIMPacket_barometer_altitude_tag      4
+#define HILSIMPacket_barometer_temperature_tag   5
+#define HILSIMPacket_barometer_pressure_tag      6
+#define HILSIMPacket_imu_low_ax_tag              7
+#define HILSIMPacket_imu_low_ay_tag              8
+#define HILSIMPacket_imu_low_az_tag              9
+#define HILSIMPacket_imu_low_gx_tag              10
+#define HILSIMPacket_imu_low_gy_tag              11
+#define HILSIMPacket_imu_low_gz_tag              12
+#define HILSIMPacket_mag_x_tag                   13
+#define HILSIMPacket_mag_y_tag                   14
+#define HILSIMPacket_mag_z_tag                   15
+#define HILSIMPacket_ornt_roll_tag               16
+#define HILSIMPacket_ornt_pitch_tag              17
+#define HILSIMPacket_ornt_yaw_tag                18
 
 /* Struct field encoding specification for nanopb */
 #define HILSIMPacket_FIELDLIST(X, a) \
-X(a, STATIC,   REQUIRED, UINT32,   timestamp,         1) \
-X(a, STATIC,   OPTIONAL, FLOAT,    imu_high_ax,       2) \
-X(a, STATIC,   OPTIONAL, FLOAT,    imu_high_ay,       3) \
-X(a, STATIC,   OPTIONAL, FLOAT,    imu_high_az,       4) \
-X(a, STATIC,   OPTIONAL, FLOAT,    barometer_altitude,   5) \
-X(a, STATIC,   OPTIONAL, FLOAT,    barometer_temperature,   6) \
-X(a, STATIC,   OPTIONAL, FLOAT,    barometer_pressure,   7) \
-X(a, STATIC,   OPTIONAL, FLOAT,    imu_low_ax,        8) \
-X(a, STATIC,   OPTIONAL, FLOAT,    imu_low_ay,        9) \
-X(a, STATIC,   OPTIONAL, FLOAT,    imu_low_az,       10) \
-X(a, STATIC,   OPTIONAL, FLOAT,    imu_low_gx,       11) \
-X(a, STATIC,   OPTIONAL, FLOAT,    imu_low_gy,       12) \
-X(a, STATIC,   OPTIONAL, FLOAT,    imu_low_gz,       13) \
-X(a, STATIC,   OPTIONAL, FLOAT,    mag_x,            14) \
-X(a, STATIC,   OPTIONAL, FLOAT,    mag_y,            15) \
-X(a, STATIC,   OPTIONAL, FLOAT,    mag_z,            16) \
-X(a, STATIC,   OPTIONAL, FLOAT,    ornt_roll,        17) \
-X(a, STATIC,   OPTIONAL, FLOAT,    ornt_pitch,       18) \
-X(a, STATIC,   OPTIONAL, FLOAT,    ornt_yaw,         19)
+X(a, STATIC,   OPTIONAL, FLOAT,    imu_high_ax,       1) \
+X(a, STATIC,   OPTIONAL, FLOAT,    imu_high_ay,       2) \
+X(a, STATIC,   OPTIONAL, FLOAT,    imu_high_az,       3) \
+X(a, STATIC,   OPTIONAL, FLOAT,    barometer_altitude,   4) \
+X(a, STATIC,   OPTIONAL, FLOAT,    barometer_temperature,   5) \
+X(a, STATIC,   OPTIONAL, FLOAT,    barometer_pressure,   6) \
+X(a, STATIC,   OPTIONAL, FLOAT,    imu_low_ax,        7) \
+X(a, STATIC,   OPTIONAL, FLOAT,    imu_low_ay,        8) \
+X(a, STATIC,   OPTIONAL, FLOAT,    imu_low_az,        9) \
+X(a, STATIC,   OPTIONAL, FLOAT,    imu_low_gx,       10) \
+X(a, STATIC,   OPTIONAL, FLOAT,    imu_low_gy,       11) \
+X(a, STATIC,   OPTIONAL, FLOAT,    imu_low_gz,       12) \
+X(a, STATIC,   OPTIONAL, FLOAT,    mag_x,            13) \
+X(a, STATIC,   OPTIONAL, FLOAT,    mag_y,            14) \
+X(a, STATIC,   OPTIONAL, FLOAT,    mag_z,            15) \
+X(a, STATIC,   OPTIONAL, FLOAT,    ornt_roll,        16) \
+X(a, STATIC,   OPTIONAL, FLOAT,    ornt_pitch,       17) \
+X(a, STATIC,   OPTIONAL, FLOAT,    ornt_yaw,         18)
 #define HILSIMPacket_CALLBACK NULL
 #define HILSIMPacket_DEFAULT NULL
 
@@ -115,7 +114,7 @@ extern const pb_msgdesc_t HILSIMPacket_msg;
 #define HILSIMPacket_fields &HILSIMPacket_msg
 
 /* Maximum encoded size of messages (where known) */
-#define HILSIMPacket_size                        100
+#define HILSIMPacket_size                        93
 
 #ifdef __cplusplus
 } /* extern "C" */
