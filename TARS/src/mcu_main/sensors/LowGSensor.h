@@ -5,7 +5,7 @@
 #include "mcu_main/sensors/HighGSensor.h"
 #include "common/packet.h"
 #include "mcu_main/error.h"
-#include "mcu_main/hilsim/HILSIMPacket.h"
+#include "mcu_main/hilsim/hilsimpacket.pb.h"
 #ifndef ENABLE_SILSIM_MODE
 #include "SparkFunLSM6DS3.h"
 #endif

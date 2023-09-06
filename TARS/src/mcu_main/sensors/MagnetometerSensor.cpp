@@ -1,5 +1,7 @@
 #include "MagnetometerSensor.h"
 
+#include <ChRt.h>
+
 #include "mcu_main/pins.h"
 #include "mcu_main/dataLog.h"
 #include "mcu_main/emulation.h"

@@ -1,0 +1,46 @@
+/**
+ * @struct HILSIMPacket
+ * @brief Structure to hold data received serially from a desktop computer
+ *
+ * The simulated/past-launch data is streamed through serial row-by-row to TARS. TARS receives it in the HILSIM thread and populates
+ * data that would otherwise be read from sensors via the received HILSIM packet. Used for rapid testing and iteration of onboard
+ * hardware, GNC, and telemetry systems.
+ * To generate hilsimpacket.pb.h, use the following command:
+ * `python generator/nanopb_generator.py hilsimpacket.proto`
+ * To generate hilsimpacket_pb2.py, use the following command:
+ * `protoc -I=. --python_out=. hilsimpacket.proto`
+*/
+syntax = "proto2";
+
+// TODO(Zyun): Might be more optimal to change all of this to required because protobuf for platformio
+// adds an extra bool between each data package, which could lead to some data wastage
+message HILSIMPacket {
+    required uint32 timestamp = 1;
+    // High-G IMU data
+    optional float imu_high_ax = 2;
+    optional float imu_high_ay = 3;
+    optional float imu_high_az = 4;
+
+    // Barometer data
+    optional float barometer_altitude = 5;
+    optional float barometer_temperature = 6;
+    optional float barometer_pressure = 7;
+
+    // Low-G IMU data
+    optional float imu_low_ax = 8;
+    optional float imu_low_ay = 9;
+    optional float imu_low_az = 10;
+    optional float imu_low_gx = 11;
+    optional float imu_low_gy = 12;
+    optional float imu_low_gz = 13;
+
+    // Mag data
+    optional float mag_x = 14;
+    optional float mag_y = 15;
+    optional float mag_z = 16;
+
+    // Orientation data
+    optional float ornt_roll = 17;
+    optional float ornt_pitch = 18;
+    optional float ornt_yaw = 19;
+}
