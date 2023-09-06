@@ -165,7 +165,7 @@ void Telemetry::transmit() {
     if (rocket_state == FSM_State::STATE_INIT || rocket_state == FSM_State::STATE_IDLE) {
         packet.compact_packet = makeCompactPacket(dataLogger.read());
         packet.type = Packets::COMPACT;
-    } else { 
+    } else {
         packet.default_packet = makePacket(dataLogger.read());
         packet.type = Packets::DEFAULT;
     }

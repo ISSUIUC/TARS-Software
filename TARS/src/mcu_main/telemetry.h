@@ -37,7 +37,7 @@ struct TelemetryDataLite {
 };
 
 struct TelemetryPacket {
-    unsigned int idx = 0;
+    unsigned short idx = 0;
     TelemetryDataLite datapoints[4];
     float gps_lat;
     float gps_long;
@@ -70,7 +70,7 @@ struct TelemetryPacket {
 };
 
 struct CompactTelemetryPacket {
-    unsigned int idx = 1;
+    unsigned short idx = 1;
     float gps_lat;
     float gps_long;
     float gps_alt;
@@ -86,7 +86,6 @@ struct Packets {
 
     TelemetryPacket default_packet;
     CompactTelemetryPacket compact_packet;
-    
 };
 
 // Commands transmitted from ground station to rocket
