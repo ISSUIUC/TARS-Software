@@ -23,6 +23,7 @@
  * Jeffery Zhou
  * Karnap Patel
  * Magilan Sendhil
+ * Aidan Costello
  */
 
 #include "mcu_main/Rt.h"
