@@ -30,6 +30,7 @@
 #include <Arduino.h>
 #include <PWMServo.h>
 #include <SPI.h>
+#include <pb_decode.h>
 #include <Wire.h>
 #endif
 
@@ -72,9 +73,9 @@ static THD_FUNCTION(hilsim_THD, arg) {
             if (data_read[bytes_read - 1] == '\r') data_read[bytes_read - 1] = 0;
 
             hilsim_reader = HILSIMPacket_init_zero;
-            pb_istream_t stream = pb_istream_from_buffer(buffer, data_read);
+            pb_istream_t stream = pb_istream_from_buffer((pb_byte_t*)(data_read), bytes_read);
         
-            bool status = pb_decode(&stream, SimpleMessage_fields, &hilsim_reader);
+            bool status = pb_decode(&stream, HILSIMPacket_fields, &hilsim_reader);
 
             if (!status) {
                 Serial.print("Decoding failed: ");

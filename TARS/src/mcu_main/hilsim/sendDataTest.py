@@ -10,7 +10,7 @@ SPEED_FACTOR = 1
 GRANULARITY_FACTOR = 2
 
 # -----------------<Change first param to the correct port, MacOS (ls /dev/tty.*)>-----------------
-ser = serial.Serial("/dev/tty.usbmodem132228101", 9600, timeout=10, write_timeout=10)
+ser = serial.Serial("COM6", 9600, timeout=10, write_timeout=10)
 
 csv = pandas.read_csv('flight_computer.csv')
 total_rows = csv.shape[0]
@@ -50,7 +50,7 @@ for i, row in csv.iterrows():
     hilsim_packet.mag_y = row["my"]
     hilsim_packet.mag_z = row["mz"]
 
-    ser.write(hilsim_packet)
+    ser.write(hilsim_packet.SerializeToString())
     
     data = ser.read_all()
     decoded = data.decode("utf8")
