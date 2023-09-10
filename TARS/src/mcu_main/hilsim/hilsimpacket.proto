@@ -6,7 +6,7 @@
  * data that would otherwise be read from sensors via the received HILSIM packet. Used for rapid testing and iteration of onboard
  * hardware, GNC, and telemetry systems.
  * To generate hilsimpacket.pb.h, use the following command:
- * `python generator/nanopb_generator.py hilsimpacket.proto`
+ * `python nanopb_generator/nanopb_generator.py hilsimpacket.proto`
  * To generate hilsimpacket_pb2.py, use the following command:
  * `protoc -I=. --python_out=. hilsimpacket.proto`
 */

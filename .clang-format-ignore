@@ -4,3 +4,5 @@ TARS/.pio/*
 TARS/src/mcu_main/ISS_SILSIM/*
 TARS/src/mcu_main/hilsim/hilsimpacket.pb.h
 TARS/src/mcu_main/hilsim/hilsimpacket.pb.c
+TARS/src/mcu_main/hilsim/generator/*
+*.proto
