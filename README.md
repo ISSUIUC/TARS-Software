@@ -72,3 +72,5 @@ Things to keep in mind about code formatting:
   - Exempt directories should be listed in `.clang-format-ignore` so they don't get auto-formatted by the script.
   - Exempt directories should also be listed in `.github/workflows/clang_format_check.yml` on the lines with `exclude:`, so they're not checked for style violations by GitHub. 
 - Changing/tweaking the style guide is always option! If you have ideas, reach out!
+
+ - You can copy the file tools/pre-commit to .git/hooks with the command `cp tools/pre-commit .git/hooks/pre-commit` to automatically run clang tidy before committing.
