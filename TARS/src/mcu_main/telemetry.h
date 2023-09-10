@@ -23,7 +23,7 @@ class Telemetry;
 extern Telemetry tlm;
 
 struct TelemetryDataLite {
-    systime_t timestamp;          //[0, 2^32]
+    systime_t timestamp;  //[0, 2^32]
 
     uint16_t barometer_pressure;  //[0, 4096]
     int16_t highG_ax;             //[128, -128]
@@ -33,7 +33,7 @@ struct TelemetryDataLite {
     int16_t bno_pitch;            //[-4,4]
     int16_t bno_yaw;              //[-4,4]
 
-    float flap_extension;         //[0, 256]
+    float flap_extension;  //[0, 256]
 };
 
 struct TelemetryPacket {
