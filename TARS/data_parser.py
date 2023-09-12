@@ -9,6 +9,7 @@ Steps to use this wonderful software:
     - There are numerous reasons this might not work out of the box. Some reasons I can think of right now include
       not having python on your path, having the wrong python on your path, not being in the right working directory,
       or not having installed the right lark.
+    - Outputting to a `.csv` file will automatically trigger a conversion from JSON to CSV at the end of the process.
 """
 
 from __future__ import annotations
@@ -627,9 +628,35 @@ def preprocess(t: str) -> str:
             l.append(line)
     return "\n".join(l)
 
+# Given a json object that is representative of the whole file, recursively create a header string containing every key in the json.
+def construct_header_string(with_trace, jsonobject):
+    out = ""
+    for key in list(jsonobject.keys()):
+        if(type(jsonobject[key]) is dict):
+            # If it's a dictionary, continue recursively but including the trace to the datatype
+            out += construct_header_string(with_trace + key + ".", jsonobject[key]) + ","
+        else:
+            out += with_trace + key + ","
+    return out.rstrip(out[-1])
+        
+# Create a string containing a single json object as a csv
+def construct_data_string(jsonobject):
+    out = ""
+    for key in list(jsonobject.keys()):
+        if(type(jsonobject[key]) is dict):
+            # If it's a dictionary, continue recursively but including the trace to the datatype
+            out += construct_data_string(jsonobject[key]) + ","
+        elif(type(jsonobject[key]) is list):
+            # If it's a list, take only the first value (Lists are only used for FSM, anyway, someone could alter this behavior though if they wish)
+            out += str(jsonobject[key][0]) + ","
+        else:
+            out += str(jsonobject[key]) + ","
+    return out.rstrip(out[-1])
 
 def main():
     args = get_arguments()
+
+    
 
     parser = Lark(grammar, parser="earley")
     # open up the header file and read it in
@@ -646,12 +673,19 @@ def main():
     # extract the info for the sensorDataStruct_t from the context (since Calculate mutates it as it goes)
     sensor_data_struct: Type = ctxt.types["sensorDataStruct_t"]
 
+    file_type = pathlib.Path(args.out).suffix
+
     # open up the raw data file and read it in
     with args.raw.open("rb") as f_da:
         all_data: bytes = f_da.read()
 
     idx = 0  # a counter which keeps track of how far into the raw data we are
     # open up the output file, which we write to incrementally
+
+    # Determine if the filetype should be a .csv file or a .json file.
+    
+
+    # If file_type is .csv, we will convert it from JSON (It is easier to convert from JSON than from a binary format.)
     with args.out.open("w") as f_out:
         f_out.write("[")
         prev = False  # keeps track of whether this is the first line written, so we know whether to prepend a comma
@@ -675,6 +709,22 @@ def main():
             # displays the progress
             print(f"\rParsed {render_bytes(idx)}/{render_bytes(len(all_data))} bytes", end="", flush=True)
         f_out.write("\n]")
+
+    if file_type == ".csv":
+        print("\nConverting .json output to .csv")
+        with args.out.open("r") as f_in:
+            data_json = json.load(f_in)
+        
+        headerString = construct_header_string("", data_json[0])
+        with args.out.open("w") as f_out:
+            # Now we can overwrite the data, since we have the json loaded.
+            f_out.write(headerString + "\n")
+            for data_object in data_json:
+                f_out.write(construct_data_string(data_object) + "\n")
+            
+
+
+        
 
 
 if __name__ == '__main__':
