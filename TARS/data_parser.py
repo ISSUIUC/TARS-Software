@@ -656,8 +656,6 @@ def construct_data_string(jsonobject):
 def main():
     args = get_arguments()
 
-    
-
     parser = Lark(grammar, parser="earley")
     # open up the header file and read it in
     with args.header.open("r") as f:
@@ -673,19 +671,17 @@ def main():
     # extract the info for the sensorDataStruct_t from the context (since Calculate mutates it as it goes)
     sensor_data_struct: Type = ctxt.types["sensorDataStruct_t"]
 
-    file_type = pathlib.Path(args.out).suffix
-
     # open up the raw data file and read it in
     with args.raw.open("rb") as f_da:
         all_data: bytes = f_da.read()
 
     idx = 0  # a counter which keeps track of how far into the raw data we are
-    # open up the output file, which we write to incrementally
-
-    # Determine if the filetype should be a .csv file or a .json file.
     
 
-    # If file_type is .csv, we will convert it from JSON (It is easier to convert from JSON than from a binary format.)
+    # Determine if the filetype should be a .csv file or a .json file.
+    file_type = pathlib.Path(args.out).suffix
+
+    # open up the output file, which we write to incrementally
     with args.out.open("w") as f_out:
         f_out.write("[")
         prev = False  # keeps track of whether this is the first line written, so we know whether to prepend a comma
@@ -710,6 +706,7 @@ def main():
             print(f"\rParsed {render_bytes(idx)}/{render_bytes(len(all_data))} bytes", end="", flush=True)
         f_out.write("\n]")
 
+    # If file_type is .csv, we will convert it from JSON (It is easier to convert from JSON than from a binary format.)
     if file_type == ".csv":
         print("\nConverting .json output to .csv")
         with args.out.open("r") as f_in:
@@ -723,8 +720,6 @@ def main():
                 f_out.write(construct_data_string(data_object) + "\n")
             
 
-
-        
 
 
 if __name__ == '__main__':
