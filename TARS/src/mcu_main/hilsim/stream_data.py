@@ -3,7 +3,6 @@ import time
 import os
 
 serial_port = "/dev/tty.usbmodem132228101"
-log_file = "./run.txt"
 
 
 def run_hilsim(raw_csv):
