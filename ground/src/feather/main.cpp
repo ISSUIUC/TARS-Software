@@ -277,6 +277,31 @@ void printPacketJson(FullTelemetryData const& packet) {
         printJSONField("gps_alt", packet.gps_alt);
         printJSONField("Voltage", packet.voltage_battery);
         printJSONField("TEMP", packet.barometer_temp);
+
+        // TODO(replace with memset)
+        printJSONField("response_ID", 0);
+        printJSONField("KX_IMU_ax", 0);
+        printJSONField("KX_IMU_ay", 0);
+        printJSONField("KX_IMU_az", 0);
+        printJSONField("IMU_gx", 0);
+        printJSONField("IMU_gy", 0);
+        printJSONField("IMU_gz", 0);
+        printJSONField("IMU_mx", 0);
+        printJSONField("IMU_my", 0);
+        printJSONField("IMU_mz", 0);
+        printJSONField("FSM_state", 0);
+        printJSONField("sign", "NOSIGN");
+        printJSONField("RSSI", rf95.lastRssi());
+        printJSONField("frequency", 0);
+        printJSONField("flap_extension", 0);
+        printJSONField("STE_ALT", 0);
+        printJSONField("STE_VEL", 0);
+        printJSONField("STE_ACC", 0);
+        printJSONField("STE_APO", 0);
+        printJSONField("BNO_YAW", 0);
+        printJSONField("BNO_PITCH", 0);
+        printJSONField("BNO_ROLL", 0);
+        printJSONField("pressure", 0, false);
     } else {
         printJSONField("response_ID", packet.response_ID);
         printJSONField("gps_lat", packet.gps_lat);
