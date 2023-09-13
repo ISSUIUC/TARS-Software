@@ -1,0 +1,17 @@
+RUN FAIL
+SILSIM CI Exited with code 255 [Generic error]
+
+
+Traceback:
+Traceback (most recent call last):
+  File "c:\Users\mpkar\Documents\ISS\TARS-Software\TARS\silsim_ci\ci_check.py", line 227, in main
+    run_packet_checks(cur_state, packet)
+    ^^^^^^^^^^^^^^^^^
+NameError: name 'run_packet_checks' is not defined
+
+
+
+=================== LOGFILE ===================
+<main>  Loading silsim output
+<main>  Running silsim parser
+===================   END   ===================
