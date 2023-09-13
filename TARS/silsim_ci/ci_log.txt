@@ -3,15 +3,17 @@ SILSIM CI Exited with code 255 [Generic error]
 
 
 Traceback:
-Traceback (most recent call last):
-  File "c:\Users\mpkar\Documents\ISS\TARS-Software\TARS\silsim_ci\ci_check.py", line 227, in main
-    run_packet_checks(cur_state, packet)
-    ^^^^^^^^^^^^^^^^^
-NameError: name 'run_packet_checks' is not defined
+NoneType: None
 
 
 
 =================== LOGFILE ===================
 <main>  Loading silsim output
 <main>  Running silsim parser
+<t+2.72>  FSM State change from 'None' to 1
+<t+49361.15>  FSM State change from '1' to '2'
+<t+49364.15>  FSM State change from '2' to '3'
+<post-flight>  SILSIM parse complete
+<FATAL>  Check FSM state after simulation end: assert_equal failed, expected value '16' but got '3'
+<FATAL>  CI Abort
 ===================   END   ===================
