@@ -2,6 +2,9 @@ import csv
 import os
 import traceback
 import ci_config as config
+import copy
+import pandas as pd
+import matplotlib.pyplot as plt
 # This script determines if the CI should pass or fail given a simulation_output csv.
 # This script will also output a log of all the actions that happened during the simulated launch
 
@@ -47,10 +50,15 @@ def success():
     exit(0)
 
 def fail(msg=None):
-    if msg == None:
-        print("\033[93m" + traceback.format_exc() + "\033[0m")
+    text_output = ""
+    if msg == None or msg == str(None):
+        text_output = traceback.format_exc()
     else:
-        print("\033[93m" + msg + "\033[0m")
+        text_output = msg
+        
+    log(text_output, "FATAL")
+    log("CI Abort", "FATAL")
+    print("\033[93m" + str(msg) + "\033[0m")
     print("\n\nSILSIM CI run \033[91mFAIL\033[0m")
     clear_file()
     insert_file("RUN FAIL")
@@ -61,6 +69,9 @@ def fail(msg=None):
     exit(255)
 
 # Actual ci logic
+
+def ticks_to_ms(tick):
+    return ((tick * 1000) + 10000 - 1)/10000
 
 # add_branch function from https://stackoverflow.com/questions/30880973/parse-a-dot-seperated-string-into-dictionary-variable
 def add_branch(tree, vector, value):
@@ -119,7 +130,6 @@ def construct_packet_format(csv_header_line):
         packet_format = add_branch(packet_format, trace, None)
     return (packet_format, packet_format_list)
     
-    
 
 def construct_packet_from_format(packet_format, packet_format_list, csv_line):
     packet = packet_format
@@ -131,8 +141,39 @@ def construct_packet_from_format(packet_format, packet_format_list, csv_line):
         
     return packet
 
+def get_packet_timestamp_diff(current_timestamp, silsim_packet, datastring):
+    data_timestamp = int(silsim_packet[datastring]['timestamp'])
+    return abs(data_timestamp - current_timestamp)
+
+def check_timestamp_diff_complies(current_state, silsim_packet, datastring):
+    if(not test_data_exists(silsim_packet, datastring)):
+        return
+
+    current_timestamp = 0
+    if(current_state['lastseen'].get(datastring) != None):
+        current_timestamp = int(current_state['lastseen'][datastring])
+    
+    diff = ticks_to_ms(get_packet_timestamp_diff(current_timestamp, silsim_packet, datastring))
+    # print(diff / 1000)
+    if(int(diff / 1000) > config.check_timeouts_length):
+        print(current_state['lastseen'])
+        print(datastring)
+        print(silsim_packet[datastring]['timestamp'])
+        fail("Packet data timeout for " + datastring + " on timestamp " + str(current_timestamp) + "  (simulation time " + str(ticks_to_ms(current_timestamp)/1000) + " seconds)\nPacket timed out with time " + str((diff / 1000)) + "s, fail condition set to " + str(config.check_timeouts_length) + "s")
+
+
 def parse_packet(current_state, silsim_packet):
-    return
+    if(config.check_timeouts):
+        check_timestamp_diff_complies(current_state, silsim_packet, "lowG_data")
+        check_timestamp_diff_complies(current_state, silsim_packet, "highG_data")
+        check_timestamp_diff_complies(current_state, silsim_packet, "gps_data")
+        check_timestamp_diff_complies(current_state, silsim_packet, "barometer_data")
+        # check_timestamp_diff_complies(current_state, silsim_packet, "state_data")
+        check_timestamp_diff_complies(current_state, silsim_packet, "voltage_data")
+        check_timestamp_diff_complies(current_state, silsim_packet, "rocketState_data")
+
+    
+
 
 def test_data_exists(silsim_packet, datastring):
     return silsim_packet["has_" + datastring] == "True" or silsim_packet["has_" + datastring] == "1"
@@ -145,13 +186,20 @@ def get_timestamp(silsim_packet, datastring):
 def get_lastseen(current_state, silsim_packet, datastring):
     this_seen = get_timestamp(silsim_packet, datastring)
     if(this_seen != -1):
-        current_state['lastseen_' + datastring] = this_seen
+        current_state['lastseen'][datastring] = this_seen
 
 def load_packet_key(current_state, silsim_packet, datastring):
     if test_data_exists(silsim_packet, datastring):
-        current_state[datastring] = silsim_packet[datastring]
+        current_state[datastring] = silsim_packet[datastring].copy()
+
+def get_timestamp_seconds(timestamp):
+    return ticks_to_ms(timestamp)/1000
+
+def get_sim_timestamp_string(timestamp):
+    return "t+" + str(round(get_timestamp_seconds(timestamp), 2))
 
 def load_packet_into_state(current_state, silsim_packet):
+    
     # Load the last time that the packet was seen
     get_lastseen(current_state, silsim_packet, "lowG_data")
     get_lastseen(current_state, silsim_packet, "highG_data")
@@ -161,7 +209,8 @@ def load_packet_into_state(current_state, silsim_packet):
     get_lastseen(current_state, silsim_packet, "voltage_data")
     get_lastseen(current_state, silsim_packet, "rocketState_data")
     
-    load_packet_key(current_state['loaded_state'], silsim_packet, "lowG_data")
+    if(load_packet_key(current_state['loaded_state'], silsim_packet, "lowG_data")):
+        pass
     load_packet_key(current_state['loaded_state'], silsim_packet, "highG_data")
     load_packet_key(current_state['loaded_state'], silsim_packet, "gps_data")
     load_packet_key(current_state['loaded_state'], silsim_packet, "barometer_data")
@@ -173,7 +222,8 @@ def assert_equal(assert_text, real, expected):
     if(real != expected):
         fail(assert_text + ": assert_equal failed, expected value '" + str(expected) + "' but got '" + str(real) + "'")
     else:
-        log(assert_text + ": PASS", "assert_equal")
+        log(assert_text + ": PASS", "assert-equal")
+
 
 def post_launch(state):
     log("SILSIM parse complete", "post-flight")
@@ -188,15 +238,25 @@ def post_launch(state):
 def get_timestamp_for_packet(silsim_packet):
     max_timestamp = -1
     for key in silsim_packet:
-        if(type(key) is dict):
+        if(type(silsim_packet[key]) is dict):
             if(silsim_packet[key]['timestamp']):
                 if(int(silsim_packet[key]['timestamp']) > max_timestamp):
                     max_timestamp = int(silsim_packet[key]['timestamp'])
     return max_timestamp
 
+def compare_packets(last, cur):
+    # print(get_timestamp_for_packet(last) == get_timestamp_for_packet(cur))
+    timestamp = get_timestamp_for_packet(cur)
+    timestamp_string = get_sim_timestamp_string(timestamp)
 
-#def run_packet_checks(state, silsim_packet):
-#    if(config.check_timeouts):
+    if(test_data_exists(cur, "rocketState_data")):
+        rocket_state = cur['rocketState_data']['rocketState']
+        if(last.get('rocketState_data') == None):
+            log("FSM State change from 'None' to " + str(rocket_state), timestamp_string)
+        else:
+            if(int(last['rocketState_data']['rocketState']) != int(rocket_state)):
+                log("FSM State change from '" + str(last['rocketState_data']['rocketState']) + "' to '" + str(rocket_state) + "'", timestamp_string)
+
 
 
 
@@ -211,8 +271,10 @@ def main():
             packet_format = None
             packet_format_list = None
 
+            last_packet = None
+
             # Initial state
-            cur_state = {'loaded_state': {}}
+            cur_state = {'loaded_state': {}, 'lastseen': {}}
             log("Running silsim parser")
             for row in csv_rows:
                 if cur_line == 0:
@@ -220,14 +282,16 @@ def main():
                     # Line 0 will have all the headers for the csv, we want to construct a dict using the headers.
                     cur_line += 1
                     continue
+                
                 packet = construct_packet_from_format(packet_format, packet_format_list, row)
+                if cur_line == 1:
+                    last_packet = copy.deepcopy(cur_state["loaded_state"])
+
                 parse_packet(cur_state, packet)
                 load_packet_into_state(cur_state, packet)
-
-                run_packet_checks(cur_state, packet)
-                
+                compare_packets(last_packet, packet)
+                last_packet = copy.deepcopy(cur_state["loaded_state"])
                 cur_line += 1
-
             post_launch(cur_state)
     except SystemExit:
         print("Process exited with error code 255")
@@ -238,14 +302,6 @@ def main():
 
     log("SILSIM CI run complete")
     success()
-
-
-
-
-
-
-
-
 
 if __name__ == "__main__":
     main()
