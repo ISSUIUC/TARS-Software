@@ -199,15 +199,9 @@ def check_timestamp_diff_complies(current_state, silsim_packet, datastring):
 # @param silsim_packet newest packet to update current_state with
 def parse_packet(current_state, silsim_packet):
     if(config.check_timeouts):
-        check_timestamp_diff_complies(current_state, silsim_packet, "lowG_data")
-        check_timestamp_diff_complies(current_state, silsim_packet, "highG_data")
-        check_timestamp_diff_complies(current_state, silsim_packet, "gps_data")
-        check_timestamp_diff_complies(current_state, silsim_packet, "barometer_data")
-        # check_timestamp_diff_complies(current_state, silsim_packet, "state_data")
-        check_timestamp_diff_complies(current_state, silsim_packet, "voltage_data")
-        check_timestamp_diff_complies(current_state, silsim_packet, "rocketState_data")
-
-    
+        for category_value in config.all_data_vales:
+            if category_value != "state_data":
+                check_timestamp_diff_complies(current_state, silsim_packet, category_value)
 
 # Checks if a certain datastring has data in a packet
 # @param silsim_packet the newest packet to check existence of data
@@ -235,7 +229,7 @@ def get_lastseen(current_state, silsim_packet, datastring):
         current_state['last_seen'][datastring] = this_seen
 
 # Updates current state with the newest data found in the packet for a certain datastring
-# @param current_state tuple with current state and timestamp dictionaries
+# @param current_state current_state value dictionary
 # @param silsim_packet newest packet to update current_state with
 # @param datastring the sensor in which to update data
 def load_packet_key(current_state, silsim_packet, datastring):
@@ -259,22 +253,9 @@ def get_sim_timestamp_string(timestamp):
 # @param silsim_packet current packet to update current_state with
 def load_packet_into_state(current_state, silsim_packet):
     
-    # Load the last time that the packet was seen
-    get_lastseen(current_state, silsim_packet, "lowG_data")
-    get_lastseen(current_state, silsim_packet, "highG_data")
-    get_lastseen(current_state, silsim_packet, "gps_data")
-    get_lastseen(current_state, silsim_packet, "barometer_data")
-    get_lastseen(current_state, silsim_packet, "state_data")
-    get_lastseen(current_state, silsim_packet, "voltage_data")
-    get_lastseen(current_state, silsim_packet, "rocketState_data")
-
-    load_packet_key(current_state['loaded_state'], silsim_packet, "lowG_data") 
-    load_packet_key(current_state['loaded_state'], silsim_packet, "highG_data")
-    load_packet_key(current_state['loaded_state'], silsim_packet, "gps_data")
-    load_packet_key(current_state['loaded_state'], silsim_packet, "barometer_data")
-    load_packet_key(current_state['loaded_state'], silsim_packet, "state_data")
-    load_packet_key(current_state['loaded_state'], silsim_packet, "voltage_data")
-    load_packet_key(current_state['loaded_state'], silsim_packet, "rocketState_data")
+    for data_category in config.all_data_vales:
+        get_lastseen(current_state, silsim_packet, data_category)
+        load_packet_key(current_state['loaded_state'], silsim_packet, data_category) 
 
 # Checks if first and second values are the same, fails simulation if they are different
 # @param assert_text test to be dispalyed to user when fail or pass
