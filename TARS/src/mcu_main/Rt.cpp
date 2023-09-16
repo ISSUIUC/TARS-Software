@@ -15,10 +15,10 @@ void setup();
 static Simulation* g_sim;
 struct ThreadInfo {
    public:
-    explicit ThreadInfo(const char* name, void* handle) : _name(name), fiber_handle(handle) {}
+    explicit ThreadInfo(const char* name, FiberHandle handle) : _name(name), fiber_handle(handle) {}
 
     const char* _name;
-    void* fiber_handle;
+    FiberHandle fiber_handle;
 };
 
 struct ThreadManager {
@@ -40,7 +40,7 @@ struct ThreadManager {
         ThreadInfo* switch_to = &threads[next_thread];
         next_thread++;
         if (debug) std::cout << "Switching to " << switch_to->_name << std::endl;
-        SwitchToFiber(switch_to->fiber_handle);
+        EmuSwitchToFiber(switch_to->fiber_handle);
     }
 };
 
@@ -51,7 +51,7 @@ uint32_t getTime() { return g_sim->get_time(); }
 void threadYield() { thread_manager.yield(); }
 
 void createThread(const char* name, void fn(void*), size_t stack, void* arg) {
-    void* handle = CreateFiber(stack, fn, arg);
+    FiberHandle handle = EmuCreateFiber(stack, fn, arg);
     thread_manager.threads.emplace_back(name, handle);
 }
 
@@ -93,7 +93,7 @@ void run_sim(void* arg) {
 }
 
 int main() {
-    thread_manager.threads.emplace_back("main", ConvertThreadToFiber(nullptr));
+    thread_manager.threads.emplace_back("main", EmuConvertThreadToFiber());
 
     Rocket rocket = createRocket();
 

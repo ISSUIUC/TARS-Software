@@ -1,4 +1,5 @@
 #pragma once
+#include<cstddef>
 typedef void ThreadFunc(void*);
 struct FiberHandle;
 void EmuSwitchToFiber(FiberHandle handle);
