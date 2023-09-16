@@ -1,9 +1,18 @@
 import serial
 import time
 import os
+import serial.tools.list_ports
 
 serial_port = "/dev/tty.usbmodem132228101"
 
+def get_ports():
+    return serial.tools.list_ports.comports()
+
+def validate_ports():
+    ports = get_ports()
+    if(len(ports) == 0):
+        return "No devices are plugged in. Please plug TARS into a serial port"
+    return "OK"
 
 def run_hilsim(raw_csv):
     print("Run hilsim request recieved")

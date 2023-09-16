@@ -21,4 +21,8 @@ def index():
     return {'log': result}, 200
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', debug=True)
+    v_result = stream_data.validate_ports()
+    if(v_result == "OK"):
+        app.run(host='0.0.0.0', debug=True)
+    else:
+        print("ERR: " + v_result)
