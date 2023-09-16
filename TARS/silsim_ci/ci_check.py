@@ -10,17 +10,23 @@ import matplotlib.pyplot as plt
 
 # Logging
 log_output = "ci_log.txt"
+
+# Array of strings that are the logs
 logs = []
 
+# Clears the log_output file to rewrite to before dumping logs
 def clear_file():
     f = open(os.path.join(os.path.dirname(__file__), "./" + log_output), "w")
     f.close()
 
+# Inserts text to the log output file
+# @param test the text to outut to the file
 def insert_file(text):
     f = open(os.path.join(os.path.dirname(__file__), "./" + log_output), "a")
     f.write(text + "\n")
-    f.close();
+    f.close()
 
+# Writes everything in the log to the log_output file
 def insert_logs():
     f = open(os.path.join(os.path.dirname(__file__), "./" + log_output), "a")
     if(len(logs) > 0):
@@ -35,11 +41,14 @@ def insert_logs():
     
     f.close()
 
+# Logs test in a certain manner to both the log and terminal
+# @param logtext text to output to the log
+# @param key tag to define the text, default to main
 def log(logtext, key="main"):
     logs.append("<" + key + ">  " + str(logtext))
     print("\033[90m[" + key + "]  " + str(logtext) + "\033[0m")
 
-# CI success/fail methods
+# CI success/fail methods, automatically called if no exceptions
 def success():
     print("\n\nSILSIM CI run \033[92mSUCCESS\033[0m")
     clear_file()
@@ -49,6 +58,8 @@ def success():
     print("\n")
     exit(0)
 
+# Fails and exiits the program after outputting to file
+# @param msg the message to display on fail
 def fail(msg=None):
     text_output = ""
     if msg == None or msg == str(None):
@@ -69,11 +80,17 @@ def fail(msg=None):
     exit(255)
 
 # Actual ci logic
-
+# Turns number of ticks into number if ms
+# @param tick the number of ticks
+# @return that amout of ticks in milliseconds
 def ticks_to_ms(tick):
     return ((tick * 1000) + 10000 - 1)/10000
 
 # add_branch function from https://stackoverflow.com/questions/30880973/parse-a-dot-seperated-string-into-dictionary-variable
+# Creates a dictionary in the format as defined below 
+# @param tree the original dictionary
+# @param vector the current structure to be created in the dictionary
+# @param value the value to be stored in the dictionary
 def add_branch(tree, vector, value):
     """
     Given a dict, a vector, and a value, insert the value into the dict
@@ -121,6 +138,9 @@ def add_branch(tree, vector, value):
                         value)
     return tree
 
+# Takes the header and turns it into a dictionary of packet structure
+# @param csv_header_line the header line
+# @return a tuple of the format dictionary and the subcategories in an array
 def construct_packet_format(csv_header_line):
     packet_format = {}
     packet_format_list = []
@@ -131,6 +151,10 @@ def construct_packet_format(csv_header_line):
     return (packet_format, packet_format_list)
     
 
+# Creates a packet dictionary from the format and the data
+# @param packet_format the template of the packet to create the format of the packet with
+# @param packet_format_list each datastrings structure to add into the dictionary
+# @return the packet in the correct format with all the data
 def construct_packet_from_format(packet_format, packet_format_list, csv_line):
     packet = packet_format
     cur_token = 0 # Which piece of data are we on in the current line?
@@ -141,28 +165,38 @@ def construct_packet_from_format(packet_format, packet_format_list, csv_line):
         
     return packet
 
+# Gets the difference in timestamps between current stored and the one in the packet
+# @param current_timestamp the current store timestamp
+# @param silsim_packet the current packet to check timestamp with
+# @param datastring current sensor category to get timestamp difference in
+# @return the absolute value of the difference between current stored and packet timestamp
 def get_packet_timestamp_diff(current_timestamp, silsim_packet, datastring):
     data_timestamp = int(silsim_packet[datastring]['timestamp'])
     return abs(data_timestamp - current_timestamp)
 
+# Makes sure current stored timestamp and packet timestamp are within ten seconds, fails simulation if not
+# @param current_state tuple with current state and timestamp dictionaries
+# @param silsim_packet newest packet to update current_state with
+# @param datastring sensor category to check timestamp complying in
 def check_timestamp_diff_complies(current_state, silsim_packet, datastring):
-    SECONDS_TO_MILLISECONDS = 0.001
 
     if(not test_data_exists(silsim_packet, datastring)):
         return
 
     current_timestamp = 0
-    if(current_state['lastseen'].get(datastring) != None):
-        current_timestamp = int(current_state['lastseen'][datastring])
+    if(current_state['last_seen'].get(datastring) != None):
+        current_timestamp = int(current_state['last_seen'][datastring])
     
     diff = ticks_to_ms(get_packet_timestamp_diff(current_timestamp, silsim_packet, datastring))
-    if(int(diff * SECONDS_TO_MILLISECONDS) > config.check_timeouts_length):
-        print(current_state['lastseen'])
+    if(int(diff * config.SECONDS_TO_MS) > config.check_timeouts_length):
+        print(current_state['last_seen'])
         print(datastring)
         print(silsim_packet[datastring]['timestamp'])
-        fail("Packet data timeout for " + datastring + " on timestamp " + str(current_timestamp) + "  (simulation time " + str(ticks_to_ms(current_timestamp) * SECONDS_TO_MILLISECONDS) + " seconds)\nPacket timed out with time " + str((diff * SECONDS_TO_MILLISECONDS)) + "s, fail condition set to " + str(config.check_timeouts_length) + "s")
+        fail("Packet data timeout for " + datastring + " on timestamp " + str(current_timestamp) + "  (simulation time " + str(ticks_to_ms(current_timestamp) * config.SECONDS_TO_MS) + " seconds)\nPacket timed out with time " + str((diff * config.SECONDS_TO_MS)) + "s, fail condition set to " + str(config.check_timeouts_length) + "s")
 
-
+# Parses packet for all of the sensor categories
+# @param current_state tuple with current state and timestamp dictionaries
+# @param silsim_packet newest packet to update current_state with
 def parse_packet(current_state, silsim_packet):
     if(config.check_timeouts):
         check_timestamp_diff_complies(current_state, silsim_packet, "lowG_data")
@@ -175,30 +209,54 @@ def parse_packet(current_state, silsim_packet):
 
     
 
-
+# Checks if a certain datastring has data in a packet
+# @param silsim_packet the newest packet to check existence of data
+# @param datastring the sensor category to check if data exists
+# @return boolean that reuturns true if the data exists and false if not
 def test_data_exists(silsim_packet, datastring):
     return silsim_packet["has_" + datastring] == "True" or silsim_packet["has_" + datastring] == "1"
 
+# Gets the timestamp from a packet
+# @param silsim_packet the newest packet to get the timestamp from
+# @param datastring the sensor from which to get the timestamp
+# @return the timestamp from the packet in the sensor data or -1 if it cannot be found
 def get_timestamp(silsim_packet, datastring):
     if test_data_exists(silsim_packet, datastring):
         return silsim_packet[datastring]['timestamp']
     return -1
 
+# Updates current_state timestamp dictionary with the newst timestamp for the datastring
+# @param current_state tuple with current state and timestamp dictionaries
+# @param silsim_packet newest packet to update current_state with
+# @param datastring the sensor in which to update data
 def get_lastseen(current_state, silsim_packet, datastring):
     this_seen = get_timestamp(silsim_packet, datastring)
     if(this_seen != -1):
-        current_state['lastseen'][datastring] = this_seen
+        current_state['last_seen'][datastring] = this_seen
 
+# Updates current state with the newest data found in the packet for a certain datastring
+# @param current_state tuple with current state and timestamp dictionaries
+# @param silsim_packet newest packet to update current_state with
+# @param datastring the sensor in which to update data
 def load_packet_key(current_state, silsim_packet, datastring):
     if test_data_exists(silsim_packet, datastring):
         current_state[datastring] = silsim_packet[datastring].copy()
 
+# Converts a timestamp from milliseconds to seconds
+# @param timestamp timestamp in milliseconds
+# @return timestamp in seconds
 def get_timestamp_seconds(timestamp):
-    return ticks_to_ms(timestamp)/1000
+    return ticks_to_ms(timestamp) * config.SECONDS_TO_MS
 
+# Returns timestamp with a t infront of it for logging uprposes
+# @param timestamp timestamp to return with a t
+# @return timestamp with t added infront of it
 def get_sim_timestamp_string(timestamp):
     return "t+" + str(round(get_timestamp_seconds(timestamp), 2))
 
+# Updates both the current data and timestamp in current_state from the silsim_packet for eact data sensor
+# @param current_state the tuple of state and timestamp dictionary
+# @param silsim_packet current packet to update current_state with
 def load_packet_into_state(current_state, silsim_packet):
     
     # Load the last time that the packet was seen
@@ -209,9 +267,8 @@ def load_packet_into_state(current_state, silsim_packet):
     get_lastseen(current_state, silsim_packet, "state_data")
     get_lastseen(current_state, silsim_packet, "voltage_data")
     get_lastseen(current_state, silsim_packet, "rocketState_data")
-    
-    if(load_packet_key(current_state['loaded_state'], silsim_packet, "lowG_data")):
-        pass
+
+    load_packet_key(current_state['loaded_state'], silsim_packet, "lowG_data") 
     load_packet_key(current_state['loaded_state'], silsim_packet, "highG_data")
     load_packet_key(current_state['loaded_state'], silsim_packet, "gps_data")
     load_packet_key(current_state['loaded_state'], silsim_packet, "barometer_data")
@@ -219,13 +276,19 @@ def load_packet_into_state(current_state, silsim_packet):
     load_packet_key(current_state['loaded_state'], silsim_packet, "voltage_data")
     load_packet_key(current_state['loaded_state'], silsim_packet, "rocketState_data")
 
+# Checks if first and second values are the same, fails simulation if they are different
+# @param assert_text test to be dispalyed to user when fail or pass
+# @param real one of the values, got from the state of the rocket
+# @param expected the value expected to be had
 def assert_equal(assert_text, real, expected):
     if(real != expected):
         fail(assert_text + ": assert_equal failed, expected value '" + str(expected) + "' but got '" + str(real) + "'")
     else:
         log(assert_text + ": PASS", "assert-equal")
 
-
+# Checks if the Finite State Machine and the success final state value are the same
+# @param state a tuple of two dictionaries. The first dictionary has key, value pairs of data name and data
+#              the second dictionary has key, value pairs of data name and most recent timestamp
 def post_launch(state):
     log("SILSIM parse complete", "post-flight")
     # After-run checks:
@@ -236,6 +299,8 @@ def post_launch(state):
         assert_equal("Check FSM state after simulation end", fsm_state, check_state)
 
 # Determine the latest time that the packet might have been sent
+# @param silsim_packet the current packet to find the timestamp of
+# @return the newest timestamp that is found
 def get_timestamp_for_packet(silsim_packet):
     max_timestamp = -1
     for key in silsim_packet:
@@ -245,6 +310,10 @@ def get_timestamp_for_packet(silsim_packet):
                     max_timestamp = int(silsim_packet[key]['timestamp'])
     return max_timestamp
 
+# NOT COMPLETE
+# Compares previous and current packets and updates data accordingly in log
+# @param last the previous data packet
+# @param cur the current data packet
 def compare_packets(last, cur):
     # print(get_timestamp_for_packet(last) == get_timestamp_for_packet(cur))
     timestamp = get_timestamp_for_packet(cur)
@@ -260,7 +329,7 @@ def compare_packets(last, cur):
 
 
 
-
+# Runs through all packets in the csv data and processes them
 def main():
     # Load in the file
     csv_rows = None
@@ -275,7 +344,8 @@ def main():
             last_packet = None
 
             # Initial state
-            cur_state = {'loaded_state': {}, 'lastseen': {}}
+            # Seperate dictionaries for loaded_state and last_seen timestamps to maintain loaded_state with packet structure
+            cur_state = {'loaded_state': {}, 'last_seen': {}}
             log("Running silsim parser")
             for row in csv_rows:
                 if cur_line == 0:
