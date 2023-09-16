@@ -149,10 +149,10 @@ void Adxl355::stopTempSensor() {
 }
 
 double Adxl355::getTempC() {
-    uint16_t itemp = read16(TEMP2);
-    double dtemp = ((double)(1852 - itemp)) / 9.05 + 19.21;
+    uint16_t value = read16(TEMP2);
+    double temp = ((double)(1852 - value)) / 9.05 + 19.21;
 
-    return dtemp;
+    return temp;
 }
 
 double Adxl355::getTempF() {
