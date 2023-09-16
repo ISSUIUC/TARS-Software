@@ -1,6 +1,7 @@
 ## SILSIM CI configuration file
 # Timestamp conversion
 TICKS_TO_MS = 100
+SECONDS_TO_MS = 0.001
 
 # Fail conditions
 check_timeouts = True
