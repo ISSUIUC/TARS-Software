@@ -66,14 +66,42 @@ class Adxl355 {
     // Filter Setting Register
     static const uint8_t FILTER = 0x28;
 
+    enum STATUS_VALUES { NVM_BUSY = 0x10, ACTIVITY = 0x08, FIFO_OVERRUN = 0x04, FIFO_FULL = 0x02, DATA_READY = 0x01 };
+
+    enum RANGE_VALUES { RANGE_2G = 0x01, RANGE_4G = 0x02, RANGE_8G = 0x03, RANGE_MASK = 0x03 };
+
+    enum HPF_CORNER {
+        NOT_ENABLED = 0b000,
+        ODR_X_2_47 = 0b001,
+        ODR_X_62_084 = 0b010,
+        ODR_X_15_545 = 0b011,
+        ODR_X_3_862 = 0b100,
+        ODR_X_0_954 = 0b101,
+        ODR_X_0_238 = 0b110,
+        HPF_CORNER_MASK = 0b01110000
+    };
+
+    enum ODR_LPF {
+        ODR_4000_AND_1000 = 0b0000,
+        ODR_2000_AND_500 = 0b0001,
+        ODR_1000_AND_250 = 0b0010,
+        ODR_500_AND_125 = 0b0011,
+        ODR_250_AND_62_5 = 0b0100,
+        ODR_125_AND_31_25 = 0b0101,
+        ODR_62_5_AND_15_625 = 0b0110,
+        ODR_31_25_AND_7_813 = 0b0111,
+        ODR_15_625_AND_3_906 = 0b1000,
+        ODR_7_813_AND_1_953 = 0b1001,
+        ODR_3_906_AND_0_977 = 0b1010,
+        ODR_LPF_MASK = 0b1111
+    };
+
     enum POWER_CTL_VALUES {
         POWER_CTL_OFF = 0x01,
         POWER_CTL_ON = ~POWER_CTL_OFF,
         POWER_CTL_TEMP_OFF = 0x02,
         POWER_CTL_TEMP_ON = ~POWER_CTL_TEMP_OFF
     };
-
-
 
     SPIClass *spi_obj = NULL;
 
@@ -97,6 +125,17 @@ class Adxl355 {
     int stop();
     void update();
     int getRawAccel(long *x, long *y, long *z);
+
+    bool isDeviceRecognized();
+    bool isRunning();
+    void initializeSensor(RANGE_VALUES range, ODR_LPF odr_lpf, bool verbose);
+    void setRange(RANGE_VALUES value);
+    void setIntMap(uint8_t value);
+    int getFIFOCount();
+    STATUS_VALUES getStatus();
+    bool isDataReady();
+    bool isFIFOFull();
+    bool isFIFOOverrun();
 };
 
 #endif  // _ADXL355_H_
