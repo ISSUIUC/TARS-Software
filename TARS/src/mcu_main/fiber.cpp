@@ -48,7 +48,7 @@ FiberHandle EmuCreateFiber(size_t stack_size, ThreadFunc func, void* arg) {
 }
 
 // always main thread
-FiberHandle EmuConvertThreadToFiber(void*) {
+FiberHandle EmuConvertThreadToFiber() {
     current_context = &main_context;
     return {.handle = &main_context, .real_stack_size = 0, .is_main=true};
 }
