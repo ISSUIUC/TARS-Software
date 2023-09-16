@@ -27,13 +27,13 @@ constexpr const char* stack_end = "STACKEND";
 static ucontext_t main_context;
 static ucontext_t* current_context;
 typedef void VoidFunc(void);
-void SwitchToFiber(FiberHandle handle) {
+void EmuSwitchToFiber(FiberHandle handle) {
     ucontext_t* to_context = current_context;
     current_context = handle.handle;
     swapcontext(to_context, handle.handle);
 }
 
-FiberHandle CreateFiber(size_t stack_size, ThreadFunc func, void* arg) {
+FiberHandle EmuCreateFiber(size_t stack_size, ThreadFunc func, void* arg) {
     ucontext_t* context = new ucontext_t{};
     if (getcontext(context) == -1) {
         assert(!"Get context fail");
@@ -44,12 +44,12 @@ FiberHandle CreateFiber(size_t stack_size, ThreadFunc func, void* arg) {
     context->uc_stack.ss_size = REAL_STACK_SIZE;
     context->uc_link = &main_context;
     makecontext(context, (VoidFunc*)func, 1, arg);
-    return {.handle = context, .real_stack_size = stack_size, is_main=false};
+    return {.handle = context, .real_stack_size = stack_size, .is_main=false};
 }
 
 // always main thread
-FiberHandle ConvertThreadToFiber(void*) {
+FiberHandle EmuConvertThreadToFiber(void*) {
     current_context = &main_context;
-    return {.handle = &main_context, .real_stack_size = 0, is_main=true};
+    return {.handle = &main_context, .real_stack_size = 0, .is_main=true};
 }
 #endif
