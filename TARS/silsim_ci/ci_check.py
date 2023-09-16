@@ -219,22 +219,17 @@ def get_timestamp(silsim_packet, datastring):
         return silsim_packet[datastring]['timestamp']
     return -1
 
-# Updates current_state timestamp dictionary with the newst timestamp for the datastring
+# Updates current_state tuple dictionaries with newest state and timestamps
 # @param current_state tuple with current state and timestamp dictionaries
 # @param silsim_packet newest packet to update current_state with
 # @param datastring the sensor in which to update data
-def get_lastseen(current_state, silsim_packet, datastring):
+def update_current_state_values(current_state, silsim_packet, datastring):
+    if test_data_exists(silsim_packet, datastring):
+        current_state["loaded_state"][datastring] = silsim_packet[datastring].copy()
+    
     this_seen = get_timestamp(silsim_packet, datastring)
     if(this_seen != -1):
         current_state['last_seen'][datastring] = this_seen
-
-# Updates current state with the newest data found in the packet for a certain datastring
-# @param current_state current_state value dictionary
-# @param silsim_packet newest packet to update current_state with
-# @param datastring the sensor in which to update data
-def load_packet_key(current_state, silsim_packet, datastring):
-    if test_data_exists(silsim_packet, datastring):
-        current_state[datastring] = silsim_packet[datastring].copy()
 
 # Converts a timestamp from milliseconds to seconds
 # @param timestamp timestamp in milliseconds
@@ -254,8 +249,7 @@ def get_sim_timestamp_string(timestamp):
 def load_packet_into_state(current_state, silsim_packet):
     
     for data_category in config.all_data_vales:
-        get_lastseen(current_state, silsim_packet, data_category)
-        load_packet_key(current_state['loaded_state'], silsim_packet, data_category) 
+        update_current_state_values(current_state, silsim_packet, data_category)
 
 # Checks if first and second values are the same, fails simulation if they are different
 # @param assert_text test to be dispalyed to user when fail or pass
