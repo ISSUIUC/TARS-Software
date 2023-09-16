@@ -136,6 +136,11 @@ class Adxl355 {
     bool isDataReady();
     bool isFIFOFull();
     bool isFIFOOverrun();
+    void startTempSensor();
+    void stopTempSensor();
+    double getTempC();
+    double getTempF();
+    
 };
 
 #endif  // _ADXL355_H_

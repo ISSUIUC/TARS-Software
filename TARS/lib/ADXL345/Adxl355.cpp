@@ -50,9 +50,9 @@ bool Adxl355::isDeviceRecognized() {
 
 bool Adxl355::isRunning() {
     bool check = false;
-    int work = read8(POWER_CTL);
+    int data = read8(POWER_CTL);
 
-    check = (work & POWER_CTL_VALUES::POWER_CTL_OFF) ? false : true;
+    check = (data & POWER_CTL_VALUES::POWER_CTL_OFF) ? false : true;
 
     return check;
 }
@@ -101,31 +101,62 @@ void Adxl355::write8(uint8_t reg, uint8_t value) {
 void Adxl355::setIntMap(uint8_t value) { write8(INT_MAP, value); }
 
 int Adxl355::getFIFOCount() {
-    uint8_t work = read8(FIFO_ENTRIES);
+    uint8_t data = read8(FIFO_ENTRIES);
 
-    return work;
+    return data;
 }
 
 Adxl355::STATUS_VALUES Adxl355::getStatus() {
-    uint8_t work = read8(STATUS);
+    uint8_t data = read8(STATUS);
 
-    return (STATUS_VALUES)work;
+    return (STATUS_VALUES)data;
 }
 
 bool Adxl355::isDataReady() {
-    STATUS_VALUES work = getStatus();
+    STATUS_VALUES data = getStatus();
 
-    return (work & STATUS_VALUES::DATA_READY) ? true : false;
+    return (data & STATUS_VALUES::DATA_READY) ? true : false;
 }
 
 bool Adxl355::isFIFOFull() {
-    STATUS_VALUES work = getStatus();
+    STATUS_VALUES data = getStatus();
 
-    return (work & STATUS_VALUES::FIFO_FULL) ? true : false;
+    return (data & STATUS_VALUES::FIFO_FULL) ? true : false;
 }
 
 bool Adxl355::isFIFOOverrun() {
-    STATUS_VALUES work = getStatus();
+    STATUS_VALUES data = getStatus();
 
-    return (work & STATUS_VALUES::FIFO_OVERRUN) ? true : false;
+    return (data & STATUS_VALUES::FIFO_OVERRUN) ? true : false;
+}
+
+void Adxl355::startTempSensor() {
+    uint8_t data = read8(POWER_CTL);
+
+    if (data & POWER_CTL_VALUES::POWER_CTL_TEMP_OFF) {
+        data = data & (int)POWER_CTL_VALUES::POWER_CTL_TEMP_ON;
+        write8(POWER_CTL, data);
+    }
+}
+
+void Adxl355::stopTempSensor() {
+    uint8_t data = read8(POWER_CTL);
+
+    if (!(data & POWER_CTL_VALUES::POWER_CTL_TEMP_OFF)) {
+        data = data | (int)POWER_CTL_VALUES::POWER_CTL_TEMP_OFF;
+        write8(POWER_CTL, data);
+    }
+}
+
+double Adxl355::getTempC() {
+    uint16_t itemp = read16(TEMP2);
+    double dtemp = ((double)(1852 - itemp)) / 9.05 + 19.21;
+
+    return dtemp;
+}
+
+double Adxl355::getTempF() {
+    double result = getTempC();
+
+    return result * 9 / 5 + 32;
 }
