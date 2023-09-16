@@ -12,6 +12,9 @@ struct FiberHandle {
     bool is_main;
 };
 #else
+#ifdef __APPLE__
+#define _XOPEN_SOURCE
+#endif
 #include <ucontext.h>
 struct FiberHandle {
     ucontext_t * handle;
