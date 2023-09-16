@@ -146,6 +146,8 @@ def get_packet_timestamp_diff(current_timestamp, silsim_packet, datastring):
     return abs(data_timestamp - current_timestamp)
 
 def check_timestamp_diff_complies(current_state, silsim_packet, datastring):
+    SECONDS_TO_MILLISECONDS = 0.001
+
     if(not test_data_exists(silsim_packet, datastring)):
         return
 
@@ -154,12 +156,11 @@ def check_timestamp_diff_complies(current_state, silsim_packet, datastring):
         current_timestamp = int(current_state['lastseen'][datastring])
     
     diff = ticks_to_ms(get_packet_timestamp_diff(current_timestamp, silsim_packet, datastring))
-    # print(diff / 1000)
-    if(int(diff / 1000) > config.check_timeouts_length):
+    if(int(diff * SECONDS_TO_MILLISECONDS) > config.check_timeouts_length):
         print(current_state['lastseen'])
         print(datastring)
         print(silsim_packet[datastring]['timestamp'])
-        fail("Packet data timeout for " + datastring + " on timestamp " + str(current_timestamp) + "  (simulation time " + str(ticks_to_ms(current_timestamp)/1000) + " seconds)\nPacket timed out with time " + str((diff / 1000)) + "s, fail condition set to " + str(config.check_timeouts_length) + "s")
+        fail("Packet data timeout for " + datastring + " on timestamp " + str(current_timestamp) + "  (simulation time " + str(ticks_to_ms(current_timestamp) * SECONDS_TO_MILLISECONDS) + " seconds)\nPacket timed out with time " + str((diff * SECONDS_TO_MILLISECONDS)) + "s, fail condition set to " + str(config.check_timeouts_length) + "s")
 
 
 def parse_packet(current_state, silsim_packet):
