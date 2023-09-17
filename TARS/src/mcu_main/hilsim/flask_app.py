@@ -4,6 +4,7 @@ import stream_data
 import json
 from flask_cors import CORS, cross_origin
 import os
+import traceback
 
 app = Flask(__name__)
 CORS(app)#, supports_credentials=True)
@@ -17,7 +18,9 @@ def index():
         try:
             result = stream_data.run_hilsim(csvData['csv_data'])
         except:
+            print(traceback.format_exc())
             return "Internal Server Error", 500
+    print("HILSIM run returned")
     return {'log': result}, 200
 
 if __name__ == "__main__":

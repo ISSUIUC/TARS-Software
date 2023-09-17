@@ -3,7 +3,7 @@ import time
 import os
 import serial.tools.list_ports
 
-serial_port = "/dev/tty.usbmodem132228101"
+serial_port = "COM3"
 
 def get_ports():
     return serial.tools.list_ports.comports()
@@ -16,7 +16,7 @@ def validate_ports():
 
 def run_hilsim(raw_csv):
     print("Run hilsim request recieved")
-    # ser = serial.Serial(serial_port, 9600, timeout=10)
+    ser = serial.Serial(serial_port, 9600, timeout=10, write_timeout=1)
     hilsim_return_log = ""
     csv_lines = raw_csv.split("\n")
     cur_line = 0
@@ -30,27 +30,36 @@ def run_hilsim(raw_csv):
     approx_time_sec = (len(csv_lines) * 10)/1000 + 10
     print("Approximate runtime: " + str(approx_time_sec) + "s")
     print("Awaiting serial connection (10s)...")
-    while(cur_line < len(csv_lines)):       
-        if time.time()*1000 > last_time + 1:
-            last_time += 1
+
+    watchdog_start = time.time()
+
+    while(cur_line < len(csv_lines)):      
+        if(abs(watchdog_start - time.time()) > 3):
+            print("we should abort")
+            return hilsim_return_log
+
+        if time.time()*1000 > last_time + 10:
+            last_time += 10
             if time.time()*1000 < start_time + 10000:
-                pass
-                # ser.write((first_line + '\n').encode("utf8"))
+                ser.write((first_line + '\n').encode("utf8"))
             else:
-                print(str(cur_line) + " / " + str(len(csv_lines)) + " packets simulated [time: "+ str(round((cur_line/100)+10, 2)) + "s]                                  ", end="\r")
                 line = csv_lines[cur_line][:-1] + ",0,0,0"
                 cur_line += 1
                 if not line:
-                    break
-                # ser.write((line + '\n').encode("utf8"))
-        if True: #ser.in_waiting:
-            #data = ser.read_all()
-            string = "test dataa"
-            #string = data.decode("utf8")
+                    return hilsim_return_log
+                try:
+                    ser.write((line + '\n').encode("utf8"))
+                except:
+                    return hilsim_return_log
+        if ser.in_waiting:
+            data = ser.read_all()
+            string = data.decode("utf8")
             
             if string:
+                watchdog_start = time.time()
                 string = string[0 : (len(string)-1)]
                 hilsim_return_log += string + "\n"
+           
 
     return hilsim_return_log
 
