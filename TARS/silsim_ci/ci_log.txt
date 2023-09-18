@@ -1,19 +1,22 @@
-RUN FAIL
-SILSIM CI Exited with code 255 [Generic error]
-
-
-Traceback:
-NoneType: None
-
-
-
+RUN SUCCESS
+SILSIM CI Exited with code 0 [No error]
 =================== LOGFILE ===================
 <main>  Loading silsim output
 <main>  Running silsim parser
-<t+2.72>  FSM State change from 'None' to 1
-<t+49361.15>  FSM State change from '1' to '2'
-<t+49364.15>  FSM State change from '2' to '3'
+<t+348.18>  FSM State change from 'None' to 2
+<t+348.21>  FSM State change from '2' to '3'
+<t+348.25>  FSM State change from '3' to '4'
+<t+348.74>  FSM State change from '4' to '6'
+<t+349.56>  FSM State change from '6' to '7'
+<t+351.37>  FSM State change from '7' to '8'
+<t+351.38>  FSM State change from '8' to '9'
+<t+351.38>  FSM State change from '9' to '11'
+<t+351.39>  FSM State change from '11' to '12'
+<t+352.38>  FSM State change from '12' to '13'
+<t+352.39>  FSM State change from '13' to '14'
+<t+362.88>  FSM State change from '14' to '15'
+<t+362.89>  FSM State change from '15' to '16'
 <post-flight>  SILSIM parse complete
-<FATAL>  Check FSM state after simulation end: assert_equal failed, expected value '16' but got '3'
-<FATAL>  CI Abort
+<assert-equal>  Check FSM state after simulation end: PASS
+<main>  SILSIM CI run complete
 ===================   END   ===================

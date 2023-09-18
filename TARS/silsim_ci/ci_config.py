@@ -12,4 +12,26 @@ check_fsm = True # Check FSM final state
 check_fsm_final_state = 16 # State enum which signifies 'LANDED'
 
 # Data Values
-all_data_vales = ["lowG_data", "highG_data", "gps_data", "barometer_data", "state_data", "voltage_data", "rocketState_data"]
+all_data_values = ["lowG_data", "highG_data", "gps_data", "barometer_data", "state_data", "voltage_data", "rocketState_data"]
+rocket_states = ["STATE_UNKNOWN",
+    "STATE_INIT",
+    "STATE_IDLE",
+    "STATE_LAUNCH_DETECT",
+    "STATE_BOOST",
+    "STATE_BURNOUT_DETECT",
+    "STATE_COAST_PREGNC",
+    "STATE_COAST_GNC",
+    "STATE_APOGEE_DETECT",
+    "STATE_APOGEE",
+    "STATE_SEPARATION",
+    "STATE_DROGUE_DETECT",
+    "STATE_DROGUE",
+    "STATE_MAIN_DETECT",
+    "STATE_MAIN",
+    "STATE_LANDED_DETECT",
+    "STATE_LANDED",
+    "STATE_ABORT"]
+
+# Is the data processed?
+data_is_processed = True
+data_start_timestamp = 3481810
