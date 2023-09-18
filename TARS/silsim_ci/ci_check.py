@@ -184,6 +184,11 @@ def check_timestamp_diff_complies(current_state, silsim_packet, datastring):
         return
 
     current_timestamp = 0
+
+    if config.data_is_processed:
+        # If the data is processed, we want to set min timestamp to when sim starts.
+        current_timestamp = config.data_start_timestamp
+
     if(current_state['last_seen'].get(datastring) != None):
         current_timestamp = int(current_state['last_seen'][datastring])
     
@@ -199,7 +204,7 @@ def check_timestamp_diff_complies(current_state, silsim_packet, datastring):
 # @param silsim_packet newest packet to update current_state with
 def parse_packet(current_state, silsim_packet):
     if(config.check_timeouts):
-        for category_value in config.all_data_vales:
+        for category_value in config.all_data_values:
             if category_value != "state_data":
                 check_timestamp_diff_complies(current_state, silsim_packet, category_value)
 
@@ -208,7 +213,7 @@ def parse_packet(current_state, silsim_packet):
 # @param datastring the sensor category to check if data exists
 # @return boolean that reuturns true if the data exists and false if not
 def test_data_exists(silsim_packet, datastring):
-    return silsim_packet["has_" + datastring] == "True" or silsim_packet["has_" + datastring] == "1"
+    return silsim_packet["has_" + datastring] == "True" or silsim_packet["has_" + datastring] == "1" or silsim_packet["has_" + datastring] == True
 
 # Gets the timestamp from a packet
 # @param silsim_packet the newest packet to get the timestamp from
@@ -226,7 +231,7 @@ def get_timestamp(silsim_packet, datastring):
 def update_current_state_values(current_state, silsim_packet, datastring):
     if test_data_exists(silsim_packet, datastring):
         current_state["loaded_state"][datastring] = silsim_packet[datastring].copy()
-    
+
     this_seen = get_timestamp(silsim_packet, datastring)
     if(this_seen != -1):
         current_state['last_seen'][datastring] = this_seen
@@ -247,9 +252,9 @@ def get_sim_timestamp_string(timestamp):
 # @param current_state the tuple of state and timestamp dictionary
 # @param silsim_packet current packet to update current_state with
 def load_packet_into_state(current_state, silsim_packet):
-    
-    for data_category in config.all_data_vales:
+    for data_category in config.all_data_values:
         update_current_state_values(current_state, silsim_packet, data_category)
+    
 
 # Checks if first and second values are the same, fails simulation if they are different
 # @param assert_text test to be dispalyed to user when fail or pass
@@ -269,7 +274,7 @@ def post_launch(state):
     # After-run checks:
     # Check that FSM state is landed.
     if(config.check_fsm):
-        fsm_state = int(state['loaded_state']['rocketState_data']['rocketState'])
+        fsm_state = rocketstate_to_int(state['loaded_state']['rocketState_data']['rocketState'])
         check_state = config.check_fsm_final_state
         assert_equal("Check FSM state after simulation end", fsm_state, check_state)
 
@@ -285,6 +290,14 @@ def get_timestamp_for_packet(silsim_packet):
                     max_timestamp = int(silsim_packet[key]['timestamp'])
     return max_timestamp
 
+def rocketstate_to_int(rocketstate_string):
+    evaluated = eval(rocketstate_string)
+    if(type(evaluated) is list):
+        st = evaluated[0]
+        return config.rocket_states.index(st)
+    if(type(evaluated) is int):
+        return int(rocketstate_string)
+
 # NOT COMPLETE
 # Compares previous and current packets and updates data accordingly in log
 # @param last the previous data packet
@@ -295,14 +308,38 @@ def compare_packets(last, cur):
     timestamp_string = get_sim_timestamp_string(timestamp)
 
     if(test_data_exists(cur, "rocketState_data")):
-        rocket_state = cur['rocketState_data']['rocketState']
+        rocket_state = rocketstate_to_int(cur['rocketState_data']['rocketState'])
         if(last.get('rocketState_data') == None):
             log("FSM State change from 'None' to " + str(rocket_state), timestamp_string)
         else:
-            if(int(last['rocketState_data']['rocketState']) != int(rocket_state)):
-                log("FSM State change from '" + str(last['rocketState_data']['rocketState']) + "' to '" + str(rocket_state) + "'", timestamp_string)
+            if(rocketstate_to_int(last['rocketState_data']['rocketState']) != int(rocket_state)):
+                log("FSM State change from '" + str(rocketstate_to_int(last['rocketState_data']['rocketState'])) + "' to '" + str(rocket_state) + "'", timestamp_string)
 
+# Mass-map processed packet data to raw data
+# @param processed_data_dict list of data fields to add to data_dict, maps processed data => name for unprocessed
+# @param data_dict dictionary to add data to
+# @param processed_packet the processed packet to retrieve data from
+def map_processed_data_field(processed_data_dict, data_dict, processed_packet):
+    for data_field_key in list(processed_data_dict.keys()):
+        data_dict[processed_data_dict[data_field_key]] = processed_packet[data_field_key]
 
+# Given a packet from a processed data file, return a packet as it would come from SILSIM data.
+# @param packet The processed packet
+def packet_to_raw(packet):
+    new_packet = {}
+    for datastring in config.all_data_values:
+        new_packet["has_" + datastring] = True
+        new_packet[datastring] = {}
+
+    map_processed_data_field({'ax': 'ax', 'ay': 'ay', 'az': 'az', 'gx': 'gx', 'gy': 'gy', 'gz': 'gz', 'timestamp_ms': 'timestamp'}, new_packet['lowG_data'], packet)
+    map_processed_data_field({'highg_ax': 'ax', 'highg_ay': 'ay', 'highg_az': 'az', 'timestamp_ms': 'timestamp'}, new_packet['highG_data'], packet)
+    map_processed_data_field({'latitude': 'latitude', 'longitude': 'longitude', 'position_lock': 'posLock', 'satellite_count': 'siv_count', 'timestamp_ms': 'timestamp'}, new_packet['gps_data'], packet)
+    map_processed_data_field({'temperature': 'temperature', 'pressure': 'pressure', 'barometer_altitude': 'altitude', 'timestamp_ms': 'timestamp'}, new_packet['barometer_data'], packet)
+    map_processed_data_field({'kalman_pos_x': 'x', 'kalman_vel_x': 'vx', 'kalman_acc_x': 'ax', 'kalman_apo': 'apo', 'timestamp_ms': 'timestamp'}, new_packet['state_data'], packet)
+    map_processed_data_field({'voltage_battery': 'battery_voltage', 'timestamp_ms': 'timestamp'}, new_packet['voltage_data'], packet)
+    map_processed_data_field({'state': 'rocketState', 'timestamp_ms': 'timestamp'}, new_packet['rocketState_data'], packet)
+
+    return new_packet
 
 # Runs through all packets in the csv data and processes them
 def main():
@@ -310,7 +347,7 @@ def main():
     csv_rows = None
     log("Loading silsim output")
     try:
-        with open(os.path.join(os.path.dirname(__file__), "./flight_computer.csv")) as csv_file:
+        with open(os.path.join(os.path.dirname(__file__), "./real_data.csv")) as csv_file:
             csv_rows = csv.reader(csv_file, delimiter=',')
             cur_line = 0
             packet_format = None
@@ -321,7 +358,10 @@ def main():
             # Initial state
             # Seperate dictionaries for loaded_state and last_seen timestamps to maintain loaded_state with packet structure
             cur_state = {'loaded_state': {}, 'last_seen': {}}
+
+
             log("Running silsim parser")
+
             for row in csv_rows:
                 if cur_line == 0:
                     (packet_format, packet_format_list) = construct_packet_format(row)
@@ -333,6 +373,9 @@ def main():
                 if cur_line == 1:
                     last_packet = copy.deepcopy(cur_state["loaded_state"])
 
+                # This line is only used for converting processed data back into a raw-ish format:
+                if config.data_is_processed:
+                    packet = packet_to_raw(packet)
                 parse_packet(cur_state, packet)
                 load_packet_into_state(cur_state, packet)
                 compare_packets(last_packet, packet)
