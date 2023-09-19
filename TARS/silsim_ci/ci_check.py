@@ -319,9 +319,14 @@ def compare_packets(last, cur):
 # @param processed_data_dict list of data fields to add to data_dict, maps processed data => name for unprocessed
 # @param data_dict dictionary to add data to
 # @param processed_packet the processed packet to retrieve data from
-def map_processed_data_field(processed_data_dict, data_dict, processed_packet):
+# @return the correct format dictionary for each datastring
+def map_processed_data_field(processed_data_dict, processed_packet):
+    new_dict = {}
+
     for data_field_key in list(processed_data_dict.keys()):
-        data_dict[processed_data_dict[data_field_key]] = processed_packet[data_field_key]
+        new_dict[processed_data_dict[data_field_key]] = processed_packet[data_field_key]
+    
+    return new_dict
 
 # Given a packet from a processed data file, return a packet as it would come from SILSIM data.
 # @param packet The processed packet
@@ -332,13 +337,13 @@ def packet_to_raw(packet):
         new_packet["has_" + datastring] = True
         new_packet[datastring] = {}
 
-    map_processed_data_field({'ax': 'ax', 'ay': 'ay', 'az': 'az', 'gx': 'gx', 'gy': 'gy', 'gz': 'gz', 'timestamp_ms': 'timestamp'}, new_packet['lowG_data'], packet)
-    map_processed_data_field({'highg_ax': 'ax', 'highg_ay': 'ay', 'highg_az': 'az', 'timestamp_ms': 'timestamp'}, new_packet['highG_data'], packet)
-    map_processed_data_field({'latitude': 'latitude', 'longitude': 'longitude', 'position_lock': 'posLock', 'satellite_count': 'siv_count', 'timestamp_ms': 'timestamp'}, new_packet['gps_data'], packet)
-    map_processed_data_field({'temperature': 'temperature', 'pressure': 'pressure', 'barometer_altitude': 'altitude', 'timestamp_ms': 'timestamp'}, new_packet['barometer_data'], packet)
-    map_processed_data_field({'kalman_pos_x': 'x', 'kalman_vel_x': 'vx', 'kalman_acc_x': 'ax', 'kalman_apo': 'apo', 'timestamp_ms': 'timestamp'}, new_packet['state_data'], packet)
-    map_processed_data_field({'voltage_battery': 'battery_voltage', 'timestamp_ms': 'timestamp'}, new_packet['voltage_data'], packet)
-    map_processed_data_field({'state': 'rocketState', 'timestamp_ms': 'timestamp'}, new_packet['rocketState_data'], packet)
+    new_packet['lowG_data'] = map_processed_data_field({'ax': 'ax', 'ay': 'ay', 'az': 'az', 'gx': 'gx', 'gy': 'gy', 'gz': 'gz', 'timestamp_ms': 'timestamp'}, packet)
+    new_packet['highG_data'] = map_processed_data_field({'highg_ax': 'ax', 'highg_ay': 'ay', 'highg_az': 'az', 'timestamp_ms': 'timestamp'}, packet)
+    new_packet['gps_data'] = map_processed_data_field({'latitude': 'latitude', 'longitude': 'longitude', 'position_lock': 'posLock', 'satellite_count': 'siv_count', 'timestamp_ms': 'timestamp'}, packet)
+    new_packet['barometer_data'] = map_processed_data_field({'temperature': 'temperature', 'pressure': 'pressure', 'barometer_altitude': 'altitude', 'timestamp_ms': 'timestamp'}, packet)
+    new_packet['state_data'] = map_processed_data_field({'kalman_pos_x': 'x', 'kalman_vel_x': 'vx', 'kalman_acc_x': 'ax', 'kalman_apo': 'apo', 'timestamp_ms': 'timestamp'}, packet)
+    new_packet['voltage_data'] = map_processed_data_field({'voltage_battery': 'battery_voltage', 'timestamp_ms': 'timestamp'}, packet)
+    new_packet['rocketState_data'] = map_processed_data_field({'state': 'rocketState', 'timestamp_ms': 'timestamp'}, packet)
 
     return new_packet
 
