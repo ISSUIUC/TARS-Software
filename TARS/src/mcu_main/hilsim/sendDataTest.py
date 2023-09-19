@@ -10,7 +10,7 @@ SPEED_FACTOR = 1
 GRANULARITY_FACTOR = 2
 
 # -----------------<Change first param to the correct port, MacOS (ls /dev/tty.*)>-----------------
-ser = serial.Serial("COM6", 9600, timeout=10, write_timeout=10)
+ser = serial.Serial("COM5", 9600, timeout=10, write_timeout=10)
 
 csv = pandas.read_csv('flight_computer.csv')
 total_rows = csv.shape[0]
@@ -30,8 +30,7 @@ for i, row in csv.iterrows():
     last10.append(start)
     if len(last10) > 10:
         last10.pop(0)
-    line = f"{','.join(str(item) for item in row[written])}\n"
-
+        
     hilsim_packet = hilsimpacket_pb2.HILSIMPacket()
 
     hilsim_packet.imu_high_ax = row['highg_ax']
@@ -51,7 +50,6 @@ for i, row in csv.iterrows():
     hilsim_packet.mag_z = row["mz"]
 
     ser.write(hilsim_packet.SerializeToString())
-    
     data = ser.read_all()
     decoded = data.decode("utf8")
 

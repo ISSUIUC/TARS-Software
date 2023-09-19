@@ -2,7 +2,7 @@ import serial
 import time
 
 
-ser = serial.Serial("/dev/tty.usbmodem132228101", 9600, timeout=10)
+ser = serial.Serial("COM5", 9600, timeout=10)
 
 csv = open("flight_computer.csv", "r")
 csv.readline()

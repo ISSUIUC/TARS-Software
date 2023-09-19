@@ -59,12 +59,11 @@ HILSIMPacket hilsim_reader;
 static THD_FUNCTION(hilsim_THD, arg) {
     // Creating array for data to be read into
     char data_read[512];
-    int fields_to_read = 19;
     Serial.setTimeout(10);
     Serial.println("[TARS] Hardware-in-Loop Test Commenced");
 
     while (1) {
-        int bytes_read = Serial.readBytesUntil('\n', data_read, 511);
+        int bytes_read = Serial.readBytesUntil('\n', data_read, 70);
         if (bytes_read > 0) {
             Serial.println(bytes_read);
             Serial.println("Got something");
@@ -89,8 +88,6 @@ static THD_FUNCTION(hilsim_THD, arg) {
                 Serial.print("Barom alt: ");
                 Serial.println(hilsim_reader.barometer_altitude);
             }
-
-            data_read[bytes_read] = 0;
         } else {
             Serial.println("Got nothing");
         }
