@@ -325,6 +325,7 @@ def map_processed_data_field(processed_data_dict, data_dict, processed_packet):
 
 # Given a packet from a processed data file, return a packet as it would come from SILSIM data.
 # @param packet The processed packet
+# @return the processed packet into the raw file
 def packet_to_raw(packet):
     new_packet = {}
     for datastring in config.all_data_values:
