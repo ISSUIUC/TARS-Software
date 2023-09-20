@@ -165,13 +165,24 @@ def construct_packet_from_format(packet_format, packet_format_list, csv_line):
         
     return packet
 
+# Gets the dictionary key for the timestamp value in a certain sensor's data dictionary
+# @param silsim_packet the packet in which to check for the timestamp
+# @param datastring current sensor category to get timestamp key in
+# @return key in the dictionary that contains timestamp data
+def get_timestamp_packet_key(silsim_packet, datastring):
+    # Find the timestamp key (they are all different for some reason)
+    for key in list(silsim_packet[datastring].keys()):
+        if(key.lower().startswith("timestamp")):
+            return key
+
 # Gets the difference in timestamps between current stored and the one in the packet
 # @param current_timestamp the current store timestamp
 # @param silsim_packet the current packet to check timestamp with
 # @param datastring current sensor category to get timestamp difference in
 # @return the absolute value of the difference between current stored and packet timestamp
 def get_packet_timestamp_diff(current_timestamp, silsim_packet, datastring):
-    data_timestamp = int(silsim_packet[datastring]['timestamp'])
+    packet_key = get_timestamp_packet_key(silsim_packet, datastring)
+    data_timestamp = int(silsim_packet[datastring][packet_key])
     return abs(data_timestamp - current_timestamp)
 
 # Makes sure current stored timestamp and packet timestamp are within ten seconds, fails simulation if not
@@ -213,15 +224,19 @@ def parse_packet(current_state, silsim_packet):
 # @param datastring the sensor category to check if data exists
 # @return boolean that reuturns true if the data exists and false if not
 def test_data_exists(silsim_packet, datastring):
-    return silsim_packet["has_" + datastring] == "True" or silsim_packet["has_" + datastring] == "1" or silsim_packet["has_" + datastring] == True
-
+    try:
+        return silsim_packet["has_" + datastring] == "True" or silsim_packet["has_" + datastring] == "1" or silsim_packet["has_" + datastring] == True
+    except:
+        return False
+    
 # Gets the timestamp from a packet
 # @param silsim_packet the newest packet to get the timestamp from
 # @param datastring the sensor from which to get the timestamp
 # @return the timestamp from the packet in the sensor data or -1 if it cannot be found
 def get_timestamp(silsim_packet, datastring):
     if test_data_exists(silsim_packet, datastring):
-        return silsim_packet[datastring]['timestamp']
+        timestamp_key = get_timestamp_packet_key(silsim_packet, datastring)
+        return silsim_packet[datastring][timestamp_key]
     return -1
 
 # Updates current_state tuple dictionaries with newest state and timestamps
@@ -274,7 +289,7 @@ def post_launch(state):
     # After-run checks:
     # Check that FSM state is landed.
     if(config.check_fsm):
-        fsm_state = rocketstate_to_int(state['loaded_state']['rocketState_data']['rocketState'])
+        fsm_state = rocketstate_to_int(state['loaded_state']['rocketState_data'])
         check_state = config.check_fsm_final_state
         assert_equal("Check FSM state after simulation end", fsm_state, check_state)
 
@@ -285,18 +300,27 @@ def get_timestamp_for_packet(silsim_packet):
     max_timestamp = -1
     for key in silsim_packet:
         if(type(silsim_packet[key]) is dict):
-            if(silsim_packet[key]['timestamp']):
-                if(int(silsim_packet[key]['timestamp']) > max_timestamp):
-                    max_timestamp = int(silsim_packet[key]['timestamp'])
+            timestamp_key = get_timestamp_packet_key(silsim_packet, key)
+            if(silsim_packet[key][timestamp_key]):
+                if(int(silsim_packet[key][timestamp_key]) > max_timestamp):
+                    max_timestamp = int(silsim_packet[key][timestamp_key])
     return max_timestamp
 
-def rocketstate_to_int(rocketstate_string):
-    evaluated = eval(rocketstate_string)
+def rocketstate_to_int(rocketstate_packet):
+    rocketstate_packet_key = "rocketStates"
+    if(config.data_is_processed):
+        rocketstate_packet_key = "rocketState"
+    try:
+        evaluated = eval(rocketstate_packet[rocketstate_packet_key])
+    except:
+        evaluated = rocketstate_packet[rocketstate_packet_key]
     if(type(evaluated) is list):
         st = evaluated[0]
         return config.rocket_states.index(st)
     if(type(evaluated) is int):
-        return int(rocketstate_string)
+        return int(rocketstate_packet[rocketstate_packet_key])
+    if(type(evaluated) is str):
+        return config.rocket_states.index(evaluated)
 
 # NOT COMPLETE
 # Compares previous and current packets and updates data accordingly in log
@@ -307,17 +331,18 @@ def compare_packets(last, cur):
     timestamp_string = get_sim_timestamp_string(timestamp)
 
     if(test_data_exists(cur, "rocketState_data")):
-        rocket_state = rocketstate_to_int(cur['rocketState_data']['rocketState'])
+        rocket_state = rocketstate_to_int(cur['rocketState_data'])
         
         if(last.get('rocketState_data') == None):
             log("FSM State change from 'None' to " + str(rocket_state), timestamp_string)
         else:
-            last_state = rocketstate_to_int(last['rocketState_data']['rocketState'])
-            if(rocketstate_to_int(last['rocketState_data']['rocketState']) != int(rocket_state)):
-                state_diff = abs(rocketstate_to_int(last['rocketState_data']['rocketState']) - int(rocket_state))
-                log("FSM State change from '" + str(rocketstate_to_int(last['rocketState_data']['rocketState'])) + "' to '" + str(rocket_state) + "'", timestamp_string)
+            last_state = rocketstate_to_int(last['rocketState_data'])
+            
+            if(last_state != int(rocket_state)):
+                state_diff = abs(last_state - int(rocket_state))
+                log("FSM State change from '" + str(last_state) + "' to '" + str(rocket_state) + "'", timestamp_string)
                 if(state_diff > 1):
-                    cur_state_str = str(rocketstate_to_int(last['rocketState_data']['rocketState']))
+                    cur_state_str = str(last_state)
                     fail(f"Fail by FSM state jump: State changed from '{cur_state_str}' to '{str(rocket_state)}', but expected '{str(last_state)}' => '{str(last_state+1)}' OR '{str(last_state)}' => '{str(last_state-1)}'")
                 
 
@@ -343,11 +368,11 @@ def packet_to_raw(packet):
         new_packet["has_" + datastring] = True
         new_packet[datastring] = {}
 
-    new_packet['lowG_data'] = map_processed_data_field({'ax': 'ax', 'ay': 'ay', 'az': 'az', 'gx': 'gx', 'gy': 'gy', 'gz': 'gz', 'timestamp_ms': 'timestamp'}, packet)
-    new_packet['highG_data'] = map_processed_data_field({'highg_ax': 'ax', 'highg_ay': 'ay', 'highg_az': 'az', 'timestamp_ms': 'timestamp'}, packet)
-    new_packet['gps_data'] = map_processed_data_field({'latitude': 'latitude', 'longitude': 'longitude', 'position_lock': 'posLock', 'satellite_count': 'siv_count', 'timestamp_ms': 'timestamp'}, packet)
-    new_packet['barometer_data'] = map_processed_data_field({'temperature': 'temperature', 'pressure': 'pressure', 'barometer_altitude': 'altitude', 'timestamp_ms': 'timestamp'}, packet)
-    new_packet['state_data'] = map_processed_data_field({'kalman_pos_x': 'x', 'kalman_vel_x': 'vx', 'kalman_acc_x': 'ax', 'kalman_apo': 'apo', 'timestamp_ms': 'timestamp'}, packet)
+    new_packet['lowG_data'] = map_processed_data_field({'ax': 'ax', 'ay': 'ay', 'az': 'az', 'gx': 'gx', 'gy': 'gy', 'gz': 'gz', 'timestamp_ms': 'timeStamp_lowG'}, packet)
+    new_packet['highG_data'] = map_processed_data_field({'highg_ax': 'ax', 'highg_ay': 'ay', 'highg_az': 'az', 'timestamp_ms': 'timeStamp_highG'}, packet)
+    new_packet['gps_data'] = map_processed_data_field({'latitude': 'latitude', 'longitude': 'longitude', 'position_lock': 'posLock', 'satellite_count': 'siv_count', 'timestamp_ms': 'timeStamp_GPS'}, packet)
+    new_packet['barometer_data'] = map_processed_data_field({'temperature': 'temperature', 'pressure': 'pressure', 'barometer_altitude': 'altitude', 'timestamp_ms': 'timeStamp_barometer'}, packet)
+    new_packet['state_data'] = map_processed_data_field({'kalman_pos_x': 'x', 'kalman_vel_x': 'vx', 'kalman_acc_x': 'ax', 'kalman_apo': 'apo', 'timestamp_ms': 'timeStamp_state'}, packet)
     new_packet['voltage_data'] = map_processed_data_field({'voltage_battery': 'battery_voltage', 'timestamp_ms': 'timestamp'}, packet)
     new_packet['rocketState_data'] = map_processed_data_field({'state': 'rocketState', 'timestamp_ms': 'timestamp'}, packet)
 
@@ -359,7 +384,7 @@ def main():
     csv_rows = None
     log("Loading silsim output")
     try:
-        with open(os.path.join(os.path.dirname(__file__), "./real_data.csv")) as csv_file:
+        with open(os.path.join(os.path.dirname(__file__), "./silsim_output.csv")) as csv_file:
             csv_rows = csv.reader(csv_file, delimiter=',')
             cur_line = 0
             packet_format = None

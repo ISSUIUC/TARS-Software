@@ -10,10 +10,16 @@ NoneType: None
 =================== LOGFILE ===================
 <main>  Loading silsim output
 <main>  Running silsim parser
-<t+348.18>  FSM State change from 'None' to 2
-<t+348.21>  FSM State change from '2' to '3'
-<t+348.25>  FSM State change from '3' to '4'
-<t+348.74>  FSM State change from '4' to '6'
-<FATAL>  Fail by FSM state jump: State changed from '4' to '6', but expected '4' => '5' OR '4' => '3'
+<t+0.0>  FSM State change from 'None' to 2
+<t+0.0>  FSM State change from '2' to '3'
+<t+0.0>  FSM State change from '3' to '2'
+<t+0.0>  FSM State change from '2' to '3'
+<t+0.0>  FSM State change from '3' to '2'
+<t+0.0>  FSM State change from '2' to '3'
+<t+0.0>  FSM State change from '3' to '2'
+<t+0.0>  FSM State change from '2' to '3'
+<t+0.0>  FSM State change from '3' to '2'
+<post-flight>  SILSIM parse complete
+<FATAL>  Check FSM state after simulation end: assert_equal failed, expected value '16' but got '2'
 <FATAL>  CI Abort
 ===================   END   ===================
