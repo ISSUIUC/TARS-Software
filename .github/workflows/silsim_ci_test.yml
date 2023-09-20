@@ -36,6 +36,9 @@ jobs:
       run: |
         cd TARS
         pio run -e mcu_silsim -t upload
+    - name: Install flight check dependencies
+      run: |
+        pip install lark
     - name: Reformat raw data to CSV
       run: |
         cd TARS
