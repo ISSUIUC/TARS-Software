@@ -1,6 +1,6 @@
 name: SILSIM CI
 
-on: [push]
+on: []
 
 jobs:
   build:
