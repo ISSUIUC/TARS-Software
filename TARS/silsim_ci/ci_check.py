@@ -303,17 +303,23 @@ def rocketstate_to_int(rocketstate_string):
 # @param last the previous data packet
 # @param cur the current data packet
 def compare_packets(last, cur):
-    # print(get_timestamp_for_packet(last) == get_timestamp_for_packet(cur))
     timestamp = get_timestamp_for_packet(cur)
     timestamp_string = get_sim_timestamp_string(timestamp)
 
     if(test_data_exists(cur, "rocketState_data")):
         rocket_state = rocketstate_to_int(cur['rocketState_data']['rocketState'])
+        
         if(last.get('rocketState_data') == None):
             log("FSM State change from 'None' to " + str(rocket_state), timestamp_string)
         else:
+            last_state = rocketstate_to_int(last['rocketState_data']['rocketState'])
             if(rocketstate_to_int(last['rocketState_data']['rocketState']) != int(rocket_state)):
+                state_diff = abs(rocketstate_to_int(last['rocketState_data']['rocketState']) - int(rocket_state))
                 log("FSM State change from '" + str(rocketstate_to_int(last['rocketState_data']['rocketState'])) + "' to '" + str(rocket_state) + "'", timestamp_string)
+                if(state_diff > 1):
+                    cur_state_str = str(rocketstate_to_int(last['rocketState_data']['rocketState']))
+                    fail(f"Fail by FSM state jump: State changed from '{cur_state_str}' to '{str(rocket_state)}', but expected '{str(last_state)}' => '{str(last_state+1)}' OR '{str(last_state)}' => '{str(last_state-1)}'")
+                
 
 # Mass-map processed packet data to raw data
 # @param processed_data_dict list of data fields to add to data_dict, maps processed data => name for unprocessed
@@ -385,8 +391,7 @@ def main():
                 parse_packet(cur_state, packet)
                 load_packet_into_state(cur_state, packet)
 
-                # Uncomment this line if we ever need to compare between packets
-                # compare_packets(last_packet, packet)
+                compare_packets(last_packet, packet)
 
                 last_packet = copy.deepcopy(cur_state["loaded_state"])
                 cur_line += 1
