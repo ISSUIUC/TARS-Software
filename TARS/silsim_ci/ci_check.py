@@ -3,8 +3,6 @@ import os
 import traceback
 import ci_config as config
 import copy
-import pandas as pd
-import matplotlib.pyplot as plt
 # This script determines if the CI should pass or fail given a simulation_output csv.
 # This script will also output a log of all the actions that happened during the simulated launch
 
