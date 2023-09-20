@@ -46,6 +46,14 @@ jobs:
     - name: Run flight check script
       run: |
         python ./TARS/silsim_ci/ci_check.py
+    - name: Slack Notification
+      if: always()
+      uses: rtCamp/action-slack-notify@v2
+      env:
+        SLACK_COLOR: ${{ job.status }} # or a specific color like 'good' or '#ff00ff'
+        SLACK_MESSAGE: 'SILSIM Flight Test :rocket: (WIP)'
+        SLACK_TITLE: 'Flight result: ${{ job.status }}'
+        SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
     - name: Checkout
       uses: actions/checkout@v1
     - run: echo "Test file 2" > test.txt
