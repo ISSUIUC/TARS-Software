@@ -180,6 +180,6 @@ SILSIM CI Exited with code 0 [No error]
 <t+3.1>  FSM State change from '5' to '4'
 <t+3.1>  FSM State change from '4' to '5'
 <post-flight>  SILSIM parse complete
-<assert-equal>  Check FSM state after simulation end: PASS
+<assert-greater>  Check FSM state after simulation end: PASS
 <main>  SILSIM CI run complete
 ===================   END   ===================

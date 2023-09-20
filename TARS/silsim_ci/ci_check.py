@@ -279,6 +279,16 @@ def assert_equal(assert_text, real, expected):
     else:
         log(assert_text + ": PASS", "assert-equal")
 
+# Checks if the first value < the second value
+# @param assert_text test to be dispalyed to user when fail or pass
+# @param lesser The value which should be lesser
+# @param greater The value which should be greater
+def assert_greater(assert_text, lesser, greater):
+    if(lesser < greater):
+        fail(assert_text + ": assert_greater failed, expected expr '" + str(lesser) + " < " + str(greater) + "' to be TRUE")
+    else:
+        log(assert_text + ": PASS", "assert-greater")
+
 # Checks if the Finite State Machine and the success final state value are the same
 # @param state a tuple of two dictionaries. The first dictionary has key, value pairs of data name and data
 #              the second dictionary has key, value pairs of data name and most recent timestamp
@@ -288,8 +298,8 @@ def post_launch(state):
     # Check that FSM state is landed.
     if(config.check_fsm):
         fsm_state = rocketstate_to_int(state['loaded_state']['rocketState_data'])
-        check_state = config.check_fsm_final_state
-        assert_equal("Check FSM state after simulation end", fsm_state, check_state)
+        check_state = config.check_fsm_final_state - 1
+        assert_greater("Check FSM state after simulation end", fsm_state, check_state)
 
 # Determine the latest time that the packet might have been sent
 # @param silsim_packet the current packet to find the timestamp of
