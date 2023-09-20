@@ -42,10 +42,10 @@ jobs:
     - name: Reformat raw data to CSV
       run: |
         cd TARS
-        python data_parser.py .\src\common\packet.h .\sdlog.dat -o .\silsim_ci\silsim_output.csv
+        python ./data_parser.py ./src/common/packet.h ./sdlog.dat -o ./silsim_ci/silsim_output.csv
     - name: Run flight check script
       run: |
-        python .\TARS\silsim_ci\ci_check.py
+        python ./TARS/silsim_ci/ci_check.py
     - name: Checkout
       uses: actions/checkout@v1
     - run: echo "Test file 2" > test.txt
