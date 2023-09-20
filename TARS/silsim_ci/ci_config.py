@@ -33,5 +33,5 @@ rocket_states = ["STATE_UNKNOWN",
     "STATE_ABORT"]
 
 # Is the data processed?
-data_is_processed = True
+data_is_processed = False
 data_start_timestamp = 3481810
