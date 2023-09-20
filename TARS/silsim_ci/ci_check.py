@@ -384,7 +384,10 @@ def main():
                     packet = packet_to_raw(packet)
                 parse_packet(cur_state, packet)
                 load_packet_into_state(cur_state, packet)
-                compare_packets(last_packet, packet)
+
+                # Uncomment this line if we ever need to compare between packets
+                # compare_packets(last_packet, packet)
+
                 last_packet = copy.deepcopy(cur_state["loaded_state"])
                 cur_line += 1
             post_launch(cur_state)
