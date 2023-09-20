@@ -1,4 +1,4 @@
-name: SILSIM CI
+name: SILSIM CI FLIGHT TEST
 
 on: [push]
 
@@ -39,7 +39,7 @@ jobs:
     - name: Reformat raw data to CSV
       run: |
         cd TARS
-        python .\data_parser.py .\src\common\packet.h .\sdlog.dat -o .\silsim_ci\silsim_output.csv
+        python data_parser.py .\src\common\packet.h .\sdlog.dat -o .\silsim_ci\silsim_output.csv
     - name: Run flight check script
       run: |
         python .\TARS\silsim_ci\ci_check.py
