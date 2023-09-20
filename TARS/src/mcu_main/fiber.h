@@ -1,5 +1,5 @@
 #pragma once
-#include<cstddef>
+#include <cstddef>
 typedef void ThreadFunc(void*);
 struct FiberHandle;
 void EmuSwitchToFiber(FiberHandle handle);
@@ -8,7 +8,7 @@ FiberHandle EmuConvertThreadToFiber();
 #if defined(_WIN32) || defined(_WIN64)
 struct FiberHandle {
     void* handle;
-    size_t real_stack_size;
+    size_t emu_stack_size;
     bool is_main;
 };
 #else
@@ -17,8 +17,8 @@ struct FiberHandle {
 #endif
 #include <ucontext.h>
 struct FiberHandle {
-    ucontext_t * handle;
-    size_t real_stack_size;
+    ucontext_t* handle;
+    size_t emu_stack_size;
     bool is_main;
 };
 #endif

@@ -78,6 +78,13 @@ void SerialPatch::begin(int baudrate) {}
 
 SerialPatch Serial;
 
+void recur() {
+    char data[4096]{};
+    recur();
+}
+
+int catch_over(int v) { std::cout << v << '\n'; }
+
 void run_sim(void* arg) {
     for (int i = 0; i < 100000; i++) {
         if (i % 1000 == 0) std::cout << "Run " << i << std::endl;

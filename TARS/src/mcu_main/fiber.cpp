@@ -1,19 +1,18 @@
 #include "fiber.h"
 constexpr size_t REAL_STACK_SIZE = 8372224;
 #ifdef _WIN32
-#include<windows.h>
-void EmuSwitchToFiber(FiberHandle handle){
-    SwitchToFiber(handle.handle);
-}
-FiberHandle EmuCreateFiber(size_t stack_size, ThreadFunc func, void* arg){
+#include <windows.h>
+
+void EmuSwitchToFiber(FiberHandle handle) { SwitchToFiber(handle.handle); }
+FiberHandle EmuCreateFiber(size_t stack_size, ThreadFunc func, void* arg) {
     void* handle = CreateFiber(REAL_STACK_SIZE, func, arg);
-    return {.handle = handle, .real_stack_size = stack_size, .is_main = false};
+    return {.handle = handle, .emu_stack_size = stack_size, .is_main = false};
 }
-FiberHandle EmuConvertThreadToFiber(){
+FiberHandle EmuConvertThreadToFiber() {
     void* handle = ConvertThreadToFiber(nullptr);
-    return {.handle = handle, .real_stack_size = 0, .is_main = true};
+    return {.handle = handle, .emu_stack_size = 0, .is_main = true};
 }
-#else //_WIN32
+#else  //_WIN32
 #ifdef __APPLE__
 #define _XOPEN_SOURCE
 #endif
@@ -44,12 +43,12 @@ FiberHandle EmuCreateFiber(size_t stack_size, ThreadFunc func, void* arg) {
     context->uc_stack.ss_size = REAL_STACK_SIZE;
     context->uc_link = &main_context;
     makecontext(context, (VoidFunc*)func, 1, arg);
-    return {.handle = context, .real_stack_size = stack_size, .is_main=false};
+    return {.handle = context, .emu_stack_size = stack_size, .is_main = false};
 }
 
 // always main thread
 FiberHandle EmuConvertThreadToFiber() {
     current_context = &main_context;
-    return {.handle = &main_context, .real_stack_size = 0, .is_main=true};
+    return {.handle = &main_context, .emu_stack_size = 0, .is_main = true};
 }
 #endif
