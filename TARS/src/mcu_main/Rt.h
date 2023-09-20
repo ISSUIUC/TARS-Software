@@ -71,7 +71,7 @@ typedef uint32_t sysinterval_t;
 #define chThdCreateStatic(wa_ptr, wa_size, prio, fn, arg) createThread(fn##_name, fn, wa_size, arg)
 #define chThdSleepMilliseconds(time) threadSleep(time)
 #define chThdYield() threadYield()
-#define chVTGetSystemTime() TIME_MS2I(getTime() / 1000.0)
+#define chVTGetSystemTime() (getTime() * 1000)
 #define chBegin(f) f()
 
 typedef uint64_t time_conv_t;
