@@ -1,0 +1,15 @@
+on: push
+name: SILSIM Flight Test Slack Notification
+jobs:
+  slackNotification:
+    name: Slack Notification
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Slack Notification
+      uses: rtCamp/action-slack-notify@v2
+      env:
+        SLACK_COLOR: ${{ job.status }} # or a specific color like 'good' or '#ff00ff'
+        SLACK_MESSAGE: 'SILSIM Flight Test :rocket: (WIP)'
+        SLACK_TITLE: 'Flight result: ${{ job.status }}'
+        SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
