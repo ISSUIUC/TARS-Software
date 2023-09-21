@@ -58,18 +58,25 @@ HILSIMPacket hilsim_reader;
 #ifdef ENABLE_HILSIM_MODE
 static THD_FUNCTION(hilsim_THD, arg) {
     // Creating array for data to be read into
-    char data_read[512];
+    char data_read[70];
     Serial.setTimeout(10);
     Serial.println("[TARS] Hardware-in-Loop Test Commenced");
 
     while (1) {
-        int bytes_read = Serial.readBytesUntil('\n', data_read, 70);
+        // The bytes that we read is 70
+        // 70 might not be fixed as the size of the packet might change as
+        // we change the protobuf definition, so do take note of this, and change
+        // the size accordingly.
+        int bytes_read = Serial.readBytes(data_read, 70);
+
         if (bytes_read > 0) {
             Serial.println(bytes_read);
             Serial.println("Got something");
-
-            if (data_read[bytes_read - 1] == '\r') data_read[bytes_read - 1] = 0;
-
+            // Protobuf can be tempremental sometimes, so whenever it complains that
+            // here's a "wrong wire type", or something like that, do regenerate the protobuf
+            // header files and the python package.
+            // The instructions can be found in the protobuf prototype for hilsimpacket, at
+            // src/mcu_main/hilsim/hilsimpacket.proto
             hilsim_reader = HILSIMPacket_init_zero;
             pb_istream_t stream = pb_istream_from_buffer((pb_byte_t*)(data_read), bytes_read);
 

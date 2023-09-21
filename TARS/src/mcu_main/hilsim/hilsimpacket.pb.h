@@ -10,8 +10,9 @@
 #endif
 
 /* Struct definitions */
-/* TODO(Zyun): Might be more optimal to change all of this to required because protobuf for platformio
- adds an extra bool between each data package, which could lead to some data wastage */
+/* All of the packet data is optional because we might not be able to set all these data, however
+ it ight be more optimal to change all of this to required because protobuf for platformio (nanopb)
+ adds an extra bool for each data element to check if it exists, which could lead to some memory wastage */
 typedef struct _HILSIMPacket {
     /* High-G IMU data */
     bool has_imu_high_ax;
