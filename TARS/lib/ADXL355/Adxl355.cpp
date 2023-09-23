@@ -160,3 +160,62 @@ double Adxl355::getTempF() {
 
     return result * 9 / 5 + 32;
 }
+
+Adxl355::RANGE_VALUES Adxl355::getRange() {
+    int range = read8(I2CSPEED_INTPOLARITY_RANGE);
+
+    return (RANGE_VALUES)(range & RANGE_VALUES::RANGE_MASK);
+}
+
+void Adxl355::setRange(RANGE_VALUES value) {
+    if (isRunning()) {
+        return;
+    }
+
+    uint8_t range = read8(I2CSPEED_INTPOLARITY_RANGE);
+
+    range &= ~(RANGE_VALUES::RANGE_MASK);
+    range |= (int)value;
+
+    write8(I2CSPEED_INTPOLARITY_RANGE, range);
+}
+
+bool Adxl355::isRunning() {
+    bool result = false;
+    int work = read8(POWER_CTL);
+
+    result = (work & POWER_CTL_VALUES::POWER_CTL_OFF) ? false : true;
+
+    return result;
+}
+
+Adxl355::ODR_LPF Adxl355::getOdrLpf() {
+    uint8_t work = read8(FILTER);
+
+    return (ODR_LPF)(work & ODR_LPF::ODR_LPF_MASK);
+}
+
+void Adxl355::setOdrLpf(ODR_LPF value) {
+    if (isRunning()) {
+        return;
+    }
+
+    uint8_t work = read8(FILTER);
+
+    work = (work & ~(ODR_LPF::ODR_LPF_MASK)) | ((int)value);
+
+    write8(FILTER, work);
+}
+
+// Set up the Adxl355 with our required values
+void Adxl355::initializeSensor(RANGE_VALUES range, ODR_LPF odr_lpf) {
+    setRange(Adxl355::RANGE_VALUES::RANGE_2G);
+
+    Adxl355::RANGE_VALUES rangeValue = getRange();
+
+    // Set the ODR and LPF
+    setOdrLpf(odr_lpf);
+
+    // Set the interrupt to FIFO FULL on INT1
+    setIntMap(0x01);
+}

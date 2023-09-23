@@ -26,7 +26,7 @@ class Adxl355 {
     static const uint8_t INT_MAP = 0x2a;
 
     // Only using SPI
-    // static const uint8_t I2CSPEED_INTPOLARITY_RANGE = 0x2c;
+    static const uint8_t I2CSPEED_INTPOLARITY_RANGE = 0x2c;
     static const uint8_t POWER_CTL = 0x2d;
     static const uint8_t RESET = 0x2f;
     static const uint8_t RESET_VALUE = 0x52;
@@ -128,7 +128,7 @@ class Adxl355 {
 
     bool isDeviceRecognized();
     bool isRunning();
-    void initializeSensor(RANGE_VALUES range, ODR_LPF odr_lpf, bool verbose);
+    void initializeSensor(RANGE_VALUES range, ODR_LPF odr_lpf);
     void setRange(RANGE_VALUES value);
     void setIntMap(uint8_t value);
     int getFIFOCount();
@@ -140,6 +140,11 @@ class Adxl355 {
     void stopTempSensor();
     double getTempC();
     double getTempF();
+    ODR_LPF getOdrLpf();
+    void setOdrLpf(ODR_LPF odr_lpf);
+    bool isRunning();
+    RANGE_VALUES getRange();
+    void setRange(RANGE_VALUES range_value)
     
 };
 
