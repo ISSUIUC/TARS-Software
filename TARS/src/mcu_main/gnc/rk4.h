@@ -281,7 +281,7 @@ class rk4 {
 
         int i = x * 10;
         if(i < 0) i = 0;
-        if(i >= x_interpolate.rows()) i = x_interpolate.rows() - 1;
+        if(i + 1>= x_interpolate.rows()) i = x_interpolate.rows() - 2;
 
         int ind = 4 * i;
         float fa_val =
