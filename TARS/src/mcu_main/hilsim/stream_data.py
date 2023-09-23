@@ -20,37 +20,40 @@ def run_hilsim(raw_csv):
     print("Run hilsim request recieved")
     ser = serial.Serial(serial_port, 9600, timeout=10, write_timeout=1)
     hilsim_return_log = ""
-    csv_lines = raw_csv.split("\n")
-    cur_line = 0
-
+    print("intialized")
+    csv = pandas.read_csv('flight_computer.csv')
+    csv_list = csv.iterrows()
     print("CSV parsed")    
+    
 
     last_time = time.time()*1000
     start_time = last_time
-    first_line = csv_lines[0]
 
-    approx_time_sec = (len(csv_lines) * 10)/1000 + 10
+    approx_time_sec = (len(csv) * 10)/1000 + 10
     print("Approximate runtime: " + str(approx_time_sec) + "s")
     print("Awaiting serial connection (10s)...")
 
     watchdog_start = time.time()
 
-    while(cur_line < len(csv_lines)):      
+    while(True):      
         if(abs(watchdog_start - time.time()) > 3):
             print("we should abort")
             return hilsim_return_log
 
         if time.time()*1000 > last_time + 10:
             last_time += 10
+            
             if time.time()*1000 < start_time + 10000:
-                ser.write((first_line + '\n').encode("utf8"))
+                pass
             else:
-                line = csv_lines[cur_line][:-1] + ",0,0,0"
-                cur_line += 1
-                if not line:
+                line_num, row = next(csv_list, (None, None))
+                if line_num == None:
+                    break
+                data = csv_datastream.csv_line_to_protobuf(row)
+                if not data:
                     return hilsim_return_log
                 try:
-                    ser.write((line + '\n').encode("utf8"))
+                    ser.write(data)
                 except:
                     return hilsim_return_log
         if ser.in_waiting:
@@ -77,6 +80,7 @@ if __name__ == "__main__":
     start_time = last_time
     line_num = 0
     csv_list = csv.iterrows()
+
     while(True):       
         if time.time()*1000 > last_time + 10:
             last_time += 10

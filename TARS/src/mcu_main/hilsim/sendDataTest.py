@@ -10,7 +10,7 @@ SPEED_FACTOR = 1
 GRANULARITY_FACTOR = 2
 
 # -----------------<Change first param to the correct port, MacOS (ls /dev/tty.*)>-----------------
-ser = serial.Serial("COM6", 9600, timeout=10, write_timeout=10)
+ser = serial.Serial("COM3", 9600, timeout=10, write_timeout=10)
 
 csv = pandas.read_csv('flight_computer.csv')
 total_rows = csv.shape[0]
