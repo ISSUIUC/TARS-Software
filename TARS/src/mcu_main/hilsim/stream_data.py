@@ -34,8 +34,10 @@ def run_hilsim(raw_csv):
     print("Awaiting serial connection (10s)...")
 
     watchdog_start = time.time()
+    cur_line = 0
 
     while(True):      
+        
         if(abs(watchdog_start - time.time()) > 3):
             print("we should abort")
             return hilsim_return_log
@@ -46,6 +48,8 @@ def run_hilsim(raw_csv):
             if time.time()*1000 < start_time + 10000:
                 pass
             else:
+                cur_line += 1
+                print(f"{cur_line} / {len(csv)}")
                 line_num, row = next(csv_list, (None, None))
                 if line_num == None:
                     break
