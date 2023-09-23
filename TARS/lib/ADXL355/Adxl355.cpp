@@ -217,7 +217,6 @@ void Adxl355::setOdrLpf(ODR_LPF value) {
     write8(FILTER, work);
 }
 
-// Set up the Adxl355 with our required values
 void Adxl355::initializeSensor(RANGE_VALUES range, ODR_LPF odr_lpf) {
     setRange(Adxl355::RANGE_VALUES::RANGE_2G);
 

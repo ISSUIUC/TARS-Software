@@ -145,7 +145,7 @@ class Adxl355 {
     void setOdrLpf(ODR_LPF odr_lpf);
     bool isRunning();
     RANGE_VALUES getRange();
-    void setRange(RANGE_VALUES range_value)
+    void setRange(RANGE_VALUES range_value);
     
 };
 
