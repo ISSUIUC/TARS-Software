@@ -148,6 +148,9 @@ class Adxl355 {
     void setRange(RANGE_VALUES range_value);
     long twosComplement(unsigned long value);
     int getRawAxis(long *x, long *y, long *z);
+    void calibrateSensor(int fifoReadCount);
+    void setTrim(int32_t x, int32_t y, int32_t z);
+    int readFIFOEntries(long *output);
 };
 
 #endif  // _ADXL355_H_

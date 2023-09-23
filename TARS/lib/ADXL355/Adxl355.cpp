@@ -197,6 +197,7 @@ Adxl355::RANGE_VALUES Adxl355::getRange() {
 }
 
 void Adxl355::setRange(RANGE_VALUES value) {
+    // Cannot setRange while running the sensor
     if (isRunning()) {
         return;
     }
@@ -225,6 +226,7 @@ Adxl355::ODR_LPF Adxl355::getOdrLpf() {
 }
 
 void Adxl355::setOdrLpf(ODR_LPF value) {
+    // Cannot setOdrLpf while running the sensor
     if (isRunning()) {
         return;
     }
@@ -256,12 +258,12 @@ long Adxl355::twosComplement(unsigned long value) {
 }
 
 // Convert raw data to signed integer value
-int getRawAxis(long *x, long *y, long *z) {
+int Adxl355::getRawAxis(long *x, long *y, long *z) {
     uint8_t output[9];
     // Fills memory with 0's
     memset(output, 0, 9);
 
-    // Reads 9 byres
+    // Reads 9 bytes
     int result = readBlock(XDATA3, 9, (uint8_t *)output);
 
     unsigned long value_x = 0;
@@ -283,4 +285,74 @@ int getRawAxis(long *x, long *y, long *z) {
     *z = twosComplement(value_z);
 
     return result;
+}
+
+void Adxl355::setTrim(int32_t x, int32_t y, int32_t z) {
+    // Cannot setTrim while running the sensor
+    if (isRunning()) {
+        return;
+    }
+
+    int16_t value_x = (x >> 4);
+    int16_t value_y = (y >> 4);
+    int16_t value_z = (z >> 4);
+
+    uint8_t high_x = (value_x & 0xff00) >> 8;
+    uint8_t low_x = value_x & 0x00ff;
+    uint8_t high_y = (value_y & 0xff00) >> 8;
+    uint8_t low_y = value_y & 0x00ff;
+    uint8_t high_z = (value_z & 0xff00) >> 8;
+    uint8_t low_z = value_z & 0x00ff;
+
+    write8(OFFSET_X_H, high_x);
+    write8(OFFSET_X_L, low_x);
+    write8(OFFSET_Y_H, high_y);
+    write8(OFFSET_Y_L, low_y);
+    write8(OFFSET_Z_H, high_z);
+    write8(OFFSET_Z_L, low_z);
+}
+
+void Adxl355::calibrateSensor(int fifoReadCount) {
+    long FIFOOut[32][3];
+    int result;
+    int readings = 0;
+
+    long total_x = 0;
+    long total_y = 0;
+    long total_z = 0;
+
+    // Fill FIFOOut with 0s in memory
+    memset(FIFOOut, 0, sizeof(FIFOOut));
+
+    stop();
+
+    setTrim(0, 0, 0);
+
+    start();
+
+    for (int j = 0; j < fifoReadCount; j++) {
+        // TODO: Define FIFOEntries function
+        if (-1 != (result = readFIFOEntries((long *)FIFOOut))) {
+            readings += result;
+
+            for (int i = 0; i < result; i++) {
+                total_x += FIFOOut[i][0];
+                total_y += FIFOOut[i][1];
+                total_z += FIFOOut[i][2];
+            }
+        } else {
+            // Failed the read
+            // Error out
+        }
+    }
+
+    long avg_x = total_x / readings;
+    long avg_y = total_y / readings;
+    long avg_z = total_z / readings;
+
+    stop();
+
+    // Set new trim and start
+    setTrim(avg_x, avg_y, avg_z);
+    start();
 }
