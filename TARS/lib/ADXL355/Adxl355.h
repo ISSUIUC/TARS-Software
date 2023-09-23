@@ -107,7 +107,7 @@ class Adxl355 {
 
     uint8_t read8(uint8_t reg);
     uint16_t read16(uint8_t reg);
-    uint32_t readBlock(uint8_t reg, uint8_t length, uint8_t *output);
+    uint8_t readBlock(uint8_t reg, uint8_t length, uint8_t *output);
     void write8(uint8_t reg, uint8_t value);
 
     int _csPin;
@@ -146,7 +146,8 @@ class Adxl355 {
     bool isRunning();
     RANGE_VALUES getRange();
     void setRange(RANGE_VALUES range_value);
-    
+    long twosComplement(unsigned long value);
+    int getRawAxis(long *x, long *y, long *z);
 };
 
 #endif  // _ADXL355_H_

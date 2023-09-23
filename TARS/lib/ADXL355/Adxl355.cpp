@@ -15,6 +15,7 @@ void Adxl355::initSPI(SPIClass &spi) {
     }
 }
 
+// Puts Sensor in Standby Mode
 int Adxl355::stop() {
     int power = read8(POWER_CTL);
 
@@ -87,6 +88,24 @@ uint16_t Adxl355::read16(uint8_t reg) {
     digitalWrite(_csPin, HIGH);
 
     return value;
+}
+
+uint8_t Adxl355::readBlock(uint8_t reg, uint8_t length, uint8_t *output) {
+    uint8_t registerToSend = (reg << 1) | READ_BYTE;
+
+    digitalWrite(_csPin, LOW);
+    spi_obj->transfer(registerToSend);
+
+    int i = length;
+
+    while (i) {
+        *output++ = spi_obj->transfer(0x00);
+        i--;
+    }
+
+    digitalWrite(_csPin, HIGH);
+
+    return length - i;
 }
 
 void Adxl355::write8(uint8_t reg, uint8_t value) {
@@ -227,4 +246,41 @@ void Adxl355::initializeSensor(RANGE_VALUES range, ODR_LPF odr_lpf) {
 
     // Set the interrupt to FIFO FULL on INT1
     setIntMap(0x01);
+}
+
+long Adxl355::twosComplement(unsigned long value) {
+    // If the most significant bit is set we negate the value
+    value = -(value & (1 << (20 - 1))) + (value & ~(1 << (20 - 1)));
+
+    return value;
+}
+
+// Convert raw data to signed integer value
+int getRawAxis(long *x, long *y, long *z) {
+    uint8_t output[9];
+    // Fills memory with 0's
+    memset(output, 0, 9);
+
+    // Reads 9 byres
+    int result = readBlock(XDATA3, 9, (uint8_t *)output);
+
+    unsigned long value_x = 0;
+    unsigned long value_y = 0;
+    unsigned long value_z = 0;
+
+    // Check if all bytes were successfully read into
+    if (result == 9) {
+        // Converts into 20 bit value for each axis
+        value_x = (output[0] << 12) | (output[1] << 4) | (output[2] >> 4);
+        value_y = (output[3] << 12) | (output[4] << 4) | (output[5] >> 4);
+        value_z = (output[6] << 12) | (output[7] << 4) | (output[8] >> 4);
+    }
+
+    // Binary to
+
+    *x = twosComplement(value_x);
+    *y = twosComplement(value_y);
+    *z = twosComplement(value_z);
+
+    return result;
 }
