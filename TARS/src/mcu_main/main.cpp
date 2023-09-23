@@ -58,16 +58,26 @@ HILSIMPacket hilsim_reader;
 #ifdef ENABLE_HILSIM_MODE
 static THD_FUNCTION(hilsim_THD, arg) {
     // Creating array for data to be read into
-    char data_read[512];
+    char data_read[512]; // Change this to 70 or something
     int fields_to_read = 19;
-    Serial.setTimeout(10);
+    Serial.setTimeout(30);
     Serial.println("[TARS] Hardware-in-Loop Test Commenced");
 
     while (1) {
-        int bytes_read = Serial.readBytesUntil('\n', data_read, 511);
-        if (bytes_read > 0) {
-            Serial.println(bytes_read);
-            Serial.println("Got something");
+        int bytes_read = Serial.readBytes(data_read, 70);
+        if (bytes_read != 0 && bytes_read != 70) {
+            Serial.print(bytes_read);
+            Serial.println(" bytes read, not reading sufficient bytes");
+            int dummy = 70 - bytes_read;
+            // Then read mod seventy until the next bit
+            int s = Serial.readBytes(data_read, dummy);
+            Serial.print(s);
+            Serial.println(" trashed bytes");
+        }
+        else if (bytes_read > 0) {
+            Serial.print(bytes_read);
+            // Convert the bits to hex
+            Serial.println("bytes read");
 
             if (data_read[bytes_read - 1] == '\r') data_read[bytes_read - 1] = 0;
 

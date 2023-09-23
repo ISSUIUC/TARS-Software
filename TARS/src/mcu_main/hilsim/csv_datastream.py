@@ -7,7 +7,7 @@ def csv_line_to_protobuf(parsed_csv):
     hilsim_packet.imu_high_ax = parsed_csv['highg_ax']
     hilsim_packet.imu_high_ay = parsed_csv["highg_ay"]
     hilsim_packet.imu_high_az = parsed_csv["highg_az"]
-    hilsim_packet.imu_high_ax = parsed_csv["barometer_altitude"]
+    hilsim_packet.barometer_altitude = parsed_csv["barometer_altitude"]
     hilsim_packet.barometer_temperature = parsed_csv["temperature"]
     hilsim_packet.barometer_pressure = parsed_csv["pressure"]
     hilsim_packet.imu_low_ax = parsed_csv["ax"]
