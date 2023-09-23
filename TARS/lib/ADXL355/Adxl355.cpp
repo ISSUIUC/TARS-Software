@@ -130,6 +130,16 @@ bool Adxl355::isFIFOOverrun() {
     return (data & STATUS_VALUES::FIFO_OVERRUN) ? true : false;
 }
 
+bool Adxl355::isTempSensorOn() {
+    bool result = false;
+
+    uint8_t work = read8(POWER_CTL);
+
+    result = ((work & POWER_CTL_VALUES::POWER_CTL_OFF) || (work & POWER_CTL_VALUES::POWER_CTL_TEMP_OFF)) ? false : true;
+
+    return result;
+}
+
 void Adxl355::startTempSensor() {
     uint8_t data = read8(POWER_CTL);
 
