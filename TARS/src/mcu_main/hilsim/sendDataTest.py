@@ -2,7 +2,7 @@ import serial
 import pandas
 
 import time
-import hilsimpacket_pb2
+import csv_datastream
 
 # n means that the flight will be played n times slower. So 1 means real time, 2 means half speed, etc.
 SPEED_FACTOR = 1
@@ -32,25 +32,8 @@ for i, row in csv.iterrows():
         last10.pop(0)
     line = f"{','.join(str(item) for item in row[written])}\n"
 
-    hilsim_packet = hilsimpacket_pb2.HILSIMPacket()
-
-    hilsim_packet.imu_high_ax = row['highg_ax']
-    hilsim_packet.imu_high_ay = row["highg_ay"]
-    hilsim_packet.imu_high_az = row["highg_az"]
-    hilsim_packet.imu_high_ax = row["barometer_altitude"]
-    hilsim_packet.barometer_temperature = row["temperature"]
-    hilsim_packet.barometer_pressure = row["pressure"]
-    hilsim_packet.imu_low_ax = row["ax"]
-    hilsim_packet.imu_low_ay = row["ay"]
-    hilsim_packet.imu_low_az = row["az"]
-    hilsim_packet.imu_low_gx = row["gx"]
-    hilsim_packet.imu_low_gy = row["gy"]
-    hilsim_packet.imu_low_gz = row["gz"]
-    hilsim_packet.mag_x = row["mx"]
-    hilsim_packet.mag_y = row["my"]
-    hilsim_packet.mag_z = row["mz"]
-
-    ser.write(hilsim_packet.SerializeToString())
+    hilsim_packet = csv_datastream.csv_line_to_protobuf(row)
+    ser.write(hilsim_packet)
     
     data = ser.read_all()
     decoded = data.decode("utf8")
