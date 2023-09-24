@@ -280,8 +280,8 @@ class rk4 {
             2.69068966, 2.7937931, 2.89689655, 3.0;
 
         int i = x * 10;
-        if(i < 0) i = 0;
-        if(i + 1>= x_interpolate.rows()) i = x_interpolate.rows() - 2;
+        if (i < 0) i = 0;
+        if (i + 1 >= x_interpolate.rows()) i = x_interpolate.rows() - 2;
 
         int ind = 4 * i;
         float fa_val =
