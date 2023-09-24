@@ -5,7 +5,8 @@ import serial.tools.list_ports
 import pandas
 import csv_datastream
 
-serial_port = "COM3"
+# TODO: Automatically check for TARS port
+serial_port = "COM5"
 
 def get_ports():
     return serial.tools.list_ports.comports()
@@ -24,7 +25,6 @@ def run_hilsim(raw_csv):
     csv = pandas.read_csv('flight_computer.csv')
     csv_list = csv.iterrows()
     print("CSV parsed")    
-    
 
     last_time = time.time()*1000
     start_time = last_time
@@ -44,7 +44,6 @@ def run_hilsim(raw_csv):
 
         if time.time()*1000 > last_time + 10:
             last_time += 10
-            
             if time.time()*1000 < start_time + 10000:
                 pass
             else:
@@ -69,7 +68,6 @@ def run_hilsim(raw_csv):
                 string = string[0 : (len(string)-1)]
                 hilsim_return_log += string + "\n"
            
-
     return hilsim_return_log
 
 

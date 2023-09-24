@@ -57,24 +57,26 @@ HILSIMPacket hilsim_reader;
 
 #ifdef ENABLE_HILSIM_MODE
 static THD_FUNCTION(hilsim_THD, arg) {
+    // Size of protobuf packet size
+    // Check src/mcu_main/hilsim/README.md for more info
+    const unsigned int packet_size = 70;
     // Creating array for data to be read into
-    char data_read[512]; // Change this to 70 or something
+    char data_read[packet_size];
     int fields_to_read = 19;
     Serial.setTimeout(30);
     Serial.println("[TARS] Hardware-in-Loop Test Commenced");
 
     while (1) {
-        int bytes_read = Serial.readBytes(data_read, 70);
-        if (bytes_read != 0 && bytes_read != 70) {
+        int bytes_read = Serial.readBytes(data_read, packet_size);
+        if (bytes_read != 0 && bytes_read != packet_size) {
             Serial.print(bytes_read);
             Serial.println(" bytes read, not reading sufficient bytes");
-            int dummy = 70 - bytes_read;
+            int dummy = packet_size - bytes_read;
             // Then read mod seventy until the next bit
             int s = Serial.readBytes(data_read, dummy);
             Serial.print(s);
             Serial.println(" trashed bytes");
-        }
-        else if (bytes_read > 0) {
+        } else if (bytes_read > 0) {
             Serial.print(bytes_read);
             // Convert the bits to hex
             Serial.println("bytes read");

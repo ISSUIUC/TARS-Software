@@ -19,7 +19,7 @@ def index():
             result = stream_data.run_hilsim(csvData['csv_data'])
         except:
             print(traceback.format_exc())
-            return "Internal Server Error", 500
+            return "Internal Server Error: " + traceback.format_exc(), 500
     print("HILSIM run returned")
     return {'log': result}, 200
 

@@ -30,7 +30,6 @@ for i, row in csv.iterrows():
     last10.append(start)
     if len(last10) > 10:
         last10.pop(0)
-    line = f"{','.join(str(item) for item in row[written])}\n"
 
     hilsim_packet = csv_datastream.csv_line_to_protobuf(row)
     ser.write(hilsim_packet)
