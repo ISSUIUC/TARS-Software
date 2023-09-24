@@ -4,12 +4,21 @@ import os
 import serial.tools.list_ports
 import pandas
 import csv_datastream
+import traceback
+import io 
 
 # TODO: Automatically check for TARS port
-serial_port = "COM5"
+serial_port = "COM3"
 
 def get_ports():
     return serial.tools.list_ports.comports()
+
+def raw_csv_to_dataframe(raw_csv):
+    # Get column names
+    header = raw_csv.split('\n')[0].split(",")
+    csv = "\n".join(raw_csv.split('\n')[1:])
+    csvStringIO = io.StringIO(csv)
+    return pandas.read_csv(csvStringIO, sep=",", header=None, names=header)
 
 def validate_ports():
     ports = get_ports()
@@ -17,12 +26,16 @@ def validate_ports():
         return "No devices are plugged in. Please plug TARS into a serial port"
     return "OK"
 
+def get_runtime(raw_csv):
+    csv = raw_csv_to_dataframe(raw_csv)
+    return (len(csv) * 10)/1000 + 10
+
 def run_hilsim(raw_csv):
     print("Run hilsim request recieved")
     ser = serial.Serial(serial_port, 9600, timeout=10, write_timeout=1)
     hilsim_return_log = ""
     print("intialized")
-    csv = pandas.read_csv('flight_computer.csv')
+    csv = raw_csv_to_dataframe(raw_csv)
     csv_list = csv.iterrows()
     print("CSV parsed")    
 
@@ -39,25 +52,29 @@ def run_hilsim(raw_csv):
     while(True):      
         
         if(abs(watchdog_start - time.time()) > 3):
-            print("we should abort")
+            print("Watchdog timer tripped")
             return hilsim_return_log
-
         if time.time()*1000 > last_time + 10:
             last_time += 10
             if time.time()*1000 < start_time + 10000:
                 pass
             else:
                 cur_line += 1
+
                 print(f"{cur_line} / {len(csv)}")
                 line_num, row = next(csv_list, (None, None))
                 if line_num == None:
+                    print("Ran out of data to send -- HILSIM data stream end")
                     break
                 data = csv_datastream.csv_line_to_protobuf(row)
                 if not data:
+                    print("No data")
                     return hilsim_return_log
                 try:
                     ser.write(data)
                 except:
+                    print("Exception during serial write")
+                    print(traceback.format_exc())
                     return hilsim_return_log
         if ser.in_waiting:
             data = ser.read_all()
@@ -67,7 +84,8 @@ def run_hilsim(raw_csv):
                 watchdog_start = time.time()
                 string = string[0 : (len(string)-1)]
                 hilsim_return_log += string + "\n"
-           
+        else:
+            watchdog_start = time.time()
     return hilsim_return_log
 
 

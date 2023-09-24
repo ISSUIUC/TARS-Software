@@ -14,5 +14,6 @@ with open(os.path.join(os.path.dirname(__file__), "./flight_computer.csv"), "r")
         print('Response: ' + res.text)
     else:
         f = open(file, "w")
-        f.write(json.loads(res.text)["log"].replace("\n\r", "\n"))
+        print(res.text)
+        f.write(json.loads(res.text)["log"].replace("\r\n", "\n"))
         print('Got a response! Saved to post_return.txt')

@@ -3,7 +3,6 @@ import hilsimpacket_pb2
 def csv_line_to_protobuf(parsed_csv):
     
     hilsim_packet = hilsimpacket_pb2.HILSIMPacket()
-
     hilsim_packet.imu_high_ax = parsed_csv['highg_ax']
     hilsim_packet.imu_high_ay = parsed_csv["highg_ay"]
     hilsim_packet.imu_high_az = parsed_csv["highg_az"]
