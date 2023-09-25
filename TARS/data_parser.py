@@ -10,13 +10,17 @@ Steps to use this wonderful software:
       not having python on your path, having the wrong python on your path, not being in the right working directory,
       or not having installed the right lark.
     - Outputting to a `.csv` file will automatically trigger a conversion from JSON to CSV at the end of the process.
+
+Authors:
+    Magilan Sendhil
+    Michael Karpov
 """
 
 from __future__ import annotations
 
 import json
 from abc import ABC, abstractmethod
-from typing import Callable
+from typing import Callable, Any, NamedTuple, cast
 
 import lark
 from lark import Lark
@@ -600,7 +604,13 @@ def render_bytes(n: int) -> str:
     return f"{n:#.4g}{endings[end_idx]}"
 
 
-def get_arguments():
+class Arguments(NamedTuple):
+    header: pathlib.Path
+    raw: pathlib.Path
+    out: pathlib.Path
+
+
+def get_arguments() -> Arguments:
     """
     A helper function which parses the arguments passed to the file.
 
@@ -618,40 +628,59 @@ def get_arguments():
     if args.out is None:
         raw_path: pathlib.Path = args.raw
         args.out = raw_path.with_suffix(".json")
-    return args
+    return cast(Arguments, args)
 
 
 def preprocess(t: str) -> str:
+    """
+    A very basic and very wrong C++ preprocessor, it just deletes any line which has a preprocessor directive
+    """
     l = []
     for line in t.splitlines():
         if not line.startswith("#"):
             l.append(line)
     return "\n".join(l)
 
-# Given a json object that is representative of the whole file, recursively create a header string containing every key in the json.
-def construct_header_string(with_trace, jsonobject):
-    out = ""
-    for key in list(jsonobject.keys()):
-        if(type(jsonobject[key]) is dict):
+
+def construct_header_string(jsonobject: dict[str, Any], path: str = "") -> str:
+    """
+    Given a json object that is representative of the whole file, recursively create a header string containing every
+    key in the json as a period-separated path.
+
+    :param jsonobject: A JSON object to construct a header string for
+    :param path: The path this JSON object is at
+    :return: A string for the keys in this json object
+    """
+    items: list[str] = []
+    for key, value in jsonobject.items():
+        if isinstance(value, dict):
             # If it's a dictionary, continue recursively but including the trace to the datatype
-            out += construct_header_string(with_trace + key + ".", jsonobject[key]) + ","
+            items.append(construct_header_string(value, f"{path}.{key}"))
         else:
-            out += with_trace + key + ","
-    return out.rstrip(out[-1])
-        
-# Create a string containing a single json object as a csv
-def construct_data_string(jsonobject):
-    out = ""
-    for key in list(jsonobject.keys()):
-        if(type(jsonobject[key]) is dict):
-            # If it's a dictionary, continue recursively but including the trace to the datatype
-            out += construct_data_string(jsonobject[key]) + ","
-        elif(type(jsonobject[key]) is list):
-            # If it's a list, take only the first value (Lists are only used for FSM, anyway, someone could alter this behavior though if they wish)
-            out += str(jsonobject[key][0]) + ","
+            items.append(f"{path}.{key}")
+    return ",".join(items)
+
+
+def construct_data_string(jsonobject: dict[str, Any]):
+    """
+    Construct a string turning a single JSON object into csv columns
+
+    :param jsonobject: A JSON object to convert
+    :return: a string for the values in this json object as csv rows
+    """
+    items: list[str] = []
+    for key, value in jsonobject.items():
+        if isinstance(value, dict):
+            items.append(construct_data_string(value))
+        elif isinstance(value, list):
+            # If it's a list, take only the first value
+            # (Lists are only used for FSM, anyway, someone could alter this behavior though if they wish)
+            # todo make this less fragile, but it should be good for now
+            items.append(str(value[0]))
         else:
-            out += str(jsonobject[key]) + ","
-    return out.rstrip(out[-1])
+            items.append(value)
+    return ",".join(items)
+
 
 def main():
     args = get_arguments()
@@ -676,10 +705,6 @@ def main():
         all_data: bytes = f_da.read()
 
     idx = 0  # a counter which keeps track of how far into the raw data we are
-    
-
-    # Determine if the filetype should be a .csv file or a .json file.
-    file_type = pathlib.Path(args.out).suffix
 
     # open up the output file, which we write to incrementally
     with args.out.open("w") as f_out:
@@ -707,19 +732,17 @@ def main():
         f_out.write("\n]")
 
     # If file_type is .csv, we will convert it from JSON (It is easier to convert from JSON than from a binary format.)
-    if file_type == ".csv":
+    if args.out.suffix == ".csv":
         print("\nConverting .json output to .csv")
         with args.out.open("r") as f_in:
             data_json = json.load(f_in)
-        
-        headerString = construct_header_string("", data_json[0])
+
+        header_string = construct_header_string(data_json[0])
         with args.out.open("w") as f_out:
             # Now we can overwrite the data, since we have the json loaded.
-            f_out.write(headerString + "\n")
+            f_out.write(header_string + "\n")
             for data_object in data_json:
                 f_out.write(construct_data_string(data_object) + "\n")
-            
-
 
 
 if __name__ == '__main__':
