@@ -51,6 +51,19 @@ void OrientationSensor::setIMU(Adafruit_BNO08x const& bno) {
 }
 #endif
 
+#ifdef ENABLE_HILSIM_MODE
+void OrientationSensor::update(HILSIMPacket hilsim_packet) {
+#ifdef ENABLE_ORIENTATION
+    chSysLock();
+    chMtxLock(&mutex);
+    _orientationEuler = (euler_t){hilsim_packet.ornt_roll, hilsim_packet.ornt_pitch, hilsim_packet.ornt_yaw};
+    dataLogger.pushOrientationFifo(
+            (OrientationData){_accelerations, _gyro, _magnetometer, _orientationEuler, chVTGetSystemTime()});
+    chMtxUnlock(&mutex);
+    chSysUnlock();
+#endif
+}
+#else
 void OrientationSensor::update() {
 #ifdef ENABLE_ORIENTATION
     chSysLock();
@@ -103,18 +116,7 @@ void OrientationSensor::update() {
     chSysUnlock();
 #endif
 }
-
-void OrientationSensor::update(HILSIMPacket hilsim_packet) {
-#ifdef ENABLE_ORIENTATION
-    chSysLock();
-    chMtxLock(&mutex);
-    _orientationEuler = (euler_t){hilsim_packet.ornt_roll, hilsim_packet.ornt_pitch, hilsim_packet.ornt_yaw};
-    dataLogger.pushOrientationFifo(
-        (OrientationData){_accelerations, _gyro, _magnetometer, _orientationEuler, chVTGetSystemTime()});
-    chMtxUnlock(&mutex);
-    chSysUnlock();
 #endif
-}
 
 #define sq(v) (std::pow(v, 2))
 

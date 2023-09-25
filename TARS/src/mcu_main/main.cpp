@@ -30,7 +30,6 @@
 #include <Arduino.h>
 #include <PWMServo.h>
 #include <SPI.h>
-#include <pb_decode.h>
 #include <Wire.h>
 #endif
 
@@ -46,9 +45,13 @@
 #include "mcu_main/error.h"
 #include "mcu_main/buzzer/buzzer.h"
 #include "mcu_main/debug.h"
+
+#ifdef ENABLE_HILSIM_MODE
+#include <pb_decode.h>
 #include "mcu_main/hilsim/hilsimpacket.pb.h"
 
 HILSIMPacket hilsim_reader;
+#endif
 
 #if defined(ENABLE_HIGH_G) || defined(ENABLE_ORIENTATION) || defined(ENABLE_BAROMETER) || defined(ENABLE_LOW_G) || \
     defined(ENABLE_MAGNETOMETER) || defined(ENABLE_GAS)
@@ -183,7 +186,6 @@ static THD_FUNCTION(sensor_fast_THD, arg) {
         Serial.println("### Sensor fast thread entrance");
 #endif
 #ifdef ENABLE_HILSIM_MODE
-
         barometer.update(hilsim_reader);
         magnetometer.update(hilsim_reader);
         gas.refresh();
@@ -191,7 +193,6 @@ static THD_FUNCTION(sensor_fast_THD, arg) {
         lowG.update(hilsim_reader);
         voltage.read();
         highG.update(hilsim_reader);
-
 #else
         barometer.update();
         magnetometer.update();

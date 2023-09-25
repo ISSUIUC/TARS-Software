@@ -8,7 +8,9 @@
 #include "mcu_main/debug.h"
 #include "mcu_main/error.h"
 #include "mcu_main/pins.h"
+#ifdef ENABLE_HILSIM_MODE
 #include "mcu_main/hilsim/hilsimpacket.pb.h"
+#endif
 
 #ifndef ENABLE_SILSIM_MODE
 #include <Wire.h>
@@ -35,12 +37,15 @@ class OrientationSensor;
 extern OrientationSensor orientation;
 
 class OrientationSensor {
-   public:
+public:
     MUTEX_DECL(mutex);
     OrientationSensor();
 
-    void update();
+#ifdef ENABLE_HILSIM_MODE
     void update(HILSIMPacket hilsim_packet);
+#else
+    void update();
+#endif
 
     ErrorCode __attribute__((warn_unused_result)) init();
 

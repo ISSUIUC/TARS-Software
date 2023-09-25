@@ -20,6 +20,17 @@ ErrorCode MagnetometerSensor::init() {
     return ErrorCode::NO_ERROR;
 }
 
+#ifdef ENABLE_HILSIM_MODE
+void MagnetometerSensor::update(HILSIMPacket hilsim_packet) {
+#ifdef ENABLE_MAGNETOMETER
+    time_stamp = chVTGetSystemTime();
+    mx = hilsim_packet.mag_x;
+    my = hilsim_packet.mag_y;
+    mz = hilsim_packet.mag_z;
+    dataLogger.pushMagnetometerFifo((MagnetometerData){{mx, my, mz}, time_stamp});
+#endif
+}
+#else
 void MagnetometerSensor::update() {
 #ifdef ENABLE_MAGNETOMETER
 #ifdef ENABLE_SILSIM_MODE
@@ -37,15 +48,6 @@ void MagnetometerSensor::update() {
     dataLogger.pushMagnetometerFifo((MagnetometerData){{mx, my, mz}, time_stamp});
 #endif
 }
-
-void MagnetometerSensor::update(HILSIMPacket hilsim_packet) {
-#ifdef ENABLE_MAGNETOMETER
-    time_stamp = chVTGetSystemTime();
-    mx = hilsim_packet.mag_x;
-    my = hilsim_packet.mag_y;
-    mz = hilsim_packet.mag_z;
-    dataLogger.pushMagnetometerFifo((MagnetometerData){{mx, my, mz}, time_stamp});
 #endif
-}
 
 Magnetometer MagnetometerSensor::getMagnetometer() { return {mx, my, mz}; }

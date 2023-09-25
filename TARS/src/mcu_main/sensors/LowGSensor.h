@@ -5,7 +5,10 @@
 #include "mcu_main/sensors/HighGSensor.h"
 #include "common/packet.h"
 #include "mcu_main/error.h"
+
+#ifdef ENABLE_HILSIM_MODE
 #include "mcu_main/hilsim/hilsimpacket.pb.h"
+#endif
 #ifndef ENABLE_SILSIM_MODE
 #include "SparkFunLSM6DS3.h"
 #endif
@@ -28,8 +31,12 @@ class LowGSensor {
     LowGSensor();
 
     ErrorCode __attribute__((warn_unused_result)) init();
-    void update();
+
+#ifdef ENABLE_HILSIM_MODE
     void update(HILSIMPacket hilsim_packet);
+#else
+    void update();
+#endif
     Acceleration getAcceleration();
     Gyroscope getGyroscope();
 

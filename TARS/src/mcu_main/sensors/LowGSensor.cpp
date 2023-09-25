@@ -4,7 +4,6 @@
 #include "mcu_main/dataLog.h"
 #include "mcu_main/pins.h"
 #include "mcu_main/debug.h"
-#include "mcu_main/hilsim/hilsimpacket.pb.h"
 
 #ifdef ENABLE_SILSIM_MODE
 #include "mcu_main/emulation.h"
@@ -12,6 +11,25 @@
 
 LowGSensor lowG;
 
+#ifdef ENABLE_HILSIM_MODE
+void LowGSensor::update(HILSIMPacket hilsim_packet) {
+#ifdef ENABLE_LOW_G
+    chSysLock();
+    chMtxLock(&mutex);
+    ax = hilsim_packet.imu_low_ax;
+    ay = hilsim_packet.imu_low_ay;
+    az = hilsim_packet.imu_low_az;
+    gx = hilsim_packet.imu_low_gx;
+    gy = hilsim_packet.imu_low_gy;
+    gz = hilsim_packet.imu_low_gz;
+
+    dataLogger.pushLowGFifo((LowGData){ax, ay, az, gx, gy, gz, chVTGetSystemTime()});
+
+    chMtxUnlock(&mutex);
+    chSysUnlock();
+#endif
+}
+#else
 void LowGSensor::update() {
 #ifdef ENABLE_LOW_G
     chSysLock();
@@ -41,24 +59,7 @@ void LowGSensor::update() {
     dataLogger.pushLowGFifo((LowGData){ax, ay, az, gx, gy, gz, timestamp});
 #endif
 }
-
-void LowGSensor::update(HILSIMPacket hilsim_packet) {
-#ifdef ENABLE_LOW_G
-    chSysLock();
-    chMtxLock(&mutex);
-    ax = hilsim_packet.imu_low_ax;
-    ay = hilsim_packet.imu_low_ay;
-    az = hilsim_packet.imu_low_az;
-    gx = hilsim_packet.imu_low_gx;
-    gy = hilsim_packet.imu_low_gy;
-    gz = hilsim_packet.imu_low_gz;
-
-    dataLogger.pushLowGFifo((LowGData){ax, ay, az, gx, gy, gz, chVTGetSystemTime()});
-
-    chMtxUnlock(&mutex);
-    chSysUnlock();
 #endif
-}
 
 Acceleration LowGSensor::getAcceleration() { return Acceleration{ax, ay, az}; }
 
