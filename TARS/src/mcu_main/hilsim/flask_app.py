@@ -17,6 +17,8 @@ job_runtime = 0
 @app.route('/', methods=["GET", "POST"])
 def index():
     global run_locked, job_queue
+    if request.method == "GET":
+        return "Hello world!", 200
     if request.method == "POST":
         csvData = json.loads(request.get_data().decode())
         # TODO: validate data here
