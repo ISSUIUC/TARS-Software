@@ -40,6 +40,7 @@
 #include "mcu_main/sensors/sensors.h"
 #include "mcu_main/telemetry.h"
 
+
 #define THREAD_DEBUG
 //#define SERVO_DEBUG
 
@@ -208,8 +209,9 @@ static THD_FUNCTION(dataLogger_THD, arg) {
 #ifdef THREAD_DEBUG
         Serial.println("Data Logging thread entrance");
 #endif
-
-        sd_logger.update();
+        if (datalog_is_running) {
+            sd_logger.update();
+        }
 
         chThdSleepMilliseconds(6);
     }
