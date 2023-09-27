@@ -1,5 +1,4 @@
 #include "mcu_main/Abort.h"
-         
 
 bool is_aborted = false;
 

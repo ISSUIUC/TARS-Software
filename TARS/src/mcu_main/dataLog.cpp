@@ -39,6 +39,9 @@ sensorDataStruct_t DataLogBuffer::read() {
     barometerFifo.read(data.barometer_data);
     flapFifo.read(data.flap_data);
     voltageFifo.read(data.voltage_data);
+    orientationFifo.read(data.orientation_data);
+    magnetometerFifo.read(data.magnetometer_data);
+    gasFifo.read(data.gas_data);
     return data;
 }
 
@@ -91,6 +94,21 @@ void DataLogBuffer::pushVoltageFifo(VoltageData const& voltage_data) {
     UPDATE_QUEUE(voltageQueue, voltage_data);
 }
 
+void DataLogBuffer::pushOrientationFifo(OrientationData const& orientation_data) {
+    orientationFifo.push(orientation_data);
+    UPDATE_QUEUE(orientationQueue, orientation_data);
+}
+
+void DataLogBuffer::pushGasFifo(const GasData& gas_data) {
+    gasFifo.push(gas_data);
+    UPDATE_QUEUE(gasQueue, gas_data);
+}
+
+void DataLogBuffer::pushMagnetometerFifo(const MagnetometerData& magnetometer_data) {
+    magnetometerFifo.push(magnetometer_data);
+    UPDATE_QUEUE(magnetometerQueue, magnetometer_data);
+}
+
 #undef UPDATE_QUEUE
 
 void DataLogQueue::attach(DataLogBuffer& buffer) {
@@ -108,5 +126,8 @@ sensorDataStruct_t DataLogQueue::next() {
     data.has_barometer_data = barometerQueue.pop(data.barometer_data);
     data.has_flap_data = flapQueue.pop(data.flap_data);
     data.has_voltage_data = voltageQueue.pop(data.voltage_data);
+    data.has_orientation_data = orientationQueue.pop(data.orientation_data);
+    data.has_gas_data = gasQueue.pop(data.gas_data);
+    data.has_magnetometer_data = magnetometerQueue.pop(data.magnetometer_data);
     return data;
 }

@@ -1,13 +1,14 @@
 #include "mcu_main/SDLogger.h"
 
-#include "FS.h"
 #include "mcu_main/pins.h"
+#include "mcu_main/debug.h"
 
 SDLogger sd_logger;  // NOLINT(cppcoreguidelines-interfaces-global-init)
 
-// SDLogger::SDLogger() { }
-
 #define MAX_FILES 999
+
+#ifndef ENABLE_SILSIM_MODE
+#include "FS.h"
 
 /**
  * @brief Creates the name for a file to be written to SD card.
@@ -65,56 +66,54 @@ char* sdFileNamer(char* fileName, char* fileExtensionParam) {
 
     return fileName;
 }
+#endif
 
-void SDLogger::init() {
+ErrorCode SDLogger::init() {
+#ifdef ENABLE_SD
     queue.attach(dataLogger);
-
+#ifdef ENABLE_SILSIM_MODE
+    file.open("sdlog.dat", std::ios_base::binary | std::ios_base::out | std::ios_base::trunc);
+#else
     if (SD.begin(BUILTIN_SDCARD)) {
-        char file_extension[6] = ".dat";
+        char file_extension[8] = ".launch";
 
         char data_name[16] = "data";
         sdFileNamer(data_name, file_extension);
         // Initialize SD card
-        sd_file = SD.open(data_name, FILE_WRITE_BEGIN);
+        file = SD.open(data_name, FILE_WRITE_BEGIN);
         // print header to file on sd card that lists each variable that is logged
         // sd_file.println("binary logging of sensor_data_t");
-        sd_file.flush();
+        file.flush();
 
-        Serial.println(sd_file.name());
+        Serial.println(file.name());
     } else {
-        digitalWrite(LED_RED, HIGH);
-        digitalWrite(LED_ORANGE, HIGH);
-        digitalWrite(LED_BLUE, HIGH);
-        Serial.println("SD Begin Failed. Stalling Program");
-        while (true) {
-            digitalWrite(LED_RED, HIGH);
-            delay(100);
-            digitalWrite(LED_RED, LOW);
-            delay(100);
-        }
+        return ErrorCode::SD_BEGIN_FAILED;
     }
+#endif
+#endif
+    return ErrorCode::NO_ERROR;
 }
 
 void SDLogger::update() {
+#ifdef ENABLE_SD
     sensorDataStruct_t current_data = queue.next();
-    Serial.print("Has Data?");
-    Serial.println(current_data.hasData());
     if (!current_data.hasData()) {
         return;
     }
 
     logData(&current_data);
+#endif
 }
 
 template <typename T>
 void SDLogger::logData(T* data) {
-    sd_file.write((const uint8_t*)data, sizeof(T));
+    file.write((const char*)data, sizeof(T));
     // Flush data once for every 50 writes
     // Flushing data is the step that actually writes to the card
     // Flushing more frequently incurs more of a latency penalty, but less
     // potential data loss
     if (writes_since_flush >= 50) {
-        sd_file.flush();
+        file.flush();
         writes_since_flush = 0;
     } else {
         writes_since_flush++;

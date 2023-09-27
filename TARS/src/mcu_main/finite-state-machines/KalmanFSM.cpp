@@ -36,20 +36,20 @@
 #include "mcu_main/gnc/kalmanFilter.h"
 #include "mcu_main/sensors/sensors.h"
 
-double getAltitudeAverage(size_t start, size_t len) {
+double KalmanFSM::getAltitudeAverage(size_t start, size_t len) {
     return KalmanFSM::getAverage(
-        dataLogger.kalmanFifo, +[](KalmanData& k) { return (double)k.kalman_x; }, start, len);
+        dataLogger.kalmanFifo, +[](KalmanData& k) { return (double)k.kalman_pos_x; }, start, len);
 }
 
-double getSecondDerivativeAltitudeAverage(size_t start, size_t len) {
+double KalmanFSM::getSecondDerivativeAltitudeAverage(size_t start, size_t len) {
     return KalmanFSM::getSecondDerivativeAverage(
-        dataLogger.kalmanFifo, +[](KalmanData& k) { return (double)k.kalman_x; },
+        dataLogger.kalmanFifo, +[](KalmanData& k) { return (double)k.kalman_pos_x; },
         +[](KalmanData& k) { return k.timeStamp_state; }, start, len);
 }
 
-double getAccelerationAverage(size_t start, size_t len) {
+double KalmanFSM::getAccelerationAverage(size_t start, size_t len) {
     return KalmanFSM::getAverage(
-        dataLogger.kalmanFifo, +[](KalmanData& k) { return (double)k.kalman_ax; }, start, len);
+        dataLogger.kalmanFifo, +[](KalmanData& k) { return (double)k.kalman_acc_x; }, start, len);
 }
 
 /**
@@ -80,7 +80,7 @@ void KalmanFSM::tickFSM() {
 
         case FSM_State::STATE_IDLE:
             // If high acceleration is observed in z direction...
-            if (kalmanFilter.getState().ax > launch_linear_acceleration_thresh) {
+            if (kalmanFilter.getState().state_est_accel_x > launch_linear_acceleration_thresh) {
                 launch_time_ = chVTGetSystemTime();
                 rocket_state_ = FSM_State::STATE_LAUNCH_DETECT;
             }
@@ -89,7 +89,7 @@ void KalmanFSM::tickFSM() {
 
         case FSM_State::STATE_LAUNCH_DETECT:
             // If the acceleration was too brief, go back to IDLE
-            if (kalmanFilter.getState().ax < launch_linear_acceleration_thresh) {
+            if (kalmanFilter.getState().state_est_accel_x < launch_linear_acceleration_thresh) {
                 rocket_state_ = FSM_State::STATE_IDLE;
                 break;
             }
@@ -107,7 +107,7 @@ void KalmanFSM::tickFSM() {
         case FSM_State::STATE_BOOST:
             burn_timer_ = chVTGetSystemTime() - launch_time_;
             // If low acceleration in the Z direction...
-            if (kalmanFilter.getState().ax < coast_thresh) {
+            if (kalmanFilter.getState().state_est_accel_x < coast_thresh) {
                 // Serial.println("Acceleration below thresh");
                 burnout_time_ = chVTGetSystemTime();
                 rocket_state_ = FSM_State::STATE_BURNOUT_DETECT;
@@ -127,7 +127,7 @@ void KalmanFSM::tickFSM() {
 
         case FSM_State::STATE_BURNOUT_DETECT:
             // If the 0 acceleration was too brief, go back to BOOST
-            if (kalmanFilter.getState().ax > coast_thresh) {
+            if (kalmanFilter.getState().state_est_accel_x > coast_thresh) {
                 rocket_state_ = FSM_State::STATE_BOOST;
                 break;
             }
@@ -153,7 +153,7 @@ void KalmanFSM::tickFSM() {
         case FSM_State::STATE_COAST_GNC:
             coast_timer_ = chVTGetSystemTime() - burnout_time_;
 
-            if (fabs(kalmanFilter.getState().vx) * 0.02 < apogee_altimeter_threshold) {
+            if (fabs(kalmanFilter.getState().state_est_vel_x) * 0.02 < apogee_altimeter_threshold) {
                 rocket_state_ = FSM_State::STATE_APOGEE_DETECT;
                 apogee_time_ = chVTGetSystemTime();
                 break;

@@ -1,13 +1,17 @@
 #pragma once
 
-#include <ChRt.h>
-#include <RH_RF95.h>
+#include "mcu_main/Rt.h"
 
 #include <array>
 
 #include "common/MessageQueue.h"
 #include "common/packet.h"
 #include "mcu_main/pins.h"
+#include "mcu_main/error.h"
+
+#ifndef ENABLE_SILSIM_MODE
+#include <RH_RF95.h>
+#endif
 
 // Make sure to change these pinout depending on wiring
 // Don't forget to change the ini file to build the correct main file
@@ -25,12 +29,11 @@ struct TelemetryDataLite {
     int16_t highG_ax;             //[128, -128]
     int16_t highG_ay;             //[128, -128]
     int16_t highG_az;             //[128, -128]
-    int16_t gyro_x;               //[-4096, 4096]
-    int16_t gyro_y;               //[-4096, 4096]
-    int16_t gyro_z;               //[-4096, 4096]
+    int16_t bno_roll;             //[-4,4]
+    int16_t bno_pitch;            //[-4,4]
+    int16_t bno_yaw;              //[-4,4]
 
-    uint8_t flap_extension;  //[0, 256]
-    uint8_t barometer_temp;  //[0, 128]
+    float flap_extension;  //[0, 256]
 };
 
 struct TelemetryPacket {
@@ -38,15 +41,31 @@ struct TelemetryPacket {
     float gps_lat;
     float gps_long;
     float gps_alt;
+    float yaw;
+    float pitch;
+    float roll;
     float gnc_state_x;
     float gnc_state_vx;
     float gnc_state_ax;
+    float gnc_state_y;
+    float gnc_state_vy;
+    float gnc_state_ay;
+    float gnc_state_z;
+    float gnc_state_vz;
+    float gnc_state_az;
     float gns_state_apo;
+    int16_t mag_x;            //[-4, 4]
+    int16_t mag_y;            //[-4, 4]
+    int16_t mag_z;            //[-4, 4]
+    int16_t gyro_x;           //[-4096, 4096]
+    int16_t gyro_y;           //[-4096, 4096]
+    int16_t gyro_z;           //[-4096, 4096]
     int16_t response_ID;      //[0, 2^16]
     int8_t rssi;              //[-128, 128]
     int8_t datapoint_count;   //[0,4]
     uint8_t voltage_battery;  //[0, 16]
     uint8_t FSM_State;        //[0,256]
+    int16_t barometer_temp;   //[-128, 128]
 };
 
 // Commands transmitted from ground station to rocket
@@ -76,7 +95,7 @@ class Telemetry {
 
     Telemetry();
 
-    void init();
+    ErrorCode __attribute__((warn_unused_result)) init();
 
     void transmit();
 
@@ -87,7 +106,9 @@ class Telemetry {
     void serialPrint(const sensorDataStruct_t& sensor_data);
 
    private:
+#ifndef ENABLE_SILSIM_MODE
     RH_RF95 rf95;
+#endif
     MessageQueue<TelemetryDataLite, 4> buffered_data;
 
     // Initializing command ID

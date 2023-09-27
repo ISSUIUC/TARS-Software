@@ -2,7 +2,7 @@
 
 #include <initializer_list>  // this is here to make initializing the FSMCollection a lot more convenient
 
-#include "ChRt.h"
+#include "mcu_main/Rt.h"
 #include "mcu_main/finite-state-machines/RocketFSMBase.h"
 
 /**

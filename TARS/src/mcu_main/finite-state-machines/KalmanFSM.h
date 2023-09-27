@@ -1,6 +1,7 @@
 #pragma once
 
 #include "mcu_main/finite-state-machines/RocketFSMBase.h"
+#include "mcu_main/Rt.h"
 
 class KalmanFSM : public RocketFSMBase {
    public:
@@ -25,4 +26,8 @@ class KalmanFSM : public RocketFSMBase {
 
     systime_t landing_time_ = 0;
     sysinterval_t landing_timer = 0;
+
+    double getAltitudeAverage(size_t start, size_t len);
+    double getSecondDerivativeAltitudeAverage(size_t start, size_t len);
+    double getAccelerationAverage(size_t start, size_t len);
 };

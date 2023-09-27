@@ -1,16 +1,22 @@
 #pragma once
 
-#include <ChRt.h>
+#include "mcu_main/Rt.h"
+
+#ifdef ENABLE_SILSIM_MODE
+#include <fstream>
+#else
 #include <SD.h>
+#endif
 
 #include "mcu_main/dataLog.h"
+#include "mcu_main/error.h"
 
 class SDLogger;
 extern SDLogger sd_logger;
 
 class SDLogger {
    public:
-    void init();
+    ErrorCode __attribute__((warn_unused_result)) init();
 
     void update();
 
@@ -19,6 +25,10 @@ class SDLogger {
     void logData(T* data);
 
     DataLogQueue queue;
-    File sd_file;
+#ifdef ENABLE_SILSIM_MODE
+    std::ofstream file;
+#else
+    File file;
+#endif
     size_t writes_since_flush = 0;
 };

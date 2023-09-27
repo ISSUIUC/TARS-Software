@@ -1,22 +1,21 @@
 #include "VoltageSensor.h"
 
-#include "ChRt.h"
+#include "mcu_main/Rt.h"
 #include "mcu_main/dataLog.h"
 
-VoltageSensor voltage{Serial1};
+VoltageSensor voltage;
 
 VoltageData VoltageSensor::read() {
     chMtxLock(&mutex);
 
-    v_battery = read_voltage('B');
-    v_servo1 = read_voltage('1');
-    v_servo2 = read_voltage('2');
-    v_3_3 = read_voltage('3');
-    v_5 = read_voltage('5');
-    v_9 = read_voltage('9');
+#ifdef ENABLE_SILSIM_MODE
+    v_battery = 9.0;
+#else
+    v_battery = analogRead(16) / 1024.f * 3.3f * 3.f;
+#endif
     timestamp = chVTGetSystemTime();
 
-    auto data = (VoltageData){v_battery, v_servo1, v_servo2, v_3_3, v_5, v_9, timestamp};
+    auto data = (VoltageData){v_battery, timestamp};
 
     dataLogger.pushVoltageFifo(data);
 
