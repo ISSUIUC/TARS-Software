@@ -312,6 +312,29 @@ void Adxl355::setTrim(int32_t x, int32_t y, int32_t z) {
     write8(OFFSET_Z_L, low_z);
 }
 
+int Adxl355::readFIFOEntries(long *output) {
+    int fifoCount = getFIFOCount();
+    uint8_t data[9];
+    memset(data, 0, 9);
+
+    unsigned long work[3];
+
+    for (int i = 0; i < fifoCount / 3; i++) {
+        int result = readBlock(FIFO_DATA, 9, (uint8_t *)data);
+
+        if (result > 0) {
+            for (int j = 0; j < 9; j += 3) {
+                work[j / 3] = (data[0 + j] << 12) | (data[1 + j] << 4) | (data[2 + j] >> 4);
+                output[i * 3 + j / 3] = twosComplement(work[j / 3]);
+            }
+        } else {
+            return -1;
+        }
+    }
+
+    return fifoCount / 3;
+}
+
 void Adxl355::calibrateSensor(int fifoReadCount) {
     long FIFOOut[32][3];
     int result;
@@ -331,7 +354,6 @@ void Adxl355::calibrateSensor(int fifoReadCount) {
     start();
 
     for (int j = 0; j < fifoReadCount; j++) {
-        // TODO: Define FIFOEntries function
         if (-1 != (result = readFIFOEntries((long *)FIFOOut))) {
             readings += result;
 
