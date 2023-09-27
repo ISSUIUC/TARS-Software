@@ -25,7 +25,7 @@ DataLogBuffer dataLogger;
 
 // DataLogView::DataLogView(DataLogBuffer& buffer) :
 //         lowGView(buffer.lowGFifo), highGView(buffer.highGFifo), gpsView(buffer.gpsFifo),
-//         kalmanView(buffer.kalmanFifo), rocketStateView(buffer.rocketStateFifo), barometerView(buffer.barometerFifo),                                                                                Anthony Caroline Mara Kira Billy Vayun
+//         kalmanView(buffer.kalmanFifo), rocketStateView(buffer.rocketStateFifo), barometerView(buffer.barometerFifo),
 //         flapView(buffer.flapFifo), voltageView(buffer.voltageFifo)
 //         { }
 

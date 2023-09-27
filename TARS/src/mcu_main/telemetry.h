@@ -72,6 +72,7 @@ class Telemetry {
    public:
     bool abort = false;
     bool datalog_is_running = false;
+    
 
     Telemetry();
 
