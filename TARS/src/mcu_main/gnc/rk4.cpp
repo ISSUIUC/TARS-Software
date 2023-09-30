@@ -31,17 +31,9 @@ rk4::rk4() {
  * @return float the Coefficient of drag at the present estimated state
  */
 float rk4::cd(float alt, float vel) {
-    float mach = vel / (atmo_.getSpeedOfSound(alt));
+    float mach = std::abs(vel) / (atmo_.getSpeedOfSound(alt));
 
-    double cd = 0;
-
-    // double mach_power = 1;
-    // for (int i = 0; i < 151; i++) {
-    //     cd += poly[150 - i] * mach_power;
-    //     mach_power *= mach;
-    // }
-    approximate_cubic_spline_(mach);
-    return float(cd);
+    return approximate_cubic_spline_(mach);
 }
 
 /**
