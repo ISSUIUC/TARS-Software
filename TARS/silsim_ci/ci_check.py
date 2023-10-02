@@ -80,7 +80,7 @@ def fail(msg=None):
 # Actual ci logic
 # Turns number of ticks into number if ms
 # @param tick the number of ticks
-# @return that amout of ticks in milliseconds
+# @return that amount of ticks in milliseconds
 def ticks_to_ms(tick):
     return ((tick * 1000) + 10000 - 1)/10000
 
