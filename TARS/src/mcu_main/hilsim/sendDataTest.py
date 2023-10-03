@@ -2,6 +2,7 @@ import serial
 import pandas
 
 import time
+import csv_datastream
 
 # n means that the flight will be played n times slower. So 1 means real time, 2 means half speed, etc.
 SPEED_FACTOR = 1
@@ -9,7 +10,7 @@ SPEED_FACTOR = 1
 GRANULARITY_FACTOR = 2
 
 # -----------------<Change first param to the correct port, MacOS (ls /dev/tty.*)>-----------------
-ser = serial.Serial("/dev/tty.usbmodem132228101", 9600, timeout=10, write_timeout=10)
+ser = serial.Serial("COM3", 9600, timeout=10, write_timeout=10)
 
 csv = pandas.read_csv('flight_computer.csv')
 total_rows = csv.shape[0]
@@ -29,12 +30,13 @@ for i, row in csv.iterrows():
     last10.append(start)
     if len(last10) > 10:
         last10.pop(0)
-    line = f"{','.join(str(item) for item in row[written])}\n"
 
-    ser.write(line.encode("utf8"))
-
+    hilsim_packet = csv_datastream.csv_line_to_protobuf(row)
+    ser.write(hilsim_packet)
+    
     data = ser.read_all()
     decoded = data.decode("utf8")
+
     if decoded != "":
         string = decoded
     curr = time.time()

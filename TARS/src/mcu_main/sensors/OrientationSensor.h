@@ -8,7 +8,7 @@
 #include "mcu_main/debug.h"
 #include "mcu_main/error.h"
 #include "mcu_main/pins.h"
-#include "mcu_main/hilsim/HILSIMPacket.h"
+#include "mcu_main/hilsim/hilsimpacket.pb.h"
 
 #ifndef ENABLE_SILSIM_MODE
 #include <Wire.h>

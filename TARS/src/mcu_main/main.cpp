@@ -30,6 +30,7 @@
 #include <Arduino.h>
 #include <PWMServo.h>
 #include <SPI.h>
+#include <pb_decode.h>
 #include <Wire.h>
 #endif
 
@@ -45,7 +46,7 @@
 #include "mcu_main/error.h"
 #include "mcu_main/buzzer/buzzer.h"
 #include "mcu_main/debug.h"
-#include "mcu_main/hilsim/HILSIMPacket.h"
+#include "mcu_main/hilsim/hilsimpacket.pb.h"
 
 HILSIMPacket hilsim_reader;
 
@@ -56,55 +57,50 @@ HILSIMPacket hilsim_reader;
 
 #ifdef ENABLE_HILSIM_MODE
 static THD_FUNCTION(hilsim_THD, arg) {
+    // Size of protobuf packet size
+    // Check src/mcu_main/hilsim/README.md for more info
+    const unsigned int packet_size = 70;
     // Creating array for data to be read into
-    char data_read[512];
+    char data_read[packet_size];
     int fields_to_read = 19;
-    Serial.setTimeout(10);
+    Serial.setTimeout(30);
     Serial.println("[TARS] Hardware-in-Loop Test Commenced");
 
     while (1) {
-        int bytes_read = Serial.readBytesUntil('\n', data_read, 511);
-        if (bytes_read > 0) {
-            Serial.println(bytes_read);
-            Serial.println("Got something");
+        int bytes_read = Serial.readBytes(data_read, packet_size);
+        if (bytes_read != 0 && bytes_read != packet_size) {
+            Serial.print(bytes_read);
+            Serial.println(" bytes read, not reading sufficient bytes");
+            int dummy = packet_size - bytes_read;
+            // Then read mod seventy until the next bit
+            int s = Serial.readBytes(data_read, dummy);
+            Serial.print(s);
+            Serial.println(" trashed bytes");
+        } else if (bytes_read > 0) {
+            Serial.print(bytes_read);
+            // Convert the bits to hex
+            Serial.println("bytes read");
+
             if (data_read[bytes_read - 1] == '\r') data_read[bytes_read - 1] = 0;
 
-            char* token;
-            float parsed_values[fields_to_read];
-            int i = 0;
-            token = strtok(data_read, ",");
-            while (token) {
-                parsed_values[i] = atof(token);
-                token = strtok(NULL, ",");
-                i++;
-            }
-            hilsim_reader.imu_high_ax = parsed_values[0];
-            hilsim_reader.imu_high_ay = parsed_values[1];
-            hilsim_reader.imu_high_az = parsed_values[2];
-            hilsim_reader.barometer_altitude = parsed_values[3];
-            hilsim_reader.barometer_temperature = parsed_values[4];
-            hilsim_reader.barometer_pressure = parsed_values[5];
-            hilsim_reader.imu_low_ax = parsed_values[6];
-            hilsim_reader.imu_low_ay = parsed_values[7];
-            hilsim_reader.imu_low_az = parsed_values[8];
-            hilsim_reader.imu_low_gx = parsed_values[9];
-            hilsim_reader.imu_low_gy = parsed_values[10];
-            hilsim_reader.imu_low_gz = parsed_values[11];
-            hilsim_reader.mag_x = parsed_values[12];
-            hilsim_reader.mag_y = parsed_values[13];
-            hilsim_reader.mag_z = parsed_values[14];
-            hilsim_reader.ornt_roll = parsed_values[15];
-            hilsim_reader.ornt_pitch = parsed_values[16];
-            hilsim_reader.ornt_yaw = parsed_values[17];
+            hilsim_reader = HILSIMPacket_init_zero;
+            pb_istream_t stream = pb_istream_from_buffer((pb_byte_t*)(data_read), bytes_read);
 
-            Serial.print("ax: ");
-            Serial.println(hilsim_reader.imu_high_ax);
-            Serial.print("ay: ");
-            Serial.println(hilsim_reader.imu_high_ay);
-            Serial.print("az: ");
-            Serial.println(hilsim_reader.imu_high_az);
-            Serial.print("Barom alt: ");
-            Serial.println(hilsim_reader.barometer_altitude);
+            bool status = pb_decode(&stream, HILSIMPacket_fields, &hilsim_reader);
+
+            if (!status) {
+                Serial.print("Decoding failed: ");
+                Serial.println(PB_GET_ERROR(&stream));
+            } else {
+                Serial.print("ax: ");
+                Serial.println(hilsim_reader.imu_high_ax);
+                Serial.print("ay: ");
+                Serial.println(hilsim_reader.imu_high_ay);
+                Serial.print("az: ");
+                Serial.println(hilsim_reader.imu_high_az);
+                Serial.print("Barom alt: ");
+                Serial.println(hilsim_reader.barometer_altitude);
+            }
 
             data_read[bytes_read] = 0;
         } else {
