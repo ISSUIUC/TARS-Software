@@ -23,7 +23,7 @@ void BarometerSensor::update() {
     chMtxLock(&mutex);
 #ifdef ENABLE_SILSIM_MODE
     pressure = emulatedMS->get_data();
-    std::cout << pressure << std::endl;
+    // std::cout << pressure << std::endl;
     temperature = emulatedThermometer->get_data();
 #else
 #ifdef ENABLE_BAROMETER

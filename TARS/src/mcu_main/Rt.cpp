@@ -93,7 +93,10 @@ void run_sim(void* arg) {
             // thread_manager.debug = true;
         }
         bool res = g_sim->step();
-        if (!res) break;
+        if (!res) {
+            std::cout << "Simulation ended " << i << std::endl;
+            break;
+        }
         threadYield();
     }
     exit(0);
@@ -102,7 +105,32 @@ void run_sim(void* arg) {
 int main() {
     thread_manager.threads.emplace_back("main", EmuConvertThreadToFiber());
 
-    Rocket rocket = createRocket();
+    /****************** Conversion Constants  ******************/
+    double deg2rad = 3.14159265 / 180.0;
+    double kLbsToKg = 0.453592;
+    double kInchToMeters = 0.0254;
+
+    /***************** Intrepid MK6 Parameters *****************/
+    double kIntrepidDryMass = 46.52 * kLbsToKg;
+    double kIntrepidWetMass = 67.30 * kLbsToKg;
+    double kIntrepidWetCGLocation = 82.79 * kInchToMeters;
+    double kIntrepidDryCGLocation = 73.06 * kInchToMeters;
+    double kIntrepidTotalLength = 130.0 * kInchToMeters;
+    double kIntrepidDiameter = 4.02 * kInchToMeters;
+    double kIntrepidRadius = kIntrepidDiameter / 2.0;
+
+    RocketParameters Intrepid = {
+        "src/mcu_main/ISS_SILSIM/utils/RASAero_fetch/output/RASAero_Intrepid_5800_mk6.csv",
+        kIntrepidDryMass,
+        kIntrepidWetMass,
+        kIntrepidWetCGLocation,
+        kIntrepidDryCGLocation,
+        kIntrepidTotalLength,
+        kIntrepidDiameter,
+        kIntrepidRadius,
+    };
+
+    Rocket rocket = createRocket(Intrepid);
 
     Accelerometer accel1(rocket, 100);
     accel1.enable_noise_injection();
