@@ -9,6 +9,12 @@
 // Transition from boost to coast if low acceleration detected for 300 ms
 static constexpr float coast_time_thresh = 300;
 
+// Transition from burnout to firing the second set of ignition
+static constexpr float burnout_time_thresh = 2500;
+
+// Transition from burnout to seperation the rocket
+static constexpr float seperate_time_thresh = 1000;
+
 // transition from coast to apogee if low velocity detected for 100ms
 static constexpr float apogee_time_thresh = 100;
 
@@ -16,6 +22,9 @@ static constexpr float landing_time_thresh = 1000;
 
 // 2 gs for launch detect
 static constexpr float launch_linear_acceleration_thresh = 3;
+
+// 1.5 gs for first seperation detect
+static constexpr float first_seperation_linear_acceleration_thresh = 2.5;
 
 // Required time of detected acceleration to switch to boost
 static constexpr float launch_time_thresh = 250;
