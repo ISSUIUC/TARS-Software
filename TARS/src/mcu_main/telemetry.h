@@ -69,7 +69,7 @@ struct TelemetryPacket {
 };
 
 // Commands transmitted from ground station to rocket
-enum CommandType { SET_FREQ, SET_CALLSIGN, ABORT, TEST_FLAPS, EMPTY };
+enum CommandType { SET_FREQ, SET_CALLSIGN, ABORT, TEST_FLAPS, EMPTY, START_LOGGING, STOP_LOGGING };
 
 struct telemetry_command {
     CommandType command;
@@ -90,6 +90,8 @@ struct command_handler_struct {
 class Telemetry {
    public:
     bool abort = false;
+    bool datalog_is_running = false;
+    
 
     Telemetry();
 

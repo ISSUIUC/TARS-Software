@@ -109,7 +109,7 @@ void Telemetry::handleCommand(const telemetry_command &cmd) {
         return;
     }
     last_command_id = (int16_t)cmd.cmd_id;
-
+    
     /*
      * Write frequency to SD card to save
      * between runs
@@ -129,6 +129,14 @@ void Telemetry::handleCommand(const telemetry_command &cmd) {
             abort = !abort;
         }
         Serial.println("[DEBUG]: Got abort");
+    }
+
+    if (cmd.command == START_LOGGING) {
+        datalog_is_running = true;
+    }
+
+    if (cmd.command == STOP_LOGGING) {
+        datalog_is_running = false;
     }
 }
 

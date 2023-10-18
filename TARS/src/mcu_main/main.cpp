@@ -293,8 +293,9 @@ static THD_FUNCTION(dataLogger_THD, arg) {
 #ifdef THREAD_DEBUG
         Serial.println("Data Logging thread entrance");
 #endif
-
-        sd_logger.update();
+        if (datalog_is_running) {
+            sd_logger.update();
+        }
 
         chThdSleepMilliseconds(6);
     }

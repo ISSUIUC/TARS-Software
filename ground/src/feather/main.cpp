@@ -331,6 +331,10 @@ void SerialInput(const char* key, const char* value) {
         return;
     } else if (strcmp(key, "FLAP") == 0) {
         command.command = CommandType::TEST_FLAP;
+    } else if (strcmp(key, "START_LOGGING") == 0) {
+        command.command = CommandType::START_LOGGING;
+    } else if (strcmp(key, "STOP_LOGGING") == 0) {
+        command.command = CommandType::STOP_LOGGING;
     } else {
         SerialError();
         return;
