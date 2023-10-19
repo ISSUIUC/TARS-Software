@@ -243,7 +243,8 @@ bool kalman_start = false;
 static THD_FUNCTION(kalman_THD, arg) {
     kalman_start = true;
 
-    kalmanFilter.Initialize();
+    kalmanFilter.Initialize(false);
+    rotational_kalmanFilter.Initialize(true);
 
     systime_t last = chVTGetSystemTime();
     while (true) {
@@ -252,6 +253,7 @@ static THD_FUNCTION(kalman_THD, arg) {
 #endif
         // Serial.println("entering tick");
         kalmanFilter.kfTickFunction(TIME_I2MS(chVTGetSystemTime() - last), 13.0);
+        rotational_kalmanFilter.kfTickFunction(TIME_I2MS(chVTGetSystemTime() - last), 13.0);
         // Serial.println("exiting tick");
         // Serial.println(TIME_I2MS(chVTGetSystemTime() - last));
         last = chVTGetSystemTime();

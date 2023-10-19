@@ -16,6 +16,7 @@
 
 class KalmanFilter;
 extern KalmanFilter kalmanFilter;
+extern KalmanFilter rotational_kalmanFilter;
 
 typedef struct KalmanState {
     float state_est_pos_x;
@@ -27,16 +28,6 @@ typedef struct KalmanState {
     float state_est_pos_z;
     float state_est_vel_z;
     float state_est_accel_z;
-
-    float state_est_r_pos_x;
-    float state_est_r_vel_x;
-    float state_est_r_accel_x;
-    float state_est_r_pos_y;
-    float state_est_r_vel_y;
-    float state_est_r_accel_y;
-    float state_est_r_pos_z;
-    float state_est_r_vel_z;
-    float state_est_r_accel_z;
 } KalmanState;
 
 class KalmanFilter {
@@ -59,6 +50,7 @@ class KalmanFilter {
     void updateApogee(float estimate);
 
    private:
+    bool rotational;
     float s_dt = 0.050;
 
     KalmanState kalman_state;

@@ -109,7 +109,7 @@ void KalmanFilter::kfTickFunction(float dt, float sd) {
  * be kept consistent (do not mix GPS altitude and barometric).
  *
  */
-void KalmanFilter::Initialize() {
+void KalmanFilter::Initialize(bool rotational) {
     // TODO: The altitude initialization is the same code as
     //   setLaunchPadElevation() in AC. Maybe use the same one?
     float sum = 0;
@@ -186,10 +186,18 @@ void KalmanFilter::Initialize() {
     Q(8, 7) = Q(7, 8);
 
     // set H
-    H(0, 0) = 1;
-    H(1, 2) = 1;
-    H(2, 5) = 1;
-    H(3, 8) = 1;
+    // the rotational ekf has a different H matrix than the regular EKF
+    if (!rotational) {
+        H(0, 0) = 1;
+        H(1, 2) = 1;
+        H(2, 5) = 1;
+        H(3, 8) = 1;
+    } else {
+        H(1,1) = 1;
+        H(3,3) = 1;
+        H(5,5) = 1:
+    }
+
 
     float spectral_density = 13.0;
     Q = Q * spectral_density;
