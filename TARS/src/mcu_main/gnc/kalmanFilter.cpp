@@ -199,7 +199,6 @@ void KalmanFilter::Initialize(bool rotational) {
         H(5, 5) = 1;
     }
 
-
     float spectral_density = 13.0;
     Q = Q * spectral_density;
 
@@ -293,7 +292,7 @@ void KalmanFilter::update() {
         for (float i : data) {
             sum += i;
         }
-        setState((KalmanState){sum / 10.0f, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0});
+        setState((KalmanState){sum / 10.0f, 0, 0, 0, 0, 0, 0, 0, 0});
     } else if (getActiveFSM().getFSMState() >= FSM_State::STATE_APOGEE) {
         H(1, 2) = 0;
     }
