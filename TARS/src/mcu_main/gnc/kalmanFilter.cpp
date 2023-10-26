@@ -195,7 +195,7 @@ void KalmanFilter::Initialize(bool rotational) {
     } else {
         H(1,1) = 1;
         H(3,3) = 1;
-        H(5,5) = 1:
+        H(5,5) = 1;
     }
 
 
