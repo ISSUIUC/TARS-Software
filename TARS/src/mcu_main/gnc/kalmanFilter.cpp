@@ -112,6 +112,7 @@ void KalmanFilter::kfTickFunction(float dt, float sd) {
 void KalmanFilter::Initialize(bool rotational) {
     // TODO: The altitude initialization is the same code as
     //   setLaunchPadElevation() in AC. Maybe use the same one?
+    rotational_ = rotational;
     float sum = 0;
     for (int i = 0; i < 30; i++) {
         // TODO This mutex lock is almost certainly not necessary
@@ -187,7 +188,7 @@ void KalmanFilter::Initialize(bool rotational) {
 
     // set H
     // the rotational ekf has a different H matrix than the regular EKF
-    if (!rotational) {
+    if (!rotational_) {
         H(0, 0) = 1;
         H(1, 2) = 1;
         H(2, 5) = 1;

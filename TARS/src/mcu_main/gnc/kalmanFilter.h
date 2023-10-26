@@ -34,7 +34,7 @@ class KalmanFilter {
    public:
     MUTEX_DECL(mutex);
 
-    void Initialize();
+    void Initialize(bool rotational);
     void Initialize(float pos_x, float vel_x, float pos_y, float vel_y, float pos_z, float vel_z);
     void priori();
     void update();
@@ -50,7 +50,7 @@ class KalmanFilter {
     void updateApogee(float estimate);
 
    private:
-    bool rotational;
+    bool rotational_;
     float s_dt = 0.050;
 
     KalmanState kalman_state;
