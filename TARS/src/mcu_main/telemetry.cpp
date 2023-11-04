@@ -159,9 +159,26 @@ void Telemetry::transmit() {
     digitalWrite(LED_BLUE, blue_state);
     blue_state = !blue_state;
 
-    TelemetryPacket packet = makePacket(dataLogger.read());
+    Packets packet;
+
+    auto rocket_state = dataLogger.read().rocketState_data.rocketStates[0];
+    if (rocket_state == FSM_State::STATE_INIT || rocket_state == FSM_State::STATE_IDLE) {
+        packet.compact_packet = makeCompactPacket(dataLogger.read());
+        packet.type = Packets::COMPACT;
+    } else {
+        packet.default_packet = makePacket(dataLogger.read());
+        packet.type = Packets::DEFAULT;
+    }
+
 #ifndef ENABLE_SILSIM_MODE
-    rf95.send((uint8_t *)&packet, sizeof(packet));
+    switch (packet.type) {
+        case (Packets::DEFAULT):
+            rf95.send((uint8_t *)&packet, sizeof(packet.default_packet));
+            break;
+        case (Packets::COMPACT):
+            rf95.send((uint8_t *)&packet, sizeof(packet.compact_packet));
+            break;
+    }
 
     chThdSleepMilliseconds(170);
 
@@ -389,6 +406,18 @@ TelemetryPacket Telemetry::makePacket(const sensorDataStruct_t &data_struct) {
         packet.datapoints[i] = data;
         packet.datapoint_count = i + (int8_t)1;
     }
+    return packet;
+}
+
+CompactTelemetryPacket Telemetry::makeCompactPacket(const sensorDataStruct_t &data_struct) {
+    CompactTelemetryPacket packet{};
+    packet.gps_lat = data_struct.gps_data.latitude;
+    packet.gps_long = data_struct.gps_data.longitude;
+    packet.gps_alt = data_struct.gps_data.altitude;
+
+    packet.voltage_battery = inv_convert_range<uint8_t>(data_struct.voltage_data.v_battery, 16);
+    packet.barometer_temp = inv_convert_range<int16_t>(data_struct.barometer_data.temperature, 256);
+
     return packet;
 }
 

@@ -76,6 +76,7 @@ struct TelemetryDataLite {
 
 struct TelemetryPacket {
     TelemetryDataLite datapoints[4];
+    unsigned int idx;
     float gps_lat;
     float gps_long;
     float gps_alt;
@@ -138,6 +139,8 @@ struct FullTelemetryData {
     float barometer_temp;   //[-128, 128]
     float freq;
     int64_t print_time;
+
+    unsigned int idx;
 };
 
 enum class CommandType { SET_FREQ, SET_CALLSIGN, ABORT, TEST_FLAP, EMPTY };
@@ -182,14 +185,20 @@ void printFloat(float f, int precision = 5) {
     }
 }
 
-void EnqueuePacket(const TelemetryPacket& packet, float frequency) {
-    if (packet.datapoint_count == 0) return;
+void SetCompactData(const TelemetryPacket& packet, FullTelemetryData& item) {
+    item.barometer_temp = convert_range(packet.barometer_temp, 256);
+    item.gps_alt = packet.gps_alt;
+    item.gps_lat = packet.gps_lat;
+    item.gps_long = packet.gps_long;
+    item.voltage_battery = convert_range(packet.voltage_battery, 16);
+    print_queue.emplace(item);
+}
 
+void SetData(const TelemetryPacket& packet, FullTelemetryData& item, float frequency) {
     int64_t start_timestamp = packet.datapoints[0].timestamp;
     int64_t start_printing = millis();
 
     for (int i = 0; i < packet.datapoint_count && i < 4; i++) {
-        FullTelemetryData item;
         TelemetryDataLite data = packet.datapoints[i];
         item.barometer_pressure = convert_range(data.barometer_pressure, 4096);
         item.barometer_temp = convert_range(packet.barometer_temp, 256);
@@ -223,6 +232,18 @@ void EnqueuePacket(const TelemetryPacket& packet, float frequency) {
     }
 }
 
+void EnqueuePacket(const TelemetryPacket& packet, float frequency) {
+    if (packet.datapoint_count == 0) return;
+
+    FullTelemetryData item;
+    item.idx = packet.idx;
+    if (packet.idx == 1) {  // compact
+        SetCompactData(packet, item);
+    } else {
+        SetData(packet, item, frequency);
+    }
+}
+
 void printJSONField(const char* name, float val, bool comma = true) {
     Serial.print('\"');
     Serial.print(name);
@@ -250,34 +271,67 @@ void printJSONField(const char* name, const char* val, bool comma = true) {
 
 void printPacketJson(FullTelemetryData const& packet) {
     Serial.print(R"({"type": "data", "value": {)");
-    printJSONField("response_ID", packet.response_ID);
-    printJSONField("gps_lat", packet.gps_lat);
-    printJSONField("gps_long", packet.gps_long);
-    printJSONField("gps_alt", packet.gps_alt);
-    printJSONField("KX_IMU_ax", packet.highG_ax);
-    printJSONField("KX_IMU_ay", packet.highG_ay);
-    printJSONField("KX_IMU_az", packet.highG_az);
-    printJSONField("IMU_gx", packet.gyro_x);
-    printJSONField("IMU_gy", packet.gyro_y);
-    printJSONField("IMU_gz", packet.gyro_z);
-    printJSONField("IMU_mx", packet.mag_x);
-    printJSONField("IMU_my", packet.mag_y);
-    printJSONField("IMU_mz", packet.mag_z);
-    printJSONField("FSM_state", packet.FSM_State);
-    printJSONField("sign", "NOSIGN");
-    printJSONField("RSSI", rf95.lastRssi());
-    printJSONField("Voltage", packet.voltage_battery);
-    printJSONField("frequency", packet.freq);
-    printJSONField("flap_extension", packet.flap_extension);
-    printJSONField("STE_ALT", packet.gnc_state_x);
-    printJSONField("STE_VEL", packet.gnc_state_vx);
-    printJSONField("STE_ACC", packet.gnc_state_ax);
-    printJSONField("STE_APO", packet.gnc_state_apo);
-    printJSONField("BNO_YAW", packet.bno_yaw);
-    printJSONField("BNO_PITCH", packet.bno_pitch);
-    printJSONField("BNO_ROLL", packet.bno_roll);
-    printJSONField("TEMP", packet.barometer_temp);
-    printJSONField("pressure", packet.barometer_pressure, false);
+    if (packet.idx == 1) {  // compact
+        printJSONField("gps_lat", packet.gps_lat);
+        printJSONField("gps_long", packet.gps_long);
+        printJSONField("gps_alt", packet.gps_alt);
+        printJSONField("Voltage", packet.voltage_battery);
+        printJSONField("TEMP", packet.barometer_temp);
+
+        // TODO(replace with memset)
+        printJSONField("response_ID", 0);
+        printJSONField("KX_IMU_ax", 0);
+        printJSONField("KX_IMU_ay", 0);
+        printJSONField("KX_IMU_az", 0);
+        printJSONField("IMU_gx", 0);
+        printJSONField("IMU_gy", 0);
+        printJSONField("IMU_gz", 0);
+        printJSONField("IMU_mx", 0);
+        printJSONField("IMU_my", 0);
+        printJSONField("IMU_mz", 0);
+        printJSONField("FSM_state", 0);
+        printJSONField("sign", "NOSIGN");
+        printJSONField("RSSI", rf95.lastRssi());
+        printJSONField("frequency", 0);
+        printJSONField("flap_extension", 0);
+        printJSONField("STE_ALT", 0);
+        printJSONField("STE_VEL", 0);
+        printJSONField("STE_ACC", 0);
+        printJSONField("STE_APO", 0);
+        printJSONField("BNO_YAW", 0);
+        printJSONField("BNO_PITCH", 0);
+        printJSONField("BNO_ROLL", 0);
+        printJSONField("pressure", 0, false);
+    } else {
+        printJSONField("response_ID", packet.response_ID);
+        printJSONField("gps_lat", packet.gps_lat);
+        printJSONField("gps_long", packet.gps_long);
+        printJSONField("gps_alt", packet.gps_alt);
+        printJSONField("KX_IMU_ax", packet.highG_ax);
+        printJSONField("KX_IMU_ay", packet.highG_ay);
+        printJSONField("KX_IMU_az", packet.highG_az);
+        printJSONField("IMU_gx", packet.gyro_x);
+        printJSONField("IMU_gy", packet.gyro_y);
+        printJSONField("IMU_gz", packet.gyro_z);
+        printJSONField("IMU_mx", packet.mag_x);
+        printJSONField("IMU_my", packet.mag_y);
+        printJSONField("IMU_mz", packet.mag_z);
+        printJSONField("FSM_state", packet.FSM_State);
+        printJSONField("sign", "NOSIGN");
+        printJSONField("RSSI", rf95.lastRssi());
+        printJSONField("Voltage", packet.voltage_battery);
+        printJSONField("frequency", packet.freq);
+        printJSONField("flap_extension", packet.flap_extension);
+        printJSONField("STE_ALT", packet.gnc_state_x);
+        printJSONField("STE_VEL", packet.gnc_state_vx);
+        printJSONField("STE_ACC", packet.gnc_state_ax);
+        printJSONField("STE_APO", packet.gnc_state_apo);
+        printJSONField("BNO_YAW", packet.bno_yaw);
+        printJSONField("BNO_PITCH", packet.bno_pitch);
+        printJSONField("BNO_ROLL", packet.bno_roll);
+        printJSONField("TEMP", packet.barometer_temp);
+        printJSONField("pressure", packet.barometer_pressure, false);
+    }
     Serial.println("}}");
 }
 

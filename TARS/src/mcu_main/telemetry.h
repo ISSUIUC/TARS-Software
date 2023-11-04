@@ -37,6 +37,7 @@ struct TelemetryDataLite {
 };
 
 struct TelemetryPacket {
+    unsigned short idx = 0;
     TelemetryDataLite datapoints[4];
     float gps_lat;
     float gps_long;
@@ -66,6 +67,25 @@ struct TelemetryPacket {
     uint8_t voltage_battery;  //[0, 16]
     uint8_t FSM_State;        //[0,256]
     int16_t barometer_temp;   //[-128, 128]
+};
+
+struct CompactTelemetryPacket {
+    unsigned short idx = 1;
+    float gps_lat;
+    float gps_long;
+    float gps_alt;
+    uint8_t voltage_battery;  //[0, 16]
+    int16_t barometer_temp;   //[-128, 128]
+};
+
+struct Packets {
+    enum {
+        COMPACT,
+        DEFAULT,
+    } type;
+
+    TelemetryPacket default_packet;
+    CompactTelemetryPacket compact_packet;
 };
 
 // Commands transmitted from ground station to rocket
@@ -117,4 +137,6 @@ class Telemetry {
     command_handler_struct freq_status = {};
 
     TelemetryPacket makePacket(const sensorDataStruct_t& data_struct);
+
+    CompactTelemetryPacket makeCompactPacket(const sensorDataStruct_t& data_struct);
 };
