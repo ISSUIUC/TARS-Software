@@ -1,0 +1,4 @@
+#!/bin/sh
+python run_clang_format.py -r -i TARS
+git add .
+exit 0
